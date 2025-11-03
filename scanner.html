@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURA - Scanner QR Code</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="light-theme">
+    <div id="particles-js"></div>
+
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SECURA</span>
+                </div>
+                <nav class="nav-menu" id="navMenu">
+                    <a href="index.html" class="nav-link">Accueil</a>
+                    <a href="events.html" class="nav-link">Événements</a>
+                    <a href="guests.html" class="nav-link">Invités</a>
+                    <a href="qr-generator.html" class="nav-link">Générateur QR</a>
+                    <a href="scanner.html" class="nav-link active">Scanner</a>
+                </nav>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+                    <button class="fullscreen-toggle" id="fullscreenToggle"><i class="fas fa-expand"></i></button>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header animate-fade-in">
+                <div>
+                    <h1><i class="fas fa-camera"></i> Scanner QR Code</h1>
+                    <p>Scannez les QR Codes des invités pour valider leur présence</p>
+                </div>
+            </div>
+
+            <div class="scanner-container">
+                <div class="scanner-panel">
+                    <div class="scanner-modes">
+                        <button class="mode-btn active" id="cameraModeBtn"><i class="fas fa-camera"></i> <span>Caméra</span></button>
+                        <button class="mode-btn" id="fileModeBtn"><i class="fas fa-image"></i> <span>Image</span></button>
+                    </div>
+
+                    <div class="scanner-view" id="cameraScanner">
+                        <div class="camera-container">
+                            <video id="cameraPreview" autoplay playsinline></video>
+                            <canvas id="scannerCanvas" style="display: none;"></canvas>
+                            <div class="scanner-overlay"><div class="scan-region"></div></div>
+                            <div class="scanner-instructions"><i class="fas fa-qrcode"></i> <p>Positionnez le QR Code</p></div>
+                        </div>
+                        <div class="scanner-controls">
+                            <button class="btn btn-primary" id="startScanBtn"><i class="fas fa-play"></i> Démarrer</button>
+                            <button class="btn btn-danger" id="stopScanBtn" style="display: none;"><i class="fas fa-stop"></i> Arrêter</button>
+                            <select id="cameraSelect" class="form-input" style="display: none;"></select>
+                        </div>
+                    </div>
+
+                    <div class="scanner-view" id="fileScanner" style="display: none;">
+                        <div class="file-upload-zone" id="qrFileDropZone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Glissez une image</p>
+                            <p class="text-sm">ou</p>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('qrFileInput').click()">Choisir</button>
+                            <input type="file" id="qrFileInput" accept="image/*" style="display: none;">
+                        </div>
+                        <div id="filePreview" style="display: none;">
+                            <img id="uploadedImage" alt="QR Code">
+                            <button class="btn btn-primary" id="scanImageBtn"><i class="fas fa-search"></i> Analyser</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-panel">
+                    <h3><i class="fas fa-clipboard-check"></i> Résultat</h3>
+                    <div class="scan-result-placeholder" id="scanPlaceholder">
+                        <i class="fas fa-qrcode"></i> <p>En attente...</p>
+                    </div>
+                    <div class="scan-result-card" id="scanResult" style="display: none;">
+                        <div class="result-header">
+                            <div class="status-badge success" id="resultStatus"><i class="fas fa-check-circle"></i> <span>Valide</span></div>
+                            <span class="scan-time" id="scanTime"></span>
+                        </div>
+                        <div class="welcome-message" id="welcomeMessage"></div>
+                        <div class="guest-details">
+                            <div class="detail-row"><span class="detail-label"><i class="fas fa-user"></i> Invité:</span> <span class="detail-value" id="resultName">-</span></div>
+                            <div class="detail-row"><span class="detail-label"><i class="fas fa-envelope"></i> Email:</span> <span class="detail-value" id="resultEmail">-</span></div>
+                            <div class="detail-row"><span class="detail-label"><i class="fas fa-phone"></i> Téléphone:</span> <span class="detail-value" id="resultPhone">-</span></div>
+                            <div class="detail-row"><span class="detail-label"><i class="fas fa-calendar"></i> Événement:</span> <span class="detail-value" id="resultEvent">-</span></div>
+                            <div class="detail-row"><span class="detail-label"><i class="fas fa-clock"></i> Date & Heure:</span> <span class="detail-value" id="resultDateTime">-</span></div>
+                            <div class="detail-row"><span class="detail-label"><i class="fas fa-map-marker-alt"></i> Lieu:</span> <span class="detail-value" id="resultLocation">-</span></div>
+                        </div>
+                        <div class="result-actions">
+                            <button class="btn btn-success" id="markPresentBtn"><i class="fas fa-check"></i> Marquer présent</button>
+                            <button class="btn btn-outline" id="newScanBtn"><i class="fas fa-redo"></i> Nouveau scan</button>
+                        </div>
+                    </div>
+
+                    <div class="scan-history">
+                        <h4><i class="fas fa-history"></i> Historique <span class="badge" id="scanCount">0</span></h4>
+                        <div class="history-list" id="scanHistory"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scan-statistics">
+                <h3><i class="fas fa-chart-bar"></i> Statistiques du jour</h3>
+                <div class="stats-grid">
+                    <div class="stat-card"><i class="fas fa-qrcode"></i> <div><h4 id="todayScans">0</h4><p>Scans</p></div></div>
+                    <div class="stat-card"><i class="fas fa-user-check"></i> <div><h4 id="todayPresent">0</h4><p>Présents</p></div></div>
+                    <div class="stat-card"><i class="fas fa-clock"></i> <div><h4 id="lastScanTime">-</h4><p>Dernier</p></div></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo"><i class="fas fa-shield-alt"></i> <span>SECURA</span></div>
+                <p>&copy; 2025 SECURA. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <button class="scroll-top" id="scrollTop"><i class="fas fa-arrow-up"></i></button>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="js/particles-config.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/scanner.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

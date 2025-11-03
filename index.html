@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SECURA - Plateforme de gestion d'événements sécurisée avec QR Code">
+    <title>SECURA - Gestion d'Événements Sécurisée</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="light-theme">
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SECURA</span>
+                </div>
+                <nav class="nav-menu" id="navMenu">
+                    <a href="index.html" class="nav-link active">Accueil</a>
+                    <a href="events.html" class="nav-link">Événements</a>
+                    <a href="guests.html" class="nav-link">Invités</a>
+                    <a href="qr-generator.html" class="nav-link">Générateur QR</a>
+                    <a href="scanner.html" class="nav-link">Scanner</a>
+                </nav>
+
+                <button class="btn btn-outline" onclick="storage.selectFile().then(() => location.reload())" id="changeDataFile" style="margin: 1rem;">
+                    Changer de fichier de données
+                </button>
+
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Changer le thème">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="fullscreen-toggle" id="fullscreenToggle" aria-label="Plein écran">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content animate-fade-in">
+                <h1 class="hero-title gradient-text">Bienvenue sur <span class="">SECURA</span></h1>
+                <p class="hero-subtitle">La plateforme complète pour gérer vos événements avec des QR Codes stylisés et sécurisés</p>
+                <div class="hero-features">
+                    <div class="feature-card">
+                        <i class="fas fa-calendar-alt"></i>
+                        <h3>Créer des Événements</h3>
+                        <p>Mariages, anniversaires, conférences</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-users"></i>
+                        <h3>Gérer les Invités</h3>
+                        <p>Import CSV, formulaire, export</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-qrcode"></i>
+                        <h3>QR Codes Stylisés</h3>
+                        <p>Personnalisables et téléchargeables</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-share-alt"></i>
+                        <h3>Partage Facile</h3>
+                        <p>Email, SMS, téléchargement direct</p>
+                    </div>
+                </div>
+                <div class="hero-cta">
+                    <a href="events.html" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle"></i>
+                        Créer un Événement
+                    </a>
+                    <a href="scanner.html" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-camera"></i>
+                        Scanner un QR Code
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card animate-slide-up">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3 id="totalEvents">0</h3>
+                    <p>Événements Créés</p>
+                </div>
+                <div class="stat-card animate-slide-up" style="animation-delay: 0.1s">
+                    <i class="fas fa-user-friends"></i>
+                    <h3 id="totalGuests">0</h3>
+                    <p>Invités Enregistrés</p>
+                </div>
+                <div class="stat-card animate-slide-up" style="animation-delay: 0.2s">
+                    <i class="fas fa-qrcode"></i>
+                    <h3 id="totalQrCodes">0</h3>
+                    <p>QR Codes Générés</p>
+                </div>
+                <div class="stat-card animate-slide-up" style="animation-delay: 0.3s">
+                    <i class="fas fa-check-circle"></i>
+                    <h3 id="scannedQrCodes">0</h3>
+                    <p>QR Codes Scannés</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Events -->
+    <section class="recent-events">
+        <div class="container">
+            <div class="section-header">
+                <h2>Événements Récents</h2>
+                <a href="events.html" class="btn btn-outline">Voir Tout</a>
+            </div>
+            <div class="events-grid" id="recentEventsGrid">
+                <div class="empty-state">
+                    <i class="fas fa-calendar-plus"></i>
+                    <p>Aucun événement créé</p>
+                    <a href="events.html" class="btn btn-primary">Créer votre premier événement</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SECURA</span>
+                </div>
+                <p>&copy; 2025 SECURA. Tous droits réservés.</p>
+                <div class="footer-links">
+                    <a href="#">Confidentialité</a>
+                    <a href="#">Conditions</a>
+                    <a href="#">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top -->
+    <button class="scroll-top" id="scrollTop" aria-label="Retour en haut">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/particles-config.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

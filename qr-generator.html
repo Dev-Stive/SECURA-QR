@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURA - Générateur QR Code</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="light-theme">
+    <div id="particles-js"></div>
+
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SECURA</span>
+                </div>
+                <nav class="nav-menu" id="navMenu">
+                    <a href="index.html" class="nav-link">Accueil</a>
+                    <a href="events.html" class="nav-link">Événements</a>
+                    <a href="guests.html" class="nav-link">Invités</a>
+                    <a href="qr-generator.html" class="nav-link active">Générateur QR</a>
+                    <a href="scanner.html" class="nav-link">Scanner</a>
+                </nav>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="fullscreen-toggle" id="fullscreenToggle">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header animate-fade-in">
+                <div>
+                    <h1><i class="fas fa-qrcode"></i> Générateur de QR Code</h1>
+                    <p>Créez des QR Codes stylisés pour vos invités</p>
+                </div>
+            </div>
+
+            <div class="qr-generator-container">
+                <!-- Configuration Panel -->
+                <div class="qr-config-panel">
+                    <h3><i class="fas fa-cog"></i> Configuration</h3>
+
+                    <div class="form-group">
+                        <label for="qrEventSelector">Événement *</label>
+                        <select id="qrEventSelector" class="form-input" required>
+                            <option value="">-- Sélectionner un événement --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qrGuestSelector">Invité *</label>
+                        <select id="qrGuestSelector" class="form-input" required disabled>
+                            <option value="">-- Sélectionner d'abord un événement --</option>
+                        </select>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <h4><i class="fas fa-palette"></i> Personnalisation</h4>
+
+                    <div class="form-group">
+                        <label for="qrSize">Taille du QR Code</label>
+                        <input type="range" id="qrSize" min="200" max="500" value="300" step="10" class="form-range">
+                        <span class="range-value" id="qrSizeValue">300px</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="qrForeground">Couleur principale</label>
+                            <input type="color" id="qrForeground" value="#C79B77" class="form-color">
+                        </div>
+                        <div class="form-group">
+                            <label for="qrBackground">Couleur de fond</label>
+                            <input type="color" id="qrBackground" value="#FFFFFF" class="form-color">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qrStyle">Style des modules</label>
+                        <select id="qrStyle" class="form-input">
+                            <option value="square">Carré</option>
+                            <option value="rounded">Arrondi</option>
+                            <option value="dots">Points</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qrErrorLevel">Niveau de correction d'erreur</label>
+                        <select id="qrErrorLevel" class="form-input">
+                           
+                            <option value="L">Basse (plus de données)</option>
+                            <option value="M" selected>Moyenne (recommandé)</option>
+                            <option value="Q">Haute</option>
+                            <option value="H">Très haute (moins de données)</option>
+                        
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="qrIncludeLogo" checked>
+                            <span>Inclure le logo SECURA</span>
+                        </label>
+                    </div>
+
+                    <button class="btn btn-primary btn-block" id="generateQrBtn" disabled>
+                        <i class="fas fa-magic"></i>
+                        Générer le QR Code
+                    </button>
+                </div>
+
+                <!-- Preview Panel -->
+                <div class="qr-preview-panel">
+                    <h3><i class="fas fa-eye"></i> Aperçu</h3>
+                    
+                    <div class="qr-preview-container" id="qrPreviewContainer">
+                        <div class="qr-placeholder">
+                            <i class="fas fa-qrcode"></i>
+                            <p>Le QR Code apparaîtra ici</p>
+                        </div>
+                    </div>
+
+                    <div class="qr-info" id="qrInfo" style="display: none;">
+                        <h4>Informations de l'invité</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Nom:</span>
+                                <span class="info-value" id="infoName">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value" id="infoEmail">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Téléphone:</span>
+                                <span class="info-value" id="infoPhone">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Événement:</span>
+                                <span class="info-value" id="infoEvent">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qr-actions" id="qrActions" style="display: none;">
+                        <button class="btn btn-primary" id="downloadQrBtn">
+                            <i class="fas fa-download"></i>
+                            Télécharger PNG
+                        </button>
+                        <button class="btn btn-secondary" id="downloadQrSvgBtn">
+                            <i class="fas fa-vector-square"></i>
+                            Télécharger SVG
+                        </button>
+                        <button class="btn btn-outline" id="shareQrBtn">
+                            <i class="fas fa-share-alt"></i>
+                            Partager
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Generation Section -->
+            <div class="bulk-generation-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-layer-group"></i> Génération en masse</h3>
+                    <button class="btn btn-primary" id="bulkGenerateBtn">
+                        <i class="fas fa-rocket"></i>
+                        Générer tous les QR Codes
+                    </button>
+                </div>
+                <p class="text-muted">Générez automatiquement des QR Codes pour tous les invités d'un événement</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Share Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-overlay" onclick="closeShareModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-share-alt"></i>
+                    Partager le QR Code
+                </h2>
+                <button class="modal-close" onclick="closeShareModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="share-options">
+                    <button class="share-option" id="shareEmailBtn">
+                        <i class="fas fa-envelope"></i>
+                        <span>Envoyer par Email</span>
+                    </button>
+                    <button class="share-option" id="shareSmsBtn">
+                        <i class="fas fa-sms"></i>
+                        <span>Envoyer par SMS</span>
+                    </button>
+                    <button class="share-option" id="shareWhatsappBtn">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </button>
+                    <button class="share-option" id="shareCopyBtn">
+                        <i class="fas fa-copy"></i>
+                        <span>Copier le lien</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>SECURA</span>
+                </div>
+                <p>&copy; 2025 SECURA. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <button class="scroll-top" id="scrollTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="js/particles-config.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/qr-generator.js"></script>
+    <script src="js/main.js"></script>
+    
+</body>
+</html>
