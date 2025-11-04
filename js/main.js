@@ -3,13 +3,16 @@
  * Scripts communs à toutes les pages
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await window.storageReady;
+
     initializeNavigation();
     initializeScrollTop();
     initializeFullscreen();
     updateStats();
     loadRecentEvents();
 });
+
 
 // ===== NAVIGATION =====
 function initializeNavigation() {

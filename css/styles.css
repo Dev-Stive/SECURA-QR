@@ -346,6 +346,7 @@ body.dark-theme {
 .bulk-generation-section {
     background: linear-gradient(135deg, rgba(217, 119, 6, 0.05), rgba(244, 162, 97, 0.05));
     padding: var(--spacing-2xl);
+    margin-top: var(--spacing-xl);
     border-radius: var(--radius-lg);
     text-align: center;
 }
@@ -1458,6 +1459,7 @@ body.dark-theme {
 
 .dark-theme .icon-btn {
     background: var(--secura-brown);
+    color: var(--secura-white);
 }
 
 .icon-btn:hover {

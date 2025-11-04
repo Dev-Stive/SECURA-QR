@@ -125,33 +125,44 @@ function startContinuousScanning() {
     }, 300);
 }
 
+// ===== FILE SCANNING =====
 function handleFileSelect(e) {
-    const file = e.target.files[0];
-    if (file) processImageFile(file);
+    const file = e.target.files[0];
+    if (file) {
+        processImageFile(file);
+    }
 }
-
 function processImageFile(file) {
-    const reader = new FileReader();
-    reader.onload = e => {
-        const img = document.getElementById('uploadedImage');
-        img.src = e.target.result;
-        document.getElementById('qrFileDropZone').style.display = 'none';
-        document.getElementById('filePreview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+        const img = document.getElementById('uploadedImage');
+        img.src = e.target.result;
+        
+        document.getElementById('qrFileDropZone').style.display = 'none';
+        document.getElementById('filePreview').style.display = 'block';
+    };
+    
+    reader.readAsDataURL(file);
 }
-
 function scanUploadedImage() {
-    if (typeof jsQR === 'undefined') return showNotification('error', 'jsQR non chargé');
-    const img = document.getElementById('uploadedImage');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    ctx.drawImage(img, 0, 0);
-    const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-    if (code) processQRCode(code.data);
-    else showNotification('error', 'QR Code non détecté');
+    if (typeof jsQR === 'undefined') {
+        showNotification('error', 'Bibliothèque jsQR non chargée');
+        return;
+    }
+    const img = document.getElementById('uploadedImage');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    if (code) {
+        processQRCode(code.data);
+    } else {
+        showNotification('error', 'Aucun QR Code détecté dans l\'image');
+    }
 }
 
 // ===== PROCESS QR CODE (INTELLIGENT) =====

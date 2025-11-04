@@ -601,31 +601,29 @@ async selectFile() {
 
 }
 
-// === INSTANCE GLOBALE ===
 const storage = new FileStorage();
 window.storage = storage;
 
-// === AUTO-INIT AU DEMARRAGE ===
+window.storageReady = (async () => {
+    await storage.init();
+    return storage;
+})();
+
 document.addEventListener('DOMContentLoaded', async () => {
-    await storage.init(); 
-    loadEvents();   
+    await window.storageReady;
 
+    console.log("📂 SECURA prêt - Données disponibles :", storage.getStatistics());
+    loadEvents();
 
-
-    // Écouter les mises à jour
     window.addEventListener('secura:data-updated', (e) => {
         console.log('📊 Stats live:', e.detail);
-        // Trigger UI updates
         document.dispatchEvent(new CustomEvent('storage:updated', { detail: e.detail }));
-
-         console.log("📂 Données prêtes :", e.detail);
-       loadEvents(); 
-    
+        loadEvents();
     });
 
-    // Auto-backup toutes les 30min
     setInterval(() => storage.createBackup(), 30 * 60 * 1000);
 });
+
 
 
 function downloadFile(content, filename, mimeType) {

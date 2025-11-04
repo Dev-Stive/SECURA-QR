@@ -2,15 +2,14 @@
  * SECURA - QR Code Generator ULTRA MÉGA COMPLET
  * QR ultra-léger + génération en masse + ZIP ou DOSSIER
  */
-
 let currentQRCode = null;
 let currentGuestId = null;
 let qrConfig = {
     size: 300,
-  foreground: "#C79B77",
-  background: "#FFF9F5",
+    foreground: '#D97706',
+    background: '#FFFFFF',
     style: 'square',
-    errorLevel: 'H',
+    errorLevel: 'H', // H = max robustesse
     includeLogo: true
 };
 let downloadDirHandle = null;
@@ -31,9 +30,8 @@ function formatFileName(...parts) {
         .replace(/\s+/g, '-')
         .replace(/[^a-zA-Z0-9-_]/g, '')
         .replace(/-+/g, '-')    
-        .replace(/^-|-$/g, '');
+        .replace(/^-|-$/g, '');      // retire tiret au début/fin
 }
-
 
 // ===== INITIALISER LE DOSSIER (CHROME/EDGE) =====
 async function initDownloadDirectory() {
