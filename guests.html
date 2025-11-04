@@ -41,32 +41,27 @@
 
     <main class="main-content">
         <div class="container">
-            <div class="page-header animate-fade-in">
+            <!-- Header dynamique (événement sélectionné) -->
+            <div id="dynamicHeader" class="page-header animate-fade-in">
                 <div>
                     <h1><i class="fas fa-users"></i> Gestion des Invités</h1>
-                    <p>Ajoutez et gérez vos invités pour chaque événement</p>
+                    <p>Cliquez sur un événement pour voir ses invités</p>
                 </div>
+
+
+            <div id="dynamicHeaderEvent" class=" animate-fade-in"></div>
+
                 <div class="header-actions-group">
-                    <button class="btn btn-secondary" id="importCsvBtn">
-                        <i class="fas fa-file-csv"></i>
-                        Importer CSV
+                    <button class="btn btn-secondary" id="importCsvBtn" style="display: none;">
+                        <i class="fas fa-file-csv"></i> Importer CSV
                     </button>
-                    <button class="btn btn-primary" id="addGuestBtn">
-                        <i class="fas fa-user-plus"></i>
-                        Ajouter un Invité
+                    <button class="btn btn-primary" id="addGuestBtn" style="display: none;">
+                        <i class="fas fa-user-plus"></i> Ajouter un Invité
                     </button>
                 </div>
             </div>
 
-            <!-- Event Selector -->
-            <div class="event-selector animate-slide-up">
-                <label for="eventSelector">Sélectionner un événement:</label>
-                <select id="eventSelector" class="form-input">
-                    <option value="">-- Choisir un événement --</option>
-                </select>
-            </div>
-
-            <!-- Guests Actions Bar -->
+            <!-- Barre d'actions (seulement quand un événement est sélectionné) -->
             <div class="guests-actions-bar" id="guestsActionsBar" style="display: none;">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
@@ -74,58 +69,29 @@
                 </div>
                 <div class="action-buttons">
                     <button class="btn btn-outline" id="exportCsvBtn">
-                        <i class="fas fa-download"></i>
-                        Exporter CSV
+                        <i class="fas fa-download"></i> Exporter CSV
                     </button>
                     <button class="btn btn-outline" id="exportJsonBtn">
-                        <i class="fas fa-file-code"></i>
-                        Exporter JSON
+                        <i class="fas fa-file-code"></i> Exporter JSON
                     </button>
                     <button class="btn btn-danger" id="deleteSelectedBtn" style="display: none;">
-                        <i class="fas fa-trash"></i>
-                        Supprimer (<span id="selectedCount">0</span>)
+                        <i class="fas fa-trash"></i> Supprimer (<span id="selectedCount">0</span>)
                     </button>
                 </div>
             </div>
 
-            <!-- Guests Table -->
-            <div class="table-container" id="guestsTableContainer" style="display: none;">
-                <table class="data-table" id="guestsTable">
-                    <thead>
-                        <tr>
-                            <th width="40">
-                                <input type="checkbox" id="selectAllGuests">
-                            </th>
-                            <th>Prénom</th>
-                            <th>Nom</th>
-                            <th>Email</th>
-                            <th>Téléphone</th>
-                            <th>Statut</th>
-                            <th>QR Code</th>
-                            <th width="120">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="guestsTableBody">
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Empty State -->
-            <div class="empty-state" id="guestsEmptyState">
-                <i class="fas fa-user-friends"></i>
-                <p>Sélectionnez un événement pour voir ses invités</p>
-            </div>
+            <!-- Conteneur principal : soit cartes, soit table -->
+            <div id="mainContent"></div>
         </div>
     </main>
 
-    <!-- Add/Edit Guest Modal -->
+    <!-- MODAL AJOUT/MODIF INVITÉ -->
     <div class="modal" id="guestModal">
         <div class="modal-overlay" onclick="closeGuestModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="guestModalTitle">
-                    <i class="fas fa-user-plus"></i>
-                    Ajouter un Invité
+                    <i class="fas fa-user-plus"></i> Ajouter un Invité
                 </h2>
                 <button class="modal-close" onclick="closeGuestModal()">
                     <i class="fas fa-times"></i>
@@ -134,7 +100,6 @@
             <form id="guestForm" class="modal-body">
                 <input type="hidden" id="guestId">
                 <input type="hidden" id="guestEventId">
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="guestFirstName">Prénom *</label>
@@ -145,46 +110,39 @@
                         <input type="text" id="guestLastName" class="form-input" required>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label for="guestEmail">Email *</label>
                     <input type="email" id="guestEmail" class="form-input" required>
                 </div>
-
                 <div class="form-group">
                     <label for="guestPhone">Téléphone</label>
                     <input type="tel" id="guestPhone" class="form-input" placeholder="+237 6XX XXX XXX">
                 </div>
-
                 <div class="form-group">
                     <label for="guestCompany">Entreprise/Organisation</label>
                     <input type="text" id="guestCompany" class="form-input">
                 </div>
-
                 <div class="form-group">
                     <label for="guestNotes">Notes</label>
                     <textarea id="guestNotes" class="form-input" rows="3"></textarea>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeGuestModal()">Annuler</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i>
-                        Enregistrer
+                        <i class="fas fa-save"></i> Enregistrer
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Import CSV Modal -->
+    <!-- MODAL IMPORT CSV -->
     <div class="modal" id="csvImportModal">
         <div class="modal-overlay" onclick="closeCsvImportModal()"></div>
         <div class="modal-content modal-lg">
             <div class="modal-header">
                 <h2>
-                    <i class="fas fa-file-csv"></i>
-                    Importer des Invités depuis CSV
+                    <i class="fas fa-file-csv"></i> Importer des Invités depuis CSV
                 </h2>
                 <button class="modal-close" onclick="closeCsvImportModal()">
                     <i class="fas fa-times"></i>
@@ -194,19 +152,17 @@
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i>
                     <div>
-                        <strong>Format CSV attendu:</strong>
+                        <strong>Format CSV attendu :</strong>
                         <p>Prénom,Nom,Email,Téléphone,Entreprise,Notes</p>
                         <a href="#" id="downloadTemplate" class="link">Télécharger un modèle</a>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label for="csvEventSelector">Événement de destination *</label>
                     <select id="csvEventSelector" class="form-input" required>
                         <option value="">-- Choisir un événement --</option>
                     </select>
                 </div>
-
                 <div class="file-upload-area" id="csvDropZone">
                     <i class="fas fa-cloud-upload-alt"></i>
                     <p>Glissez-déposez votre fichier CSV ici</p>
@@ -216,7 +172,6 @@
                     </button>
                     <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
                 </div>
-
                 <div id="csvPreview" style="display: none;">
                     <h4>Aperçu des données (5 premières lignes)</h4>
                     <div class="table-container">
@@ -225,8 +180,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" onclick="closeCsvImportModal()">Annuler</button>
                         <button type="button" class="btn btn-primary" id="confirmCsvImport">
-                            <i class="fas fa-check"></i>
-                            Importer (<span id="csvRowCount">0</span> lignes)
+                            <i class="fas fa-check"></i> Importer (<span id="csvRowCount">0</span> lignes)
                         </button>
                     </div>
                 </div>
@@ -234,6 +188,7 @@
         </div>
     </div>
 
+    <!-- FOOTER -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -241,7 +196,7 @@
                     <i class="fas fa-shield-alt"></i>
                     <span>SECURA</span>
                 </div>
-                <p>&copy; 2025 SECURA. Tous droits réservés.</p>
+                <p>© 2025 SECURA. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
@@ -250,6 +205,7 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -257,7 +213,6 @@
     <script src="js/theme.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/guests.js"></script>
-
     <script src="js/main.js"></script>
 </body>
 </html>

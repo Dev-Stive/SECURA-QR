@@ -11,11 +11,18 @@ let cameraStream = null;
 let scanningActive = false;
 let scanInterval = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await window.storageReady;
+
     initializeScannerListeners();
     loadScanHistory();
     updateScanStatistics();
+
+
 });
+
 
 // ===== LOAD EVENTS =====
 function loadEvents() {

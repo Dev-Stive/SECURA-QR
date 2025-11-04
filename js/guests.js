@@ -1,308 +1,495 @@
-/**
- * SECURA - Guests Management
- * Gestion complète des invités
- */
 
+
+
+
+
+
+/**
+ * SECURA - Guests Management ULTRA PRO
+ * Deux vues : Cartes événements OU Table invités
+ */
 let currentEventId = null;
 let currentGuests = [];
 let selectedGuests = [];
 
 
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    loadEvents();
+// Attente du stockage
+document.addEventListener('DOMContentLoaded', async () => {
+    await window.storageReady;
     initializeGuestListeners();
     checkUrlParams();
+
+    window.addEventListener('popstate', () => {
+        checkUrlParams();
+        updateGuestView();
+    });
 });
 
-// ===== CHECK URL PARAMS =====
+// ===== VÉRIFICATION URL =====
 function checkUrlParams() {
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event');
-    if (eventId) {
-        const eventSelector = document.getElementById('eventSelector');
-        if (eventSelector) {
-            eventSelector.value = eventId;
-            loadGuestsByEvent(eventId);
-        }
-    }
 
+    if (eventId) {
+        const event = storage.getEventById(eventId);
+        if (event) {
+            selectEvent(eventId);
+        } else {
+            showInvalidEventError(eventId);
+        }
+    } else {
+        renderEventCards();
+    }
 }
+
+function updateGuestView() {
+    if (currentEventId) {
+        currentGuests = storage.getGuestsByEventId(currentEventId);
+        renderGuestsTable();
+    } else {
+        renderEventCards();
+    }
+}
+
+
+
 
 // ===== LOAD EVENTS =====
 function loadEvents() {
-    console.log("Chargement des événements...");
-    const events = storage.getAllEvents();
-    console.log("Événements trouvés :", events);
+    renderEventCards();
+}
 
-    const eventSelector = document.getElementById('eventSelector');
-    const csvEventSelector = document.getElementById('csvEventSelector');
-    
-    if (!eventSelector) {
-        console.error("Sélecteur d'événement non trouvé !");
+
+function showInvalidEventError(eventId) {
+    const container = document.getElementById('mainContent');
+    container.innerHTML = `
+        <div class="empty-state error-state animate-fade-in">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Événement introuvable</h3>
+            <p>ID: <strong>${eventId}</strong></p>
+            <a href="guests.html" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    `;
+}
+
+// ===== AFFICHAGE CARTES ÉVÉNEMENTS =====
+function renderEventCards() {
+    const events = storage.getAllEvents();
+    const container = document.getElementById('mainContent');
+
+    if (events.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state animate-fade-in">
+                <i class="fas fa-calendar-plus"></i>
+                <p>Aucun événement créé</p>
+                <a href="events.html" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Créer un événement
+                </a>
+            </div>
+        `;
         return;
     }
 
-    eventSelector.innerHTML = '<option value="">-- Choisir un événement --</option>';
-    events.forEach(event => {
-        eventSelector.innerHTML += `<option value="${event.id}">${event.name} (${new Date(event.date).toLocaleDateString('fr-FR')})</option>`;
-    });
+    container.innerHTML = `
+        <div class="events-grid-pro">
+            ${events.map((event, i) => `
+                <div class="animate-fade-in" style="animation-delay: ${i * 0.1}s">
+                    ${createEventCardForGuests(event)}
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
 
-    if (csvEventSelector) {
-        csvEventSelector.innerHTML = '<option value="">-- Choisir un événement --</option>';
-        events.forEach(event => {
-            csvEventSelector.innerHTML += `<option value="${event.id}">${event.name}</option>`;
-        });
-    }
+// ===== CARTE ÉVÉNEMENT (ULTRA PRO) =====
+function createEventCardForGuests(event) {
+    const guests = storage.getGuestsByEventId(event.id);
+    const scanned = guests.filter(g => g.scanned).length;
+    const date = new Date(event.date);
+    const isUpcoming = date >= new Date();
+    const formattedDate = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    const images = {
+        marriage: 'https://images.unsplash.com/photo-1519741497674-611481863552',
+        anniversaire: 'https://images.unsplash.com/photo-1464349095433-7956a61b8a07',
+        conference: 'https://images.unsplash.com/photo-1540575467063-868f79e66c3f',
+        autre: 'https://images.unsplash.com/photo-1501281668745-f7f579dff10e'
+    };
+
+    const labels = {
+        marriage: { label: 'MARIAGE', class: 'type-marriage' },
+        anniversaire: { label: 'ANNIVERSAIRE', class: 'type-anniversaire' },
+        conference: { label: 'CONFÉRENCE', class: 'type-conference' },
+        autre: { label: 'AUTRE', class: 'type-autre' }
+    };
+
+    const type = labels[event.type] || { label: event.type.toUpperCase(), class: 'type-autre' };
+    const bg = images[event.type] || images.autre;
+    const fillRate = event.capacity ? Math.round((guests.length / event.capacity) * 100) : 0;
+    const circumference = 2 * Math.PI * 36;
+    const offset = circumference - (fillRate / 100) * circumference;
+
+    return `
+        <div class="event-card-pro" onclick="selectEvent('${event.id}')" style="background-image: url('${bg}');">
+            ${isUpcoming ? '<div class="upcoming-ribbon">À VENIR</div>' : ''}
+            
+            <div class="event-content">
+                <h3 class="event-title">${event.name}</h3>
+                <div class="event-meta">
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i> <span>${formattedDate}</span></div>
+                    ${event.time ? `<div class="meta-item"><i class="fas fa-clock"></i> <span>${event.time}</span></div>` : ''}
+                    ${event.location ? `<div class="meta-item"><i class="fas fa-map-marker-alt"></i> <span>${event.location}</span></div>` : ''}
+                </div>
+                <div class="event-stats-circle">
+                    <div class="stat-circle"><div class="circle"><span class="value">${guests.length}</span><span class="label">Invités</span></div></div>
+                    <div class="stat-circle"><div class="circle"><span class="value">${scanned}</span><span class="label">Présents</span></div></div>
+                    ${event.capacity ? `
+                    <div class="stat-circle progress">
+                        <svg width="80" height="80" viewBox="0 0 80 80">
+                            <circle class="track" cx="40" cy="40" r="36" stroke="#e0e0e0" stroke-width="8" fill="none"/>
+                            <circle class="progress-ring" cx="40" cy="40" r="36" stroke="#4ade80" stroke-width="8" fill="none"
+                                stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" transform="rotate(-90 40 40)"/>
+                            <text x="40" y="45" text-anchor="middle" class="progress-text">${fillRate}%</text>
+                        </svg>
+                        <span class="label">Remplissage</span>
+                    </div>` : ''}
+                </div>
+                <div class="event-status">
+                    <i class="fas ${event.active ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'}"></i>
+                    <span>${event.active ? 'Actif' : 'Inactif'}</span>
+                </div>
+            </div>
+            <div class="event-actions" onclick="event.stopPropagation()">
+                <button class="action-btn" onclick="selectEvent('${event.id}')" title="Voir les invités">
+                    <i class="fas fa-users"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// ===== SÉLECTION D'ÉVÉNEMENT =====
+function selectEvent(eventId) {
+    currentEventId = eventId;
+    history.pushState(null, '', `?event=${eventId}`);
+    renderEventHeader(storage.getEventById(eventId));
+    loadGuestsByEvent(eventId);
+    document.getElementById('guestsActionsBar').style.display = 'flex';
+    document.getElementById('importCsvBtn').style.display = 'inline-flex';
+    document.getElementById('addGuestBtn').style.display = 'inline-flex';
+    reinitializeHeaderButtons();
+}
+
+function renderEventHeader(event) {
+    const header = document.getElementById('dynamicHeaderEvent');
+    const guests = storage.getGuestsByEventId(event.id);
+    const scanned = guests.filter(g => g.scanned).length;
+    const date = new Date(event.date);
+    const isUpcoming = date >= new Date();
+    const formattedDate = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Images & Labels
+    const images = {
+        marriage: 'https://images.unsplash.com/photo-1519741497674-611481863552',
+        anniversaire: 'https://images.unsplash.com/photo-1464349095433-7956a61b8a07',
+        conference: 'https://images.unsplash.com/photo-1540575467063-868f79e66c3f',
+        autre: 'https://images.unsplash.com/photo-1501281668745-f7f579dff10e'
+    };
+    const labels = {
+        marriage: { label: 'MARIAGE', color: '#dc2626' },
+        anniversaire: { label: 'ANNIVERSAIRE', color: '#fb923c' },
+        conference: { label: 'CONFÉRENCE', color: '#3b82f6' },
+        autre: { label: 'AUTRE', color: '#6b7280' }
+    };
+    const type = labels[event.type] || { label: event.type.toUpperCase(), color: '#6b7280' };
+    const bg = images[event.type] || images.autre;
+    const fillRate = event.capacity ? Math.round((guests.length / event.capacity) * 100) : 0;
+    const circumference = 2 * Math.PI * 40;
+    const offset = circumference - (fillRate / 100) * circumference;
+
+    header.innerHTML = `
+        <div class="event-header-pro" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.8)), url('${bg}');">
+            ${isUpcoming ? '<div class="upcoming-ribbon-pro">À VENIR</div>' : ''}
+            
+            <!-- Type Badge -->
+            <div class="event-type-badge-pro" style="background: ${type.color};">
+                ${type.label}
+            </div>
+
+            <!-- Contenu -->
+            <div class="event-header-content">
+                <div class="event-main-info">
+                    <h1 class="event-title-pro">${event.name}</h1>
+                    <div class="event-meta-pro">
+                        <span><i class="fas fa-calendar-alt"></i> ${formattedDate}</span>
+                        ${event.time ? `<span><i class="fas fa-clock"></i> ${event.time}</span>` : ''}
+                        ${event.location ? `<span><i class="fas fa-map-marker-alt"></i> ${event.location}</span>` : ''}
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="event-stats-pro">
+                    <div class="stat-item">
+                        <div class="stat-value">${guests.length}</div>
+                        <div class="stat-label">Invités</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value success">${scanned}</div>
+                        <div class="stat-label">Présents</div>
+                    </div>
+                    ${event.capacity ? `
+                    <div class="stat-item progress">
+                        <svg width="90" height="90" viewBox="0 0 90 90">
+                            <circle cx="45" cy="45" r="40" stroke="#333" stroke-width="10" fill="none"/>
+                            <circle cx="45" cy="45" r="40" stroke="#4ade80" stroke-width="10" fill="none"
+                                stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+                                transform="rotate(-90 45 45)"/>
+                            <text x="45" y="50" text-anchor="middle" class="progress-text-pro">${fillRate}%</text>
+                        </svg>
+                        <div class="stat-label">Remplissage</div>
+                    </div>` : ''}
+                </div>
+        </div>
+    `;
+
+    // Réattacher les boutons
+    setTimeout(() => {
+        document.getElementById('importCsvBtn').onclick = openCsvImportModal;
+        document.getElementById('addGuestBtn').onclick = () => openGuestModal();
+    }, 100);
 }
 
 
-// ===== EVENT LISTENERS =====
-function initializeGuestListeners() {
-    // Event selector
-    const eventSelector = document.getElementById('eventSelector');
-    if (eventSelector) {
-        eventSelector.addEventListener('change', (e) => {
-            loadGuestsByEvent(e.target.value);
-        });
-    }
 
-    // Add guest button
-    const addGuestBtn = document.getElementById('addGuestBtn');
-    if (addGuestBtn) {
-        addGuestBtn.addEventListener('click', () => openGuestModal());
-    }
 
-    // Import CSV button
-    const importCsvBtn = document.getElementById('importCsvBtn');
-    if (importCsvBtn) {
-        importCsvBtn.addEventListener('click', openCsvImportModal);
-    }
-
-    // Export buttons
-    const exportCsvBtn = document.getElementById('exportCsvBtn');
-    if (exportCsvBtn) {
-        exportCsvBtn.addEventListener('click', exportGuestsToCSV);
-    }
-
-    const exportJsonBtn = document.getElementById('exportJsonBtn');
-    if (exportJsonBtn) {
-        exportJsonBtn.addEventListener('click', exportGuestsToJSON);
-    }
-
-    // Search
-    const searchGuests = document.getElementById('searchGuests');
-    if (searchGuests) {
-        searchGuests.addEventListener('input', debounce(handleGuestSearch, 300));
-    }
-
-    // Select all
-    const selectAllGuests = document.getElementById('selectAllGuests');
-    if (selectAllGuests) {
-        selectAllGuests.addEventListener('change', handleSelectAll);
-    }
-
-    // Delete selected
-    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-    if (deleteSelectedBtn) {
-        deleteSelectedBtn.addEventListener('click', deleteSelectedGuests);
-    }
-
-    // Guest form
-    const guestForm = document.getElementById('guestForm');
-    if (guestForm) {
-        guestForm.addEventListener('submit', handleGuestSubmit);
-    }
-
-    // CSV file input
-    const csvFileInput = document.getElementById('csvFileInput');
-    if (csvFileInput) {
-        csvFileInput.addEventListener('change', handleCsvFileSelect);
-    }
-
-    // CSV drop zone
-    const csvDropZone = document.getElementById('csvDropZone');
-    if (csvDropZone) {
-        csvDropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            csvDropZone.classList.add('dragover');
-        });
-        
-        csvDropZone.addEventListener('dragleave', () => {
-            csvDropZone.classList.remove('dragover');
-        });
-        
-        csvDropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            csvDropZone.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.name.endsWith('.csv')) {
-                processCsvFile(file);
-            } else {
-                showNotification('error', 'Veuillez déposer un fichier CSV');
-            }
-        });
-    }
-
-    // Download template
-    const downloadTemplate = document.getElementById('downloadTemplate');
-    if (downloadTemplate) {
-        downloadTemplate.addEventListener('click', (e) => {
-            e.preventDefault();
-            downloadCsvTemplate();
-        });
-    }
-
-    // Confirm CSV import
-    const confirmCsvImport = document.getElementById('confirmCsvImport');
-    if (confirmCsvImport) {
-        confirmCsvImport.addEventListener('click', confirmCsvImportAction);
-    }
-}
-
-// ===== LOAD GUESTS BY EVENT =====
+// ===== CHARGEMENT INVITÉS =====
 function loadGuestsByEvent(eventId) {
     currentEventId = eventId;
-    
-    if (!eventId) {
-        document.getElementById('guestsActionsBar').style.display = 'none';
-        document.getElementById('guestsTableContainer').style.display = 'none';
-        document.getElementById('guestsEmptyState').style.display = 'block';
+    currentGuests = storage.getGuestsByEventId(eventId);
+    renderGuestsTable();
+}
+
+
+
+
+
+            
+function renderGuestsTable() {
+    const container = document.getElementById('mainContent');
+
+    if (currentGuests.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state-pro animate-fade-in">
+                <i class="fas fa-user-friends"></i>
+                <h3>Aucun invité</h3>
+                <p>Cet événement est vide pour le moment</p>
+                <button class="btn btn-primary" onclick="openGuestModal()">
+                    <i class="fas fa-user-plus"></i> Ajouter le premier invité
+                </button>
+            </div>
+        `;
         return;
     }
 
-    currentGuests = storage.getGuestsByEventId(eventId);
-    renderGuests();
-    
-    document.getElementById('guestsActionsBar').style.display = 'flex';
-    document.getElementById('guestsEmptyState').style.display = 'none';
-    
-    if (currentGuests.length > 0) {
-        document.getElementById('guestsTableContainer').style.display = 'block';
-    } else {
-        document.getElementById('guestsTableContainer').style.display = 'none';
-        document.getElementById('guestsEmptyState').innerHTML = `
-            <i class="fas fa-user-friends"></i>
-            <p>Aucun invité pour cet événement</p>
-            <button class="btn btn-primary" onclick="openGuestModal()">Ajouter votre premier invité</button>
-        `;
-        document.getElementById('guestsEmptyState').style.display = 'block';
-    }
-}
+    container.innerHTML = `
+    <div class="table-container" id="guestsTableContainer" >
+              <table class="data-table" id="guestsTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAllGuests"></th>
+                        <th>Invité</th>
+                        <th>Email</th>
+                        <th>Téléphone</th>
+                        <th>Statut</th>
+                        <th>QR</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="guestsTableBody"></tbody>
+            </table>
+        </div>
+    `;
 
-// ===== RENDER GUESTS =====
-function renderGuests() {
     const tbody = document.getElementById('guestsTableBody');
-    if (!tbody) return;
-
     tbody.innerHTML = currentGuests.map(guest => {
-        const qrCode = storage.getQRCodeByGuestId(guest.id);
-        const statusClass = guest.scanned ? 'success' : 'pending';
-        const statusText = guest.scanned ? 'Présent' : 'En attente';
-        
+        const color = stringToColor(`${guest.firstName} ${guest.lastName}`);
+        const initials = `${guest.firstName[0]}${guest.lastName[0]}`.toUpperCase();
+        const scanned = guest.scanned;
         return `
-            <tr>
+            <tr class="guest-row-pro ${scanned ? 'scanned' : ''}">
+                <td><input type="checkbox" class="guest-checkbox" value="${guest.id}"></td>
                 <td>
-                    <input type="checkbox" class="guest-checkbox" value="${guest.id}" 
-                           onchange="handleGuestSelect(this)">
+                    <div class="guest-info">
+                        <div class="guest-avatar-pro" style="background:${color}">${initials}</div>
+                        <div>
+                            <div class="guest-name">${guest.firstName} ${guest.lastName}</div>
+                            ${guest.company && guest.company != '-' ? `<div class="guest-company">${guest.company}</div>` : ''}
+                        </div>
+                    </div>
                 </td>
-                <td>${guest.firstName}</td>
-                <td>${guest.lastName}</td>
-                <td>${guest.email}</td>
+                <td><a href="mailto:${guest.email}" class="email-link">${guest.email}</a></td>
                 <td>${guest.phone || '-'}</td>
                 <td>
-                    <span class="status-badge ${statusClass}">
-                        <i class="fas fa-${guest.scanned ? 'check' : 'clock'}"></i>
-                        ${statusText}
+                    <span class="status-badge-pro ${scanned ? 'present' : 'pending'}">
+                        <i class="fas fa-${scanned ? 'check' : 'clock'}"></i>
+                        ${scanned ? 'Présent' : 'En attente'}
                     </span>
                 </td>
                 <td>
-                    ${qrCode ? '<i class="fas fa-qrcode" style="color: var(--secura-success)"></i>' : 
-                              '<i class="fas fa-qrcode" style="color: var(--secura-text-gray)"></i>'}
+                    ${storage.getQRCodeByGuestId(guest.id) 
+                        ? '<i class="fas fa-qrcode qr-ready"></i>' 
+                        : '<i class="fas fa-qrcode qr-missing"></i>'
+                    }
                 </td>
                 <td>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="icon-btn" onclick="editGuest('${guest.id}')" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="icon-btn" onclick="viewGuestQR('${guest.id}')" title="Voir QR">
-                            <i class="fas fa-qrcode"></i>
-                        </button>
-                        <button class="icon-btn" onclick="shareGuest('${guest.id}')" title="Partager">
-                            <i class="fas fa-share-alt"></i>
-                        </button>
-                        <button class="icon-btn" onclick="deleteGuest('${guest.id}')" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    <div class="action-btns">
+                        <button class="icon-btn" onclick="editGuest('${guest.id}')" title="Modifier"><i class="fas fa-edit"></i></button>
+                        <button class="icon-btn" onclick="viewGuestQR('${guest.id}')" title="QR Code"><i class="fas fa-qrcode"></i></button>
+                        <button class="icon-btn" onclick="shareGuest('${guest.id}')" title="Partager"><i class="fas fa-share-alt"></i></button>
+                        <button class="icon-btn delete" onclick="deleteGuest('${guest.id}')" title="Supprimer"><i class="fas fa-trash"></i></button>
                     </div>
                 </td>
             </tr>
         `;
     }).join('');
+
+    // Réattacher les listeners
+    document.getElementById('selectAllGuests').onchange = handleSelectAll;
+    document.getElementById('searchGuests').oninput = debounce(handleGuestSearch, 300);
+    document.getElementById('exportCsvBtn').onclick = exportGuestsToCSV;
+    document.getElementById('exportJsonBtn').onclick = exportGuestsToJSON;
+    document.getElementById('deleteSelectedBtn').onclick = deleteSelectedGuests;
 }
 
-// ===== GUEST SEARCH =====
+// ===== LISTENERS =====
+function initializeGuestListeners() {
+    setupSearch();
+    setupSelectAll();
+    setupDeleteSelected();
+    setupExportButtons();
+    setupCsvImport();
+    reinitializeHeaderButtons();
+}
+
+function reinitializeHeaderButtons() {
+    setTimeout(() => {
+        const importBtn = document.getElementById('importCsvBtn');
+        const addBtn = document.getElementById('addGuestBtn');
+        if (importBtn) importBtn.addEventListener('click', openCsvImportModal);
+        if (addBtn) addBtn.addEventListener('click', () => openGuestModal());
+    }, 100);
+}
+
+function setupSearch() {
+    const search = document.getElementById('searchGuests');
+    if (search) {
+        search.addEventListener('input', debounce(handleGuestSearch, 300));
+    }
+}
+
+function setupSelectAll() {
+    const selectAll = document.getElementById('selectAllGuests');
+    if (selectAll) {
+        selectAll.addEventListener('change', handleSelectAll);
+    }
+}
+
+function setupDeleteSelected() {
+    const btn = document.getElementById('deleteSelectedBtn');
+    if (btn) {
+        btn.addEventListener('click', deleteSelectedGuests);
+    }
+}
+
+function setupExportButtons() {
+    const csv = document.getElementById('exportCsvBtn');
+    const json = document.getElementById('exportJsonBtn');
+    if (csv) csv.addEventListener('click', exportGuestsToCSV);
+    if (json) json.addEventListener('click', exportGuestsToJSON);
+}
+
+function setupAddGuestButton() {
+    const btn = document.getElementById('addGuestBtn');
+    if (btn) btn.addEventListener('click', () => openGuestModal());
+}
+
+function setupCsvImport() {
+    const dropZone = document.getElementById('csvDropZone');
+    const fileInput = document.getElementById('csvFileInput');
+    const confirmBtn = document.getElementById('confirmCsvImport');
+    const templateLink = document.getElementById('downloadTemplate');
+
+    if (dropZone) {
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) processCsvFile(file);
+        });
+    }
+    if (fileInput) fileInput.addEventListener('change', e => e.target.files[0] && processCsvFile(e.target.files[0]));
+    if (confirmBtn) confirmBtn.addEventListener('click', confirmCsvImportAction);
+    if (templateLink) templateLink.addEventListener('click', e => { e.preventDefault(); downloadCsvTemplate(); });
+}
+
+
+
+
+
+function reinitializeHeaderButtons() {
+    setTimeout(() => {
+        const importBtn = document.getElementById('importCsvBtn');
+        const addBtn = document.getElementById('addGuestBtn');
+        if (importBtn) importBtn.onclick = openCsvImportModal;
+        if (addBtn) addBtn.onclick = () => openGuestModal();
+    }, 100);
+}
+
+// ===== RECHERCHE =====
 function handleGuestSearch(e) {
     const query = e.target.value.toLowerCase();
-    const allGuests = storage.getGuestsByEventId(currentEventId);
-    
-    currentGuests = allGuests.filter(guest => 
-        guest.firstName.toLowerCase().includes(query) ||
-        guest.lastName.toLowerCase().includes(query) ||
-        guest.email.toLowerCase().includes(query) ||
-        (guest.phone && guest.phone.includes(query))
+    currentGuests = storage.getGuestsByEventId(currentEventId).filter(g =>
+        g.firstName.toLowerCase().includes(query) ||
+        g.lastName.toLowerCase().includes(query) ||
+        g.email.toLowerCase().includes(query) ||
+        (g.phone && g.phone.includes(query))
     );
-    
-    renderGuests();
+    renderGuestsTable();
 }
 
-// ===== SELECT GUESTS =====
+// ===== SÉLECTION =====
 function handleSelectAll(e) {
-    const checkboxes = document.querySelectorAll('.guest-checkbox');
-    checkboxes.forEach(cb => {
-        cb.checked = e.target.checked;
-    });
+    document.querySelectorAll('.guest-checkbox').forEach(cb => cb.checked = e.target.checked);
     updateSelectedGuests();
 }
 
-function handleGuestSelect(checkbox) {
+function handleGuestSelect() {
     updateSelectedGuests();
 }
 
 function updateSelectedGuests() {
-    const checkboxes = document.querySelectorAll('.guest-checkbox:checked');
-    selectedGuests = Array.from(checkboxes).map(cb => cb.value);
-    
-    const deleteBtn = document.getElementById('deleteSelectedBtn');
-    const selectedCount = document.getElementById('selectedCount');
-    
-    if (deleteBtn && selectedCount) {
-        if (selectedGuests.length > 0) {
-            deleteBtn.style.display = 'inline-flex';
-            selectedCount.textContent = selectedGuests.length;
-        } else {
-            deleteBtn.style.display = 'none';
-        }
+    selectedGuests = Array.from(document.querySelectorAll('.guest-checkbox:checked')).map(cb => cb.value);
+    const btn = document.getElementById('deleteSelectedBtn');
+    const count = document.getElementById('selectedCount');
+    if (btn && count) {
+        btn.style.display = selectedGuests.length > 0 ? 'inline-flex' : 'none';
+        count.textContent = selectedGuests.length;
     }
 }
 
-// ===== GUEST MODAL =====
+// ===== MODAL INVITÉ =====
 function openGuestModal(guestId = null) {
-    if (!currentEventId) {
-        showNotification('warning', 'Veuillez d\'abord sélectionner un événement');
-        return;
-    }
-
+    if (!currentEventId) return showNotification('warning', 'Aucun événement sélectionné');
     const modal = document.getElementById('guestModal');
     const form = document.getElementById('guestForm');
     const title = document.getElementById('guestModalTitle');
-    
-    if (!modal || !form) return;
-
     form.reset();
     document.getElementById('guestEventId').value = currentEventId;
-    
+
     if (guestId) {
         const guest = storage.getGuestById(guestId);
         if (guest) {
@@ -313,31 +500,24 @@ function openGuestModal(guestId = null) {
             document.getElementById('guestPhone').value = guest.phone || '';
             document.getElementById('guestCompany').value = guest.company || '';
             document.getElementById('guestNotes').value = guest.notes || '';
-            
             title.innerHTML = '<i class="fas fa-user-edit"></i> Modifier l\'invité';
         }
     } else {
         title.innerHTML = '<i class="fas fa-user-plus"></i> Ajouter un invité';
     }
-
     modal.classList.add('active');
 }
 
 function closeGuestModal() {
-    const modal = document.getElementById('guestModal');
-    if (modal) {
-        modal.classList.remove('active');
-    }
+    document.getElementById('guestModal').classList.remove('active');
 }
 
-// ===== GUEST FORM SUBMIT =====
 function handleGuestSubmit(e) {
     e.preventDefault();
-    
     const guestId = document.getElementById('guestId').value;
-    const guestData = {
+    const data = {
         id: guestId || undefined,
-        eventId: document.getElementById('guestEventId').value,
+        eventId: currentEventId,
         firstName: document.getElementById('guestFirstName').value.trim(),
         lastName: document.getElementById('guestLastName').value.trim(),
         email: document.getElementById('guestEmail').value.trim(),
@@ -346,261 +526,145 @@ function handleGuestSubmit(e) {
         notes: document.getElementById('guestNotes').value.trim()
     };
 
-    // Validation
-    if (!validateEmail(guestData.email)) {
-        showNotification('error', 'Adresse email invalide');
-        return;
-    }
-
-    if (guestData.phone && !validatePhone(guestData.phone)) {
-        showNotification('error', 'Numéro de téléphone invalide');
-        return;
-    }
+    if (!validateEmail(data.email)) return showNotification('error', 'Email invalide');
+    if (data.phone && !validatePhone(data.phone)) return showNotification('error', 'Téléphone invalide');
 
     try {
-        storage.saveGuest(guestData);
+        storage.saveGuest(data);
         closeGuestModal();
         loadGuestsByEvent(currentEventId);
-        showNotification('success', guestId ? 'Invité modifié avec succès' : 'Invité ajouté avec succès');
-    } catch (error) {
-        console.error('Error saving guest:', error);
-        showNotification('error', 'Une erreur est survenue lors de l\'enregistrement');
+        showNotification('success', guestId ? 'Modifié' : 'Ajouté');
+    } catch (err) {
+        showNotification('error', 'Erreur');
     }
 }
 
-// ===== GUEST ACTIONS =====
-function editGuest(guestId) {
-    openGuestModal(guestId);
-}
-
-function viewGuestQR(guestId) {
-    window.location.href = `qr-generator.html?guest=${guestId}`;
-}
-
-function shareGuest(guestId) {
-    const guest = storage.getGuestById(guestId);
+// ===== ACTIONS INVITÉ =====
+function editGuest(id) { openGuestModal(id); }
+function viewGuestQR(id) { window.location.href = `qr-generator.html?guest=${id}`; }
+function shareGuest(id) {
+    const guest = storage.getGuestById(id);
     const event = storage.getEventById(guest.eventId);
-    
     if (!guest || !event) return;
-
-    const message = `Invitation: ${event.name}\nInvité: ${guest.firstName} ${guest.lastName}\nDate: ${new Date(event.date).toLocaleDateString('fr-FR')}`;
-    
+    const msg = `Invitation: ${event.name}\nInvité: ${guest.firstName} ${guest.lastName}\nDate: ${new Date(event.date).toLocaleDateString('fr-FR')}`;
     if (navigator.share) {
-        navigator.share({
-            title: `Invitation - ${event.name}`,
-            text: message
-        }).catch(err => console.log('Share cancelled'));
+        navigator.share({ title: `Invitation - ${event.name}`, text: msg }).catch(() => {});
     } else {
-        showNotification('info', 'Fonctionnalité de partage non disponible sur ce navigateur');
+        showNotification('info', 'Partage non disponible');
     }
 }
 
-async function deleteGuest(guestId) {
-    const guest = storage.getGuestById(guestId);
+async function deleteGuest(id) {
+    const guest = storage.getGuestById(id);
     if (!guest) return;
-
-    const confirmed = await confirmDialog(
-        'Supprimer l\'invité',
-        `Êtes-vous sûr de vouloir supprimer ${guest.firstName} ${guest.lastName} ?`,
-        'Supprimer',
-        'Annuler'
-    );
-
-    if (confirmed) {
-        storage.deleteGuest(guestId);
+    if (await confirmDialog('Supprimer', `Supprimer ${guest.firstName} ${guest.lastName} ?`, 'Supprimer', 'Annuler')) {
+        storage.deleteGuest(id);
         loadGuestsByEvent(currentEventId);
-        showNotification('success', 'Invité supprimé avec succès');
+        showNotification('success', 'Supprimé');
     }
 }
 
 async function deleteSelectedGuests() {
     if (selectedGuests.length === 0) return;
-
-    const confirmed = await confirmDialog(
-        'Supprimer les invités',
-        `Êtes-vous sûr de vouloir supprimer ${selectedGuests.length} invité(s) ?`,
-        'Supprimer',
-        'Annuler'
-    );
-
-    if (confirmed) {
+    if (await confirmDialog('Supprimer', `Supprimer ${selectedGuests.length} invité(s) ?`, 'Supprimer', 'Annuler')) {
         storage.deleteMultipleGuests(selectedGuests);
         selectedGuests = [];
         loadGuestsByEvent(currentEventId);
-        showNotification('success', 'Invités supprimés avec succès');
+        showNotification('success', 'Supprimés');
     }
 }
 
 // ===== EXPORT =====
 function exportGuestsToCSV() {
-    if (!currentEventId) return;
-
     const event = storage.getEventById(currentEventId);
-    const csvContent = storage.exportToCSV(currentEventId);
-    const filename = `${event.name.replace(/\s+/g, '_')}_invites_${new Date().toISOString().split('T')[0]}.csv`;
-    
-    downloadFile(csvContent, filename, 'text/csv');
-    showNotification('success', 'Export CSV réussi');
+    const csv = storage.exportToCSV(currentEventId);
+    const file = `${event.name.replace(/\s+/g, '_')}_invites_${new Date().toISOString().split('T')[0]}.csv`;
+    downloadFile(csv, file, 'text/csv');
+    showNotification('success', 'Export CSV OK');
 }
 
 function exportGuestsToJSON() {
-    if (!currentEventId) return;
-
     const event = storage.getEventById(currentEventId);
-    const guests = storage.getGuestsByEventId(currentEventId);
-    const jsonContent = JSON.stringify({
-        event: event,
-        guests: guests,
-        exportedAt: new Date().toISOString()
-    }, null, 2);
-    
-    const filename = `${event.name.replace(/\s+/g, '_')}_invites_${new Date().toISOString().split('T')[0]}.json`;
-    
-    downloadFile(jsonContent, filename, 'application/json');
-    showNotification('success', 'Export JSON réussi');
+    const data = JSON.stringify({ event, guests: currentGuests, exportedAt: new Date().toISOString() }, null, 2);
+    const file = `${event.name.replace(/\s+/g, '_')}_invites_${new Date().toISOString().split('T')[0]}.json`;
+    downloadFile(data, file, 'application/json');
+    showNotification('success', 'Export JSON OK');
 }
 
 // ===== CSV IMPORT =====
 function openCsvImportModal() {
     const modal = document.getElementById('csvImportModal');
-    if (modal) {
-        modal.classList.add('active');
-        document.getElementById('csvPreview').style.display = 'none';
-    }
+    modal.classList.add('active');
+    document.getElementById('csvPreview').style.display = 'none';
+    populateCsvEventSelector();
+}
+
+function populateCsvEventSelector() {
+    const select = document.getElementById('csvEventSelector');
+    select.innerHTML = '<option value="">-- Choisir --</option>' + storage.getAllEvents().map(e => `<option value="${e.id}">${e.name}</option>`).join('');
 }
 
 function closeCsvImportModal() {
-    const modal = document.getElementById('csvImportModal');
-    if (modal) {
-        modal.classList.remove('active');
-    }
-}
-
-function handleCsvFileSelect(e) {
-    const file = e.target.files[0];
-    if (file) {
-        processCsvFile(file);
-    }
+    document.getElementById('csvImportModal').classList.remove('active');
 }
 
 function processCsvFile(file) {
-    if (typeof Papa === 'undefined') {
-        showNotification('error', 'Bibliothèque CSV non chargée');
-        return;
-    }
-
+    if (!Papa) return showNotification('error', 'CSV non chargé');
     showLoading();
-
     Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
-        complete: function(results) {
-            hideLoading();
-            displayCsvPreview(results.data);
-        },
-        error: function(error) {
-            hideLoading();
-            showNotification('error', 'Erreur lors de la lecture du fichier CSV');
-            console.error('CSV Parse Error:', error);
-        }
+        complete: r => { hideLoading(); displayCsvPreview(r.data); },
+        error: () => { hideLoading(); showNotification('error', 'Erreur CSV'); }
     });
 }
 
 function displayCsvPreview(data) {
-    if (data.length === 0) {
-        showNotification('error', 'Le fichier CSV est vide');
-        return;
-    }
-
+    if (data.length === 0) return showNotification('error', 'CSV vide');
     const preview = data.slice(0, 5);
     const table = document.getElementById('csvPreviewTable');
-    
-    // Headers
     const headers = Object.keys(preview[0]);
-    let tableHTML = '<thead><tr>';
-    headers.forEach(header => {
-        tableHTML += `<th>${header}</th>`;
-    });
-    tableHTML += '</tr></thead><tbody>';
-    
-    // Rows
+    let html = '<thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
     preview.forEach(row => {
-        tableHTML += '<tr>';
-        headers.forEach(header => {
-            tableHTML += `<td>${row[header] || ''}</td>`;
-        });
-        tableHTML += '</tr>';
+        html += '<tr>' + headers.map(h => `<td>${row[h] || ''}</td>`).join('') + '</tr>';
     });
-    tableHTML += '</tbody>';
-    
-    table.innerHTML = tableHTML;
+    html += '</tbody>';
+    table.innerHTML = html;
     document.getElementById('csvRowCount').textContent = data.length;
     document.getElementById('csvPreview').style.display = 'block';
-    
-    // Stocker les données pour l'import
     window.pendingCsvData = data;
 }
 
 function confirmCsvImportAction() {
     const eventId = document.getElementById('csvEventSelector').value;
-    
-    if (!eventId) {
-        showNotification('error', 'Veuillez sélectionner un événement');
-        return;
-    }
-
-    if (!window.pendingCsvData) {
-        showNotification('error', 'Aucune donnée à importer');
-        return;
-    }
-
-    const guests = window.pendingCsvData.map(row => ({
-        eventId: eventId,
-        firstName: row['Prénom'] || row['Prenom'] || row['FirstName'] || '',
-        lastName: row['Nom'] || row['LastName'] || '',
-        email: row['Email'] || row['email'] || '',
-        phone: row['Téléphone'] || row['Telephone'] || row['Phone'] || '',
-        company: row['Entreprise'] || row['Company'] || '',
-        notes: row['Notes'] || ''
+    if (!eventId || !window.pendingCsvData) return showNotification('error', 'Données manquantes');
+    const guests = window.pendingCsvData.map(r => ({
+        eventId,
+        firstName: r['Prénom'] || r['Prenom'] || r['FirstName'] || '',
+        lastName: r['Nom'] || r['LastName'] || '',
+        email: r['Email'] || r['email'] || '',
+        phone: r['Téléphone'] || r['Telephone'] || r['Phone'] || '',
+        company: r['Entreprise'] || r['Company'] || '',
+        notes: r['Notes'] || ''
     }));
-
-    // Validation
-    const invalidGuests = guests.filter(g => !g.firstName || !g.lastName || !g.email);
-    
-    if (invalidGuests.length > 0) {
-        showNotification('warning', `${invalidGuests.length} ligne(s) invalide(s) ignorée(s)`);
-    }
-
-    const validGuests = guests.filter(g => g.firstName && g.lastName && g.email);
-    
-    if (validGuests.length === 0) {
-        showNotification('error', 'Aucun invité valide à importer');
-        return;
-    }
-
-    try {
-        storage.saveMultipleGuests(validGuests);
-        closeCsvImportModal();
-        
-        if (eventId === currentEventId) {
-            loadGuestsByEvent(currentEventId);
-        }
-        
-        showNotification('success', `${validGuests.length} invité(s) importé(s) avec succès`);
-    } catch (error) {
-        console.error('Error importing guests:', error);
-        showNotification('error', 'Erreur lors de l\'importation');
-    }
+    const valid = guests.filter(g => g.firstName && g.lastName && g.email);
+    if (valid.length === 0) return showNotification('error', 'Aucun valide');
+    storage.saveMultipleGuests(valid);
+    closeCsvImportModal();
+    if (eventId === currentEventId) loadGuestsByEvent(currentEventId);
+    showNotification('success', `${valid.length} importé(s)`);
 }
 
 function downloadCsvTemplate() {
-    const template = `Prénom,Nom,Email,Téléphone,Entreprise,Notes
-Jean,Dupont,jean.dupont@example.com,+237 6XX XXX XXX,Entreprise A,VIP
-Marie,Martin,marie.martin@example.com,+237 6XX XXX XXX,Entreprise B,`;
-
-    downloadFile(template, 'modele_invites.csv', 'text/csv');
+    const csv = `Prénom,Nom,Email,Téléphone,Entreprise,Notes\nJean,Dupont,jean@example.com,+237 6XX XXX XXX,Entreprise A,VIP`;
+    downloadFile(csv, 'modele_invites.csv', 'text/csv');
 }
 
+// ===== UTILS =====
+function getTypeColor(t) { return { marriage: '#dc2626', anniversaire: '#fb923c', conference: '#3b82f6', autre: '#6b7280' }[t] || '#6b7280'; }
+function stringToColor(s) { let h=0; for(let i=0;i<s.length;i++) h=s.charCodeAt(i)+((h<<5)-h); const c=(h&0x00FFFFFF).toString(16); return "#"+("000000"+c).slice(-6); }
+
+// Exposer globalement
 window.openGuestModal = openGuestModal;
 window.closeGuestModal = closeGuestModal;
 window.editGuest = editGuest;

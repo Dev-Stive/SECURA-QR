@@ -15,7 +15,10 @@ let qrConfig = {
 let downloadDirHandle = null;
 
 // ===== DOM LOADED =====
-document.addEventListener('DOMContentLoaded', () => {
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await window.storageReady;
+    
     loadEvents();
     initializeQRListeners();
     checkUrlParams();

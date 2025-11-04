@@ -174,54 +174,112 @@ function createEventCard(event) {
     const guests = storage.getGuestsByEventId(event.id);
     const scannedGuests = guests.filter(g => g.scanned).length;
     const eventDate = new Date(event.date);
+    const isUpcoming = eventDate >= new Date();
     const formattedDate = eventDate.toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
+        day: 'numeric', month: 'long', year: 'numeric'
     });
 
-    const typeLabels = {
-        marriage: 'Mariage',
-        anniversaire: 'Anniversaire',
-        conference: 'Conférence',
-        autre: 'Autre'
+    // === IMAGES DE FOND PAR TYPE ===
+    const typeImages = {
+        marriage: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+        anniversaire: 'https://images.unsplash.com/photo-1464349095433-7956a61b8a07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+        conference: 'https://images.unsplash.com/photo-1540575467063-868f79e66c3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+        autre: 'https://images.unsplash.com/photo-1501281668745-f7f579dff10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80'
     };
 
+    const typeLabels = {
+        marriage: { label: 'MARIAGE', class: 'type-marriage' },
+        anniversaire: { label: 'ANNIVERSAIRE', class: 'type-anniversaire' },
+        conference: { label: 'CONFÉRENCE', class: 'type-conference' },
+        autre: { label: 'AUTRE', class: 'type-autre' }
+    };
+
+    const type = typeLabels[event.type] || { label: event.type.toUpperCase(), class: 'type-autre' };
+    const backgroundImage = typeImages[event.type] || typeImages.autre;
+    const fillRate = event.capacity ? Math.round((guests.length / event.capacity) * 100) : 0;
+
+    // === Progression circulaire (SVG) ===
+    const circumference = 2 * Math.PI * 36; // rayon = 36
+    const progressOffset = circumference - (fillRate / 100) * circumference;
+
     return `
-        <div class="event-card" onclick="window.location.href='guests.html?event=${event.id}'">
-            <div class="event-card-header">
-                <span class="event-type-badge">${typeLabels[event.type] || event.type}</span>
-                <h3>${event.name}</h3>
-                <div class="event-date">
-                    <i class="fas fa-calendar"></i>
-                    <span>${formattedDate}</span>
+        <div class="event-card-pro" onclick="viewEvent('${event.id}')" style="background-image: url('${backgroundImage}');">
+            ${isUpcoming ? '<div class="upcoming-ribbon">À VENIR</div>' : ''}
+           
+
+            <!-- Contenu principal -->
+            <div class="event-content">
+                <h3 class="event-title">${event.name}</h3>
+                
+                <div class="event-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>${formattedDate}</span>
+                    </div>
+                    ${event.time ? `
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>${event.time}</span>
+                    </div>` : ''}
+                    ${event.location ? `
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${event.location}</span>
+                    </div>` : ''}
+                </div>
+
+                <!-- Stats en cercles -->
+                <div class="event-stats-circle">
+                    <div class="stat-circle">
+                        <div class="circle">
+                            <span class="value">${guests.length}</span>
+                            <span class="label">Invités</span>
+                        </div>
+                    </div>
+                    <div class="stat-circle">
+                        <div class="circle">
+                            <span class="value">${scannedGuests}</span>
+                            <span class="label">Présents</span>
+                        </div>
+                    </div>
+                    ${event.capacity ? `
+                    <div class="stat-circle progress">
+                        <svg width="80" height="80" viewBox="0 0 80 80">
+                            <circle class="track" cx="40" cy="40" r="36" stroke="#e0e0e0" stroke-width="8" fill="none"/>
+                            <circle class="progress-ring" cx="40" cy="40" r="36" stroke="#4ade80" stroke-width="8" fill="none"
+                                stroke-dasharray="${circumference}" stroke-dashoffset="${progressOffset}"
+                                transform="rotate(-90 40 40)"/>
+                            <text x="40" y="45" text-anchor="middle" class="progress-text">${fillRate}%</text>
+                        </svg>
+                        <span class="label">Remplissage</span>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <!-- Statut actif -->
+                <div class="event-status">
+                    <i class="fas ${event.active ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'}"></i>
+                    <span>${event.active ? 'Actif' : 'Inactif'}</span>
                 </div>
             </div>
-            <div class="event-card-body">
-                <div class="event-info">
-                    ${event.time ? `
-                        <div class="event-info-item">
-                            <i class="fas fa-clock"></i>
-                            <span>${event.time}</span>
-                        </div>
-                    ` : ''}
-                    ${event.location ? `
-                        <div class="event-info-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>${event.location}</span>
-                        </div>
-                    ` : ''}
-                </div>
-                <div class="event-stats">
-                    <div class="event-stat">
-                        <div class="event-stat-value">${guests.length}</div>
-                        <div class="event-stat-label">Invités</div>
-                    </div>
-                    <div class="event-stat">
-                        <div class="event-stat-value">${scannedGuests}</div>
-                        <div class="event-stat-label">Présents</div>
-                    </div>
-                </div>
+
+            <!-- Actions (flottantes) -->
+            <div class="event-actions" onclick="event.stopPropagation()">
+                <button class="action-btn" onclick="viewEvent('${event.id}')" title="Voir">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn" onclick="editEvent('${event.id}')" title="Modifier">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="action-btn" onclick="exportEvent('${event.id}')" title="Exporter">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         </div>
     `;
