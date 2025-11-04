@@ -135,10 +135,15 @@ function createEventCard(event) {
 }
 
 
-// === EMPTY STATE PRO ===
 async function renderEvents() {
     const eventsGrid = document.getElementById('eventsGrid');
-    if (!eventsGrid) return;
+    const loader = document.getElementById('eventsLoader');
+    if (!eventsGrid || !loader) return;
+
+    loader.style.display = 'flex';
+    eventsGrid.style.display = 'none';
+
+    await new Promise(r => setTimeout(r, 100));
 
     if (filteredEvents.length === 0) {
         eventsGrid.innerHTML = `
@@ -150,16 +155,19 @@ async function renderEvents() {
                 </button>
             </div>
         `;
-        return;
+    } else {
+        eventsGrid.innerHTML = filteredEvents
+            .map((event, index) => {
+                const card = createEventCard(event);
+                return `<div style="animation-delay: ${index * 0.1}s">${card}</div>`;
+            })
+            .join('');
     }
 
-    eventsGrid.innerHTML = filteredEvents
-        .map((event, index) => {
-            const card = createEventCard(event);
-            return `<div style="animation-delay: ${index * 0.1}s">${card}</div>`;
-        })
-        .join('');
+    loader.style.display = 'none';
+    eventsGrid.style.display = 'grid';
 }
+
 
 // ===== EVENT LISTENERS =====
 function initializeEventListeners() {
