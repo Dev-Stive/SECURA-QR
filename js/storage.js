@@ -291,13 +291,19 @@ async selectFile() {
     }
 
     deleteEvent(id) {
-        this.data.events = this.data.events.filter(e => e.id !== id);
-        this.data.guests = this.data.guests.filter(g => g.eventId !== id);
-        this.data.qrCodes = this.data.qrCodes.filter(q => q.eventId !== id);
-        this.data.scans = this.data.scans.filter(s => s.eventId !== id);
-        this.saveToFile();
-        return true;
-    }
+    this.data.events = this.data.events.filter(e => e.id !== id);
+
+    const guestIds = this.data.guests.filter(g => g.eventId === id).map(g => g.id);
+    this.data.guests = this.data.guests.filter(g => g.eventId !== id);
+
+    this.data.qrCodes = this.data.qrCodes.filter(q => !guestIds.includes(q.guestId));
+
+    this.data.scans = this.data.scans.filter(s => !guestIds.includes(s.guestId));
+
+    this.saveToFile();
+    this.triggerDataUpdate();
+    return true;
+}
 
     // ========================================
     //                INVITÉS
@@ -336,19 +342,30 @@ async selectFile() {
         return arr;
     }
 
-    deleteGuest(id) {
-        this.data.guests = this.data.guests.filter(g => g.id !== id);
-        this.data.qrCodes = this.data.qrCodes.filter(q => q.guestId !== id);
-        this.saveToFile();
-        return true;
-    }
+        deleteGuest(id) {
+            this.data.guests = this.data.guests.filter(g => g.id !== id);
 
-    deleteMultipleGuests(ids) {
-        this.data.guests = this.data.guests.filter(g => !ids.includes(g.id));
-        this.data.qrCodes = this.data.qrCodes.filter(q => !ids.includes(q.guestId));
-        this.saveToFile();
-        return true;
-    }
+            this.data.qrCodes = this.data.qrCodes.filter(q => q.guestId !== id);
+
+            this.data.scans = this.data.scans.filter(s => s.guestId !== id);
+
+            this.saveToFile();
+            this.triggerDataUpdate();
+            return true;
+        }
+
+   
+deleteMultipleGuests(ids) {
+    this.data.guests = this.data.guests.filter(g => !ids.includes(g.id));
+
+    this.data.qrCodes = this.data.qrCodes.filter(q => !ids.includes(q.guestId));
+
+    this.data.scans = this.data.scans.filter(s => !ids.includes(s.guestId));
+
+    this.saveToFile();
+    this.triggerDataUpdate();
+    return true;
+}
 
     // ========================================
     //                QR CODES
@@ -374,7 +391,29 @@ async selectFile() {
     // ========================================
     //                 SCANS
     // ========================================
-    getAllScans() { return this.data.scans; }
+    
+getAllScans() {
+    return [...this.data.scans].sort((a, b) => new Date(a.scannedAt) - new Date(b.scannedAt));
+}
+
+getAllScansDesc() {
+    return [...this.data.scans].sort((a, b) => new Date(b.scannedAt) - new Date(a.scannedAt));
+}
+
+deleteScansByGuest(guestId) {
+    this.data.scans = this.data.scans.filter(s => s.guestId !== guestId);
+    this.saveToFile();
+    this.triggerDataUpdate();
+    return true;
+}
+
+deleteScansByEvent(eventId) {
+    const guestIds = this.data.guests.filter(g => g.eventId === eventId).map(g => g.id);
+    this.data.scans = this.data.scans.filter(s => !guestIds.includes(s.guestId));
+    this.saveToFile();
+    this.triggerDataUpdate();
+    return true;
+}
 
     saveScan(scan) {
         scan.id = this.generateId();
@@ -550,24 +589,7 @@ async selectFile() {
         showNotification('success', 'Données réinitialisées');
     }
 
-    // Backup
-    async createBackup() {
-        const backup = JSON.stringify({
-            timestamp: new Date().toISOString(),
-            path: this.filePath,
-            ...this.data
-        }, null, 2);
-        
-        const blob = new Blob([backup], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `secura-backup-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        showNotification('success', 'Backup créé !');
-    }
+    
 
     // Sélection manuelle (fallback)
     async selectFileManually() {
@@ -621,7 +643,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadEvents();
     });
 
-    setInterval(() => storage.createBackup(), 30 * 60 * 1000);
+   // setInterval(() => storage.createBackup(), 30 * 60 * 1000);
 });
 
 

@@ -471,24 +471,44 @@ function saveScanRecord(eventId, guestId, guestName, eventName) {
 }
 
 function loadScanHistory() {
-    const scans = storage.getAllScans().slice(-10).reverse();
+    const scans = storage.getAllScansDesc();
     const list = document.getElementById('scanHistory');
+
     list.innerHTML = scans.length ? scans.map(s => `
         <div class="history-item">
-            <div><strong>${s.guestName}</strong><div class="text-sm text-muted">${s.eventName}</div></div>
-            <div class="text-sm text-muted">${new Date(s.scannedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div>
+                <strong>${s.guestName}</strong>
+                <div class="text-sm text-muted">${s.eventName}</div>
+            </div>
+            <div class="text-sm text-muted">
+                ${new Date(s.scannedAt).toLocaleDateString('fr-FR', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                })} - ${new Date(s.scannedAt).toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
+                </div>
+
         </div>
     `).join('') : `<div class="empty-state-small"><p>Aucun scan</p></div>`;
-    document.getElementById('scanCount').textContent = scans.length;
+
+    document.getElementById('scanCount').textContent = storage.getAllScans().length;
 }
+
 
 function updateScanStatistics() {
     const today = storage.getTodayScans().length;
     const present = storage.getAllGuests().filter(g => g.scanned).length;
-    const last = storage.getAllScans().slice(-1)[0];
+
+    const lastScan = storage.getAllScansDesc()[0];
     document.getElementById('todayScans').textContent = today;
     document.getElementById('todayPresent').textContent = present;
-    document.getElementById('lastScanTime').textContent = last ? new Date(last.scannedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-';
+    document.getElementById('lastScanTime').textContent = lastScan
+        ? new Date(lastScan.scannedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        : '-';
 }
 
 function resetScanner() {

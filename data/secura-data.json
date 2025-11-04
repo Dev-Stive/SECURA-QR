@@ -57,7 +57,7 @@
       "createdAt": "2025-11-03T22:43:24.227Z",
       "scanned": true,
       "status": "pending",
-      "scannedAt": "2025-11-04T08:19:23.824Z"
+      "scannedAt": "2025-11-04T09:45:36.267Z"
     },
     {
       "eventId": "sec_1762209757419_exl3pjlf0",
@@ -957,6 +957,30 @@
       "guestId": "sec_1762209804227_rkafbq7b5",
       "guestName": "Davy Vianney  Onomo Nga ",
       "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T09:45:36.267Z",
+      "id": "sec_1762249536267_8w32xqiko"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T09:43:40.433Z",
+      "id": "sec_1762249420433_kx0sz1ah2"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T09:36:21.688Z",
+      "id": "sec_1762248981688_v53ctlbpe"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
       "scannedAt": "2025-11-04T08:19:23.824Z",
       "id": "sec_1762244363824_8etf01r8t"
     },
@@ -1270,7 +1294,7 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2025-11-04T08:22:34.000Z",
+    "updatedAt": "2025-11-04T10:00:36.426Z",
     "version": "2.0"
   }
 }

@@ -533,9 +533,7 @@ body.dark-theme {
     pointer-events: none;
     z-index: 10;
 }
-#cameraPreview {
-    transform: scaleX(-1);
-}
+
 .camera-container {
     position: relative;
     border-radius: 20px;

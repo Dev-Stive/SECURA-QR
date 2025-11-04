@@ -23,7 +23,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         checkUrlParams();
         updateGuestView();
     });
+
+
+    const guestForm = document.getElementById('guestForm');
+    if (guestForm) guestForm.addEventListener('submit', handleGuestSubmit);
+
+    // Exemple d'initialisation d'événement courant
+    const eventList = document.getElementById('eventsGrid');
+    if (eventList) {
+        eventList.addEventListener('click', e => {
+            const eventId = e.target.closest('.event-card-pro')?.dataset.id;
+            if (eventId) currentEventId = eventId;
+        });
+    }
 });
+
+
+
 
 // ===== VÉRIFICATION URL =====
 function checkUrlParams() {
