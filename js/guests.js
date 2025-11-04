@@ -198,7 +198,7 @@ function renderEventHeader(event) {
         autre: 'https://images.unsplash.com/photo-1501281668745-f7f579dff10e'
     };
     const labels = {
-        marriage: { label: 'MARIAGE', color: '#dc2626' },
+        marriage: { label: 'MARIAGE', color: '#fb923c' },
         anniversaire: { label: 'ANNIVERSAIRE', color: '#fb923c' },
         conference: { label: 'CONFÉRENCE', color: '#3b82f6' },
         autre: { label: 'AUTRE', color: '#6b7280' }

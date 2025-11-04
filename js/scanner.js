@@ -98,39 +98,250 @@ async function startCameraScanning() {
     }
 }
 
-function stopCameraScanning() {
+/**
+ * RESET SCANNER UI – VERSION ULTRA PRO
+ * Remet TOUT à zéro : visuel, audio, variables, canvas, caméra
+ */
+function resetScannerUI() {
+
+    document.getElementById('scanPlaceholder').style.display = 'block';
+    document.getElementById('scanResult').style.display = 'none';
+
+    document.getElementById('resultStatus').innerHTML = '';
+    document.getElementById('resultStatus').className = 'status-badge';
+    document.getElementById('scanTime').textContent = '-';
+    document.getElementById('welcomeMessage').textContent = 'Scannez un QR Code';
+    document.getElementById('resultName').textContent = '-';
+    document.getElementById('resultEmail').textContent = '-';
+    document.getElementById('resultPhone').textContent = '-';
+    document.getElementById('resultEvent').textContent = '-';
+    document.getElementById('resultDateTime').textContent = '-';
+    document.getElementById('resultLocation').textContent = '-';
+    document.getElementById('markPresentBtn').style.display = 'none';
+
+    document.getElementById('qrFileDropZone').style.display = 'block';
+    document.getElementById('filePreview').style.display = 'none';
+    document.getElementById('uploadedImage').src = '';
+    document.getElementById('qrFileInput').value = '';
+
+    // 4. CANVAS PROPRE
+    const canvas = document.getElementById('scannerCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 5. BOUTONS CAMÉRA
+    document.getElementById('startScanBtn').style.display = 'inline-flex';
+    document.getElementById('stopScanBtn').style.display = 'none';
+
+    lastDetectedCode = null;
+    detectionCooldown = 0;
+    scanFrameCount = 0;
     scanningActive = false;
-    clearInterval(scanInterval);
+
+    clearInterval(window.scanSoundInterval);
+    window.scanSoundInterval = null;
+    SECURA_AUDIO.stop?.() || SECURA_AUDIO.play('notify');
+
+    showNotification('info', 'Scanner réinitialisé');
+
+    updateScanStatistics();
+    loadScanHistory();
+}
+
+
+
+function stopCameraScanning() {
+    stopScanningImmediately();
     if (cameraStream) {
         cameraStream.getTracks().forEach(t => t.stop());
         cameraStream = null;
     }
-    const video = document.getElementById('cameraPreview');
-    if (video) video.srcObject = null;
-    document.getElementById('startScanBtn').style.display = 'inline-flex';
-    document.getElementById('stopScanBtn').style.display = 'none';
 }
 
+/* ===== SCANNER QR ULTRA-INTELLIGENT V5 - ZÉRO LAG, 100% FIABLE ===== */
+let scanFrameCount = 0;
+let lastDetectedCode = null;
+let detectionCooldown = 0;
+const MIN_CONFIDENCE = 0.8;
+const COOLDOWN_FRAMES = 15;
+const MAX_SCAN_FPS = 30;
+
 function startContinuousScanning() {
-    if (typeof jsQR === 'undefined') return showNotification('error', 'jsQR non chargé');
+    if (typeof jsQR === 'undefined') {
+        return showNotification('error', 'jsQR non chargé');
+    }
 
     const video = document.getElementById('cameraPreview');
     const canvas = document.getElementById('scannerCanvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    scanInterval = setInterval(() => {
+    // LANCEMENT SON SCANNER
+    SECURA_AUDIO.scan();
+    window.scanSoundInterval = setInterval(() => {
+        if (scanningActive) SECURA_AUDIO.scan();
+    }, 1600);
+
+    let lastTime = 0;
+    scanFrameCount = 0;
+
+    const scanLoop = (timestamp) => {
         if (!scanningActive || !video.videoWidth) return;
+
+        const delta = timestamp - lastTime;
+        if (delta < 1000 / MAX_SCAN_FPS) {
+            requestAnimationFrame(scanLoop);
+            return;
+        }
+        lastTime = timestamp;
+
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0);
+
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
-        if (code) {
-            stopCameraScanning();
-            processQRCode(code.data);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert"
+        });
+
+        if (code && isValidQR(code)) {
+            if (detectionCooldown > 0) {
+                detectionCooldown--;
+                drawQRBox(code, 'yellow');
+            } else {
+                handleQRDetected(code);
+                return;
+            }
+        } else {
+            detectionCooldown = Math.max(0, detectionCooldown - 1);
+            drawScanningGrid();
         }
-    }, 300);
+
+        scanFrameCount++;
+        if (scanningActive) requestAnimationFrame(scanLoop);
+    };
+
+    requestAnimationFrame(scanLoop);
 }
+
+
+
+// VÉRIFICATION ULTRA-SÛRE DU QR
+function isValidQR(code) {
+    if (!code?.data) return false;
+    if (detectionCooldown > 0) return false;
+    if (code.data === lastDetectedCode) return false;
+
+    try {
+        const qr = JSON.parse(code.data);
+        return qr.t === 'INV' && qr.e && qr.g;
+    } catch {
+        return false;
+    }
+}
+
+// GESTION DÉTECTION PARFAITE
+function handleQRDetected(code) {
+    lastDetectedCode = code.data;
+    detectionCooldown = COOLDOWN_FRAMES;
+
+    stopScanningImmediately();
+
+    drawQRBox(code, '#22c55e', 2);
+    SECURA_AUDIO.scan();
+    SECURA_AUDIO.success();
+
+    setTimeout(() => processQRCode(code.data), 300);
+}
+
+
+// ARRÊT NET & PROPRE
+function stopScanningImmediately() {
+    scanningActive = false;
+    clearInterval(window.scanSoundInterval);
+    clearInterval(scanInterval);
+    window.scanSoundInterval = null;
+
+    const video = document.getElementById('cameraPreview');
+    if (video) video.pause();
+
+    document.getElementById('startScanBtn').style.display = 'inline-flex';
+    document.getElementById('stopScanBtn').style.display = 'none';
+
+    SECURA_AUDIO.stop();
+    // Nettoyage canvas
+    const canvas = document.getElementById('scannerCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// DESSIN BOÎTE QR LIVE
+function drawQRBox(code, color = '#3b82f6', thickness = 3) {
+    const canvas = document.getElementById('scannerCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = color;
+    ctx.lineWidth = thickness;
+    ctx.strokeRect(
+        code.location.topLeftCorner.x,
+        code.location.topLeftCorner.y,
+        code.location.bottomRightCorner.x - code.location.topLeftCorner.x,
+        code.location.bottomRightCorner.y - code.location.topLeftCorner.y
+    );
+
+    // Coins stylés
+    const cornerSize = 20;
+    ctx.lineWidth = 5;
+    [
+        code.location.topLeftCorner,
+        code.location.topRightCorner,
+        code.location.bottomLeftCorner,
+        code.location.bottomRightCorner
+    ].forEach(corner => {
+        ctx.beginPath();
+        ctx.moveTo(corner.x - cornerSize, corner.y);
+        ctx.lineTo(corner.x, corner.y);
+        ctx.lineTo(corner.x, corner.y - cornerSize);
+        ctx.stroke();
+    });
+}
+
+// GRILLE DE SCAN ANIMÉE
+function drawScanningGrid() {
+    const canvas = document.getElementById('scannerCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const time = Date.now() * 0.003;
+    const gridSize = 40;
+    ctx.strokeStyle = `rgba(59, 130, 246, ${0.3 + 0.2 * Math.sin(time)})`;
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+
+    // Ligne laser animée
+    const laserY = (canvas.height / 2 + Math.sin(time * 3) * 100);
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([10, 10]);
+    ctx.lineDashOffset = -time * 20;
+    ctx.beginPath();
+    ctx.moveTo(0, laserY);
+    ctx.lineTo(canvas.width, laserY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+
 
 // ===== FILE SCANNING =====
 function handleFileSelect(e) {
@@ -177,22 +388,32 @@ function processQRCode(data) {
     try {
         const qr = JSON.parse(data);
         if (qr.t !== 'INV' || !qr.e || !qr.g) {
-            return showNotification('error', 'QR Code invalide');
+            SECURA_AUDIO.error();
+            return showNotification('error', 'QR invalide');
         }
 
         const event = storage.getEventById(qr.e);
         const guest = storage.getGuestById(qr.g);
-
         if (!event || !guest) {
-            return showNotification('error', 'Invité ou événement introuvable');
+            SECURA_AUDIO.error();
+            return showNotification('error', 'Introuvable');
+        }
+
+        // SON DE VALIDATION
+        SECURA_AUDIO.success();
+
+        if (!guest.scanned) {
+            SECURA_AUDIO.play('welcome');
         }
 
         displayScanResult(event, guest);
         saveScanRecord(qr.e, qr.g, `${guest.firstName} ${guest.lastName}`, event.name);
     } catch (err) {
-        showNotification('error', 'Erreur de lecture');
+        SECURA_AUDIO.error();
+        showNotification('error', 'Lecture échouée');
     }
 }
+
 
 function displayScanResult(event, guest) {
     document.getElementById('scanPlaceholder').style.display = 'none';
@@ -231,14 +452,17 @@ function markGuestPresent() {
     guest.scannedAt = new Date().toISOString();
     storage.saveGuest(guest);
 
+    SECURA_AUDIO.success();
+
     document.getElementById('markPresentBtn').style.display = 'none';
     document.getElementById('resultStatus').innerHTML = `<i class="fas fa-check-circle"></i> <span>Présent</span>`;
     document.getElementById('resultStatus').className = 'status-badge success';
-
-    showNotification('success', `${guest.firstName} marqué présent`);
+    showNotification('success', `${guest.firstName} marqué présent !`);
     updateScanStatistics();
     loadScanHistory();
 }
+
+
 
 function saveScanRecord(eventId, guestId, guestName, eventName) {
     storage.saveScan({ eventId, guestId, guestName, eventName, scannedAt: new Date().toISOString() });
@@ -268,11 +492,10 @@ function updateScanStatistics() {
 }
 
 function resetScanner() {
-    document.getElementById('scanPlaceholder').style.display = 'block';
-    document.getElementById('scanResult').style.display = 'none';
-    document.getElementById('qrFileDropZone').style.display = 'block';
-    document.getElementById('filePreview').style.display = 'none';
-    document.getElementById('qrFileInput').value = '';
+    stopCameraScanning();
+    resetScannerUI();
+    lastDetectedCode = null;
+    detectionCooldown = 0;
 }
 
 function playSuccessSound() {

@@ -51,8 +51,9 @@
 
                     <div class="scanner-view" id="cameraScanner">
                         <div class="camera-container">
-                            <video id="cameraPreview" autoplay playsinline></video>
-                            <canvas id="scannerCanvas" style="display: none;"></canvas>
+                            <video id="cameraPreview" autoplay muted playsinline></video>
+                            <canvas id="scannerCanvas"></canvas>
+
                             <div class="scanner-overlay"><div class="scan-region"></div></div>
                             <div class="scanner-instructions"><i class="fas fa-qrcode"></i> <p>Positionnez le QR Code</p></div>
                         </div>
@@ -132,10 +133,28 @@
 
     <button class="scroll-top" id="scrollTop"><i class="fas fa-arrow-up"></i></button>
 
+
+            <!-- Précharge audio -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                SECURA_AUDIO.preload();
+            });
+        </script>
+
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+     <!-- Précharge audio -->
+      <script src="js/audio-utils.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                SECURA_AUDIO.preload();
+            });
+        </script>
+
+
     <script src="js/particles-config.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/storage.js"></script>

@@ -192,6 +192,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+     <!-- Précharge audio -->
+    <script src="js/audio-utils.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                SECURA_AUDIO.preload();
+            });
+    </script>
+
+
     <script src="js/particles-config.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/storage.js"></script>

@@ -41,22 +41,23 @@
 
     <main class="main-content">
         <div class="container">
-            <!-- Header dynamique (événement sélectionné) -->
-            <div id="dynamicHeader" class="page-header animate-fade-in">
-                <div>
-                    <h1><i class="fas fa-users"></i> Gestion des Invités</h1>
-                    <p>Cliquez sur un événement pour voir ses invités</p>
+            <div id="dynamicHeader" class="secura-header page-header animate-fade-in">
+                <div class="header-left">
+                    <div class="header-title">
+                        <h1><i class="fas fa-users"></i> Gestion des Invités</h1>
+                        <p class="header-subtitle">Sélectionnez un événement pour afficher ses invités</p>
+                    </div>
+                    <div id="dynamicHeaderEvent" class="header-event animate-fade-in"></div>
                 </div>
 
-
-            <div id="dynamicHeaderEvent" class=" animate-fade-in"></div>
-
-                <div class="header-actions-group">
+                <div class="header-actions">
                     <button class="btn btn-secondary" id="importCsvBtn" style="display: none;">
-                        <i class="fas fa-file-csv"></i> Importer CSV
+                        <i class="fas fa-file-csv"></i>
+                        <span>Importer CSV</span>
                     </button>
                     <button class="btn btn-primary" id="addGuestBtn" style="display: none;">
-                        <i class="fas fa-user-plus"></i> Ajouter un Invité
+                        <i class="fas fa-user-plus"></i>
+                        <span>Ajouter un Invité</span>
                     </button>
                 </div>
             </div>

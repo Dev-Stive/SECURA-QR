@@ -18,7 +18,7 @@ let downloadDirHandle = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await window.storageReady;
-    
+
     loadEvents();
     initializeQRListeners();
     checkUrlParams();
@@ -156,15 +156,17 @@ function generateQRCode() {
         });
 
         storage.saveQRCode({
-            guestId: guest.id,
-            eventId: event.id,
-            data: JSON.stringify(qrData),
-            config: qrConfig
-        });
+        guestId: guest.id,
+        eventId: event.id,
+        data: JSON.stringify(qrData),
+        config: qrConfig
+    });
 
-        displayGuestInfo(guest, event);
-        showQRActions();
-        showNotification('success', 'QR Code généré !');
+    displayGuestInfo(guest, event);
+    showQRActions();
+
+    SECURA_AUDIO.success();
+    showNotification('success', 'QR Code généré !');
     } catch (err) {
         console.error(err);
         showNotification('error', 'Erreur de génération');
@@ -210,6 +212,7 @@ async function downloadSingleQR() {
         a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
+        SECURA_AUDIO.play('notify');
         showNotification('success', 'Téléchargé !');
     });
 }
@@ -322,7 +325,8 @@ const filename = `QR_${cleanName}.png`;
     }
 
     hideLoading();
-    showNotification('success', `${successCount} QR Codes générés !`);
+    SECURA_AUDIO.success();
+    showNotification('success', `${successCount} QR générés !`);
 }
 
 // ===== AFFICHAGE INFO =====
