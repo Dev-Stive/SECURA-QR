@@ -1,40 +1,31 @@
-
-
-
-
-/**
- * SECURA - QR Code Scanner ULTRA INTELLIGENT
- * QR léger → récupère tout via storage
+/** 
+ * SECURA - QR Code Scanner ULTRA INTELLIGENT 
+ * NOUVELLE VERSION : CAPTURE → ANALYSE (zéro scan vidéo)
+ * Auteur : toi + Grok (2025)
  */
 
 let cameraStream = null;
 let scanningActive = false;
-let scanInterval = null;
-
-
+let capturedImageData = null;       // ← image capturée
+let captureTimeout = null;          // ← auto-stop 15s
 
 document.addEventListener('DOMContentLoaded', async () => {
     await window.storageReady;
-
     initializeScannerListeners();
     loadScanHistory();
     updateScanStatistics();
-
-
 });
 
-
-// ===== LOAD EVENTS =====
-function loadEvents() {
-    currentEvents = storage.data.events;
-    filteredEvents = [...currentEvents];
-}
-
+/* ============================================================= */
+/* =================== INITIALISATION UI ======================= */
+/* ============================================================= */
 function initializeScannerListeners() {
     document.getElementById('cameraModeBtn')?.addEventListener('click', () => switchScanMode('camera'));
     document.getElementById('fileModeBtn')?.addEventListener('click', () => switchScanMode('file'));
-    document.getElementById('startScanBtn')?.addEventListener('click', startCameraScanning);
+    document.getElementById('startScanBtn')?.addEventListener('click', startCameraForCapture);
     document.getElementById('stopScanBtn')?.addEventListener('click', stopCameraScanning);
+    document.getElementById('captureBtn')?.addEventListener('click', capturePhoto);               // NOUVEAU
+    document.getElementById('analyzeCaptureBtn')?.addEventListener('click', analyzeCapturedPhoto); // NOUVEAU
     document.getElementById('qrFileInput')?.addEventListener('change', handleFileSelect);
     document.getElementById('scanImageBtn')?.addEventListener('click', scanUploadedImage);
     document.getElementById('markPresentBtn')?.addEventListener('click', markGuestPresent);
@@ -45,24 +36,27 @@ function initializeScannerListeners() {
         dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
         dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
+            e.preventDefault(); dropZone.classList.remove('dragover');
             const file = e.dataTransfer.files[0];
             if (file?.type.startsWith('image/')) processImageFile(file);
         });
     }
-
     getCameras();
 }
 
-function switchScanMode(mode) {
-    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(mode === 'camera' ? 'cameraModeBtn' : 'fileModeBtn').classList.add('active');
-    document.getElementById('cameraScanner').style.display = mode === 'camera' ? 'block' : 'none';
-    document.getElementById('fileScanner').style.display = mode === 'file' ? 'block' : 'none';
-    stopCameraScanning();
+
+/* ============================================================= */
+/* ============ FONCTIONS OUBLIÉES (à coller à la FIN) ========== */
+/* ============================================================= */
+
+// 1. CHARGEMENT DES ÉVÉNEMENTS (pour storage.js)
+function loadEvents() {
+    if (typeof storage === 'undefined' || !storage.data) return;
+    currentEvents = storage.data.events || [];
+    filteredEvents = [...currentEvents];
 }
 
+// 2. LISTE DES CAMÉRAS
 async function getCameras() {
     if (!navigator.mediaDevices?.enumerateDevices) return;
     try {
@@ -70,13 +64,38 @@ async function getCameras() {
         const videoDevices = devices.filter(d => d.kind === 'videoinput');
         const select = document.getElementById('cameraSelect');
         if (select && videoDevices.length > 1) {
-            select.innerHTML = videoDevices.map((d, i) => `<option value="${d.deviceId}">${d.label || `Caméra ${i+1}`}</option>`).join('');
+            select.innerHTML = videoDevices.map((d, i) => 
+                `<option value="${d.deviceId}">${d.label || `Caméra ${i+1}`}</option>`
+            ).join('');
             select.style.display = 'block';
         }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+        console.error('Erreur caméras:', err);
+    }
 }
 
-async function startCameraScanning() {
+let currentEvents = [];
+let filteredEvents = [];
+
+window.loadEvents = loadEvents;
+window.getCameras = getCameras;
+
+/* ============================================================= */
+/* ====================== MODE SWITCH ========================== */
+/* ============================================================= */
+function switchScanMode(mode) {
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(mode === 'camera' ? 'cameraModeBtn' : 'fileModeBtn').classList.add('active');
+    document.getElementById('cameraScanner').style.display = mode === 'camera' ? 'block' : 'none';
+    document.getElementById('fileScanner').style.display = mode === 'file' ? 'block' : 'none';
+    stopCameraScanning();
+    resetCaptureUI();                       // ← reset capture
+}
+
+/* ============================================================= */
+/* =================== CAMÉRA POUR CAPTURE ===================== */
+/* ============================================================= */
+async function startCameraForCapture() {
     try {
         const deviceId = document.getElementById('cameraSelect')?.value;
         cameraStream = await navigator.mediaDevices.getUserMedia({
@@ -87,150 +106,154 @@ async function startCameraScanning() {
         video.srcObject = cameraStream;
         await video.play();
 
-        scanningActive = true;
+        // UI : on cache Démarrer, on montre Capturer
         document.getElementById('startScanBtn').style.display = 'none';
         document.getElementById('stopScanBtn').style.display = 'inline-flex';
+        document.getElementById('captureBtn').style.display = 'inline-flex';
+        document.getElementById('analyzeCaptureBtn').style.display = 'none';
 
-        startContinuousScanning();
-        showNotification('info', 'Scan en cours...');
+        showNotification('info', 'Appuyez sur CAPTURER');
+        SECURA_AUDIO.scan();
+
+        // Auto-stop 15s
+        captureTimeout = setTimeout(() => {
+            showNotification('info', 'Temps écoulé → arrêt');
+            stopCameraScanning();
+        }, 15000);
+
     } catch (err) {
         showNotification('error', 'Caméra inaccessible');
+        console.error(err);
     }
 }
 
-/**
- * RESET SCANNER UI – VERSION ULTRA PRO
- * Remet TOUT à zéro : visuel, audio, variables, canvas, caméra
- */
-function resetScannerUI() {
+function capturePhoto() {
+    const cameraContainer = document.querySelector('.camera-container');
+    const video = document.getElementById('cameraPreview');
 
-    document.getElementById('scanPlaceholder').style.display = 'block';
-    document.getElementById('scanResult').style.display = 'none';
+    if (!video || !cameraStream) return;
 
-    document.getElementById('resultStatus').innerHTML = '';
-    document.getElementById('resultStatus').className = 'status-badge';
-    document.getElementById('scanTime').textContent = '-';
-    document.getElementById('welcomeMessage').textContent = 'Scannez un QR Code';
-    document.getElementById('resultName').textContent = '-';
-    document.getElementById('resultEmail').textContent = '-';
-    document.getElementById('resultPhone').textContent = '-';
-    document.getElementById('resultEvent').textContent = '-';
-    document.getElementById('resultDateTime').textContent = '-';
-    document.getElementById('resultLocation').textContent = '-';
-    document.getElementById('markPresentBtn').style.display = 'none';
-
-    document.getElementById('qrFileDropZone').style.display = 'block';
-    document.getElementById('filePreview').style.display = 'none';
-    document.getElementById('uploadedImage').src = '';
-    document.getElementById('qrFileInput').value = '';
-
-    // 4. CANVAS PROPRE
-    const canvas = document.getElementById('scannerCanvas');
+    // 1. Capture sur canvas temporaire
+    const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const TARGET_W = 1080;
+    const ratio = video.videoHeight / video.videoWidth;
+    canvas.width = TARGET_W;
+    canvas.height = TARGET_W * ratio;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    capturedImageData = canvas.toDataURL('image/jpeg', 0.95);
 
-    // 5. BOUTONS CAMÉRA
-    document.getElementById('startScanBtn').style.display = 'inline-flex';
+    // 2. Stoppe la caméra
+    video.pause();
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+    video.srcObject = null;
+
+    // 3. Masque tout dans camera-container
+    if (cameraContainer) cameraContainer.style.display = 'none';
+
+
+    // 4. Affiche la capture
+    const img = document.getElementById('capturedPreview');
+    img.src = capturedImageData;
+    img.style.display = 'block';
+    document.getElementById('capturePreview').style.display = 'block';
+
+    // 5. Mise à jour des boutons
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('analyzeCaptureBtn').style.display = 'inline-flex';
     document.getElementById('stopScanBtn').style.display = 'none';
 
-    lastDetectedCode = null;
-    detectionCooldown = 0;
-    scanFrameCount = 0;
-    scanningActive = false;
+    // 6. Nettoyage timeout
+    if (captureTimeout) clearTimeout(captureTimeout);
 
-    clearInterval(window.scanSoundInterval);
-    window.scanSoundInterval = null;
-    SECURA_AUDIO.stop?.() || SECURA_AUDIO.play('notify');
-
-    showNotification('info', 'Scanner réinitialisé');
-
-    updateScanStatistics();
-    loadScanHistory();
+    // 7. Notification et son
+    showNotification('success', 'Photo capturée ! Appuyez sur ANALYSER');
+    SECURA_AUDIO.play();
 }
 
 
+function analyzeCapturedPhoto() {
+    if (!capturedImageData) return;
 
-function stopCameraScanning() {
-    stopScanningImmediately();
-    if (cameraStream) {
-        cameraStream.getTracks().forEach(t => t.stop());
-        cameraStream = null;
-    }
-}
-
-/* ===== SCANNER QR ULTRA-INTELLIGENT V5 - ZÉRO LAG, 100% FIABLE ===== */
-let scanFrameCount = 0;
-let lastDetectedCode = null;
-let detectionCooldown = 0;
-const MIN_CONFIDENCE = 0.8;
-const COOLDOWN_FRAMES = 15;
-const MAX_SCAN_FPS = 30;
-
-function startContinuousScanning() {
-    if (typeof jsQR === 'undefined') {
-        return showNotification('error', 'jsQR non chargé');
-    }
-
-    const video = document.getElementById('cameraPreview');
-    const canvas = document.getElementById('scannerCanvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-    // LANCEMENT SON SCANNER
-    SECURA_AUDIO.scan();
-    window.scanSoundInterval = setInterval(() => {
-        if (scanningActive) SECURA_AUDIO.scan();
-    }, 1600);
-
-    let lastTime = 0;
-    scanFrameCount = 0;
-
-    const scanLoop = (timestamp) => {
-        if (!scanningActive || !video.videoWidth) return;
-
-        const delta = timestamp - lastTime;
-        if (delta < 1000 / MAX_SCAN_FPS) {
-            requestAnimationFrame(scanLoop);
-            return;
-        }
-        lastTime = timestamp;
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-
+    const img = new Image();
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
             inversionAttempts: "dontInvert"
         });
 
         if (code && isValidQR(code)) {
-            if (detectionCooldown > 0) {
-                detectionCooldown--;
-                drawQRBox(code, 'yellow');
-            } else {
-                handleQRDetected(code);
-                return;
-            }
+            handleQRDetected(code);
         } else {
-            detectionCooldown = Math.max(0, detectionCooldown - 1);
-            drawScanningGrid();
+            SECURA_AUDIO.error();
+            showNotification('error', 'Aucun QR Code détecté dans la capture');
         }
-
-        scanFrameCount++;
-        if (scanningActive) requestAnimationFrame(scanLoop);
     };
+    img.src = capturedImageData;
+}
 
-    requestAnimationFrame(scanLoop);
+/* ============================================================= */
+/* =================== RESET CAPTURE UI ======================= */
+/* ============================================================= */
+function resetCaptureUI() {
+    capturedImageData = null;
+
+    // Masques capture preview
+    document.getElementById('capturePreview').style.display = 'none';
+    document.getElementById('capturedPreview').src = '';
+
+    // Boutons
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('analyzeCaptureBtn').style.display = 'none';
+    document.getElementById('startScanBtn').style.display = 'inline-flex';
+    document.getElementById('stopScanBtn').style.display = 'none';
+
+    // Réaffiche le container caméra, le canvas et l'overlay
+    const cameraContainer = document.querySelector('.camera-container');
+    if (cameraContainer) cameraContainer.style.display = 'block';
+
+    const canvasEl = document.getElementById('scannerCanvas');
+    if (canvasEl) canvasEl.style.display = 'block';
+
+    const overlay = document.querySelector('.scanner-overlay');
+    if (overlay) overlay.style.display = 'flex';
+
+    clearTimeout(captureTimeout);
 }
 
 
+/* ============================================================= */
+/* ====================== STOP CAMÉRA ========================= */
+/* ============================================================= */
+function stopCameraScanning() {
+    stopScanningImmediately();
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+    }
+    resetCaptureUI();
+    const video = document.getElementById('cameraPreview');
+    if (video) video.srcObject = null;
+}
 
-// VÉRIFICATION ULTRA-SÛRE DU QR
+function stopScanningImmediately() {
+    scanningActive = false;
+    clearInterval(window.scanSoundInterval);
+    window.scanSoundInterval = null;
+    SECURA_AUDIO.stop();
+}
+
+/* ============================================================= */
+/* =================== QR VALIDATION ========================== */
+/* ============================================================= */
 function isValidQR(code) {
     if (!code?.data) return false;
-    if (detectionCooldown > 0) return false;
-    if (code.data === lastDetectedCode) return false;
-
     try {
         const qr = JSON.parse(code.data);
         return qr.t === 'INV' && qr.e && qr.g;
@@ -239,151 +262,15 @@ function isValidQR(code) {
     }
 }
 
-// GESTION DÉTECTION PARFAITE
 function handleQRDetected(code) {
-    lastDetectedCode = code.data;
-    detectionCooldown = COOLDOWN_FRAMES;
-
-    stopScanningImmediately();
-
-    drawQRBox(code, '#22c55e', 2);
-    SECURA_AUDIO.scan();
+    stopCameraScanning();
     SECURA_AUDIO.success();
-
     setTimeout(() => processQRCode(code.data), 300);
 }
 
-
-// ARRÊT NET & PROPRE
-function stopScanningImmediately() {
-    scanningActive = false;
-    clearInterval(window.scanSoundInterval);
-    clearInterval(scanInterval);
-    window.scanSoundInterval = null;
-
-    const video = document.getElementById('cameraPreview');
-    if (video) video.pause();
-
-    document.getElementById('startScanBtn').style.display = 'inline-flex';
-    document.getElementById('stopScanBtn').style.display = 'none';
-
-    SECURA_AUDIO.stop();
-    // Nettoyage canvas
-    const canvas = document.getElementById('scannerCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-// DESSIN BOÎTE QR LIVE
-function drawQRBox(code, color = '#3b82f6', thickness = 3) {
-    const canvas = document.getElementById('scannerCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.strokeStyle = color;
-    ctx.lineWidth = thickness;
-    ctx.strokeRect(
-        code.location.topLeftCorner.x,
-        code.location.topLeftCorner.y,
-        code.location.bottomRightCorner.x - code.location.topLeftCorner.x,
-        code.location.bottomRightCorner.y - code.location.topLeftCorner.y
-    );
-
-    // Coins stylés
-    const cornerSize = 20;
-    ctx.lineWidth = 5;
-    [
-        code.location.topLeftCorner,
-        code.location.topRightCorner,
-        code.location.bottomLeftCorner,
-        code.location.bottomRightCorner
-    ].forEach(corner => {
-        ctx.beginPath();
-        ctx.moveTo(corner.x - cornerSize, corner.y);
-        ctx.lineTo(corner.x, corner.y);
-        ctx.lineTo(corner.x, corner.y - cornerSize);
-        ctx.stroke();
-    });
-}
-
-// GRILLE DE SCAN ANIMÉE
-function drawScanningGrid() {
-    const canvas = document.getElementById('scannerCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const time = Date.now() * 0.003;
-    const gridSize = 40;
-    ctx.strokeStyle = `rgba(59, 130, 246, ${0.3 + 0.2 * Math.sin(time)})`;
-    ctx.lineWidth = 1;
-
-    for (let x = 0; x < canvas.width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-    }
-    for (let y = 0; y < canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
-
-    // Ligne laser animée
-    const laserY = (canvas.height / 2 + Math.sin(time * 3) * 100);
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([10, 10]);
-    ctx.lineDashOffset = -time * 20;
-    ctx.beginPath();
-    ctx.moveTo(0, laserY);
-    ctx.lineTo(canvas.width, laserY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-}
-
-
-
-// ===== FILE SCANNING =====
-function handleFileSelect(e) {
-    const file = e.target.files[0];
-    if (file) {
-        processImageFile(file);
-    }
-}
-function processImageFile(file) {
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-        const img = document.getElementById('uploadedImage');
-        img.src = e.target.result;
-        
-        document.getElementById('qrFileDropZone').style.display = 'none';
-        document.getElementById('filePreview').style.display = 'block';
-    };
-    
-    reader.readAsDataURL(file);
-}
-function scanUploadedImage() {
-    if (typeof jsQR === 'undefined') {
-        showNotification('error', 'Bibliothèque jsQR non chargée');
-        return;
-    }
-    const img = document.getElementById('uploadedImage');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    ctx.drawImage(img, 0, 0);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height);
-    if (code) {
-        processQRCode(code.data);
-    } else {
-        showNotification('error', 'Aucun QR Code détecté dans l\'image');
-    }
-}
-
-// ===== PROCESS QR CODE (INTELLIGENT) =====
+/* ============================================================= */
+/* ====================== PROCESS QR =========================== */
+/* ============================================================= */
 function processQRCode(data) {
     try {
         const qr = JSON.parse(data);
@@ -391,21 +278,14 @@ function processQRCode(data) {
             SECURA_AUDIO.error();
             return showNotification('error', 'QR invalide');
         }
-
         const event = storage.getEventById(qr.e);
         const guest = storage.getGuestById(qr.g);
         if (!event || !guest) {
             SECURA_AUDIO.error();
             return showNotification('error', 'Introuvable');
         }
-
-        // SON DE VALIDATION
         SECURA_AUDIO.success();
-
-        if (!guest.scanned) {
-            SECURA_AUDIO.play('welcome');
-        }
-
+        if (!guest.scanned) SECURA_AUDIO.play('welcome');
         displayScanResult(event, guest);
         saveScanRecord(qr.e, qr.g, `${guest.firstName} ${guest.lastName}`, event.name);
     } catch (err) {
@@ -414,34 +294,66 @@ function processQRCode(data) {
     }
 }
 
-
 function displayScanResult(event, guest) {
     document.getElementById('scanPlaceholder').style.display = 'none';
     document.getElementById('scanResult').style.display = 'block';
-
     const status = guest.scanned ? 'Déjà présent' : 'Valide';
     const icon = guest.scanned ? 'fa-info-circle' : 'fa-check-circle';
     document.getElementById('resultStatus').innerHTML = `<i class="fas ${icon}"></i> <span>${status}</span>`;
     document.getElementById('resultStatus').className = `status-badge ${guest.scanned ? 'pending' : 'success'}`;
-
     document.getElementById('scanTime').textContent = new Date().toLocaleTimeString('fr-FR');
     document.getElementById('welcomeMessage').textContent = event.welcomeMessage || `Bienvenue ${guest.firstName} !`;
-
     document.getElementById('resultName').textContent = `${guest.firstName} ${guest.lastName}`;
     document.getElementById('resultEmail').textContent = guest.email || '-';
     document.getElementById('resultPhone').textContent = guest.phone || '-';
     document.getElementById('resultEvent').textContent = event.name;
-
     const date = new Date(event.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     document.getElementById('resultDateTime').textContent = `${date} ${event.time || ''}`;
     document.getElementById('resultLocation').textContent = event.location || '-';
-
     const btn = document.getElementById('markPresentBtn');
     btn.style.display = guest.scanned ? 'none' : 'inline-flex';
     btn.dataset.guestId = guest.id;
-
-    playSuccessSound();
+    //playSuccessSound();
 }
+
+/* ============================================================= */
+/* ====================== FILE MODE (inchangé) ================ */
+/* ============================================================= */
+function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) processImageFile(file);
+}
+
+function processImageFile(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = document.getElementById('uploadedImage');
+        img.src = e.target.result;
+        document.getElementById('qrFileDropZone').style.display = 'none';
+        document.getElementById('filePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function scanUploadedImage() {
+    if (typeof jsQR === 'undefined') {
+        showNotification('error', 'jsQR non chargé');
+        return;
+    }
+    const img = document.getElementById('uploadedImage');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    if (code) processQRCode(code.data);
+    else showNotification('error', 'Aucun QR Code détecté dans l\'image');
+}
+
+
+
 
 function markGuestPresent() {
     const guestId = document.getElementById('markPresentBtn').dataset.guestId;
@@ -511,12 +423,75 @@ function updateScanStatistics() {
         : '-';
 }
 
+
+
+/** 
+ * RESET SCANNER UI – VERSION ULTRA PRO
+ * Remet tout à zéro : visuel, audio, variables, canvas, caméra
+ */
+function resetScannerUI() {
+    // Affichage et masquage des éléments
+    document.getElementById('scanPlaceholder').style.display = 'block';
+    document.getElementById('cameraPreview').style.display = 'block';
+    document.getElementById('scanResult').style.display = 'none';
+    document.getElementById('qrFileDropZone').style.display = 'block';
+    document.getElementById('filePreview').style.display = 'none';
+
+    // Réinitialisation des valeurs
+    document.getElementById('resultStatus').innerHTML = '';
+    document.getElementById('resultStatus').className = 'status-badge';
+    document.getElementById('scanTime').textContent = '-';
+    document.getElementById('welcomeMessage').textContent = 'Scannez un QR Code';
+    document.getElementById('resultName').textContent = '-';
+    document.getElementById('resultEmail').textContent = '-';
+    document.getElementById('resultPhone').textContent = '-';
+    document.getElementById('resultEvent').textContent = '-';
+    document.getElementById('resultDateTime').textContent = '-';
+    document.getElementById('resultLocation').textContent = '-';
+
+    // Boutons et inputs
+    document.getElementById('markPresentBtn').style.display = 'none';
+    document.getElementById('uploadedImage').src = '';
+    document.getElementById('qrFileInput').value = '';
+    document.getElementById('startScanBtn').style.display = 'inline-flex';
+    document.getElementById('stopScanBtn').style.display = 'none';
+
+    // Nettoyage du canvas
+    const canvas = document.getElementById('scannerCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Réinitialisation des variables internes
+    lastDetectedCode = null;
+    detectionCooldown = 0;
+    scanFrameCount = 0;
+    scanningActive = false;
+
+    // Arrêt des sons et notifications
+    clearInterval(window.scanSoundInterval);
+    window.scanSoundInterval = null;
+    SECURA_AUDIO.stop?.() || SECURA_AUDIO.play('notify');
+
+    // Mise à jour des statistiques et historique
+    updateScanStatistics();
+    loadScanHistory();
+
+    showNotification('info', 'Scanner réinitialisé');
+}
+
+
+
+/**
+ * RESET COMPLET DU SCANNER
+ */
 function resetScanner() {
     stopCameraScanning();
     resetScannerUI();
+    resetCaptureUI();
     lastDetectedCode = null;
     detectionCooldown = 0;
 }
+
 
 function playSuccessSound() {
     try {

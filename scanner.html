@@ -53,14 +53,31 @@
                         <div class="camera-container">
                             <video id="cameraPreview" autoplay muted playsinline></video>
                             <canvas id="scannerCanvas"></canvas>
-
                             <div class="scanner-overlay"><div class="scan-region"></div></div>
-                            <div class="scanner-instructions"><i class="fas fa-qrcode"></i> <p>Positionnez le QR Code</p></div>
                         </div>
+
+                        <!-- NOUVEAU : zone capture -->
+                        <div id="capturePreview" class="capture-preview" style="display:none;">
+                           <img id="capturedPreview" alt="Capture" style="display:none; width:100%; border-radius:12px;">
+                            <div class="capture-actions">
+                                <button class="btn btn-success" id="analyzeCaptureBtn">
+                                    <i class="fas fa-search"></i> Analyser cette photo
+                                </button>
+                                <button class="btn btn-outline" id="newScanBtn"><i class="fas fa-redo"></i> Nouveau scan</button>
+                            </div>
+                        </div>
+
                         <div class="scanner-controls">
-                            <button class="btn btn-primary" id="startScanBtn"><i class="fas fa-play"></i> Démarrer</button>
-                            <button class="btn btn-danger" id="stopScanBtn" style="display: none;"><i class="fas fa-stop"></i> Arrêter</button>
-                            <select id="cameraSelect" class="form-input" style="display: none;"></select>
+                            <button class="btn btn-primary" id="startScanBtn">
+                                <i class="fas fa-play"></i> Démarrer caméra
+                            </button>
+                            <button class="btn btn-danger" id="stopScanBtn" style="display:none;">
+                                <i class="fas fa-stop"></i> Arrêter
+                            </button>
+                            <button class="btn btn-warning" id="captureBtn" style="display:none;">
+                                <i class="fas fa-camera"></i> CAPTURER
+                            </button>
+                            <select id="cameraSelect" class="form-input" style="display:none;"></select>
                         </div>
                     </div>
 
