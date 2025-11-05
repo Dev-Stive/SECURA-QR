@@ -142,7 +142,9 @@ async function renderEvents() {
 
     loader.style.display = 'flex';
     eventsGrid.style.display = 'none';
+    eventsGrid.style.opacity = 0;
 
+    
     await new Promise(r => setTimeout(r, 100));
 
     if (filteredEvents.length === 0) {
@@ -166,6 +168,8 @@ async function renderEvents() {
 
     loader.style.display = 'none';
     eventsGrid.style.display = 'grid';
+    eventsGrid.style.opacity = 1;
+    
 }
 
 

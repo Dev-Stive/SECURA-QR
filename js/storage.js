@@ -13,11 +13,12 @@
 
 class SecuraStorage {
     constructor() {
-        this.API_URL = 'http://localhost:3000/api';
+        //this.API_URL = 'http://localhost:3000/api';
+        this.API_URL = 'https://secura-qr.onrender.com/api';
         this.SYNC_ENABLED = true;
-        this.SYNC_INTERVAL = 30000; // 30 secondes
-        this.AUTO_SYNC_ON_CHANGE = true; // Sync automatique après modif
-        this.USE_API_DIRECT = true; // Utiliser API directement (pas juste sync)
+        this.SYNC_INTERVAL = 30000;
+        this.AUTO_SYNC_ON_CHANGE = true;
+        this.USE_API_DIRECT = true; 
         
         this.syncTimer = null;
         this.syncInProgress = false;
@@ -46,7 +47,6 @@ class SecuraStorage {
     // ═══════════════════════════════════════════════════════════════
 
     async init() {
-        console.log('🔄 SECURA Storage V3.0 - Initialisation...');
         
         // Charger données locales
         this.loadFromLocalStorage();
@@ -55,7 +55,6 @@ class SecuraStorage {
         const serverOnline = await this.checkServerStatus();
         
         if (serverOnline && this.SYNC_ENABLED) {
-            console.log('✅ Serveur accessible - Mode API Direct');
             await this.syncPull();
             this.startAutoSync();
         } else {
@@ -64,7 +63,6 @@ class SecuraStorage {
         }
         
         this.triggerDataUpdate();
-        console.log('✅ SECURA Storage prêt !');
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -86,7 +84,7 @@ class SecuraStorage {
     async apiRequest(endpoint, options = {}) {
         try {
             const url = endpoint.startsWith('http') ? endpoint : `${this.API_URL}${endpoint}`;
-            console.log(url);
+           
             const response = await fetch(url, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -116,11 +114,7 @@ class SecuraStorage {
             const stored = localStorage.getItem('secura_data');
             if (stored) {
                 this.data = JSON.parse(stored);
-                console.log('✅ Données locales chargées:', {
-                    events: this.data.events?.length || 0,
-                    guests: this.data.guests?.length || 0,
-                    scans: this.data.scans?.length || 0
-                });
+               
             }
         } catch (err) {
             console.error('❌ Erreur chargement local:', err);
@@ -130,7 +124,6 @@ class SecuraStorage {
     saveToLocalStorage() {
         try {
             localStorage.setItem('secura_data', JSON.stringify(this.data));
-            console.log('💾 Sauvegarde locale OK');
         } catch (err) {
             console.error('❌ Erreur sauvegarde locale:', err);
         }
@@ -139,7 +132,6 @@ class SecuraStorage {
     clearLocalStorage() {
         try {
             localStorage.removeItem('secura_data');
-            console.log('🗑️ Données locales effacées');
         } catch (err) {
             console.error('❌ Erreur effacement:', err);
         }
@@ -1405,7 +1397,6 @@ class SecuraStorage {
     destroy() {
         this.stopAutoSync();
         this.saveToLocalStorage();
-        console.log('🧹 SECURA Storage destroyed');
     }
 }
 
