@@ -1,0 +1,42 @@
+{
+  "name": "secura-qr-backend",
+  "version": "1.0.1",
+  "description": "Serveur ULTRA INTELLIGENT de SECURA-QR pour la gestion des scans et statistiques.",
+  "main": "server.js",
+  "scripts": {
+    "start": "NODE_ENV=production node server.js",
+    "dev": "nodemon server.js",
+    "backup": "node backup.js",
+    "lint": "eslint . --ext .js",
+    "format": "prettier --write .",
+    "check": "npm run lint && npm run format"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "json-server": "^0.17.4",
+    "moment": "^2.30.1",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "eslint": "^9.14.0",
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "secura",
+    "qr-code",
+    "scanner",
+    "express",
+    "backend",
+    "json-server",
+    "node-cron"
+  ],
+  "author": "SECURA Team",
+  "license": "MIT"
+}

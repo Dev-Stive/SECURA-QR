@@ -1,0 +1,1333 @@
+{
+  "events": [
+    {
+      "id": "sec_1762209757419_exl3pjlf0",
+      "name": "Mariage de Rania et Gérard",
+      "type": "marriage",
+      "date": "2025-11-22",
+      "time": "19:00",
+      "capacity": 300,
+      "location": "Florencia Palace",
+      "description": "soirée",
+      "welcomeMessage": "Raina ❤️ Gérard\nsont ravis de vous accueillir pour célébrer leur union !\nPréparez-vous à vivre une journée pleine d’amour, de sourires et de souvenirs inoubliables.",
+      "active": true,
+      "updatedAt": "2025-11-03T22:42:37.419Z",
+      "createdAt": "2025-11-03T22:42:37.419Z"
+    }
+  ],
+  "guests": [
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Maman",
+      "lastName": " Françoise ",
+      "email": "-",
+      "phone": "693592328",
+      "company": "-",
+      "notes": "Table Ensemble ",
+      "id": "sec_1762209804227_mquxez5su",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Presley",
+      "lastName": "Silape Presley ",
+      "email": "-",
+      "phone": "691457772",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "id": "sec_1762209804227_bp8bfckcl",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Davy Vianney ",
+      "lastName": "Onomo Nga ",
+      "email": "-",
+      "phone": "640634262",
+      "company": "-",
+      "notes": "Table Optimisme ",
+      "id": "sec_1762209804227_rkafbq7b5",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": true,
+      "status": "pending",
+      "scannedAt": "2025-11-04T12:32:05.211Z"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Sorel",
+      "lastName": "Nzeumegne ",
+      "email": "-",
+      "phone": "652981890",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "id": "sec_1762209804227_y017u7nrb",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Darel",
+      "lastName": "-",
+      "email": "-",
+      "phone": "690472725",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "id": "sec_1762209804227_z1r45rk68",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Syntiche",
+      "lastName": "Kopmo ",
+      "email": "-",
+      "phone": "654797647",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "id": "sec_1762209804227_v34eo6zge",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Theophile",
+      "lastName": "Ngatio ",
+      "email": "-",
+      "phone": "651223494",
+      "company": "-",
+      "notes": "Table Bonté",
+      "id": "sec_1762209804227_073wpgu10",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Cyrille",
+      "lastName": "Kwemo ",
+      "email": "-",
+      "phone": "689159074",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "id": "sec_1762209804227_1fzi6enfw",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Landry ",
+      "lastName": "Ngopnang ",
+      "email": "-",
+      "phone": "678785567",
+      "company": "-",
+      "notes": "Table Paix",
+      "id": "sec_1762209804227_dkfrn8v2z",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Fabiola",
+      "lastName": "Nzuega ",
+      "email": "-",
+      "phone": "658714751",
+      "company": "-",
+      "notes": "Table Paix",
+      "id": "sec_1762209804227_efsisoibc",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "-",
+      "lastName": "Kwemo",
+      "email": "-",
+      "phone": "676315703",
+      "company": "-",
+      "notes": "Table Paix",
+      "id": "sec_1762209804227_d79lhd5g8",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Verine",
+      "lastName": "Tchitchio  ",
+      "email": "-",
+      "phone": "658714751",
+      "company": "-",
+      "notes": "Table Paix",
+      "id": "sec_1762209804227_zngiqkhud",
+      "updatedAt": "2025-11-04T00:53:36.855Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": true,
+      "status": "pending",
+      "scannedAt": "2025-11-04T00:53:36.855Z"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Pierre",
+      "lastName": "Djopmegne ",
+      "email": "-",
+      "phone": "653236870",
+      "company": "-",
+      "notes": "Table Paix",
+      "id": "sec_1762209804227_qgoseulfr",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Arthur",
+      "lastName": "Mbamegne ",
+      "email": "-",
+      "phone": "693437801",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "id": "sec_1762209804227_u575z851w",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Dorice",
+      "lastName": "Wamegne ",
+      "email": "-",
+      "phone": "651076330",
+      "company": "-",
+      "notes": "Table Bonheur",
+      "id": "sec_1762209804227_u8we9t3s1",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Pharel",
+      "lastName": "Joufang ",
+      "email": "-",
+      "phone": "659872512",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "id": "sec_1762209804227_fncofq9z8",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "-",
+      "lastName": "Chena",
+      "email": "-",
+      "phone": "658060712",
+      "company": "-",
+      "notes": "Table Amitié",
+      "id": "sec_1762209804227_qikck1joy",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Christelle",
+      "lastName": "Ngassi",
+      "email": "-",
+      "phone": "683015321",
+      "company": "-",
+      "notes": "Table Lumière",
+      "id": "sec_1762209804227_yeswvlgek",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Berry",
+      "lastName": "Kuete ",
+      "email": "-",
+      "phone": "697654460",
+      "company": "-",
+      "notes": "Table Lumière",
+      "id": "sec_1762209804227_1fi0m54d8",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Raissa",
+      "lastName": "Teka ",
+      "email": "-",
+      "phone": "656409242",
+      "company": "-",
+      "notes": "Table Lumière",
+      "id": "sec_1762209804227_ic5g9t70j",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "-",
+      "lastName": "Alain",
+      "email": "-",
+      "phone": "679459703",
+      "company": "-",
+      "notes": "Table Lumière",
+      "id": "sec_1762209804227_s9rhob5c8",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Cyrille",
+      "lastName": "Lionel ",
+      "email": "-",
+      "phone": "697199347",
+      "company": "-",
+      "notes": "Table Lumiere ",
+      "id": "sec_1762209804227_pdg2s7hon",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Seujip",
+      "lastName": "Octavine ",
+      "email": "-",
+      "phone": "680299587",
+      "company": "-",
+      "notes": "Table Paix",
+      "id": "sec_1762209804227_mqd2hya1f",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "-",
+      "lastName": "Divin",
+      "email": "-",
+      "phone": "680299587",
+      "company": "-",
+      "notes": "Table Bien-etre",
+      "id": "sec_1762209804227_umnbeyusb",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "-",
+      "lastName": "Séraphins",
+      "email": "-",
+      "phone": "696810396",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "id": "sec_1762209804227_c0ppdvji8",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "-",
+      "lastName": "Romaric",
+      "email": "-",
+      "phone": "696810396",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "id": "sec_1762209804227_fyukxxypb",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Daïna",
+      "lastName": "Kenne ",
+      "email": "-",
+      "phone": "693231265",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "id": "sec_1762209804227_z73m6x1en",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Guiline",
+      "lastName": "Bekolo ",
+      "email": "-",
+      "phone": "672458129",
+      "company": "-",
+      "notes": "Table Lumiere ",
+      "id": "sec_1762209804227_6v7vcga0x",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Eloge",
+      "lastName": "Koumetio ",
+      "email": "-",
+      "phone": "654101622",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "id": "sec_1762209804227_5zgpolro3",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "-",
+      "lastName": "Patrick",
+      "email": "-",
+      "phone": "653236870",
+      "company": "-",
+      "notes": "Table Bonté",
+      "id": "sec_1762209804227_tr0rxugca",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Fogang",
+      "lastName": "Georges ",
+      "email": "-",
+      "phone": "682096325",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "id": "sec_1762209804227_2keierb0x",
+      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "scanned": false,
+      "status": "pending"
+    }
+  ],
+  "qrCodes": [
+    {
+      "guestId": "sec_1762209804227_mquxez5su",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_mquxez5su\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210664124_m1u3f0oss",
+      "updatedAt": "2025-11-04T00:47:51.938Z",
+      "createdAt": "2025-11-03T22:57:44.124Z"
+    },
+    {
+      "guestId": "sec_1762209804227_bp8bfckcl",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_bp8bfckcl\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210664226_l58x7qm00",
+      "updatedAt": "2025-11-04T00:47:52.042Z",
+      "createdAt": "2025-11-03T22:57:44.226Z"
+    },
+    {
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_rkafbq7b5\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210664348_4kjm62pua",
+      "updatedAt": "2025-11-04T08:22:34.000Z",
+      "createdAt": "2025-11-03T22:57:44.348Z"
+    },
+    {
+      "guestId": "sec_1762209804227_y017u7nrb",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_y017u7nrb\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210664454_wcp8kcmlm",
+      "updatedAt": "2025-11-04T00:47:52.240Z",
+      "createdAt": "2025-11-03T22:57:44.454Z"
+    },
+    {
+      "guestId": "sec_1762209804227_z1r45rk68",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_z1r45rk68\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210664549_isnj0bjt6",
+      "updatedAt": "2025-11-04T00:47:52.344Z",
+      "createdAt": "2025-11-03T22:57:44.549Z"
+    },
+    {
+      "guestId": "sec_1762209804227_v34eo6zge",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_v34eo6zge\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210664646_azvyv1a2x",
+      "updatedAt": "2025-11-04T00:47:52.457Z",
+      "createdAt": "2025-11-03T22:57:44.646Z"
+    },
+    {
+      "guestId": "sec_1762209804227_073wpgu10",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_073wpgu10\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210664743_5b17sr8o4",
+      "updatedAt": "2025-11-04T00:47:52.552Z",
+      "createdAt": "2025-11-03T22:57:44.743Z"
+    },
+    {
+      "guestId": "sec_1762209804227_1fzi6enfw",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_1fzi6enfw\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210664837_vbxpgu4r6",
+      "updatedAt": "2025-11-04T00:47:52.657Z",
+      "createdAt": "2025-11-03T22:57:44.837Z"
+    },
+    {
+      "guestId": "sec_1762209804227_dkfrn8v2z",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_dkfrn8v2z\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210664932_o61dy5dw7",
+      "updatedAt": "2025-11-04T00:47:52.806Z",
+      "createdAt": "2025-11-03T22:57:44.932Z"
+    },
+    {
+      "guestId": "sec_1762209804227_efsisoibc",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_efsisoibc\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665036_g1b6g1034",
+      "updatedAt": "2025-11-04T00:47:52.928Z",
+      "createdAt": "2025-11-03T22:57:45.036Z"
+    },
+    {
+      "guestId": "sec_1762209804227_d79lhd5g8",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_d79lhd5g8\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665126_pm7f1xuge",
+      "updatedAt": "2025-11-04T00:47:53.042Z",
+      "createdAt": "2025-11-03T22:57:45.126Z"
+    },
+    {
+      "guestId": "sec_1762209804227_zngiqkhud",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_zngiqkhud\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665226_55c1xoom0",
+      "updatedAt": "2025-11-04T00:47:53.147Z",
+      "createdAt": "2025-11-03T22:57:45.226Z"
+    },
+    {
+      "guestId": "sec_1762209804227_qgoseulfr",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_qgoseulfr\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665318_gzqfpsbxc",
+      "updatedAt": "2025-11-04T00:47:53.257Z",
+      "createdAt": "2025-11-03T22:57:45.318Z"
+    },
+    {
+      "guestId": "sec_1762209804227_u575z851w",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_u575z851w\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665425_5p5heiqik",
+      "updatedAt": "2025-11-04T00:47:53.371Z",
+      "createdAt": "2025-11-03T22:57:45.425Z"
+    },
+    {
+      "guestId": "sec_1762209804227_u8we9t3s1",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_u8we9t3s1\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665518_luttmjql3",
+      "updatedAt": "2025-11-04T00:47:53.477Z",
+      "createdAt": "2025-11-03T22:57:45.518Z"
+    },
+    {
+      "guestId": "sec_1762209804227_fncofq9z8",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_fncofq9z8\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665612_kid10zkfo",
+      "updatedAt": "2025-11-04T00:47:53.586Z",
+      "createdAt": "2025-11-03T22:57:45.612Z"
+    },
+    {
+      "guestId": "sec_1762209804227_qikck1joy",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_qikck1joy\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665707_e0hdb12hu",
+      "updatedAt": "2025-11-04T00:47:53.693Z",
+      "createdAt": "2025-11-03T22:57:45.707Z"
+    },
+    {
+      "guestId": "sec_1762209804227_yeswvlgek",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_yeswvlgek\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665800_3iwrinvdj",
+      "updatedAt": "2025-11-04T00:47:53.801Z",
+      "createdAt": "2025-11-03T22:57:45.800Z"
+    },
+    {
+      "guestId": "sec_1762209804227_1fi0m54d8",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_1fi0m54d8\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210665916_ba3k2ul63",
+      "updatedAt": "2025-11-04T00:47:53.904Z",
+      "createdAt": "2025-11-03T22:57:45.916Z"
+    },
+    {
+      "guestId": "sec_1762209804227_ic5g9t70j",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_ic5g9t70j\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210666043_0z3dlsbgk",
+      "updatedAt": "2025-11-04T00:47:54.001Z",
+      "createdAt": "2025-11-03T22:57:46.043Z"
+    },
+    {
+      "guestId": "sec_1762209804227_s9rhob5c8",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_s9rhob5c8\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210666176_vykim7n6e",
+      "updatedAt": "2025-11-04T00:47:54.094Z",
+      "createdAt": "2025-11-03T22:57:46.176Z"
+    },
+    {
+      "guestId": "sec_1762209804227_pdg2s7hon",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_pdg2s7hon\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210666279_veqn9grr7",
+      "updatedAt": "2025-11-04T00:47:54.191Z",
+      "createdAt": "2025-11-03T22:57:46.279Z"
+    },
+    {
+      "guestId": "sec_1762209804227_mqd2hya1f",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_mqd2hya1f\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210666380_039krq10n",
+      "updatedAt": "2025-11-04T00:47:54.285Z",
+      "createdAt": "2025-11-03T22:57:46.380Z"
+    },
+    {
+      "guestId": "sec_1762209804227_umnbeyusb",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_umnbeyusb\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210666482_zht6l19gi",
+      "updatedAt": "2025-11-04T00:47:54.383Z",
+      "createdAt": "2025-11-03T22:57:46.482Z"
+    },
+    {
+      "guestId": "sec_1762209804227_c0ppdvji8",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_c0ppdvji8\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210666606_ytpptf0r6",
+      "updatedAt": "2025-11-04T00:47:54.477Z",
+      "createdAt": "2025-11-03T22:57:46.606Z"
+    },
+    {
+      "guestId": "sec_1762209804227_fyukxxypb",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_fyukxxypb\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210666736_s6y00ief9",
+      "updatedAt": "2025-11-04T00:47:54.575Z",
+      "createdAt": "2025-11-03T22:57:46.736Z"
+    },
+    {
+      "guestId": "sec_1762209804227_z73m6x1en",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_z73m6x1en\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210666872_s6lx540jm",
+      "updatedAt": "2025-11-04T00:47:54.675Z",
+      "createdAt": "2025-11-03T22:57:46.872Z"
+    },
+    {
+      "guestId": "sec_1762209804227_6v7vcga0x",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_6v7vcga0x\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210667005_c8jtj43j6",
+      "updatedAt": "2025-11-04T00:47:54.777Z",
+      "createdAt": "2025-11-03T22:57:47.005Z"
+    },
+    {
+      "guestId": "sec_1762209804227_5zgpolro3",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_5zgpolro3\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210667111_u4tqa3gcy",
+      "updatedAt": "2025-11-04T00:47:54.879Z",
+      "createdAt": "2025-11-03T22:57:47.111Z"
+    },
+    {
+      "guestId": "sec_1762209804227_tr0rxugca",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_tr0rxugca\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210667215_brv3g6jlx",
+      "updatedAt": "2025-11-04T00:47:54.977Z",
+      "createdAt": "2025-11-03T22:57:47.215Z"
+    },
+    {
+      "guestId": "sec_1762209804227_2keierb0x",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"sec_1762209804227_2keierb0x\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "sec_1762210667343_du9db8cdo",
+      "updatedAt": "2025-11-04T00:47:55.078Z",
+      "createdAt": "2025-11-03T22:57:47.343Z"
+    }
+  ],
+  "scans": [
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T12:32:05.211Z",
+      "id": "sec_1762259525211_ucbsn34gj"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T12:24:56.896Z",
+      "id": "sec_1762259096896_zv5rcy3rx"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T12:22:28.474Z",
+      "id": "sec_1762258948474_i0cgazw8l"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T09:45:36.267Z",
+      "id": "sec_1762249536267_8w32xqiko"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T09:43:40.433Z",
+      "id": "sec_1762249420433_kx0sz1ah2"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T09:36:21.688Z",
+      "id": "sec_1762248981688_v53ctlbpe"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T08:19:23.824Z",
+      "id": "sec_1762244363824_8etf01r8t"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:35.675Z",
+      "id": "sec_1762241315675_uzscmdqvs"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:35.077Z",
+      "id": "sec_1762241315077_l18j2uu3g"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:34.246Z",
+      "id": "sec_1762241314246_h68jjgksj"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:34.145Z",
+      "id": "sec_1762241314145_76ya97vgn"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:33.959Z",
+      "id": "sec_1762241313959_so9jzytdw"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:33.808Z",
+      "id": "sec_1762241313808_ak9s541gg"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:33.080Z",
+      "id": "sec_1762241313080_g4uuutu4a"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:32.370Z",
+      "id": "sec_1762241312370_q7nnzu4w3"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:32.212Z",
+      "id": "sec_1762241312212_4key59kf6"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:32.065Z",
+      "id": "sec_1762241312065_x7lvjph4m"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:31.878Z",
+      "id": "sec_1762241311878_8qmy1btxo"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:31.747Z",
+      "id": "sec_1762241311747_u6odcp9u3"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:31.498Z",
+      "id": "sec_1762241311498_5w2sjpbg8"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:30.986Z",
+      "id": "sec_1762241310986_hvpgmefvw"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:30.853Z",
+      "id": "sec_1762241310853_v9mgui2iu"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:30.667Z",
+      "id": "sec_1762241310667_bbn96oltj"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:30.477Z",
+      "id": "sec_1762241310477_qgneb7r1l"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:30.327Z",
+      "id": "sec_1762241310327_vptky44is"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:30.014Z",
+      "id": "sec_1762241310014_wjfioxavr"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:29.433Z",
+      "id": "sec_1762241309433_lkmxqd2ha"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:28.538Z",
+      "id": "sec_1762241308538_7dgdfuc5m"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:27.417Z",
+      "id": "sec_1762241307417_wz1no0jul"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:26.272Z",
+      "id": "sec_1762241306272_7yj1r3flf"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:25.326Z",
+      "id": "sec_1762241305326_34p5xece7"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:24.138Z",
+      "id": "sec_1762241304138_tjj6pvdm0"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:23.545Z",
+      "id": "sec_1762241303545_7p9lv3d9e"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:22.645Z",
+      "id": "sec_1762241302645_qr0632t04"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:21.734Z",
+      "id": "sec_1762241301734_56fgmcd63"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:20.842Z",
+      "id": "sec_1762241300842_a2zqw2u2j"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:19.795Z",
+      "id": "sec_1762241299795_q1d85k2qc"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:28:13.854Z",
+      "id": "sec_1762241293854_ps3rvnlj7"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T07:27:41.228Z",
+      "id": "sec_1762241261228_b4fkr668b"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_zngiqkhud",
+      "guestName": "Verine Tchitchio  ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T00:53:16.432Z",
+      "id": "sec_1762217596432_r4zl31iyh"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T00:49:50.343Z",
+      "id": "sec_1762217390343_sdbo6jfud"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T00:48:55.767Z",
+      "id": "sec_1762217335767_ew8i0zepu"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T00:48:54.708Z",
+      "id": "sec_1762217334708_s3huv58hk"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T00:48:51.312Z",
+      "id": "sec_1762217331312_3p8ng2kjl"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T00:44:24.434Z",
+      "id": "sec_1762217064434_dj89jhu2k"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "sec_1762209804227_rkafbq7b5",
+      "guestName": "Davy Vianney  Onomo Nga ",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2025-11-04T23:21:48.030Z",
+      "id": "sec_1762298508030_nl537gmo4"
+    }
+  ],
+  "settings": {
+    "theme": "light",
+    "language": "fr"
+  },
+  "meta": {
+    "updatedAt": "2025-11-04T23:21:48.250Z",
+    "version": "2.0",
+    "server": "SECURA-ULTRA-PRO"
+  }
+}

@@ -1,489 +1,1377 @@
 /**
- * SECURA - FileStorage Manager ULTRA-COMPLET
- * 
- * ✅ Détection automatique : /home/stive-junior/secura-qr/data/secura-data.json
- * ✅ Persistance infinie : jamais de re-demande
- * ✅ Création auto dossier/fichier
- * ✅ File System Access API (Chrome/Edge) + Fallback (Firefox/Safari)
- * ✅ SweetAlert2 notifications
- * ✅ Auto-reload + Watch modifications
- * ✅ Backup auto + Export CSV
- * ✅ Statistiques live
- * ✅ window.storage global
+ * ╔═══════════════════════════════════════════════════════════════╗
+ * ║        🛡️  SECURA STORAGE - ULTRA COMPLET V3.0  🛡️           ║
+ * ║                                                               ║
+ * ║  📡 Synchronisation bidirectionnelle avec API V3              ║
+ * ║  💾 CRUD complet côté client                                  ║
+ * ║  🔄 Auto-sync intelligent                                     ║
+ * ║  📊 Statistiques temps réel                                   ║
+ * ║  🚀 Performance optimisée                                     ║
+ * ║  ⚡ Opérations directes via API                               ║
+ * ╚═══════════════════════════════════════════════════════════════╝
  */
 
-class FileStorage {
+class SecuraStorage {
     constructor() {
-        this.filePath = '/data/secura-data.json';
-        this.fileHandle = null;
+        this.API_URL = 'http://localhost:3000/api';
+        this.SYNC_ENABLED = true;
+        this.SYNC_INTERVAL = 30000; // 30 secondes
+        this.AUTO_SYNC_ON_CHANGE = true; // Sync automatique après modif
+        this.USE_API_DIRECT = true; // Utiliser API directement (pas juste sync)
+        
+        this.syncTimer = null;
+        this.syncInProgress = false;
+        this.lastSyncTime = null;
+        this.syncErrors = [];
+        
         this.data = {
             events: [],
             guests: [],
             qrCodes: [],
             scans: [],
-            settings: { 
-                theme: 'light', 
+            settings: {
+                theme: 'light',
                 language: 'fr',
-                lastBackup: null,
-                version: '1.0.0'
+                syncEnabled: true,
+                apiUrl: this.API_URL,
+                useApiDirect: true
             }
         };
-        this.isWatching = false;
+        
         this.init();
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // 🚀 INITIALISATION
+    // ═══════════════════════════════════════════════════════════════
+
     async init() {
-        console.log('🔄 FileStorage initialisation...');
+        console.log('🔄 SECURA Storage V3.0 - Initialisation...');
         
-        // 1. Vérifier chemin fixe
-        if (await this.checkFileExists()) {
-            console.log('✅ Fichier détecté automatiquement');
-            await this.loadFromFixedPath();
-            await this.setupFileWatcher();
-            return;
-        }
-
-        // 2. Vérifier localStorage persistance
-        const persistedPath = localStorage.getItem('secura_file_path');
-        if (persistedPath && await this.checkFileExists(persistedPath)) {
-            console.log('✅ Fichier récupéré depuis localStorage');
-            this.filePath = persistedPath;
-            await this.loadFromFixedPath();
-            await this.setupFileWatcher();
-            return;
-        }
-
-        await this.saveToFile();
-        localStorage.setItem('secura_file_path', this.filePath);
+        // Charger données locales
+        this.loadFromLocalStorage();
         
-        showNotification('success', 'Stockage SECURA initialisé !');
+        // Vérifier connexion serveur
+        const serverOnline = await this.checkServerStatus();
+        
+        if (serverOnline && this.SYNC_ENABLED) {
+            console.log('✅ Serveur accessible - Mode API Direct');
+            await this.syncPull();
+            this.startAutoSync();
+        } else {
+            console.warn('⚠️ Serveur inaccessible - Mode Local uniquement');
+            this.SYNC_ENABLED = false;
+        }
+        
+        this.triggerDataUpdate();
+        console.log('✅ SECURA Storage prêt !');
     }
 
-    /**
-     * Vérifie si fichier existe
-     */
-    async checkFileExists(path = this.filePath) {
+    // ═══════════════════════════════════════════════════════════════
+    // 🌐 CONNEXION SERVEUR
+    // ═══════════════════════════════════════════════════════════════
+
+    async checkServerStatus() {
         try {
-            return new Promise((resolve) => {
-                fetch(path)
-                    .then(response => resolve(response.ok))
-                    .catch(() => resolve(false));
+            const response = await fetch(`${this.API_URL.replace('/api', '')}/health`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
             });
-        } catch {
-            return false;
-        }
-    }
-
-    /**
-     * Charge depuis le chemin fixe
-     */
-    async loadFromFixedPath() {
-        try {
-            const response = await fetch(this.filePath);
-            if (!response.ok) throw new Error('Fichier non trouvé');
-            
-            const text = await response.text();
-            const parsed = JSON.parse(text || '{}');
-
-            this.data = {
-                events: Array.isArray(parsed.events) ? parsed.events : [],
-                guests: Array.isArray(parsed.guests) ? parsed.guests : [],
-                qrCodes: Array.isArray(parsed.qrCodes) ? parsed.qrCodes : [],
-                scans: Array.isArray(parsed.scans) ? parsed.scans : [],
-                settings: { 
-                    ...{ theme: 'light', language: 'fr' },
-                    ...parsed.settings 
-                }
-            };
-
-            localStorage.setItem('secura_file_path', this.filePath);
-            console.log('✅ Données chargées:', Object.keys(this.data).map(k => `${k}: ${this.data[k].length}`));
-            
-            
-            this.triggerDataUpdate();
-            return true;
+            return response.ok;
         } catch (err) {
-            console.error('❌ Erreur chargement:', err);
             return false;
         }
     }
 
-    // === DEMANDER À L'UTILISATEUR DE CHOISIR UN FICHIER SECURA ===
-async selectFile() {
-    try {
-        // --- 🧠 Cas moderne (Chrome, Edge...) : API File System Access ---
-        if ('showOpenFilePicker' in window) {
-            const [fileHandle] = await window.showOpenFilePicker({
-                types: [
-                    {
-                        description: 'Fichier de données SECURA',
-                        accept: { 'application/json': ['.json'] }
-                    }
-                ],
-                suggestedName: 'secura-data.json'
-            });
-
-            this.fileHandle = fileHandle;
-            localStorage.setItem('secura_file_selected', 'true');
-
-            await this.loadFromFile();
-            showNotification('success', 'Fichier SECURA chargé avec succès ✅');
-            return true;
-        }
-
-        // --- 🦊 Cas Firefox / Safari : pas de showOpenFilePicker ---
-        return new Promise((resolve) => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'application/json';
-            input.style.display = 'none';
-            document.body.appendChild(input);
-
-            input.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) {
-                    showNotification('warning', 'Aucun fichier sélectionné.');
-                    resolve(false);
-                    return;
-                }
-
-                try {
-                    const text = await file.text();
-                    const data = JSON.parse(text);
-                    await this.loadFromData(data);
-
-                    localStorage.setItem('secura_file_selected', 'true');
-                    showNotification('success', 'Fichier SECURA importé avec succès ✅');
-                    resolve(true);
-                } catch (err) {
-                    console.error('Erreur import JSON :', err);
-                    showNotification('error', 'Fichier invalide ou corrompu ❌');
-                    resolve(false);
-                } finally {
-                    document.body.removeChild(input);
-                }
-            });
-
-            input.click();
-        });
-
-    } catch (err) {
-        console.error("Erreur selectFile :", err);
-
-        if (err.name === 'AbortError') return false;
-        if (err.name === 'NotAllowedError') {
-            showNotification('error', 'Permission refusée. Autorisez l\'accès au fichier.');
-            return false;
-        }
-        if (err.name === 'SecurityError') {
-            showNotification('error', 'Erreur de sécurité : ouvrez l\'application en HTTPS ou via localhost.');
-            return false;
-        }
-
-        showNotification('error', `Erreur : ${err.message || 'Impossible d\'accéder au fichier'}`);
-        return false;
-    }
-}
-
-
-    /**
-     * Sauvegarde dans // Attendre que le storage ait fini son initialisation
-    window.addEventListener('secura:data-updated', (e) => {
-        console.log("📂 Données prêtes :", e.detail);
-        loadEvents(); // Charger ici quand les données sont prêtes
-    }); le fichier fixe
-     */
-    async saveToFile() {
+    async apiRequest(endpoint, options = {}) {
         try {
-            const response = await fetch(this.filePath, {
-                method: 'PUT',
-                headers: { 
+            const url = endpoint.startsWith('http') ? endpoint : `${this.API_URL}${endpoint}`;
+            console.log(url);
+            const response = await fetch(url, {
+                headers: {
                     'Content-Type': 'application/json',
-                    'X-Secura-Version': '2.0'
+                    ...options.headers
                 },
-                body: JSON.stringify({
-                    ...this.data,
-                    meta: {
-                        updatedAt: new Date().toISOString(),
-                        version: '2.0'
-                    }
-                }, null, 2)
+                ...options
             });
 
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
-            console.log('💾 Sauvegardé:', this.filePath);
-            this.triggerDataUpdate();
-            return true;
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            return result;
         } catch (err) {
-            console.error('❌ Erreur sauvegarde:', err);
-            showNotification('error', 'Échec sauvegarde. Vérifiez les permissions.');
-            return false;
+            console.error(`❌ API Error [${endpoint}]:`, err.message);
+            throw err;
         }
     }
 
-    /**
-     * Watch modifications fichier (File System Access API)
-     */
-    async setupFileWatcher() {
-        if (this.isWatching || !('showOpenFilePicker' in window)) return;
+    // ═══════════════════════════════════════════════════════════════
+    // 💾 LOCAL STORAGE
+    // ═══════════════════════════════════════════════════════════════
 
+    loadFromLocalStorage() {
         try {
-            const [handle] = await window.showOpenFilePicker({
-                types: [{ description: 'Secura JSON', accept: { 'application/json': ['.json'] } }]
-            });
-            this.fileHandle = handle;
-            this.isWatching = true;
-
-            // Watch changes
-            handle.createWritable().then(writable => {
-                writable.close();
-                this.watchFileChanges();
-            });
+            const stored = localStorage.getItem('secura_data');
+            if (stored) {
+                this.data = JSON.parse(stored);
+                console.log('✅ Données locales chargées:', {
+                    events: this.data.events?.length || 0,
+                    guests: this.data.guests?.length || 0,
+                    scans: this.data.scans?.length || 0
+                });
+            }
         } catch (err) {
-            console.warn('⚠️ File watcher non disponible:', err);
+            console.error('❌ Erreur chargement local:', err);
         }
     }
 
-    async watchFileChanges() {
-        if (!this.fileHandle) return;
+    saveToLocalStorage() {
+        try {
+            localStorage.setItem('secura_data', JSON.stringify(this.data));
+            console.log('💾 Sauvegarde locale OK');
+        } catch (err) {
+            console.error('❌ Erreur sauvegarde locale:', err);
+        }
+    }
 
-        const watcher = new FileSystemFileHandleWatcher(this.fileHandle);
-        watcher.onchange = async () => {
-            console.log('🔄 Fichier modifié externement');
-            await this.loadFromFixedPath();
+    clearLocalStorage() {
+        try {
+            localStorage.removeItem('secura_data');
+            console.log('🗑️ Données locales effacées');
+        } catch (err) {
+            console.error('❌ Erreur effacement:', err);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🔄 SYNCHRONISATION
+    // ═══════════════════════════════════════════════════════════════
+
+    async syncPull() {
+        if (!this.SYNC_ENABLED || this.syncInProgress) return false;
+        
+        this.syncInProgress = true;
+        console.log('🔄 Sync Pull...');
+        
+        try {
+            const result = this.apiRequest('/sync/pull');
+            
+            if (result.success) {
+                this.data = result.data;
+                this.saveToLocalStorage();
+                this.lastSyncTime = new Date().toISOString();
+                this.triggerDataUpdate();
+                
+                console.log('✅ Sync Pull réussie:', result.count);
+                return true;
+            }
+        } catch (err) {
+            console.warn('⚠️ Sync Pull impossible:', err.message);
+            this.syncErrors.push({ type: 'pull', time: new Date(), error: err.message });
+            return false;
+        } finally {
+            this.syncInProgress = false;
+        }
+    }
+
+    async syncPush() {
+        if (!this.SYNC_ENABLED || this.syncInProgress) return false;
+        
+        this.syncInProgress = true;
+        console.log('🔄 Sync Push...');
+        
+        try {
+            const result = this.apiRequest('/sync/push', {
+                method: 'POST',
+                body: JSON.stringify(this.data)
+            });
+            
+            if (result.success) {
+                this.lastSyncTime = new Date().toISOString();
+                console.log('✅ Sync Push réussie:', result.merged);
+                return true;
+            }
+        } catch (err) {
+            console.warn('⚠️ Sync Push impossible:', err.message);
+            this.syncErrors.push({ type: 'push', time: new Date(), error: err.message });
+            return false;
+        } finally {
+            this.syncInProgress = false;
+        }
+    }
+
+    async syncStatus() {
+        try {
+            const result = this.apiRequest('/sync/status');
+            return result.data;
+        } catch (err) {
+            return null;
+        }
+    }
+
+    startAutoSync() {
+        if (this.syncTimer) clearInterval(this.syncTimer);
+        
+        this.syncTimer = setInterval(async () => {
+            console.log('⏰ Auto-sync déclenché');
+            await this.syncPull();
+        }, this.SYNC_INTERVAL);
+        
+        console.log(`✅ Auto-sync activé (${this.SYNC_INTERVAL / 1000}s)`);
+    }
+
+    stopAutoSync() {
+        if (this.syncTimer) {
+            clearInterval(this.syncTimer);
+            this.syncTimer = null;
+            console.log('⏹️ Auto-sync arrêté');
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🎫 CRUD ÉVÉNEMENTS
+    // ═══════════════════════════════════════════════════════════════
+
+     getAllEvents(filters = {}) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const params = new URLSearchParams(filters).toString();
+                const result = this.apiRequest(`/events${params ? '?' + params : ''}`);
+                if (result.success) {
+                    this.data.events = result.data;
+                    this.saveToLocalStorage();
+
+
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API getAllEvents échec, mode local');
+            }
+        }
+        return this.data.events;
+    }
+
+    getEventById(id) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/events/${id}`);
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getEventById échec, mode local');
+            }
+        }
+        return this.data.events.find(e => e.id === id) || null;
+    }
+
+    async createEvent(event) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/events', {
+                    method: 'POST',
+                    body: JSON.stringify(event)
+                });
+                
+                if (result.success) {
+                    await this.syncPull(); // Refresh data
+                    console.log('✅ Événement créé via API:', result.data.name);
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API createEvent échec, mode local');
+            }
+        }
+        
+        // Fallback local
+        return this.saveEvent(event);
+    }
+
+    async updateEvent(id, updates) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/events/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(updates)
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    console.log('✅ Événement mis à jour via API');
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API updateEvent échec, mode local');
+            }
+        }
+        
+        // Fallback local
+        const event = this.data.events.find(e => e.id === id);
+        if (event) {
+            Object.assign(event, updates, { updatedAt: new Date().toISOString() });
+            this.saveToLocalStorage();
+            if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+            this.triggerDataUpdate();
+            return event;
+        }
+        return null;
+    }
+
+    async patchEvent(id, partialUpdates) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/events/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(partialUpdates)
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API patchEvent échec, mode local');
+            }
+        }
+        return this.updateEvent(id, partialUpdates);
+    }
+
+    async deleteEvent(id) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/events/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    console.log('✅ Événement supprimé via API');
+                    return true;
+                }
+            } catch (err) {
+                console.warn('⚠️ API deleteEvent échec, mode local');
+            }
+        }
+        
+        // Fallback local
+        this.data.events = this.data.events.filter(e => e.id !== id);
+        const guestIds = this.data.guests.filter(g => g.eventId === id).map(g => g.id);
+        this.data.guests = this.data.guests.filter(g => g.eventId !== id);
+        this.data.qrCodes = this.data.qrCodes.filter(q => !guestIds.includes(q.guestId));
+        this.data.scans = this.data.scans.filter(s => s.eventId !== id);
+        
+        this.saveToLocalStorage();
+        if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+        this.triggerDataUpdate();
+        return true;
+    }
+
+    async getEventStatistics(id) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/events/${id}/statistics`);
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getEventStatistics échec');
+            }
+        }
+        
+        // Calcul local
+        const guests = this.data.guests.filter(g => g.eventId === id);
+        const scans = this.data.scans.filter(s => s.eventId === id);
+        
+        return {
+            totalGuests: guests.length,
+            scannedGuests: guests.filter(g => g.scanned).length,
+            pendingGuests: guests.filter(g => !g.scanned).length,
+            totalScans: scans.length,
+            scanRate: guests.length > 0 ? Math.round((guests.filter(g => g.scanned).length / guests.length) * 100) : 0
         };
     }
 
-    /**
-     * Trigger update pour observers
-     */
-    triggerDataUpdate() {
-        window.dispatchEvent(new CustomEvent('secura:data-updated', { 
-            detail: this.getStatistics() 
-        }));
-    }
-
-    // === GÉNÉRER ID UNIQUE ===
-    generateId() {
-        return `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    }
-
-    // ========================================
-    //              ÉVÉNEMENTS
-    // ========================================
-    getAllEvents() { return this.data.events; }
-    getEventById(id) { return this.data.events.find(e => e.id === id) || null; }
-
+    // Local fallback (mode hors-ligne)
     saveEvent(event) {
         const now = new Date().toISOString();
-        const i = this.data.events.findIndex(e => e.id === event.id);
-
-        if (i !== -1) {
-            this.data.events[i] = { ...this.data.events[i], ...event, updatedAt: now };
+        const index = this.data.events.findIndex(e => e.id === event.id);
+        
+        if (index !== -1) {
+            this.data.events[index] = { ...this.data.events[index], ...event, updatedAt: now };
         } else {
-            event.id = this.generateId();
+            event.id = this.generateId('evt');
             event.createdAt = event.updatedAt = now;
+            event.active = event.active !== false;
             this.data.events.unshift(event);
         }
-        this.saveToFile();
+        
+        this.saveToLocalStorage();
+        if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+        this.triggerDataUpdate();
         return event;
     }
 
-    deleteEvent(id) {
-    this.data.events = this.data.events.filter(e => e.id !== id);
+    // ═══════════════════════════════════════════════════════════════
+    // 👥 CRUD INVITÉS
+    // ═══════════════════════════════════════════════════════════════
 
-    const guestIds = this.data.guests.filter(g => g.eventId === id).map(g => g.id);
-    this.data.guests = this.data.guests.filter(g => g.eventId !== id);
+    getAllGuests(filters = {}) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const params = new URLSearchParams(filters).toString();
+                const result = this.apiRequest(`/guests${params ? '?' + params : ''}`);
+                if (result.success) {
+                    this.data.guests = result.data;
+                    this.saveToLocalStorage();
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API getAllGuests échec');
+            }
+        }
+        
+        let guests = this.data.guests;
+        if (filters.eventId) guests = guests.filter(g => g.eventId === filters.eventId);
+        if (filters.scanned !== undefined) guests = guests.filter(g => g.scanned === (filters.scanned === 'true'));
+        return guests;
+    }
 
-    this.data.qrCodes = this.data.qrCodes.filter(q => !guestIds.includes(q.guestId));
+    getGuestById(id) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/guests/${id}`);
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getGuestById échec');
+            }
+        }
+        return this.data.guests.find(g => g.id === id) || null;
+    }
 
-    this.data.scans = this.data.scans.filter(s => !guestIds.includes(s.guestId));
+    getGuestsByEventId(eventId) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/events/${eventId}/guests`);
+                if (result.success) return result.data.guests;
+            } catch (err) {
+                console.warn('⚠️ API getGuestsByEventId échec');
+            }
+        }
+        return this.data.guests.filter(g => g.eventId === eventId);
+    }
 
-    this.saveToFile();
-    this.triggerDataUpdate();
-    return true;
-}
+    async createGuest(guest) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/guests', {
+                    method: 'POST',
+                    body: JSON.stringify(guest)
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    console.log('✅ Invité créé via API:', result.data.firstName);
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API createGuest échec');
+            }
+        }
+        
+        return this.saveGuest(guest);
+    }
 
-    // ========================================
-    //                INVITÉS
-    // ========================================
-    getAllGuests() { return this.data.guests; }
-    getGuestsByEventId(id) { return this.data.guests.filter(g => g.eventId === id); }
-    getGuestById(id) { return this.data.guests.find(g => g.id === id) || null; }
+    async createMultipleGuests(guests) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/guests/bulk', {
+                    method: 'POST',
+                    body: JSON.stringify({ guests })
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    console.log('✅ Invités créés en masse via API:', result.count);
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API createMultipleGuests échec');
+            }
+        }
+        
+        return this.saveMultipleGuests(guests);
+    }
 
+    async updateGuest(id, updates) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/guests/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(updates)
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API updateGuest échec');
+            }
+        }
+        
+        const guest = this.data.guests.find(g => g.id === id);
+        if (guest) {
+            Object.assign(guest, updates, { updatedAt: new Date().toISOString() });
+            this.saveToLocalStorage();
+            if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+            this.triggerDataUpdate();
+            return guest;
+        }
+        return null;
+    }
+
+    async patchGuest(id, partialUpdates) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/guests/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(partialUpdates)
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API patchGuest échec');
+            }
+        }
+        return this.updateGuest(id, partialUpdates);
+    }
+
+    async deleteGuest(id) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/guests/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    console.log('✅ Invité supprimé via API');
+                    return true;
+                }
+            } catch (err) {
+                console.warn('⚠️ API deleteGuest échec');
+            }
+        }
+        
+        this.data.guests = this.data.guests.filter(g => g.id !== id);
+        this.data.qrCodes = this.data.qrCodes.filter(q => q.guestId !== id);
+        this.data.scans = this.data.scans.filter(s => s.guestId !== id);
+        
+        this.saveToLocalStorage();
+        if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+        this.triggerDataUpdate();
+        return true;
+    }
+
+    async deleteMultipleGuests(ids) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/guests/bulk', {
+                    method: 'DELETE',
+                    body: JSON.stringify({ ids })
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    console.log('✅ Invités supprimés en masse via API:', result.deleted);
+                    return true;
+                }
+            } catch (err) {
+                console.warn('⚠️ API deleteMultipleGuests échec');
+            }
+        }
+        
+        this.data.guests = this.data.guests.filter(g => !ids.includes(g.id));
+        this.data.qrCodes = this.data.qrCodes.filter(q => !ids.includes(q.guestId));
+        this.data.scans = this.data.scans.filter(s => !ids.includes(s.guestId));
+        
+        this.saveToLocalStorage();
+        if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+        this.triggerDataUpdate();
+        return true;
+    }
+
+    async exportGuestsToCSV(eventId = null) {
+        try {
+            const params = eventId ? `?eventId=${eventId}` : '';
+            const response = await fetch(`${this.API_URL}/guests/export/csv${params}`);
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `secura-guests-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                console.log('✅ CSV exporté');
+                return true;
+            }
+        } catch (err) {
+            console.error('❌ Export CSV échec:', err);
+            return false;
+        }
+    }
+
+    // Fallback local
     saveGuest(guest) {
         const now = new Date().toISOString();
-        const i = this.data.guests.findIndex(g => g.id === guest.id);
-
-        if (i !== -1) {
-            this.data.guests[i] = { ...this.data.guests[i], ...guest, updatedAt: now };
+        const index = this.data.guests.findIndex(g => g.id === guest.id);
+        
+        if (index !== -1) {
+            this.data.guests[index] = { ...this.data.guests[index], ...guest, updatedAt: now };
         } else {
-            guest.id = this.generateId();
+            guest.id = this.generateId('gst');
             guest.createdAt = guest.updatedAt = now;
             guest.scanned = false;
             guest.status = guest.status || 'pending';
             this.data.guests.push(guest);
         }
-        this.saveToFile();
+        
+        this.saveToLocalStorage();
+        if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+        this.triggerDataUpdate();
         return guest;
     }
 
     saveMultipleGuests(arr) {
         const now = new Date().toISOString();
         arr.forEach(g => {
-            g.id = this.generateId();
+            g.id = this.generateId('gst');
             g.createdAt = g.updatedAt = now;
             g.scanned = false;
             g.status = g.status || 'pending';
             this.data.guests.push(g);
         });
-        this.saveToFile();
+        
+        this.saveToLocalStorage();
+        if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+        this.triggerDataUpdate();
         return arr;
     }
 
-        deleteGuest(id) {
-            this.data.guests = this.data.guests.filter(g => g.id !== id);
+    // ═══════════════════════════════════════════════════════════════
+    // 📱 QR CODES
+    // ═══════════════════════════════════════════════════════════════
 
-            this.data.qrCodes = this.data.qrCodes.filter(q => q.guestId !== id);
-
-            this.data.scans = this.data.scans.filter(s => s.guestId !== id);
-
-            this.saveToFile();
-            this.triggerDataUpdate();
-            return true;
+    async getAllQRCodes(filters = {}) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const params = new URLSearchParams(filters).toString();
+                const result = this.apiRequest(`/qrcodes${params ? '?' + params : ''}`);
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getAllQRCodes échec');
+            }
         }
+        return this.data.qrCodes;
+    }
 
-   
-deleteMultipleGuests(ids) {
-    this.data.guests = this.data.guests.filter(g => !ids.includes(g.id));
+    getQRCodeByGuestId(guestId) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/qrcodes/guest/${guestId}`);
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getQRCodeByGuestId échec');
+            }
+        }
+        return this.data.qrCodes.find(q => q.guestId === guestId) || null;
+    }
 
-    this.data.qrCodes = this.data.qrCodes.filter(q => !ids.includes(q.guestId));
+    async generateQRCode(guestId, eventId) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/qrcodes/generate', {
+                    method: 'POST',
+                    body: JSON.stringify({ guestId, eventId })
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    console.log('✅ QR Code généré via API');
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API generateQRCode échec');
+            }
+        }
+        
+        // Fallback local
+        const guest = this.data.guests.find(g => g.id === guestId);
+        const event = this.data.events.find(e => e.id === eventId);
+        
+        if (!guest || !event) return null;
+        
+        const qrData = {
+            t: 'INV',
+            e: eventId,
+            g: guestId,
+            n: `${guest.firstName} ${guest.lastName}`,
+            d: new Date().toISOString()
+        };
+        
+        return this.saveQRCode({
+            guestId,
+            eventId,
+            data: qrData,
+            rawData: JSON.stringify(qrData)
+        });
+    }
 
-    this.data.scans = this.data.scans.filter(s => !ids.includes(s.guestId));
-
-    this.saveToFile();
-    this.triggerDataUpdate();
-    return true;
-}
-
-    // ========================================
-    //                QR CODES
-    // ========================================
-    getAllQRCodes() { return this.data.qrCodes; }
-    getQRCodeByGuestId(id) { return this.data.qrCodes.find(q => q.guestId === id) || null; }
+    async verifyQRCode(qrData) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/qrcodes/verify', {
+                    method: 'POST',
+                    body: JSON.stringify(qrData)
+                });
+                
+                if (result.success) {
+                    console.log('✅ QR vérifié via API');
+                    return result.data;
+                }
+            } catch (err) {
+                console.warn('⚠️ API verifyQRCode échec');
+            }
+        }
+        
+        // Vérification locale
+        const { t, e, g } = qrData;
+        if (t !== 'INV' || !e || !g) return { valid: false, error: 'Format invalide' };
+        
+        const guest = this.data.guests.find(x => x.id === g);
+        const event = this.data.events.find(x => x.id === e);
+        
+        if (!guest || !event) return { valid: false, error: 'Invité ou événement introuvable' };
+        
+        return {
+            valid: true,
+            guest: {
+                id: guest.id,
+                name: `${guest.firstName} ${guest.lastName}`,
+                email: guest.email,
+                scanned: guest.scanned,
+                scannedAt: guest.scannedAt
+            },
+            event: {
+                id: event.id,
+                name: event.name,
+                date: event.date,
+                location: event.location
+            }
+        };
+    }
 
     saveQRCode(qr) {
         const now = new Date().toISOString();
-        const i = this.data.qrCodes.findIndex(q => q.guestId === qr.guestId);
-
-        if (i !== -1) {
-            this.data.qrCodes[i] = { ...this.data.qrCodes[i], ...qr, updatedAt: now };
+        const index = this.data.qrCodes.findIndex(q => q.guestId === qr.guestId);
+        
+        if (index !== -1) {
+            this.data.qrCodes[index] = { ...this.data.qrCodes[index], ...qr, updatedAt: now };
         } else {
-            qr.id = this.generateId();
+            qr.id = this.generateId('qr');
             qr.createdAt = qr.updatedAt = now;
             this.data.qrCodes.push(qr);
         }
-        this.saveToFile();
+        
+        this.saveToLocalStorage();
+        if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
         return qr;
     }
 
-    // ========================================
-    //                 SCANS
-    // ========================================
-    
-getAllScans() {
-    return [...this.data.scans].sort((a, b) => new Date(a.scannedAt) - new Date(b.scannedAt));
-}
+    // ═══════════════════════════════════════════════════════════════
+    // 📷 SCANS
+    // ═══════════════════════════════════════════════════════════════
 
-getAllScansDesc() {
-    return [...this.data.scans].sort((a, b) => new Date(b.scannedAt) - new Date(a.scannedAt));
-}
+    async scanQRCode(qrData) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/qr/scan', {
+                    method: 'POST',
+                    body: JSON.stringify(qrData)
+                });
 
-deleteScansByGuest(guestId) {
-    this.data.scans = this.data.scans.filter(s => s.guestId !== guestId);
-    this.saveToFile();
-    this.triggerDataUpdate();
-    return true;
-}
-
-deleteScansByEvent(eventId) {
-    const guestIds = this.data.guests.filter(g => g.eventId === eventId).map(g => g.id);
-    this.data.scans = this.data.scans.filter(s => !guestIds.includes(s.guestId));
-    this.saveToFile();
-    this.triggerDataUpdate();
-    return true;
-}
-
-    saveScan(scan) {
-        scan.id = this.generateId();
-        scan.scannedAt = new Date().toISOString();
-        this.data.scans.unshift(scan);
-
-        const guest = this.getGuestById(scan.guestId);
-        if (guest) {
-            guest.scanned = true;
-            guest.scannedAt = scan.scannedAt;
+                if (result.success) {
+                    await this.syncPull();
+                    console.log('✅ Scan enregistré via API:', result.data.scan.guestName);
+                    return result.data;
+                }
+            } catch (err) {
+                console.error('❌ Scan API échec:', err);
+                // Fallback local
+                return this.saveScanLocal(qrData.g, qrData.e);
+            }
         }
-        this.saveToFile();
-        return scan;
+        
+        return this.saveScanLocal(qrData.g, qrData.e);
+    }
+
+    getAllScans(filters = {}) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const params = new URLSearchParams(filters).toString();
+                const result = this.apiRequest(`/scans${params ? '?' + params : ''}`);
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getAllScans échec');
+            }
+        }
+        return [...this.data.scans].sort((a, b) => new Date(b.scannedAt) - new Date(a.scannedAt));
+    }
+
+    async getScanById(id) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/scans/${id}`);
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getScanById échec');
+            }
+        }
+        return this.data.scans.find(s => s.id === id) || null;
     }
 
     getTodayScans() {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/scan/today');
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getTodayScans échec');
+            }
+        }
+        
         const today = new Date().toDateString();
         return this.data.scans.filter(s => new Date(s.scannedAt).toDateString() === today);
     }
 
-    // ========================================
-    //               PARAMÈTRES
-    // ========================================
-    getSettings() { return this.data.settings; }
-    saveSetting(key, value) {
-        this.data.settings[key] = value;
-        this.saveToFile();
-        return this.data.settings;
+    getScansByEventId(eventId) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest(`/scans/event/${eventId}`);
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getScansByEventId échec');
+            }
+        }
+        
+        return this.data.scans.filter(s => s.eventId === eventId)
+            .sort((a, b) => new Date(b.scannedAt) - new Date(a.scannedAt));
     }
 
-    // ========================================
-    //              STATISTIQUES
-    // ========================================
+    saveScanLocal(guestId, eventId) {
+        const guest = this.getGuestById(guestId);
+        const event = this.getEventById(eventId);
+        
+        if (!guest || !event) return null;
+        
+        if (guest.scanned) {
+            console.warn('⚠️ Invité déjà scanné');
+            return { alreadyScanned: true, guest, event };
+        }
+        
+        const scan = {
+            id: this.generateId('scn'),
+            eventId,
+            guestId,
+            guestName: `${guest.firstName} ${guest.lastName}`,
+            eventName: event.name,
+            scannedAt: new Date().toISOString()
+        };
+        
+        this.data.scans.unshift(scan);
+        guest.scanned = true;
+        guest.scannedAt = scan.scannedAt;
+        
+        this.saveToLocalStorage();
+        if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+        this.triggerDataUpdate();
+        
+        console.log('✅ Scan enregistré localement:', scan.guestName);
+        return { scan, guest, event };
+    }
+
+    getAllScansDesc() {
+        return [...this.data.scans].sort((a, b) => new Date(b.scannedAt) - new Date(a.scannedAt));
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 📊 STATISTIQUES
+    // ═══════════════════════════════════════════════════════════════
+
     getStatistics() {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/statistics');
+                if (result.success) return result.data;
+            } catch (err) {
+                console.warn('⚠️ API getStatistics échec');
+            }
+        }
+        
+        // Calcul local
         const today = new Date().toDateString();
         return {
             totalEvents: this.data.events.length,
+            activeEvents: this.data.events.filter(e => e.active !== false).length,
             totalGuests: this.data.guests.length,
             totalQRCodes: this.data.qrCodes.length,
             totalScans: this.data.scans.length,
-            todayScans: this.getTodayScans().length,
+            todayScans: this.data.scans.filter(s => new Date(s.scannedAt).toDateString() === today).length,
             scannedGuests: this.data.guests.filter(g => g.scanned).length,
-            mode: this.fileHandle ? 'File System' : 'localStorage',
-            filePath: this.filePath,
-            lastUpdate: new Date().toISOString(),
-            version: '2.1.0'
+            pendingGuests: this.data.guests.filter(g => !g.scanned).length,
+            scanRate: this.data.guests.length > 0 
+                ? Math.round((this.data.guests.filter(g => g.scanned).length / this.data.guests.length) * 100) 
+                : 0,
+            syncEnabled: this.SYNC_ENABLED,
+            lastSync: this.lastSyncTime,
+            syncErrors: this.syncErrors.length,
+            lastUpdate: new Date().toISOString()
         };
     }
 
-    // ========================================
-    //              EXPORT CSV
-    // ========================================
+    getServerStatistics() {
+        try {
+            const result = this.apiRequest('/statistics');
+            if (result.success) return result.data;
+        } catch (err) {
+            console.error('❌ getServerStatistics échec:', err);
+        }
+        return null;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 💾 BACKUP & RESTORE
+    // ═══════════════════════════════════════════════════════════════
+
+    async createBackup() {
+        try {
+            window.location.href = `${this.API_URL}/backup`;
+            console.log('✅ Backup téléchargé');
+            return true;
+        } catch (err) {
+            console.error('❌ Backup échec:', err);
+            return false;
+        }
+    }
+
+    async restoreBackup(backupData) {
+        if (this.USE_API_DIRECT) {
+            try {
+                const result = this.apiRequest('/restore', {
+                    method: 'POST',
+                    body: JSON.stringify(backupData)
+                });
+                
+                if (result.success) {
+                    await this.syncPull();
+                    console.log('✅ Backup restauré via API:', result.restored);
+                    return true;
+                }
+            } catch (err) {
+                console.error('❌ Restore API échec:', err);
+            }
+        }
+        
+        // Restore local
+        this.data = backupData;
+        this.saveToLocalStorage();
+        this.triggerDataUpdate();
+        console.log('✅ Backup restauré localement');
+        return true;
+    }
+
+    async listBackups() {
+        try {
+            const result = this.apiRequest('/backups');
+            if (result.success) return result.data;
+        } catch (err) {
+            console.error('❌ listBackups échec:', err);
+        }
+        return [];
+    }
+
+    exportLocalData() {
+        const json = JSON.stringify(this.data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `secura-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        console.log('✅ Données exportées localement');
+    }
+
+    async importLocalData(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    this.data = imported;
+                    this.saveToLocalStorage();
+                    if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
+                    this.triggerDataUpdate();
+                    console.log('✅ Données importées');
+                    resolve(true);
+                } catch (err) {
+                    console.error('❌ Import échec:', err);
+                    reject(err);
+                }
+            };
+            reader.readAsText(file);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🔧 UTILITAIRES
+    // ═══════════════════════════════════════════════════════════════
+
+    generateId(prefix = 'sec') {
+        return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    triggerDataUpdate() {
+        window.dispatchEvent(new CustomEvent('secura:data-updated', {
+            detail: this.getStatistics()
+        }));
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🎨 PARAMÈTRES & CONFIGURATION
+    // ═══════════════════════════════════════════════════════════════
+
+    getSettings() {
+        return this.data.settings;
+    }
+
+    updateSettings(updates) {
+        this.data.settings = { ...this.data.settings, ...updates };
+        this.saveToLocalStorage();
+        
+        // Appliquer les changements
+        if (updates.apiUrl) this.API_URL = updates.apiUrl;
+        if (updates.syncEnabled !== undefined) this.SYNC_ENABLED = updates.syncEnabled;
+        if (updates.useApiDirect !== undefined) this.USE_API_DIRECT = updates.useApiDirect;
+        
+        console.log('✅ Paramètres mis à jour:', updates);
+        return this.data.settings;
+    }
+
+    toggleSync() {
+        this.SYNC_ENABLED = !this.SYNC_ENABLED;
+        
+        if (this.SYNC_ENABLED) {
+            this.startAutoSync();
+            console.log('✅ Sync activée');
+        } else {
+            this.stopAutoSync();
+            console.log('⏹️ Sync désactivée');
+        }
+        
+        return this.SYNC_ENABLED;
+    }
+
+    toggleApiDirect() {
+        this.USE_API_DIRECT = !this.USE_API_DIRECT;
+        console.log(this.USE_API_DIRECT ? '✅ Mode API Direct activé' : '⏹️ Mode Local activé');
+        return this.USE_API_DIRECT;
+    }
+
+    async resetAllData() {
+        const confirm = window.confirm('⚠️ ATTENTION : Êtes-vous sûr de vouloir effacer TOUTES les données ?');
+        
+        if (!confirm) return false;
+        
+        this.data = {
+            events: [],
+            guests: [],
+            qrCodes: [],
+            scans: [],
+            settings: this.data.settings
+        };
+        
+        this.clearLocalStorage();
+        this.saveToLocalStorage();
+        
+        if (this.AUTO_SYNC_ON_CHANGE) {
+            await this.syncPush();
+        }
+        
+        this.triggerDataUpdate();
+        console.log('🗑️ TOUTES les données ont été effacées');
+        return true;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 📈 MÉTRIQUES & MONITORING
+    // ═══════════════════════════════════════════════════════════════
+
+    getSyncStatus() {
+        return {
+            enabled: this.SYNC_ENABLED,
+            useApiDirect: this.USE_API_DIRECT,
+            inProgress: this.syncInProgress,
+            lastSync: this.lastSyncTime,
+            interval: this.SYNC_INTERVAL,
+            autoSyncOnChange: this.AUTO_SYNC_ON_CHANGE,
+            errors: this.syncErrors,
+            errorCount: this.syncErrors.length
+        };
+    }
+
+    clearSyncErrors() {
+        this.syncErrors = [];
+        console.log('🧹 Erreurs de sync effacées');
+    }
+
+    async testConnection() {
+        console.log('🔍 Test de connexion...');
+        
+        try {
+            const start = Date.now();
+            const online = await this.checkServerStatus();
+            const duration = Date.now() - start;
+            
+            if (online) {
+                console.log(`✅ Serveur accessible (${duration}ms)`);
+                return { online: true, duration, apiUrl: this.API_URL };
+            } else {
+                console.error('❌ Serveur inaccessible');
+                return { online: false, apiUrl: this.API_URL };
+            }
+        } catch (err) {
+            console.error('❌ Test connexion échec:', err);
+            return { online: false, error: err.message };
+        }
+    }
+
+    getDebugInfo() {
+        return {
+            version: '3.0',
+            apiUrl: this.API_URL,
+            syncEnabled: this.SYNC_ENABLED,
+            useApiDirect: this.USE_API_DIRECT,
+            autoSyncOnChange: this.AUTO_SYNC_ON_CHANGE,
+            syncInterval: this.SYNC_INTERVAL,
+            lastSync: this.lastSyncTime,
+            syncInProgress: this.syncInProgress,
+            syncErrors: this.syncErrors.length,
+            dataStats: {
+                events: this.data.events.length,
+                guests: this.data.guests.length,
+                qrCodes: this.data.qrCodes.length,
+                scans: this.data.scans.length
+            },
+            localStorage: {
+                used: (JSON.stringify(this.data).length / 1024).toFixed(2) + ' KB',
+                available: localStorage ? 'Oui' : 'Non'
+            }
+        };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🔍 RECHERCHE & FILTRES AVANCÉS
+    // ═══════════════════════════════════════════════════════════════
+
+    searchGuests(query) {
+        if (!query || query.trim().length < 2) return this.data.guests;
+        
+        const term = query.toLowerCase().trim();
+        return this.data.guests.filter(g =>
+            g.firstName?.toLowerCase().includes(term) ||
+            g.lastName?.toLowerCase().includes(term) ||
+            g.email?.toLowerCase().includes(term) ||
+            g.phone?.includes(term) ||
+            g.company?.toLowerCase().includes(term)
+        );
+    }
+
+    searchEvents(query) {
+        if (!query || query.trim().length < 2) return this.data.events;
+        
+        const term = query.toLowerCase().trim();
+        return this.data.events.filter(e =>
+            e.name?.toLowerCase().includes(term) ||
+            e.location?.toLowerCase().includes(term) ||
+            e.description?.toLowerCase().includes(term)
+        );
+    }
+
+    filterGuestsByStatus(status) {
+        return this.data.guests.filter(g => g.status === status);
+    }
+
+    filterGuestsByScanned(scanned = true) {
+        return this.data.guests.filter(g => g.scanned === scanned);
+    }
+
+    getActiveEvents() {
+        return this.data.events.filter(e => e.active !== false);
+    }
+
+    getPastEvents() {
+        const now = new Date();
+        return this.data.events.filter(e => new Date(e.date) < now)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    getUpcomingEvents() {
+        const now = new Date();
+        return this.data.events.filter(e => new Date(e.date) >= now)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 📊 RAPPORTS & ANALYTICS
+    // ═══════════════════════════════════════════════════════════════
+
+    getEventReport(eventId) {
+        const event = this.data.events.find(e => e.id === eventId);
+        if (!event) return null;
+        
+        const guests = this.data.guests.filter(g => g.eventId === eventId);
+        const scans = this.data.scans.filter(s => s.eventId === eventId);
+        
+        const report = {
+            event: {
+                id: event.id,
+                name: event.name,
+                date: event.date,
+                location: event.location
+            },
+            guests: {
+                total: guests.length,
+                scanned: guests.filter(g => g.scanned).length,
+                pending: guests.filter(g => !g.scanned).length,
+                byStatus: {
+                    pending: guests.filter(g => g.status === 'pending').length,
+                    confirmed: guests.filter(g => g.status === 'confirmed').length,
+                    cancelled: guests.filter(g => g.status === 'cancelled').length
+                }
+            },
+            scans: {
+                total: scans.length,
+                today: scans.filter(s => new Date(s.scannedAt).toDateString() === new Date().toDateString()).length,
+                lastScan: scans.length > 0 ? scans[0].scannedAt : null
+            },
+            performance: {
+                scanRate: guests.length > 0 ? Math.round((guests.filter(g => g.scanned).length / guests.length) * 100) : 0,
+                completionRate: guests.length > 0 ? Math.round((guests.filter(g => g.scanned).length / guests.length) * 100) : 0
+            },
+            timeline: this.getEventTimeline(eventId)
+        };
+        
+        return report;
+    }
+
+    getEventTimeline(eventId) {
+        const scans = this.data.scans
+            .filter(s => s.eventId === eventId)
+            .sort((a, b) => new Date(a.scannedAt) - new Date(b.scannedAt));
+        
+        if (scans.length === 0) return [];
+        
+        // Grouper par heure
+        const timeline = {};
+        scans.forEach(scan => {
+            const hour = new Date(scan.scannedAt).getHours();
+            timeline[hour] = (timeline[hour] || 0) + 1;
+        });
+        
+        return Object.entries(timeline).map(([hour, count]) => ({
+            hour: `${hour}h`,
+            scans: count
+        }));
+    }
+
+    getGlobalReport() {
+        const stats = this.getStatistics();
+        
+        return {
+            overview: stats,
+            events: {
+                total: this.data.events.length,
+                active: this.getActiveEvents().length,
+                upcoming: this.getUpcomingEvents().length,
+                past: this.getPastEvents().length
+            },
+            guests: {
+                total: this.data.guests.length,
+                scanned: stats.scannedGuests,
+                pending: stats.pendingGuests,
+                scanRate: stats.scanRate
+            },
+            performance: {
+                avgGuestsPerEvent: this.data.events.length > 0 
+                    ? Math.round(this.data.guests.length / this.data.events.length) 
+                    : 0,
+                avgScansPerEvent: this.data.events.length > 0 
+                    ? Math.round(this.data.scans.length / this.data.events.length) 
+                    : 0
+            },
+            topEvents: this.getTopEvents(5)
+        };
+    }
+
+    getTopEvents(limit = 5) {
+        return this.data.events
+            .map(event => {
+                const guests = this.data.guests.filter(g => g.eventId === event.id);
+                const scans = this.data.scans.filter(s => s.eventId === event.id);
+                
+                return {
+                    id: event.id,
+                    name: event.name,
+                    date: event.date,
+                    guestCount: guests.length,
+                    scanCount: scans.length,
+                    scanRate: guests.length > 0 
+                        ? Math.round((scans.length / guests.length) * 100) 
+                        : 0
+                };
+            })
+            .sort((a, b) => b.guestCount - a.guestCount)
+            .slice(0, limit);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🎯 MÉTHODES UTILITAIRES SUPPLÉMENTAIRES
+    // ═══════════════════════════════════════════════════════════════
+
     exportToCSV(eventId) {
         const guests = this.getGuestsByEventId(eventId);
-        const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Entreprise', 'Notes', 'Statut', 'Scanné'];
+        const headers = ['ID', 'Prénom', 'Nom', 'Email', 'Téléphone', 'Entreprise', 'Notes', 'Statut', 'Scanné', 'Date Scan'];
         const rows = [headers.join(',')];
-
+        
         guests.forEach(g => {
             rows.push([
+                g.id,
                 g.firstName || '',
                 g.lastName || '',
                 g.email || '',
                 g.phone || '',
                 g.company || '',
-                g.notes || '',
-                g.status || 'pending',
-                g.scanned ? 'Oui' : 'Non'
-            ].map(this.escapeCSV).join(','));
+                (g.notes || '').replace(/,/g, ';'),
+                g.status || '',
+                g.scanned ? 'Oui' : 'Non',
+                g.scannedAt || ''
+            ].map(v => `"${v}"`).join(','));
         });
-
+        
         return rows.join('\n');
     }
 
@@ -494,168 +1382,54 @@ deleteScansByEvent(eventId) {
             : s;
     }
 
-    // ========================================
-    //           EXPORT / IMPORT JSON
-    // ========================================
-    exportToJSON(type = 'all') {
-        const exportData = {
-            version: '2.1.0',
-            exportedAt: new Date().toISOString(),
-            data: {}
-        };
+    // ═══════════════════════════════════════════════════════════════
+    // 📢 EVENT LISTENERS
+    // ═══════════════════════════════════════════════════════════════
 
-        if (type === 'all' || type === 'events') exportData.data.events = this.data.events;
-        if (type === 'all' || type === 'guests') exportData.data.guests = this.data.guests;
-        if (type === 'all' || type === 'qrcodes') exportData.data.qrCodes = this.data.qrCodes;
-        if (type === 'all' || type === 'scans') exportData.data.scans = this.data.scans;
-
-        return JSON.stringify(exportData, null, 2);
+    on(event, callback) {
+        window.addEventListener(`secura:${event}`, callback);
     }
 
-    importFromJSON(jsonString) {
-        try {
-            const parsed = JSON.parse(jsonString);
-            if (!parsed.data) return false;
-
-            if (parsed.data.events) this.data.events = parsed.data.events;
-            if (parsed.data.guests) this.data.guests = parsed.data.guests;
-            if (parsed.data.qrCodes) this.data.qrCodes = parsed.data.qrCodes;
-            if (parsed.data.scans) this.data.scans = parsed.data.scans;
-
-            this.saveToFile();
-            this.triggerUpdate();
-            return true;
-        } catch (err) {
-            console.error('Import échoué:', err);
-            return false;
-        }
+    off(event, callback) {
+        window.removeEventListener(`secura:${event}`, callback);
     }
 
-    // ========================================
-    //             BACKUP & RESTORE
-    // ========================================
-    createBackup() {
-        const backup = {
-            timestamp: new Date().toISOString(),
-            path: this.filePath,
-            version: '2.1.0',
-            ...this.data
-        };
-
-        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `secura-backup-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showNotification('success', 'Backup automatique créé !');
+    emit(event, data) {
+        window.dispatchEvent(new CustomEvent(`secura:${event}`, { detail: data }));
     }
 
-    restoreBackup(jsonString) {
-        try {
-            const backup = JSON.parse(jsonString);
-            if (!backup.events) return false;
+    // ═══════════════════════════════════════════════════════════════
+    // 🧹 CLEANUP
+    // ═══════════════════════════════════════════════════════════════
 
-            this.data.events = backup.events;
-            this.data.guests = backup.guests;
-            this.data.qrCodes = backup.qrCodes;
-            this.data.scans = backup.scans;
-            this.data.settings = { ...this.getDefaultData().settings, ...backup.settings };
-
-            this.saveToFile();
-            this.triggerUpdate();
-            showNotification('success', 'Restauration réussie !');
-            return true;
-        } catch (err) {
-            console.error('Restauration échouée:', err);
-            showNotification('error', 'Fichier de backup invalide');
-            return false;
-        }
+    destroy() {
+        this.stopAutoSync();
+        this.saveToLocalStorage();
+        console.log('🧹 SECURA Storage destroyed');
     }
-
-    // ========================================
-    //             RÉINITIALISATION
-    // ========================================
-    clearAllData() {
-        if (!confirm('Êtes-vous sûr de vouloir tout effacer ?')) return;
-
-        this.data = this.getDefaultData();
-        localStorage.removeItem(this.DATA_KEY);
-        localStorage.removeItem(this.FILE_HANDLE_KEY);
-        this.fileHandle = null;
-        this.saveToFile();
-        this.triggerUpdate();
-        showNotification('success', 'Données réinitialisées');
-    }
-
-    
-
-    // Sélection manuelle (fallback)
-    async selectFileManually() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        
-        return new Promise(resolve => {
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return resolve(false);
-                
-                try {
-                    const text = await file.text();
-                    const data = JSON.parse(text);
-                    this.data = { ...this.data, ...data };
-                    localStorage.setItem('secura_file_path', file.name);
-                    await this.saveToFile();
-                    resolve(true);
-                } catch {
-                    showNotification('error', 'Fichier JSON invalide');
-                    resolve(false);
-                }
-            };
-            input.click();
-        });
-    }
-
-
-
-
 }
 
-const storage = new FileStorage();
+// ═══════════════════════════════════════════════════════════════
+// 🚀 INITIALISATION GLOBALE
+// ═══════════════════════════════════════════════════════════════
+
+const storage = new SecuraStorage();
 window.storage = storage;
+window.storageReady = Promise.resolve(storage);
 
-window.storageReady = (async () => {
-    await storage.init();
-    return storage;
-})();
-
-document.addEventListener('DOMContentLoaded', async () => {
-    await window.storageReady;
-
-    console.log("📂 SECURA prêt - Données disponibles :", storage.getStatistics());
-    loadEvents();
-
-    window.addEventListener('secura:data-updated', (e) => {
-        console.log('📊 Stats live:', e.detail);
-        document.dispatchEvent(new CustomEvent('storage:updated', { detail: e.detail }));
-        loadEvents();
-    });
-
-   // setInterval(() => storage.createBackup(), 30 * 60 * 1000);
+// Événements globaux
+window.addEventListener('secura:data-updated', (e) => {
+    console.log('📊 Données mises à jour:', e.detail);
 });
 
+// Cleanup au déchargement
+window.addEventListener('beforeunload', () => {
+    storage.destroy();
+});
 
-
-function downloadFile(content, filename, mimeType) {
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+// Export
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = SecuraStorage;
 }
+
+console.log('✅ SECURA Storage V3.0 chargé et prêt !');

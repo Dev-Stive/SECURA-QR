@@ -319,6 +319,7 @@ function renderGuestsTable() {
                         <th>Email</th>
                         <th>Téléphone</th>
                         <th>Statut</th>
+                        <th>Notes</th>
                         <th>QR</th>
                         <th>Actions</th>
                     </tr>
@@ -353,6 +354,7 @@ function renderGuestsTable() {
                         ${scanned ? 'Présent' : 'En attente'}
                     </span>
                 </td>
+                <td>${guest.notes || '-'}</td>
                 <td>
                     ${storage.getQRCodeByGuestId(guest.id) 
                         ? '<i class="fas fa-qrcode qr-ready"></i>' 

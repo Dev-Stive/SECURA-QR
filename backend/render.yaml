@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: secura-qr-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      NODE_VERSION: 20.x
+      API_KEY: secura_ultra_2025_x9k2m!vPq8z
+      BASE_URL: https://secura-qr.onrender.com
+      BACKUP_ENABLED: true

@@ -70,8 +70,8 @@ function checkUrlParams() {
 }
 
 // ===== LOAD EVENTS =====
-function loadEvents() {
-    const events = storage.getAllEvents();
+async function loadEvents() {
+    const events = await storage.getAllEvents();
     const selector = document.getElementById('qrEventSelector');
     if (!selector) return;
     selector.innerHTML = '<option value="">-- Sélectionner un événement --</option>';

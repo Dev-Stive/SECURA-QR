@@ -4,6 +4,32 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
+    if (!isValidRoute()) {
+
+        fetch('/404.html')
+            .then(response => {
+                if (!response.ok) throw new Error('404 page not found');
+                return response.text();
+            })
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+                initialize404Scripts();
+            })
+            .catch(err => {
+                console.error('Erreur chargement 404:', err);
+                document.body.innerHTML = `
+                    <div style="text-align:center; padding:50px; font-family:sans-serif;">
+                        <h1>404 - Page non trouvée</h1>
+                        <p><a href="/">Retour à l'accueil</a></p>
+                    </div>
+                `;
+            });
+        return; 
+    }
+
+
     await window.storageReady;
 
     initializeNavigation();
@@ -12,6 +38,68 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateStats();
     loadRecentEvents();
 });
+
+
+function isValidRoute() {
+    const currentPath = window.location.pathname;
+
+    const validRoutes = [
+        '/',
+        '/index',
+        '/events',
+        '/guests',
+        '/qr-generator',
+        '/scanner',
+        '/events-list'
+    ];
+
+    const cleanPath = currentPath.replace(/\/$/, '') || '/';
+
+    // Vérifier si le chemin est dans la liste
+    if (validRoutes.includes(cleanPath)) {
+        return true;
+    }
+
+    if (
+        cleanPath.startsWith('/css/') ||
+        cleanPath.startsWith('/js/') ||
+        cleanPath.startsWith('/assets/') ||
+        cleanPath.startsWith('/api/') ||
+        cleanPath.startsWith('/db/') ||
+        cleanPath.endsWith('.json') ||
+        cleanPath.includes('.')
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+
+
+function initialize404Scripts() {
+    
+    const script = document.createElement('script');
+    script.innerHTML = `
+        const particlesContainer = document.getElementById('particles');
+        if (particlesContainer) {
+            const particleCount = 20;
+            for ( régler i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 60 + 20;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 8 + 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+    `;
+    document.body.appendChild(script);
+}
 
 
 // ===== NAVIGATION =====
@@ -141,11 +229,11 @@ function animateNumber(element, target) {
 }
 
 // ===== RECENT EVENTS =====
-function loadRecentEvents() {
+async function loadRecentEvents() {
     const recentEventsGrid = document.getElementById('recentEventsGrid');
     if (!recentEventsGrid) return;
 
-    const events = storage.getAllEvents();
+    const events = await storage.getAllEvents();
     const recentEvents = events.slice(-3).reverse();
 
     if (recentEvents.length === 0) {
@@ -171,7 +259,8 @@ function loadRecentEvents() {
 }
 
 function createEventCard(event) {
-    const guests = storage.getGuestsByEventId(event.id);
+    const guests =  storage.getGuestsByEventId(event.id);
+    
     const scannedGuests = guests.filter(g => g.scanned).length;
     const eventDate = new Date(event.date);
     const isUpcoming = eventDate >= new Date();

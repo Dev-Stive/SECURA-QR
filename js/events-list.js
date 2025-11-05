@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
 });
 
-function loadEvents() {
-    const events = storage.getAllEvents();
+async function loadEvents() {
+    const events = await storage.getAllEvents();
     const grid = document.getElementById('eventsGrid');
     const empty = document.getElementById('emptyState');
 
