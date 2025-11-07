@@ -20,8 +20,9 @@ const path = require('path');
 const chalk = require('chalk');
 const moment = require('moment');
 const cron = require('node-cron');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-const PROJECT_ROOT = path.resolve(__dirname, '..');
 
 //════════════════════════════════════════
 // 🎨 SYSTÈME DE LOGS ULTRA PRO
@@ -131,10 +132,6 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-app.use(express.static(PROJECT_ROOT));
-app.use('/assets', express.static(path.join(PROJECT_ROOT, 'assets')));
-app.use('/css', express.static(path.join(PROJECT_ROOT, 'css')));
-app.use('/js', express.static(path.join(PROJECT_ROOT, 'js')));
 
 // ═══════════════════════════════════════════════════════════════
 // 📊 MIDDLEWARE LOGGER DÉTAILLÉ
@@ -284,6 +281,160 @@ const validateGuest = (guest) => {
     return { valid: errors.length === 0, errors };
 };
 
+
+const hashPassword = (password) => bcrypt.hashSync(password, 10);
+const comparePassword = (password, hash) => bcrypt.compareSync(password, hash);
+
+// Générer JWT
+const generateToken = (user) => {
+    return jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+};
+
+// Middleware JWT
+const jwtAuth = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+        return res.status(401).json({ success: false, error: 'Token requis' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = payload;
+        next();
+    } catch (err) {
+        log.warning('Token invalide', req.ip);
+        return res.status(401).json({ success: false, error: 'Token invalide ou expiré' });
+    }
+};
+
+
+const requireRole = (role) => (req, res, next) => {
+    if (req.user.role !== role) {
+        return res.status(403).json({ success: false, error: 'Accès refusé' });
+    }
+    next();
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🔐 AUTHENTIFICATION - LOGIN / REGISTER
+// ═══════════════════════════════════════════════════════════════
+
+app.post('/api/auth/register', (req, res) => {
+    try {
+        const { email, password, firstName, lastName } = req.body;
+
+        if (!email || !password || password.length < 6) {
+            return res.status(400).json({ success: false, error: 'Email et mot de passe (6+ chars) requis' });
+        }
+
+        const data = loadData();
+
+        // Empêcher doublon email
+        if (data.users?.some(u => u.email === email)) {
+            return res.status(400).json({ success: false, error: 'Email déjà utilisé' });
+        }
+
+
+        const user = {
+            id: generateId('usr'),
+            email,
+            password: hashPassword(password),
+            firstName: firstName || '',
+            lastName: lastName || '',
+            role: data.users?.length === 0 ? 'admin' : 'user',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        if (!data.users) data.users = [];
+        data.users.push(user);
+        saveData(data);
+
+        const token = generateToken(user);
+
+        log.success('Utilisateur créé', `${email} (${user.role})`);
+        res.status(201).json({
+            success: true,
+            message: 'Inscription réussie',
+            token,
+            user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName }
+        });
+    } catch (err) {
+        log.error('POST /api/auth/register', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.post('/api/auth/login', (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ success: false, error: 'Email et mot de passe requis' });
+        }
+
+        const data = loadData();
+        const user = data.users?.find(u => u.email === email);
+
+        if (!user || !comparePassword(password, user.password)) {
+            log.warning('Login échoué', email);
+            return res.status(401).json({ success: false, error: 'Email ou mot de passe incorrect' });
+        }
+
+        const token = generateToken(user);
+
+        log.success('Connexion réussie', `${email} (${user.role})`);
+        res.json({
+            success: true,
+            message: 'Connexion réussie',
+            token,
+            user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName }
+        });
+    } catch (err) {
+        log.error('POST /api/auth/login', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.get('/api/auth/me', jwtAuth, (req, res) => {
+    const data = loadData();
+    const user = data.users?.find(u => u.id === req.user.id);
+    if (!user) return res.status(404).json({ success: false, error: 'Utilisateur introuvable' });
+
+    res.json({
+        success: true,
+        user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName }
+    });
+});
+
+
+const crypto = require('crypto');
+
+const SECRET_REGISTER_PATH = "mon_evenement_ultra_secret_2025";
+const SECRET_HASH = crypto.createHash('md5').update(SECRET_REGISTER_PATH).digest('hex');
+const SECRET_ROUTE = `/secure-register-${SECRET_HASH.substring(0, 16)}`;
+
+app.get(SECRET_ROUTE, (req, res) => {
+    const registerPath = path.join(__dirname, 'register.html');
+    if (fs.existsSync(registerPath)) {
+        log.success('Accès au register secret', req.ip);
+        res.sendFile(registerPath);
+    } else {
+        res.status(404).send('<h1>404 - Page non trouvée</h1>');
+    }
+});
+
+
+
+
+
+
+
 // ═══════════════════════════════════════════════════════════════
 // 🌐 ROUTES API - DOCUMENTATION
 // ═══════════════════════════════════════════════════════════════
@@ -343,6 +494,11 @@ app.get('/api', (req, res) => {
                 create: 'GET /api/backup',
                 restore: 'POST /api/restore',
                 list: 'GET /api/backups'
+            },
+            auth: {
+                register: 'POST /api/auth/register',
+                login: 'POST /api/auth/login',
+                me: 'GET /api/auth/me (Bearer Token)'
             }
         }
     });
@@ -1420,72 +1576,34 @@ app.get('/api/events/:id/scans', (req, res) => {
     }
 });
 
-
-
-
 // ═══════════════════════════════════════════════════════════════
-// 🔄 JSON SERVER (API REST auto-générée)
-// ═══════════════════════════════════════════════════════════════
-
-const router = jsonServer.router(CONFIG.DB_FILE);
-const jsonServerMiddlewares = jsonServer.defaults({
-    static: path.join(__dirname, 'public'),
-    noCors: false,
-    readOnly: false
+// DASHBOARD API  - RACINE /
+app.get('/', (req, res) => {
+    const dashboard = path.join(__dirname, 'dashboard.html');
+    res.sendFile(dashboard);
 });
 
-app.use('/db', jsonServerMiddlewares);
-app.use('/db', router);
+
 
 // ═══════════════════════════════════════════════════════════════
 // 📄 FRONTEND - PAGES STATIQUES
 // ═══════════════════════════════════════════════════════════════
 
-app.use(express.static(__dirname));
-
-const PAGES = [
-    { route: '/', file: 'index.html' },
-    { route: '/events', file: 'events.html' },
-    { route: '/guests', file: 'guests.html' },
-    { route: '/qr-generator', file: 'qr-generator.html' },
-    { route: '/scanner', file: 'scanner.html' },
-    { route: '/events-list', file: 'events-list.html' }
-];
-
-// Redirection URLs propres (sans .html)
-app.use((req, res, next) => {
-    if (req.path.endsWith('.html') && req.path !== '/index.html') {
-        const cleanPath = req.path.replace(/\.html$/, '');
-        log.info('Redirection clean URL', `${req.path} → ${cleanPath}`);
-        return res.redirect(301, cleanPath);
-    }
-    next();
-});
-
-PAGES.forEach(({ route, file }) => {
-    app.get(route, (req, res) => {
-        const filePath = path.join(PROJECT_ROOT, file);
-        if (fs.existsSync(filePath)) {
-            log.info(`Page servie`, `${route} → ${file}`);
-            res.sendFile(filePath);
-        } else {
-            res.status(404).sendFile(path.join(PROJECT_ROOT, '404.html'));
-        }
-    });
-});
 
 // 404 personnalisé
 app.get('*', (req, res) => {
     if (!req.path.startsWith('/api') && !req.path.startsWith('/db')) {
-        const notFoundPath = path.join(PROJECT_ROOT, '404.html');
+        const notFoundPath = path.join(__dirname, '404.html');
         if (fs.existsSync(notFoundPath)) {
             log.warning('404', `${req.method} ${req.originalUrl}`);
             res.status(404).sendFile(notFoundPath);
         } else {
-            res.status(404).send('<h1>404 - Page non trouvée</h1><p><a href="/">Retour à l\'accueil</a></p>');
+            res.status(404).send('<h1>404 - Endpoint non trouvé</h1><p><a href="/">Consultez /api pour la documentation</a></p>');
         }
     }
 });
+
+
 
 // ═══════════════════════════════════════════════════════════════
 // 💾 BACKUP AUTOMATIQUE
@@ -1634,6 +1752,7 @@ app.listen(CONFIG.PORT, () => {
     log.separator();
     
     // Afficher statistiques initiales
+
     const data = loadData();
     log.stats({
         'Événements': data.events?.length || 0,

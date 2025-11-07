@@ -1358,20 +1358,20 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2025-11-07T06:04:30.491Z",
+    "updatedAt": "2025-11-07T05:54:58.269Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   },
   "users": [
     {
-      "id": "usr_1762495470357_srykfuf9g",
+      "id": "usr_1762494898114_330pw0oqj",
       "email": "admin@secura.cm",
-      "password": "$2b$10$1a4zUNSh2qqkRvS1Bh4mpOXPuG.xFwHo/Z9/fCUQZVA15YQzaY5fa",
+      "password": "$2b$10$XW22xPQjZLQc5MoEPj9UFuzCQKjrznssYIPf5Q3DZITKJrDQBeP/e",
       "firstName": "NANA",
       "lastName": "JUNIOR",
       "role": "admin",
-      "createdAt": "2025-11-07T06:04:30.491Z",
-      "updatedAt": "2025-11-07T06:04:30.491Z"
+      "createdAt": "2025-11-07T05:54:58.269Z",
+      "updatedAt": "2025-11-07T05:54:58.269Z"
     }
   ]
 }
