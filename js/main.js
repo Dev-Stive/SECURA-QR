@@ -24,13 +24,13 @@
     if (!isPublicPage) {
         const token = localStorage.getItem('secura_token');
    
-        if (!token) {
+       if (!token) {
             storage.forceLogout();
             console.warn('🔒 Accès refusé - Redirection vers login');
-            window.location.replace('/login');
-         
+            window.location.replace('/login.html');
             return;
         }
+
     }
 })();
 
