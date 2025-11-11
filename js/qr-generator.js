@@ -262,7 +262,7 @@ async function bulkGenerateAndDownload() {
                 if (canvas) {
                     const blob = await new Promise(resolve => canvas.toBlob(resolve));
                     const cleanName = formatFileName(guest.firstName, guest.lastName);
-const filename = `QR_${cleanName}.png`;
+                    const filename = `QR_${cleanName}.png`;
                     const fileHandle = await downloadDirHandle.getFileHandle(filename, { create: true });
                     const writable = await fileHandle.createWritable();
                     await writable.write(blob);

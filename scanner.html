@@ -5,33 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SECURA - Scanner QR Code</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dash.css">
+    
 </head>
 <body class="light-theme">
     <div id="particles-js"></div>
 
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>SECURA</span>
-                </div>
-                <nav class="nav-menu" id="navMenu">
-                    <a href="index.html" class="nav-link">Accueil</a>
-                    <a href="events.html" class="nav-link">Événements</a>
-                    <a href="guests.html" class="nav-link">Invités</a>
-                    <a href="qr-generator.html" class="nav-link">Générateur QR</a>
-                    <a href="scanner.html" class="nav-link active">Scanner</a>
-                </nav>
-                <div class="header-actions">
-                    <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
-                    <button class="fullscreen-toggle" id="fullscreenToggle"><i class="fas fa-expand"></i></button>
-                    <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
-                </div>
+ 
+ <!-- Header Premium -->
+<header class="header">
+    <div class="header-content">
+        <div class="logo-section">
+            <div class="logo-icon">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="logo-text">
+                <h1>SECURA</h1>
+                <p>Tableau de Bord • Gestion Sécurisée</p>
             </div>
         </div>
-    </header>
+
+        <nav class="nav-menu" id="navMenu">
+            <a href="index.html" class="nav-link ">Accueil</a>
+            <a href="events.html" class="nav-link">Événements</a>
+            <a href="guests.html" class="nav-link">Invités</a>
+            <a href="qr-generator.html" class="nav-link">Générateur QR</a>
+            <a href="scanner.html" class="nav-link active">Scanner</a>
+        </nav>
+
+        <div class="header-actions">
+            <button class="theme-toggle" id="themeToggle" aria-label="Changer le thème">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="fullscreen-toggle" id="fullscreenToggle" aria-label="Plein écran">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- BOUTON PROFIL DANS LE HEADER -->
+        <button class="profile-toggle header-profile-btn" id="profileToggle" aria-haspopup="true" aria-expanded="false">
+            <div class="profile-avatar">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="profile-info">
+                <span class="profile-name" id="profileName">Chargement...</span>
+                <span class="profile-role" id="profileRole">Utilisateur</span>
+            </div>
+            <i class="bi bi-chevron-down profile-arrow"></i>
+        </button>
+    </div>
+</header>
+
+<!-- MENU PROFIL FLOTTANT (HORS HEADER) -->
+<div class="floating-profile-menu" id="floatingProfileMenu">
+    <div class="profile-dropdown show" id="profileDropdown" role="menu">
+        <div class="profile-header">
+            <div class="profile-avatar large">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="profile-details">
+                <strong id="dropdownName">Chargement...</strong>
+                <small id="dropdownEmail">email@exemple.com</small>
+                <span class="badge-role" id="dropdownRole">Utilisateur</span>
+            </div>
+        </div>
+
+        <div class="dropdown-actions">
+            <a href="profile.html" class="dropdown-item" role="menuitem">
+                <i class="bi bi-person"></i> Mon Profil
+            </a>
+            <a href="settings.html" class="dropdown-item" role="menuitem">
+                <i class="bi bi-gear"></i> Paramètres
+            </a>
+            <hr class="dropdown-divider">
+            <button class="dropdown-item text-danger" id="logout-btn" role="menuitem">
+                <i class="bi bi-box-arrow-right"></i> Déconnexion
+            </button>
+        </div>
+    </div>
+</div>
+
+    <!-- Hero Section -->
+  
 
     <main class="main-content">
         <div class="container">
@@ -131,20 +193,54 @@
 
             <div class="scan-statistics">
                 <h3><i class="fas fa-chart-bar"></i> Statistiques du jour</h3>
-                <div class="stats-grid">
-                    <div class="stat-card"><i class="fas fa-qrcode"></i> <div><h4 id="todayScans">0</h4><p>Scans</p></div></div>
-                    <div class="stat-card"><i class="fas fa-user-check"></i> <div><h4 id="todayPresent">0</h4><p>Présents</p></div></div>
-                    <div class="stat-card"><i class="fas fa-clock"></i> <div><h4 id="lastScanTime">-</h4><p>Dernier</p></div></div>
+             
+
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card animate-slide-up">
+                    <div class="stat-icon">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <div class="stat-value" id="lastScanTime">0</div>
+                    <div class="stat-label">Dernier</div>
+                </div>
+               
+                <div class="stat-card animate-slide-up">
+                    <div class="stat-icon">
+                        <i class="bi bi-qr-code"></i>
+                    </div>
+                    <div class="stat-value" id="todayPresent">0</div>
+                    <div class="stat-label">Présents</div>
+                </div>
+                <div class="stat-card animate-slide-up">
+                    <div class="stat-icon">
+                        <i class="bi bi-upc-scan"></i>
+                    </div>
+                    <div class="stat-value" id="todayScans">0</div>
+                    <div class="stat-label">Scans</div>
                 </div>
             </div>
+            </div>
+     
+</div>
+
         </div>
     </main>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo"><i class="fas fa-shield-alt"></i> <span>SECURA</span></div>
-                <p>&copy; 2025 SECURA. Tous droits réservés.</p>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-check" style="font-size:1.5rem;"></i>
+                    <span style="font-weight:600;">SECURA</span>
+                </div>
+                <p class="mb-0">© 2025 SECURA. Tous droits réservés.</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="footer-link">Confidentialité</a>
+                    <a href="#" class="footer-link">Conditions</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
             </div>
         </div>
     </footer>
@@ -152,12 +248,6 @@
     <button class="scroll-top" id="scrollTop"><i class="fas fa-arrow-up"></i></button>
 
 
-            <!-- Précharge audio -->
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                SECURA_AUDIO.preload();
-            });
-        </script>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -179,4 +269,3 @@
     <script src="js/scanner.js"></script>
     <script src="js/main.js"></script>
 </body>
-</html>

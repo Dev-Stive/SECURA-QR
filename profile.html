@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil • SECURA</title>
+
+    <!-- Font Awesome + Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+    <!-- Styles SECURA -->
+    <style>
+        /* ===== VARIABLES & STYLES (déjà fournis) ===== */
+        :root {
+            --secura-red: #D97706;
+            --secura-dark-red: #B45309;
+            --secura-black: #1b1b18;
+            --secura-white: #FDFDFC;
+            --secura-light-gray: #EDEDEC;
+            --secura-medium-gray: #A1A09A;
+            --secura-text-gray: #706f6c;
+            --secura-brown: #3E3E3A;
+            --secura-light-bg: #FAFAFA;
+            --secura-accent: #F4A261;
+            --secura-success: #10B981;
+            --secura-error: #EF4444;
+            --secura-warning: #F59E0B;
+            --secura-info: #3B82F6;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 0 12px rgba(217, 119, 6, 0.25);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --radius-full: 9999px;
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.25s ease;
+            --transition-slow: 0.35s ease;
+        }
+        .dark-theme {
+            --secura-light-bg: #1A1A1A;
+            --secura-light-gray: #2A2A2A;
+            --secura-text-gray: #A1A09A;
+            --border-color: #2A2A2A;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--secura-light-bg); color: var(--secura-black); }
+        body.dark-theme { background: var(--secura-black); color: var(--secura-white); }
+
+        /* ===== HEADER FIXE ===== */
+        .header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-section { display: flex; align-items: center; gap: 1rem; }
+        .logo-icon i { font-size: 2rem; color: var(--secura-red); }
+        .logo-text h1 { font-size: 1.8rem; font-weight: 700; color: var(--secura-red); }
+        .logo-text p { font-size: 0.9rem; color: var(--secura-text-gray); margin-top: -0.2rem; }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ===== PROFILE CARD ===== */
+        .profile-card {
+            background: var(--secura-white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .dark-theme .profile-card { background: var(--secura-light-gray); }
+
+        .profile-header {
+            background: linear-gradient(135deg, var(--secura-red), var(--secura-accent));
+            padding: 3rem 2rem;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        .profile-avatar {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 3.5rem;
+            color: var(--secura-red);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .profile-name {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .profile-role {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .profile-body {
+            padding: 2rem;
+        }
+        .profile-section {
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--secura-red);
+        }
+        .edit-btn {
+            background: none;
+            border: none;
+            color: var(--secura-red);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        .edit-btn:hover { background: rgba(217,119,6,0.1); }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .info-label {
+            font-size: 0.85rem;
+            color: var(--secura-text-gray);
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .info-value {
+            font-weight: 600;
+            padding: 0.75rem;
+            border: 2px solid var(--secura-light-gray);
+            border-radius: var(--radius-md);
+            background: var(--secura-light-bg);
+            transition: all var(--transition-fast);
+        }
+        .dark-theme .info-value { background: var(--secura-brown); border-color: var(--secura-brown); color: white; }
+        .info-value[contenteditable="true"] {
+            outline: 2px solid var(--secura-red);
+            background: white;
+        }
+        .dark-theme .info-value[contenteditable="true"] { background: #2A2A2A; }
+
+        .save-btn {
+            background: var(--secura-red);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            transition: all var(--transition-fast);
+        }
+        .save-btn:hover {
+            background: var(--secura-dark-red);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* ===== ACTIONS ===== */
+        .profile-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        .action-card {
+            flex: 1;
+            min-width: 200px;
+            background: var(--secura-light-bg);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: 2px solid transparent;
+        }
+        .dark-theme .action-card { background: var(--secura-brown); }
+        .action-card:hover {
+            border-color: var(--secura-red);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        .action-card i {
+            font-size: 2rem;
+            color: var(--secura-red);
+            margin-bottom: 0.75rem;
+        }
+        .action-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .action-card p {
+            font-size: 0.9rem;
+            color: var(--secura-text-gray);
+        }
+
+        /* ===== PARTICLES ===== */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .profile-header { padding: 2rem 1rem; }
+            .profile-avatar { width: 100px; height: 100px; font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon"><i class="bi bi-shield-check"></i></div>
+                <div class="logo-text">
+                    <h1>SECURA</h1>
+                    <p>Tableau de Bord • Profil</p>
+                </div>
+            </div>
+            <button onclick="window.history.back()" class="btn btn-outline">
+                <i class="bi bi-arrow-left"></i> Retour
+            </button>
+        </div>
+    </header>
+
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar" id="avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <h2 class="profile-name" id="fullName">Chargement...</h2>
+                <span class="profile-role" id="roleBadge">Utilisateur</span>
+            </div>
+
+            <div class="profile-body">
+
+                <!-- Informations Personnelles -->
+                <div class="profile-section">
+                    <div class="section-title">
+                        <span><i class="bi bi-person"></i> Informations Personnelles</span>
+                        <button class="edit-btn" id="editPersonalBtn"><i class="bi bi-pencil"></i></button>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label"><i class="bi bi-person"></i> Prénom</span>
+                            <div class="info-value" id="firstName" contenteditable="false">Jean</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="bi bi-person"></i> Nom</span>
+                            <div class="info-value" id="lastName" contenteditable="false">Dupont</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="bi bi-envelope"></i> Email</span>
+                            <div class="info-value" id="email" contenteditable="false">jean.dupont@exemple.com</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="bi bi-shield-lock"></i> Rôle</span>
+                            <div class="info-value" id="role" contenteditable="false">Administrateur</div>
+                        </div>
+                    </div>
+                    <button class="save-btn" id="savePersonalBtn" style="display:none;">
+                        <i class="bi bi-check"></i> Enregistrer les modifications
+                    </button>
+                </div>
+
+                <!-- Sécurité -->
+                <div class="profile-section">
+                    <div class="section-title">
+                        <span><i class="bi bi-shield-lock"></i> Sécurité</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label"><i class="bi bi-key"></i> Mot de passe</span>
+                            <div class="info-value">••••••••</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="bi bi-shield-check"></i> 2FA</span>
+                            <div class="info-value">Désactivée</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="profile-actions">
+                    <div class="action-card" onclick="changePassword()">
+                        <i class="bi bi-key"></i>
+                        <h4>Changer le mot de passe</h4>
+                        <p>Mettre à jour votre mot de passe</p>
+                    </div>
+                    <div class="action-card" onclick="enable2FA()">
+                        <i class="bi bi-shield-lock"></i>
+                        <h4>Activer la 2FA</h4>
+                        <p>Renforcer la sécurité</p>
+                    </div>
+                    <div class="action-card" onclick="storage.logout()">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <h4>Déconnexion</h4>
+                        <p>Quitter la session</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script>
+        // === CHARGER LES DONNÉES UTILISATEUR ===
+        function loadProfile() {
+            const user = JSON.parse(localStorage.getItem('secura_user') || '{}');
+            if (!user.email) {
+                Swal.fire('Erreur', 'Utilisateur non trouvé.', 'error').then(() => {
+                    window.location.href = '/login.html';
+                });
+                return;
+            }
+
+            document.getElementById('firstName').textContent = user.firstName || 'Non défini';
+            document.getElementById('lastName').textContent = user.lastName || 'Non défini';
+            document.getElementById('email').textContent = user.email;
+            document.getElementById('role').textContent = (user.role || 'Utilisateur').toUpperCase();
+            document.getElementById('fullName').textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0];
+            document.getElementById('roleBadge').textContent = (user.role || 'Utilisateur').toUpperCase();
+
+            // Couleur du badge
+            const roleBadge = document.getElementById('roleBadge');
+            roleBadge.style.background = user.role === 'admin' ? 'rgba(239,68,68,0.8)' : 'rgba(255,255,255,0.2)';
+        }
+
+        // === MODE ÉDITION ===
+        let editing = false;
+        document.getElementById('editPersonalBtn').addEventListener('click', () => {
+            if (editing) return;
+
+            editing = true;
+            const fields = ['firstName', 'lastName'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                el.contentEditable = true;
+                el.focus();
+            });
+
+            document.getElementById('savePersonalBtn').style.display = 'flex';
+            document.getElementById('editPersonalBtn').innerHTML = '<i class="bi bi-x"></i>';
+            document.getElementById('editPersonalBtn').onclick = cancelEdit;
+        });
+
+        function cancelEdit() {
+            editing = false;
+            loadProfile();
+            document.getElementById('savePersonalBtn').style.display = 'none';
+            document.getElementById('editPersonalBtn').innerHTML = '<i class="bi bi-pencil"></i>';
+            document.getElementById('editPersonalBtn').onclick = () => { /* réactiver édition */ };
+        }
+
+        // === SAUVEGARDER ===
+        document.getElementById('savePersonalBtn').addEventListener('click', async () => {
+            const user = JSON.parse(localStorage.getItem('secura_user') || '{}');
+            const updates = {
+                firstName: document.getElementById('firstName').textContent.trim(),
+                lastName: document.getElementById('lastName').textContent.trim()
+            };
+
+            try {
+                const result = await storage.apiRequest('/api/user/update', {
+                    method: 'POST',
+                    body: JSON.stringify(updates)
+                });
+
+                if (result.success) {
+                    user.firstName = updates.firstName;
+                    user.lastName = updates.lastName;
+                    localStorage.setItem('secura_user', JSON.stringify(user));
+                    loadProfile();
+                    cancelEdit();
+                    Swal.fire('Succès', 'Profil mis à jour !', 'success');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (err) {
+                Swal.fire('Erreur', err.message || 'Échec de la mise à jour.', 'error');
+            }
+        });
+
+        // === ACTIONS ===
+        function changePassword() {
+            Swal.fire({
+                title: 'Changer le mot de passe',
+                html: `
+                    <input type="password" id="current" class="swal2-input" placeholder="Mot de passe actuel">
+                    <input type="password" id="new" class="swal2-input" placeholder="Nouveau mot de passe">
+                    <input type="password" id="confirm" class="swal2-input" placeholder="Confirmer">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Mettre à jour',
+                preConfirm: () => {
+                    const current = document.getElementById('current').value;
+                    const newPass = document.getElementById('new').value;
+                    const confirm = document.getElementById('confirm').value;
+                    if (newPass !== confirm) {
+                        Swal.showValidationMessage('Les mots de passe ne correspondent pas');
+                    }
+                    return { current, new: newPass };
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // Appel API
+                    Swal.fire('Succès', 'Mot de passe mis à jour !', 'success');
+                }
+            });
+        }
+
+        function enable2FA() {
+            Swal.fire({
+                title: 'Activer la 2FA',
+                text: 'Scannez ce QR Code avec Google Authenticator',
+                imageUrl: 'https://via.placeholder.com/200?text=QR+2FA',
+                imageWidth: 200,
+                imageHeight: 200,
+                showCancelButton: true,
+                confirmButtonText: 'Vérifier le code',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { value: code } = Swal.fire({
+                        title: 'Code 2FA',
+                        input: 'text',
+                        inputLabel: 'Entrez le code à 6 chiffres',
+                        inputPlaceholder: '123456'
+                    }).then((res) => {
+                        if (res.value) {
+                            Swal.fire('Succès', '2FA activée !', 'success');
+                        }
+                    });
+                }
+            });
+        }
+
+        // === INITIALISATION ===
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfile();
+
+            // Particles
+            particlesJS('particles-js', {
+                particles: {
+                    number: { value: 80, density: { enable: true, value_area: 800 } },
+                    color: { value: '#D97706' },
+                    shape: { type: 'circle' },
+                    opacity: { value: 0.3, random: true },
+                    size: { value: 3, random: true },
+                    line_linked: { enable: true, distance: 150, color: '#D97706', opacity: 0.2, width: 1 },
+                    move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out' }
+                },
+                interactivity: {
+                    detect_on: 'canvas',
+                    events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' } },
+                    modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+                },
+                retina_detect: true
+            });
+        });
+
+        // Écoute des mises à jour
+        window.addEventListener('secura:data-updated', loadProfile);
+    </script>
+</body>
+</html>

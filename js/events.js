@@ -1,24 +1,304 @@
 /**
- * SECURA - Events Management
- * Gestion complète des événements
+ * ╔═══════════════════════════════════════════════════════════════╗
+ * ║           🎫 SECURA EVENTS MANAGEMENT V5.0 🎫                 ║
+ * ║                                                               ║
+ * ║  🎯 Mise à jour granulaire (pas de rerender complet)         ║
+ * ║  🔔 SweetAlert2 avant chaque opération                        ║
+ * ║  ✅ Validation ultra complète                                 ║
+ * ║  📊 Observable DOM patching                                   ║
+ * ║  ⚡ Performance optimisée                                     ║
+ * ║  🎨 Animations fluides                                        ║
+ * ╚═══════════════════════════════════════════════════════════════╝
  */
 
 let currentEvents = [];
 let filteredEvents = [];
+let isRendering = false;
+const eventCardCache = new Map();
+const eventStatsCache = new Map();
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadEvents();
+// ═══════════════════════════════════════════════════════════════
+// 🚀 INITIALISATION
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+    await window.storageReady;
+    
     initializeEventListeners();
+    setupGranularListener();
+
+    await loadEvents();
 });
 
-// ===== LOAD EVENTS =====
-function loadEvents() {
-    currentEvents = storage.data.events;
-    filteredEvents = [...currentEvents];
-    renderEvents();
+// ═══════════════════════════════════════════════════════════════
+// 🎧 LISTENERS GRANULAIRES OBSERVABLES
+// ═══════════════════════════════════════════════════════════════
+function setupGranularListener() {
+
+    // debounce pour éviter rafales de MAJ
+    const debouncedDataSynced = debounce((detail) => {
+        const latest = [...storage.data.events];
+        const latestMap = new Map(latest.map(e => [e.id, e]));
+        const existingIds = new Set(currentEvents.map(e => e.id));
+
+        // determine si un filtre/recherche est actif
+        const searchQuery = document.getElementById('searchEvents')?.value?.toLowerCase().trim();
+        const filterType = document.getElementById('filterType')?.value;
+        const isFilteringActive = !!(searchQuery || (filterType && filterType !== 'all'));
+
+        // Detect created & updated
+        latest.forEach(ev => {
+
+            if (ev.__justCreated) {
+                delete ev.__justCreated;
+                return;
+            }
+            const existing = currentEvents.find(x => x.id === ev.id);
+
+            // conserver la mémoire à jour
+            const idx = currentEvents.findIndex(c => c.id === ev.id);
+            if (idx !== -1) currentEvents[idx] = ev;
+
+            if (!existing) {
+                // nouvelle entrée — insérer uniquement si elle passe les filtres courants
+                console.log('🔔 Event detected (created) via data:synced:', ev.name);
+                currentEvents.unshift(ev);
+                if (passesCurrentFilters(ev)) {
+                    insertEventCard(ev);
+                } else {
+                    // si filtre actif, on n'insère pas, mais on garde l'event en mémoire
+                    if (!isFilteringActive) {
+                        insertEventCard(ev);
+                    }
+                }
+                eventStatsCache.set(ev.id, { guests: 0, scanned: 0, fillRate: 0 });
+            } else {
+                // event existant -> décider d'un update ciblé
+                const old = existing;
+                const needsFullUpdate = 
+                    old.name !== ev.name ||
+                    old.date !== ev.date ||
+                    old.time !== ev.time ||
+                    old.location !== ev.location ||
+                    old.type !== ev.type ||
+                    old.capacity !== ev.capacity ||
+                    old.active !== ev.active;
+
+                // si un filtre est actif, vérifier si l'event doit être visible ou retiré
+                const wasVisible = eventCardCache.has(ev.id) && document.body.contains(eventCardCache.get(ev.id));
+                const shouldBeVisible = passesCurrentFilters(ev);
+
+                if (wasVisible && !shouldBeVisible) {
+                    // retirer la carte si elle ne correspond plus aux filtres
+                    removeEventCard(ev.id);
+                    // ne pas continuer l'update DOM
+                    return;
+                }
+
+                if (!wasVisible && shouldBeVisible) {
+                    // l'event devient visible (passe maintenant les filtres) -> insérer proprement
+                    insertEventCard(ev);
+                    return;
+                }
+
+                // sinon appliquer update ciblé
+                if (needsFullUpdate) {
+                    updateEventCardIfNeeded(ev);
+                } else {
+                    // juste rafraîchir stats si besoin
+                    updateEventStats(ev.id);
+                }
+            }
+        });
+
+        // Detect deleted : supprimer toute carte qui n'existe plus côté serveur
+        currentEvents.slice().forEach(ev => {
+            if (!latestMap.has(ev.id)) {
+                console.log('🔔 Event detected (deleted) via data:synced:', ev.id);
+                removeEventCard(ev.id);
+                currentEvents = currentEvents.filter(c => c.id !== ev.id);
+            }
+        });
+
+        // resynchroniser currentEvents avec latest (garder l'ordre serveur)
+        currentEvents = latest.slice();
+        // si aucun filtre actif, synchroniser filteredEvents automatiquement
+        if (!isFilteringActive) filteredEvents = getFilteredAndSortedEvents();
+        // sinon garder filteredEvents tel quel (l'utilisateur contrôle la vue)
+    }, 200);
+
+    storage.on('data:synced', (detail) => {
+        try {
+            debouncedDataSynced(detail);
+        } catch (err) {
+            console.error('Erreur handling data:synced:', err);
+            // fallback : re-render complet si erreur
+            renderEvents();
+        }
+    });
+
+    storage.on('event:created', (event) => {
+        const ev = event.detail;
+        console.log('Événement créé détecté:', ev.name);
+
+        // Nettoyer le marqueur s'il existe
+        if (ev.__justCreated) delete ev.__justCreated;
+
+        const duplicate = currentEvents.find(e => e.name === ev.name && e.date === ev.date);
+        if (duplicate && duplicate.id !== ev.id) removeEventCard(duplicate.id);
+        
+        if (!currentEvents.find(e => e.id === ev.id)) {
+            currentEvents.unshift(ev);
+            if (passesCurrentFilters(ev)) insertEventCard(ev);
+        }
+        updateEventStats(ev.id);
+    });
+
+    storage.on('event:updated', (data) => {
+        const ev = (data && data.new) ? data.new : data;
+        console.log('🔄 Événement mis à jour détecté:', ev.name || ev.id);
+        const idx = currentEvents.findIndex(e => e.id === ev.id);
+        if (idx !== -1) currentEvents[idx] = ev; else currentEvents.push(ev);
+
+        const visible = passesCurrentFilters(ev);
+        const cardPresent = eventCardCache.has(ev.id) && document.body.contains(eventCardCache.get(ev.id));
+
+        if (cardPresent && !visible) {
+            removeEventCard(ev.id);
+            return;
+        }
+        if (!cardPresent && visible) {
+            insertEventCard(ev);
+            return;
+        }
+
+        updateEventCardIfNeeded(ev);
+        updateEventStats(ev.id);
+    });
+
+    storage.on('event:deleted', (data) => {
+        const id = (data && data.id) ? data.id : (typeof data === 'string' ? data : data?.detail?.id);
+        console.log('🗑️ Événement supprimé détecté:', id);
+        removeEventCard(id);
+        currentEvents = currentEvents.filter(e => e.id !== id);
+    });
+
+    // guests/scans/qrcodes impactent automatiquement les stats des events
+    storage.on('guest:created', (guest) => {
+        const gid = guest?.eventId || guest?.detail?.eventId;
+        if (gid) updateEventStats(gid);
+    });
+    storage.on('guest:updated', (data) => {
+        const evId = data?.new?.eventId || data?.eventId || data?.detail?.eventId;
+        if (evId) updateEventStats(evId);
+    });
+    storage.on('guest:deleted', (guest) => {
+        const evId = guest?.eventId || guest?.detail?.eventId;
+        if (evId) updateEventStats(evId);
+    });
+    storage.on('scan:created', (scan) => {
+        const evId = scan?.eventId || scan?.detail?.eventId;
+        if (evId) updateEventStats(evId);
+    });
+    storage.on('qr:generated', (qr) => {
+        const evId = qr?.eventId || qr?.detail?.eventId;
+        if (evId) updateEventStats(evId);
+    });
+
+    window.addEventListener('data:', () => {
+        loadEvents();
+    });
 }
 
-function createEventCard(event) {
+
+// ═══════════════════════════════════════════════════════════════
+// 📥 CHARGEMENT INITIAL
+// ═══════════════════════════════════════════════════════════════
+async function loadEvents() {
+    currentEvents = [...storage.data.events];
+    filteredEvents = [...currentEvents];
+ renderEvents();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🎨 RENDU INITIAL (Une seule fois)
+// ═══════════════════════════════════════════════════════════════
+async function renderEvents() {
+    if (isRendering) return;
+    isRendering = true;
+
+    const grid = document.getElementById('eventsGrid');
+    const loader = document.getElementById('eventsLoader');
+    
+    if (!grid || !loader) {
+        isRendering = false;
+        return;
+    }
+
+    loader.style.display = 'flex';
+    grid.style.opacity = '0';
+
+    await new Promise(r => setTimeout(r, 100));
+
+    eventCardCache.clear();
+    eventStatsCache.clear();
+
+    if (filteredEvents.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-calendar-plus text-6xl mb-4 text-gray-400"></i>
+                <p class="text-lg text-gray-500">Aucun événement trouvé</p>
+                <button class="btn btn-primary " onclick="openEventModal()">
+                    Créer votre premier événement
+                </button>
+            </div>
+
+            
+        `;
+    } else {
+        const fragment = document.createDocumentFragment();
+        filteredEvents.forEach((event, i) => {
+            const card = createEventCardElement(event);
+            card.style.animationDelay = `${i * 0.1}s`;
+            eventCardCache.set(event.id, card);
+            
+            const guests = storage.getGuestsByEventId(event.id);
+            const scanned = guests.filter(g => g.scanned).length;
+            const fillRate = event.capacity ? Math.round((guests.length / event.capacity) * 100) : 0;
+            
+            eventStatsCache.set(event.id, {
+                guests: guests.length,
+                scanned,
+                fillRate
+            });
+            
+            fragment.appendChild(card);
+        });
+        
+        grid.innerHTML = '';
+        grid.appendChild(fragment);
+    }
+
+    loader.style.display = 'none';
+    
+    requestAnimationFrame(() => {
+        grid.style.opacity = '1';
+    });
+    
+    isRendering = false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🎴 CRÉATION ÉLÉMENT CARTE
+// ═══════════════════════════════════════════════════════════════
+function createEventCardElement(event) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = createEventCardHTML(event);
+    const card = wrapper.firstElementChild;
+    card.setAttribute('data-event-id', event.id);
+    return card;
+}
+
+function createEventCardHTML(event) {
     const guests = storage.getGuestsByEventId(event.id);
     const scannedGuests = guests.filter(g => g.scanned).length;
     const eventDate = new Date(event.date);
@@ -27,36 +307,24 @@ function createEventCard(event) {
         day: 'numeric', month: 'long', year: 'numeric'
     });
 
-    // === IMAGES DE FOND PAR TYPE ===
     const typeImages = {
         marriage: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
-        anniversaire: 'https://images.unsplash.com/photo-1464349095433-7956a61b8a07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+        anniversaire: 'https://images.unsplash.com/photo-1569415860599-5514567fde28?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8JUVDJTgzJTlEJUVDJTlEJUJDJTIwJUVDJUI0JTlCJUVCJUI2JTg4fGVufDB8fDB8fHww&fm=jpg&q=60&w=3000',
         conference: 'https://images.unsplash.com/photo-1540575467063-868f79e66c3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
         autre: 'https://images.unsplash.com/photo-1501281668745-f7f579dff10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80'
     };
 
-    const typeLabels = {
-        marriage: { label: 'MARIAGE', class: 'type-marriage' },
-        anniversaire: { label: 'ANNIVERSAIRE', class: 'type-anniversaire' },
-        conference: { label: 'CONFÉRENCE', class: 'type-conference' },
-        autre: { label: 'AUTRE', class: 'type-autre' }
-    };
-
-    const type = typeLabels[event.type] || { label: event.type.toUpperCase(), class: 'type-autre' };
     const backgroundImage = typeImages[event.type] || typeImages.autre;
     const fillRate = event.capacity ? Math.round((guests.length / event.capacity) * 100) : 0;
-
-    // === Progression circulaire (SVG) ===
-    const circumference = 2 * Math.PI * 36; // rayon = 36
+    const circumference = 2 * Math.PI * 36;
     const progressOffset = circumference - (fillRate / 100) * circumference;
 
     return `
-        <div class="event-card-pro" onclick="viewEvent('${event.id}')" style="background-image: url('${backgroundImage}');">
+
+      <div class="col-12 col-md-6 col-lg-6 d-flex justify-content-center">
+        <div class="event-card-pro w-100" onclick="viewEvent('${event.id}')" style="background-image: url('${backgroundImage}');">
             ${isUpcoming ? '<div class="upcoming-ribbon">À VENIR</div>' : ''}
             
-         
-
-            <!-- Contenu principal -->
             <div class="event-content">
                 <h3 class="event-title">${event.name}</h3>
                 
@@ -77,7 +345,6 @@ function createEventCard(event) {
                     </div>` : ''}
                 </div>
 
-                <!-- Stats en cercles -->
                 <div class="event-stats-circle">
                     <div class="stat-circle">
                         <div class="circle">
@@ -91,28 +358,14 @@ function createEventCard(event) {
                             <span class="label">Présents</span>
                         </div>
                     </div>
-                    ${event.capacity ? `
-                    <div class="stat-circle progress">
-                        <svg width="80" height="80" viewBox="0 0 80 80">
-                            <circle class="track" cx="40" cy="40" r="36" stroke="#e0e0e0" stroke-width="8" fill="none"/>
-                            <circle class="progress-ring" cx="40" cy="40" r="36" stroke="#4ade80" stroke-width="8" fill="none"
-                                stroke-dasharray="${circumference}" stroke-dashoffset="${progressOffset}"
-                                transform="rotate(-90 40 40)"/>
-                            <text x="40" y="45" text-anchor="middle" class="progress-text">${fillRate}%</text>
-                        </svg>
-                        <span class="label">Remplissage</span>
-                    </div>
-                    ` : ''}
                 </div>
 
-                <!-- Statut actif -->
                 <div class="event-status">
                     <i class="fas ${event.active ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'}"></i>
                     <span>${event.active ? 'Actif' : 'Inactif'}</span>
                 </div>
             </div>
 
-            <!-- Actions (flottantes) -->
             <div class="event-actions" onclick="event.stopPropagation()">
                 <button class="action-btn" onclick="viewEvent('${event.id}')" title="Voir">
                     <i class="fas fa-eye"></i>
@@ -131,125 +384,363 @@ function createEventCard(event) {
                 </button>
             </div>
         </div>
+        </div>
     `;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// 🔄 MISE À JOUR GRANULAIRE DES CARTES
+// ═══════════════════════════════════════════════════════════════
+async function insertEventCard(event) {
+   
+    if (currentEvents.some(e => e.name === event.name && e.date === event.date && e.id !== event.id)) {
+        console.warn('Doublon détecté, ignoré:', event.name);
+        return;
+    }
 
-async function renderEvents() {
-    const eventsGrid = document.getElementById('eventsGrid');
-    const loader = document.getElementById('eventsLoader');
-    if (!eventsGrid || !loader) return;
-
-    loader.style.display = 'flex';
-    eventsGrid.style.display = 'none';
-    eventsGrid.style.opacity = 0;
-
+    currentEvents.unshift(event);
     
-    await new Promise(r => setTimeout(r, 100));
+    if (!passesCurrentFilters(event)) {
+        return;
+    }
 
-    if (filteredEvents.length === 0) {
-        eventsGrid.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-calendar-plus"></i>
-                <p>Aucun événement trouvé</p>
-                <button class="btn btn-primary" onclick="openEventModal()">
-                    <i class="fas fa-plus"></i> Créer votre premier événement
-                </button>
-            </div>
-        `;
+    const grid = document.getElementById('eventsGrid');
+    if (!grid) return;
+
+    const emptyState = grid.querySelector('.empty-state');
+    if (emptyState) {
+        grid.innerHTML = '';
+    }
+
+    const card = createEventCardElement(event);
+    eventCardCache.set(event.id, card);
+
+    const guests = storage.getGuestsByEventId(event.id);
+    eventStatsCache.set(event.id, {
+        guests: guests.length,
+        scanned: guests.filter(g => g.scanned).length,
+        fillRate: event.capacity ? Math.round((guests.length / event.capacity) * 100) : 0
+    });
+
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(-20px)';
+
+    const sortValue = document.getElementById('sortEvents')?.value || 'date-desc';
+    const insertBefore = findInsertPosition(event, sortValue);
+
+    if (insertBefore) {
+        grid.insertBefore(card, insertBefore);
     } else {
-        eventsGrid.innerHTML = filteredEvents
-            .map((event, index) => {
-                const card = createEventCard(event);
-                return `<div style="animation-delay: ${index * 0.1}s">${card}</div>`;
-            })
-            .join('');
+        grid.appendChild(card);
     }
 
-    loader.style.display = 'none';
-    eventsGrid.style.display = 'grid';
-    eventsGrid.style.opacity = 1;
+    requestAnimationFrame(() => {
+        card.style.transition = 'all 0.4s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    });
+
+    filteredEvents = getFilteredAndSortedEvents();
+}
+
+function findInsertPosition(newEvent, sortValue) {
+    const grid = document.getElementById('eventsGrid');
+    if (!grid) return null;
+
+    const cards = Array.from(grid.children);
     
+    for (const card of cards) {
+        const cardId = card.getAttribute('data-event-id');
+        if (!cardId) continue;
+        
+        const cardEvent = storage.getEventById(cardId);
+        if (!cardEvent) continue;
+
+        const shouldInsertBefore = compareEvents(newEvent, cardEvent, sortValue);
+        if (shouldInsertBefore) {
+            return card;
+        }
+    }
+
+    return null;
 }
 
+function compareEvents(eventA, eventB, sortValue) {
+    switch (sortValue) {
+        case 'date-desc':
+            return new Date(eventA.date) > new Date(eventB.date);
+        case 'date-asc':
+            return new Date(eventA.date) < new Date(eventB.date);
+        case 'name-asc':
+            return eventA.name.localeCompare(eventB.name) < 0;
+        case 'name-desc':
+            return eventA.name.localeCompare(eventB.name) > 0;
+        default:
+            return false;
+    }
+}
 
-// ===== EVENT LISTENERS =====
+async function updateEventCardIfNeeded(event) {
+    const oldEvent = currentEvents.find(e => e.id === event.id);
+    if (!oldEvent) {
+        currentEvents.push(event);
+        if (passesCurrentFilters(event)) {
+            await insertEventCard(event);
+        }
+        return;
+    }
+
+    const index = currentEvents.findIndex(e => e.id === event.id);
+    if (index !== -1) {
+        currentEvents[index] = event;
+    }
+
+    if (!passesCurrentFilters(event)) {
+        removeEventCard(event.id);
+        return;
+    }
+
+    const card = eventCardCache.get(event.id);
+    if (!card) {
+        await insertEventCard(event);
+        return;
+    }
+
+    const needsFullUpdate = 
+        oldEvent.name !== event.name ||
+        oldEvent.date !== event.date ||
+        oldEvent.time !== event.time ||
+        oldEvent.location !== event.location ||
+        oldEvent.type !== event.type ||
+        oldEvent.capacity !== event.capacity ||
+        oldEvent.active !== event.active;
+
+    if (needsFullUpdate) {
+        replaceEventCard(event);
+    } else {
+        updateEventStats(event.id);
+    }
+}
+
+function replaceEventCard(event) {
+    const card = eventCardCache.get(event.id);
+    if (!card) return;
+
+    const newCard = createEventCardElement(event);
+    eventCardCache.set(event.id, newCard);
+
+    card.style.transition = 'opacity 0.2s';
+    card.style.opacity = '0';
+
+    setTimeout(() => {
+        card.replaceWith(newCard);
+        newCard.style.opacity = '0';
+        requestAnimationFrame(() => {
+            newCard.style.transition = 'opacity 0.3s';
+            newCard.style.opacity = '1';
+        });
+    }, 200);
+}
+
+async function updateEventStats(eventId) {
+    const card = eventCardCache.get(eventId);
+    if (!card) return;
+
+    const guests = storage.getGuestsByEventId(eventId);
+    const scanned = guests.filter(g => g.scanned).length;
+    const event = storage.getEventById(eventId);
+    const capacity = event?.capacity;
+    const fillRate = capacity ? Math.round((guests.length / capacity) * 100) : 0;
+
+    const oldStats = eventStatsCache.get(eventId) || { guests: 0, scanned: 0, fillRate: 0 };
+    eventStatsCache.set(eventId, { guests: guests.length, scanned, fillRate });
+
+    const guestsEl = card.querySelector('.stat-circle:nth-child(1) .value');
+    if (guestsEl && oldStats.guests !== guests.length) {
+        animateValue(guestsEl, oldStats.guests, guests.length, 300);
+    }
+
+    const scannedEl = card.querySelector('.stat-circle:nth-child(2) .value');
+    if (scannedEl && oldStats.scanned !== scanned) {
+        animateValue(scannedEl, oldStats.scanned, scanned, 300);
+    }
+
+    if (capacity) {
+        const progressRing = card.querySelector('.progress-ring');
+        const progressText = card.querySelector('.progress-text');
+        
+        if (progressRing && progressText && oldStats.fillRate !== fillRate) {
+            const circumference = 2 * Math.PI * 36;
+            const offset = circumference - (fillRate / 100) * circumference;
+            progressRing.style.transition = 'stroke-dashoffset 0.5s ease';
+            progressRing.style.strokeDashoffset = offset;
+            
+            const currentValue = parseInt(progressText.textContent) || 0;
+            animateValue(progressText, currentValue, fillRate, 400, '%');
+        }
+    }
+
+    const statusEl = card.querySelector('.event-status i');
+    const statusText = card.querySelector('.event-status span');
+    if (statusEl && statusText && event) {
+        const isActive = event.active !== false;
+        statusEl.className = isActive ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-danger';
+        statusText.textContent = isActive ? 'Actif' : 'Inactif';
+    }
+}
+
+function animateValue(el, start, end, duration, suffix = '') {
+    if (start === end) return;
+    
+    const startTime = performance.now();
+    const diff = end - start;
+
+    function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOutQuad = progress * (2 - progress);
+        const current = Math.floor(start + diff * easeOutQuad);
+        el.textContent = current + suffix;
+
+        if (progress < 1) {
+            requestAnimationFrame(step);
+        } else {
+            el.textContent = end + suffix;
+        }
+    }
+
+    requestAnimationFrame(step);
+}
+
+function removeEventCard(eventId) {
+    currentEvents = currentEvents.filter(e => e.id !== eventId);
+    filteredEvents = filteredEvents.filter(e => e.id !== eventId);
+    
+    const card = eventCardCache.get(eventId);
+    if (!card) return;
+
+    card.style.transition = 'all 0.3s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+
+    setTimeout(() => {
+        card.remove();
+        eventCardCache.delete(eventId);
+        eventStatsCache.delete(eventId);
+
+        const grid = document.getElementById('eventsGrid');
+        if (grid && grid.children.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-calendar-plus text-6xl mb-4 text-gray-400"></i>
+                    <p class="text-lg text-gray-500">Aucun événement trouvé</p>
+                    <button class="btn btn-primary" onclick="openEventModal()">
+                        <i class="fas fa-plus"></i> Créer votre premier événement
+                    </button>
+                </div>
+            `;
+        }
+    }, 300);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🎧 EVENT LISTENERS
+// ═══════════════════════════════════════════════════════════════
 function initializeEventListeners() {
-    // Bouton créer événement
-    const createEventBtn = document.getElementById('createEventBtn');
-    if (createEventBtn) {
-        createEventBtn.addEventListener('click', () => openEventModal());
-    }
-
-    // Recherche
-    const searchEvents = document.getElementById('searchEvents');
-    if (searchEvents) {
-        searchEvents.addEventListener('input', debounce(handleSearch, 300));
-    }
-
-    // Filtres
-    const filterType = document.getElementById('filterType');
-    if (filterType) {
-        filterType.addEventListener('change', applyFilters);
-    }
-
-    const sortEvents = document.getElementById('sortEvents');
-    if (sortEvents) {
-        sortEvents.addEventListener('change', applyFilters);
-    }
-
-    // Formulaire événement
-    const eventForm = document.getElementById('eventForm');
-    if (eventForm) {
-        eventForm.addEventListener('submit', handleEventSubmit);
-    }
+    document.getElementById('createEventBtn')?.addEventListener('click', () => openEventModal());
+    document.getElementById('searchEvents')?.addEventListener('input', debounce(handleSearch, 300));
+    document.getElementById('filterType')?.addEventListener('change', applyFilters);
+    document.getElementById('sortEvents')?.addEventListener('change', applyFilters);
+    document.getElementById('eventForm')?.addEventListener('submit', handleEventSubmit);
+    
+    const closeButtons = document.querySelectorAll('.modal-close, .btn-cancel');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', closeEventModal);
+    });
 }
 
-// ===== SEARCH & FILTER =====
+// ═══════════════════════════════════════════════════════════════
+// 🔍 FILTRES & RECHERCHE
+// ═══════════════════════════════════════════════════════════════
 function handleSearch(e) {
-    const query = e.target.value.toLowerCase();
-    filteredEvents = currentEvents.filter(event => 
-        event.name.toLowerCase().includes(query) ||
-        (event.location && event.location.toLowerCase().includes(query)) ||
-        (event.description && event.description.toLowerCase().includes(query))
-    );
+    const query = e.target.value.toLowerCase().trim();
+    
+    if (query.length === 0) {
+        filteredEvents = [...currentEvents];
+    } else {
+        filteredEvents = currentEvents.filter(event =>
+            event.name.toLowerCase().includes(query) ||
+            (event.location && event.location.toLowerCase().includes(query)) ||
+            (event.description && event.description.toLowerCase().includes(query))
+        );
+    }
+    
     applyFilters();
 }
 
 async function applyFilters() {
-    const filterType = document.getElementById('filterType');
-    const sortEvents = document.getElementById('sortEvents');
-    
-    let filtered = [...filteredEvents];
-
-    if (filterType && filterType.value !== 'all') {
-        filtered = filtered.filter(e => e.type === filterType.value);
-    }
-
-    // Tri
-    if (sortEvents) {
-        const sortValue = sortEvents.value;
-        filtered.sort((a, b) => {
-            switch (sortValue) {
-                case 'date-desc':
-                    return new Date(b.date) - new Date(a.date);
-                case 'date-asc':
-                    return new Date(a.date) - new Date(b.date);
-                case 'name-asc':
-                    return a.name.localeCompare(b.name);
-                case 'name-desc':
-                    return b.name.localeCompare(a.name);
-                default:
-                    return 0;
-            }
-        });
-    }
-
-    filteredEvents = filtered;
+    filteredEvents = getFilteredAndSortedEvents();
     await renderEvents();
 }
 
-// ===== MODAL =====
+function getFilteredAndSortedEvents() {
+    let filtered = [...currentEvents];
+    
+    const searchQuery = document.getElementById('searchEvents')?.value.toLowerCase().trim();
+    if (searchQuery) {
+        filtered = filtered.filter(event =>
+            event.name.toLowerCase().includes(searchQuery) ||
+            (event.location && event.location.toLowerCase().includes(searchQuery)) ||
+            (event.description && event.description.toLowerCase().includes(searchQuery))
+        );
+    }
+
+    const filterType = document.getElementById('filterType')?.value;
+    if (filterType && filterType !== 'all') {
+        filtered = filtered.filter(e => e.type === filterType);
+    }
+
+    const sortValue = document.getElementById('sortEvents')?.value || 'date-desc';
+    filtered.sort((a, b) => {
+        switch (sortValue) {
+            case 'date-desc':
+                return new Date(b.date) - new Date(a.date);
+            case 'date-asc':
+                return new Date(a.date) - new Date(b.date);
+            case 'name-asc':
+                return a.name.localeCompare(b.name);
+            case 'name-desc':
+                return b.name.localeCompare(a.name);
+            default:
+                return 0;
+        }
+    });
+
+    return filtered;
+}
+
+function passesCurrentFilters(event) {
+    const searchQuery = document.getElementById('searchEvents')?.value.toLowerCase().trim();
+    if (searchQuery) {
+        const matchesSearch = 
+            event.name.toLowerCase().includes(searchQuery) ||
+            (event.location && event.location.toLowerCase().includes(searchQuery)) ||
+            (event.description && event.description.toLowerCase().includes(searchQuery));
+        
+        if (!matchesSearch) return false;
+    }
+
+    const filterType = document.getElementById('filterType')?.value;
+    if (filterType && filterType !== 'all' && event.type !== filterType) {
+        return false;
+    }
+
+    return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📝 MODAL & FORMULAIRE
+// ═══════════════════════════════════════════════════════════════
 function openEventModal(eventId = null) {
     const modal = document.getElementById('eventModal');
     const form = document.getElementById('eventForm');
@@ -258,156 +749,596 @@ function openEventModal(eventId = null) {
     if (!modal || !form) return;
 
     form.reset();
-    
+    document.getElementById('eventId').value = '';
+    document.getElementById('eventActive').checked = true;
+
     if (eventId) {
         const event = storage.getEventById(eventId);
         if (event) {
-            document.getElementById('eventId').value = event.id;
-            document.getElementById('eventName').value = event.name;
-            document.getElementById('eventType').value = event.type;
-            document.getElementById('eventDate').value = event.date;
+            document.getElementById('eventId').value = event.id || '';
+            document.getElementById('eventName').value = event.name || '';
+            document.getElementById('eventDate').value = event.date || '';
             document.getElementById('eventTime').value = event.time || '';
-            document.getElementById('eventCapacity').value = event.capacity || '';
             document.getElementById('eventLocation').value = event.location || '';
+            document.getElementById('eventType').value = event.type || 'autre';
+            document.getElementById('eventCapacity').value = event.capacity || '';
             document.getElementById('eventDescription').value = event.description || '';
-            document.getElementById('welcomeMessage').value = event.welcomeMessage || '';
+            document.getElementById('eventWelcomeMessage').value = event.welcomeMessage || '';
             document.getElementById('eventActive').checked = event.active !== false;
             
             title.innerHTML = '<i class="fas fa-edit"></i> Modifier l\'événement';
         }
     } else {
         title.innerHTML = '<i class="fas fa-calendar-plus"></i> Créer un événement';
-        document.getElementById('eventActive').checked = true;
     }
 
     modal.classList.add('active');
+    document.getElementById('eventName')?.focus();
 }
 
 function closeEventModal() {
     const modal = document.getElementById('eventModal');
-    if (modal) {
-        modal.classList.remove('active');
-    }
+    modal?.classList.remove('active');
 }
 
-// ===== FORM SUBMIT =====
-function handleEventSubmit(e) {
-    e.preventDefault();
+// ═══════════════════════════════════════════════════════════════
+// ✅ VALIDATION ULTRA COMPLÈTE
+// ═══════════════════════════════════════════════════════════════
+function validateEventForm(formData) {
+    const errors = [];
+
+    if (!formData.name || formData.name.trim().length < 3) {
+        errors.push('Le nom de l\'événement doit contenir au moins 3 caractères.');
+    }
+
+    if (formData.name && formData.name.length > 100) {
+        errors.push('Le nom de l\'événement ne peut pas dépasser 100 caractères.');
+    }
+
+    if (!formData.date) {
+        errors.push('La date de l\'événement est obligatoire.');
+    } else {
+        const eventDate = new Date(formData.date);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        if (eventDate < now) {
+            errors.push('La date de l\'événement ne peut pas être dans le passé.');
+        }
+    }
+
+    if (formData.time) {
+        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+        if (!timeRegex.test(formData.time)) {
+            errors.push('L\'heure doit être au format HH:MM (ex: 14:30).');
+        }
+    }
+
+    if (!formData.location || formData.location.trim().length < 3) {
+        errors.push('Le lieu de l\'événement doit contenir au moins 3 caractères.');
+    }
+
+    if (formData.location && formData.location.length > 200) {
+        errors.push('Le lieu ne peut pas dépasser 200 caractères.');
+    }
+
+    if (!formData.type || !['marriage', 'anniversaire', 'conference', 'autre'].includes(formData.type)) {
+        errors.push('Veuillez sélectionner un type d\'événement valide.');
+    }
+
+    if (formData.capacity) {
+        const capacity = parseInt(formData.capacity);
+        if (isNaN(capacity) || capacity < 1) {
+            errors.push('La capacité doit être un nombre positif.');
+        } else if (capacity > 100000) {
+            errors.push('La capacité ne peut pas dépasser 100 000 personnes.');
+        }
+    }
+
+    if (formData.description && formData.description.length > 1000) {
+        errors.push('La description ne peut pas dépasser 1000 caractères.');
+    }
+
+    if (formData.welcomeMessage && formData.welcomeMessage.length > 500) {
+        errors.push('Le message de bienvenue ne peut pas dépasser 500 caractères.');
+    }
+
+    return errors;
+}
+
+async function checkEventUniqueness(name, date, currentEventId = null) {
+    const existing = storage.data.events.find(e => 
+        e.id !== currentEventId &&
+        e.name.toLowerCase() === name.toLowerCase() &&
+        e.date === date
+    );
     
-    const eventId = document.getElementById('eventId').value;
+    return !existing;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📝 SOUMISSION AVEC SWEETALERT2
+// ═══════════════════════════════════════════════════════════════
+async function handleEventSubmit(e) {
+    e.preventDefault();
+
+    const eventId = (document.getElementById('eventId')?.value || '').trim();
+    const name = (document.getElementById('eventName')?.value || '').trim();
+    const type = (document.getElementById('eventType')?.value || 'autre').trim();
+    const date = (document.getElementById('eventDate')?.value || '').trim();
+    const time = (document.getElementById('eventTime')?.value || '').trim();
+    const capacityRaw = (document.getElementById('eventCapacity')?.value || '').trim();
+    const capacity = capacityRaw === '' ? null : parseInt(capacityRaw, 10);
+    const location = (document.getElementById('eventLocation')?.value || '').trim();
+    const description = (document.getElementById('eventDescription')?.value || '').trim();
+    // NOTE: dans events.html l'ID du textarea est "welcomeMessage"
+    const welcomeMessage = (document.getElementById('welcomeMessage')?.value || '').trim();
+    const active = !!document.getElementById('eventActive')?.checked;
+
     const eventData = {
-        id: eventId || undefined,
-        name: document.getElementById('eventName').value.trim(),
-        type: document.getElementById('eventType').value,
-        date: document.getElementById('eventDate').value,
-        time: document.getElementById('eventTime').value,
-        capacity: document.getElementById('eventCapacity').value ? parseInt(document.getElementById('eventCapacity').value) : null,
-        location: document.getElementById('eventLocation').value.trim(),
-        description: document.getElementById('eventDescription').value.trim(),
-        welcomeMessage: document.getElementById('welcomeMessage').value.trim(),
-        active: document.getElementById('eventActive').checked
+        name,
+        type,
+        date,
+        time: time || '',
+        capacity,
+        location,
+        description,
+        welcomeMessage,
+        active
     };
 
+    // Validation
+    const validationErrors = validateEventForm(eventData);
+    if (validationErrors.length > 0) {
+        await Swal.fire({
+            icon: 'error',
+            title: 'Erreurs de validation',
+            html: '<ul style="text-align: left;">' + validationErrors.map(err => `<li>${err}</li>`).join('') + '</ul>',
+            confirmButtonColor: '#D97706'
+        });
+        return;
+    }
+
+    if (!eventId) {
+        const isUnique = await checkEventUniqueness(eventData.name, eventData.date);
+        if (!isUnique) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Événement existant',
+                html: `Un événement avec le nom <strong>"${eventData.name}"</strong> existe déjà à cette date.<br>Veuillez choisir un autre nom ou une autre date.`,
+                confirmButtonColor: '#D97706'
+            });
+            return;
+        }
+    }
+
+    const action = eventId ? 'mise à jour' : 'création';
+    const result = await Swal.fire({
+        title: `Confirmer ${action}`,
+        html: `
+            <div style="text-align: left;">
+                <p><strong>Nom :</strong> ${escapeHtml(eventData.name)}</p>
+                <p><strong>Date :</strong> ${eventData.date ? new Date(eventData.date).toLocaleDateString('fr-FR') : '-'}</p>
+                ${eventData.time ? `<p><strong>Heure :</strong> ${escapeHtml(eventData.time)}</p>` : ''}
+                <p><strong>Lieu :</strong> ${escapeHtml(eventData.location || '-')}</p>
+                ${eventData.capacity ? `<p><strong>Capacité :</strong> ${eventData.capacity} personnes</p>` : ''}
+            </div>
+            <hr>
+            <p>Voulez-vous vraiment ${eventId ? 'modifier' : 'créer'} cet événement ?</p>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: `<i class="fas ${eventId ? 'fa-save' : 'fa-plus'}"></i> ${eventId ? 'Enregistrer' : 'Créer'}`,
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#D97706',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+        title: eventId ? 'Mise à jour...' : 'Création...',
+        text: 'Enregistrement de l\'événement',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
     try {
-        const savedEvent = storage.saveEvent(eventData);
+        let savedEvent;
+        if (eventId) {
+            savedEvent = await storage.updateEvent(eventId, eventData);
+        } else {
+            savedEvent = await storage.createEvent(eventData);
+            savedEvent.__justCreated = true;
+        }
+
+        if (!savedEvent || savedEvent.error) {
+            throw new Error(savedEvent?.message || 'Échec de l\'opération');
+        }
+
         closeEventModal();
-        loadEvents();
-        showNotification('success', eventId ? 'Événement modifié avec succès' : 'Événement créé avec succès');
-    } catch (error) {
-        console.error('Error saving event:', error);
-        showNotification('error', 'Une erreur est survenue lors de l\'enregistrement');
+        Swal.close();
+
+        await Swal.fire({
+            icon: 'success',
+            title: eventId ? 'Événement mis à jour !' : 'Événement créé !',
+            html: `<strong>"${escapeHtml(savedEvent.name)}"</strong> a été ${eventId ? 'mis à jour' : 'créé'} avec succès.`,
+            timer: 2500,
+            timerProgressBar: true,
+            showConfirmButton: false
+        });
+
+    } catch (err) {
+        console.error('Erreur soumission événement:', err);
+        Swal.close();
+        await Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: err.message || 'Une erreur est survenue lors de l\'enregistrement.',
+            confirmButtonColor: '#D97706'
+        });
     }
 }
 
-// ===== ACTIONS =====
-function viewEvent(eventId) {
-    window.location.href = `guests.html?event=${eventId}`;
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
-function editEvent(eventId) {
-    openEventModal(eventId);
-}
 
+
+// ═══════════════════════════════════════════════════════════════
+// ⚡ ACTIONS AVEC SWEETALERT2
+// ═══════════════════════════════════════════════════════════════
 async function duplicateEvent(eventId) {
     const event = storage.getEventById(eventId);
-    if (!event) return;
+    if (!event) {
+        await showError('Événement introuvable');
+        return;
+    }
 
-    const confirmed = await confirmDialog(
-        'Dupliquer l\'événement',
-        'Voulez-vous dupliquer cet événement avec tous ses invités ?',
-        'Dupliquer',
-        'Annuler'
-    );
+    const guests = storage.getGuestsByEventId(eventId);
 
-    if (confirmed) {
+    const result = await Swal.fire({
+        title: 'Dupliquer l\'événement',
+        html: `
+            <div style="text-align: left;">
+                <p>Vous allez dupliquer :</p>
+                <p><strong>"${event.name}"</strong></p>
+                ${guests.length > 0 ? `<p class="text-info"><i class="fas fa-users"></i> ${guests.length} invité(s) seront également dupliqués</p>` : '<p class="text-muted">Aucun invité à dupliquer</p>'}
+            </div>
+            <hr>
+            <p>Une copie sera créée avec tous les détails de l'événement.</p>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-copy"></i> Dupliquer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#D97706',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+        title: 'Duplication en cours...',
+        html: `
+            <div class="progress-container">
+                <p>Création de l'événement...</p>
+                <div class="spinner"></div>
+            </div>
+        `,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
         const newEvent = { ...event };
         delete newEvent.id;
-        newEvent.name = `${event.name} (Copie)`;
+        delete newEvent.createdAt;
+        delete newEvent.updatedAt;
+        newEvent.name += ' (Copie)';
         
-        const savedEvent = storage.saveEvent(newEvent);
+        const saved = await storage.createEvent(newEvent);
         
-        // Dupliquer les invités
-        const guests = storage.getGuestsByEventId(eventId);
-        guests.forEach(guest => {
-            const newGuest = { ...guest };
-            delete newGuest.id;
-            newGuest.eventId = savedEvent.id;
-            newGuest.scanned = false;
-            storage.saveGuest(newGuest);
+        if (!saved?.id) {
+            throw new Error('Échec création événement');
+        }
+
+        if (guests.length > 0) {
+            Swal.update({
+                html: `
+                    <div class="progress-container">
+                        <p>Duplication des invités...</p>
+                        <p class="text-sm text-gray-500">0 / ${guests.length}</p>
+                        <div class="spinner"></div>
+                    </div>
+                `
+            });
+
+            for (let i = 0; i < guests.length; i++) {
+                const g = guests[i];
+                const ng = { ...g };
+                delete ng.id;
+                delete ng.createdAt;
+                delete ng.updatedAt;
+                ng.eventId = saved.id;
+                ng.scanned = false;
+                ng.scannedAt = null;
+                
+                await storage.createGuest(ng);
+
+                Swal.update({
+                    html: `
+                        <div class="progress-container">
+                            <p>Duplication des invités...</p>
+                            <p class="text-sm text-gray-500">${i + 1} / ${guests.length}</p>
+                            <div class="spinner"></div>
+                        </div>
+                    `
+                });
+            }
+        }
+
+        await Swal.fire({
+            icon: 'success',
+            title: 'Duplication réussie !',
+            html: `
+                <p>L'événement <strong>"${saved.name}"</strong> a été créé.</p>
+                ${guests.length > 0 ? `<p class="text-success"><i class="fas fa-check-circle"></i> ${guests.length} invité(s) dupliqués</p>` : ''}
+            `,
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
         });
-        
-        loadEvents();
-        showNotification('success', 'Événement dupliqué avec succès');
+
+    } catch (err) {
+        console.error('Erreur duplication:', err);
+        await showError('Échec de la duplication : ' + err.message);
     }
 }
 
-function exportEvent(eventId) {
+async function exportEvent(eventId) {
     const event = storage.getEventById(eventId);
-    if (!event) return;
+    if (!event) {
+        await showError('Événement introuvable');
+        return;
+    }
 
-    const csvContent = storage.exportToCSV(eventId);
-    const filename = `${event.name.replace(/\s+/g, '_')}_invites_${new Date().toISOString().split('T')[0]}.csv`;
-    
-    downloadFile(csvContent, filename, 'text/csv');
-    showNotification('success', 'Export CSV réussi');
+    const guests = storage.getGuestsByEventId(eventId);
+
+    if (guests.length === 0) {
+        await Swal.fire({
+            icon: 'warning',
+            title: 'Aucun invité',
+            html: `L'événement <strong>"${event.name}"</strong> ne contient aucun invité à exporter.`,
+            confirmButtonColor: '#D97706'
+        });
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: 'Exporter en CSV',
+        html: `
+            <div style="text-align: left;">
+                <p>Événement : <strong>"${event.name}"</strong></p>
+                <p><i class="fas fa-users"></i> ${guests.length} invité(s) seront exportés</p>
+            </div>
+            <hr>
+            <p>Le fichier CSV contiendra toutes les informations des invités.</p>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-download"></i> Exporter',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#D97706',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+        title: 'Export en cours...',
+        text: 'Génération du fichier CSV',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        await new Promise(r => setTimeout(r, 500));
+
+        const csv = storage.exportToCSV(eventId);
+        const filename = `${event.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        await Swal.fire({
+            icon: 'success',
+            title: 'Export réussi !',
+            html: `
+                <p>Le fichier <strong>"${filename}"</strong> a été téléchargé.</p>
+                <p class="text-success"><i class="fas fa-check-circle"></i> ${guests.length} invité(s) exportés</p>
+            `,
+            timer: 3000,
+            timerProgressBar: true,
+            confirmButtonColor: '#D97706'
+        });
+
+    } catch (err) {
+        console.error('Erreur export:', err);
+        await showError('Échec de l\'export : ' + err.message);
+    }
 }
 
 async function deleteEvent(eventId) {
     const event = storage.getEventById(eventId);
-    if (!event) return;
+    if (!event) {
+        await showError('Événement introuvable');
+        return;
+    }
 
     const guests = storage.getGuestsByEventId(eventId);
-    const guestCount = guests.length;
+    const scans = storage.data.scans.filter(s => s.eventId === eventId);
 
-    const confirmed = await confirmDialog(
-        'Supprimer l\'événement',
-        `Êtes-vous sûr de vouloir supprimer "${event.name}" ? ${guestCount > 0 ? `Cela supprimera également ${guestCount} invité(s) et leurs QR codes.` : ''}`,
-        'Supprimer',
-        'Annuler'
-    );
+    const result = await Swal.fire({
+        title: 'Supprimer l\'événement ?',
+        html: `
+            <div style="text-align: left;">
+                <p>Vous êtes sur le point de supprimer :</p>
+                <p><strong>"${event.name}"</strong></p>
+                <hr>
+                ${guests.length > 0 ? `<p class="text-warning"><i class="fas fa-exclamation-triangle"></i> ${guests.length} invité(s) seront supprimés</p>` : ''}
+                ${scans.length > 0 ? `<p class="text-warning"><i class="fas fa-exclamation-triangle"></i> ${scans.length} scan(s) seront supprimés</p>` : ''}
+                <p class="text-danger"><strong>Cette action est irréversible.</strong></p>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-trash"></i> Supprimer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true,
+        input: 'checkbox',
+        inputPlaceholder: 'Je comprends que cette action est irréversible',
+        inputValidator: (result) => {
+            return !result && 'Vous devez confirmer la suppression';
+        }
+    });
 
-    if (confirmed) {
-        storage.deleteEvent(eventId);
-        loadEvents();
-        showNotification('success', 'Événement supprimé avec succès');
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+        title: 'Suppression...',
+        html: `
+            <div class="progress-container">
+                <p>Suppression de l'événement et des données associées...</p>
+                <div class="spinner"></div>
+            </div>
+        `,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        await new Promise(r => setTimeout(r, 500));
+        
+        const success = await storage.deleteEvent(eventId);
+        
+        if (!success) {
+            throw new Error('Échec de la suppression');
+        }
+
+        await Swal.fire({
+            icon: 'success',
+            title: 'Événement supprimé !',
+            html: `
+                <p><strong>"${event.name}"</strong> a été supprimé avec succès.</p>
+                ${guests.length > 0 ? `<p class="text-muted">${guests.length} invité(s) supprimés</p>` : ''}
+            `,
+            timer: 2500,
+            timerProgressBar: true,
+            showConfirmButton: false
+        });
+
+    } catch (err) {
+        console.error('Erreur suppression:', err);
+        await showError('Échec de la suppression : ' + err.message);
     }
 }
 
-// Fermer le modal en cliquant sur l'overlay
+async function viewEvent(eventId) {
+    const event = storage.getEventById(eventId);
+    if (!event) {
+        showError('Événement introuvable');
+        return;
+    }
+    
+    
+    window.location.href = `guests?event=${eventId}`;
+}
+
+function editEvent(eventId) {
+    const event = storage.getEventById(eventId);
+    if (!event) {
+        showError('Événement introuvable');
+        return;
+    }
+    openEventModal(eventId);
+}
+
+async function showError(message) {
+    await Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: message,
+        confirmButtonColor: '#D97706'
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🌐 GESTION MODAL (Clic extérieur / Escape)
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
         closeEventModal();
     }
 });
 
-// Fermer avec la touche Escape
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        closeEventModal();
+        const modal = document.getElementById('eventModal');
+        if (modal && modal.classList.contains('active')) {
+            closeEventModal();
+        }
     }
 });
 
-// Export des fonctions globales
+// ═══════════════════════════════════════════════════════════════
+// 🔧 UTILITAIRES
+// ═══════════════════════════════════════════════════════════════
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🌐 EXPORTS GLOBAUX
+// ═══════════════════════════════════════════════════════════════
 window.openEventModal = openEventModal;
 window.closeEventModal = closeEventModal;
 window.viewEvent = viewEvent;
@@ -415,3 +1346,5 @@ window.editEvent = editEvent;
 window.duplicateEvent = duplicateEvent;
 window.exportEvent = exportEvent;
 window.deleteEvent = deleteEvent;
+
+console.log('✅ SECURA Events Management V5.0 chargé - Mode Observable actif !');

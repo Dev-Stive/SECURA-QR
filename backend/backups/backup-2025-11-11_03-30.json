@@ -281,9 +281,8 @@
       "id": "sec_1762209804227_yeswvlgek",
       "updatedAt": "2025-11-03T22:43:24.227Z",
       "createdAt": "2025-11-03T22:43:24.227Z",
-      "scanned": true,
-      "status": "pending",
-      "scannedAt": "2025-11-11T11:31:37.908Z"
+      "scanned": false,
+      "status": "pending"
     },
     {
       "eventId": "sec_1762209757419_exl3pjlf0",
@@ -479,6 +478,471 @@
       "createdAt": "2025-11-10T15:19:26.383Z",
       "updatedAt": "2025-11-10T15:19:26.383Z",
       "scanned": false,
+      "status": "pending"
+    },
+    {
+      "firstName": "Maman",
+      "lastName": "Françoise",
+      "email": "",
+      "phone": "693592328",
+      "company": "-",
+      "notes": "Table Ensemble",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542516_itcpghvqo",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Presley",
+      "lastName": "Silape Presley",
+      "email": "",
+      "phone": "691457772",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542516_yscci5qfk",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Davy Vianney",
+      "lastName": "Onomo Nga",
+      "email": "",
+      "phone": "640634262",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542516_yb4db9p5n",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Sorel",
+      "lastName": "Nzeumegne",
+      "email": "",
+      "phone": "652981890",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542517_218mv5gwr",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Darel",
+      "lastName": "-",
+      "email": "",
+      "phone": "690472725",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542517_9o2vqr9qc",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Syntiche",
+      "lastName": "Kopmo",
+      "email": "",
+      "phone": "654797647",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542517_dgugxhxn7",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Theophile",
+      "lastName": "Ngatio",
+      "email": "",
+      "phone": "651223494",
+      "company": "-",
+      "notes": "Table Bonté",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542517_8nwo5jw9n",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Cyrille",
+      "lastName": "Kwemo",
+      "email": "",
+      "phone": "689159074",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542518_4ln3di5ry",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Landry",
+      "lastName": "Ngopnang",
+      "email": "",
+      "phone": "678785567",
+      "company": "-",
+      "notes": "Table Paix",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542518_jxdsby9te",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Fabiola",
+      "lastName": "Nzuega",
+      "email": "",
+      "phone": "658714751",
+      "company": "-",
+      "notes": "Table Paix",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542518_lhx9ibbwk",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "-",
+      "lastName": "Kwemo",
+      "email": "",
+      "phone": "676315703",
+      "company": "-",
+      "notes": "Table Paix",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542518_pnxf263zw",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Verine",
+      "lastName": "Tchitchio",
+      "email": "",
+      "phone": "658714751",
+      "company": "-",
+      "notes": "Table Paix",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542518_rxlohz6ig",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Pierre",
+      "lastName": "Djopmegne",
+      "email": "",
+      "phone": "653236870",
+      "company": "-",
+      "notes": "Table Paix",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542519_c8jaz3i7s",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Arthur",
+      "lastName": "Mbamegne",
+      "email": "",
+      "phone": "693437801",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542519_faq7m2b0l",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Dorice",
+      "lastName": "Wamegne",
+      "email": "",
+      "phone": "651076330",
+      "company": "-",
+      "notes": "Table Bonheur",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542519_itz2d1raj",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Pharel",
+      "lastName": "Joufang",
+      "email": "",
+      "phone": "659872512",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542519_hoc5o2z3x",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "-",
+      "lastName": "Chena",
+      "email": "",
+      "phone": "658060712",
+      "company": "-",
+      "notes": "Table Amitié",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542519_7erwpo3lp",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Christelle",
+      "lastName": "Ngassi",
+      "email": "",
+      "phone": "683015321",
+      "company": "-",
+      "notes": "Table Lumière",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542519_ni7cb12ml",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Berry",
+      "lastName": "Kuete",
+      "email": "",
+      "phone": "697654460",
+      "company": "-",
+      "notes": "Table Lumière",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542519_kx6x6218g",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Raissa",
+      "lastName": "Teka",
+      "email": "",
+      "phone": "656409242",
+      "company": "-",
+      "notes": "Table Lumière",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542520_c9x81smht",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "-",
+      "lastName": "Alain",
+      "email": "",
+      "phone": "679459703",
+      "company": "-",
+      "notes": "Table Lumière",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542520_or3yg8emv",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": true,
+      "scannedAt": "2025-11-11T02:24:24.309Z",
+      "status": "pending"
+    },
+    {
+      "firstName": "Cyrille",
+      "lastName": "Lionel",
+      "email": "",
+      "phone": "697199347",
+      "company": "-",
+      "notes": "Table Lumiere",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542520_w1s4pvffw",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Seujip",
+      "lastName": "Octavine",
+      "email": "",
+      "phone": "680299587",
+      "company": "-",
+      "notes": "Table Paix",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542520_0z2vxzlmi",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "-",
+      "lastName": "Divin",
+      "email": "",
+      "phone": "680299587",
+      "company": "-",
+      "notes": "Table Bien-etre",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542520_25ofxfigr",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "-",
+      "lastName": "Séraphins",
+      "email": "",
+      "phone": "696810396",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542520_x4zvtas2u",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "-",
+      "lastName": "Romaric",
+      "email": "",
+      "phone": "696810396",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542520_rrziqgnfb",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Daïna",
+      "lastName": "Kenne",
+      "email": "",
+      "phone": "693231265",
+      "company": "-",
+      "notes": "Table Optimisme",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542520_2mdo7djn3",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Guiline",
+      "lastName": "Bekolo",
+      "email": "",
+      "phone": "672458129",
+      "company": "-",
+      "notes": "Table Lumiere",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542520_tzmlivk7j",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Eloge",
+      "lastName": "Koumetio",
+      "email": "",
+      "phone": "654101622",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542521_ybe91xo87",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "-",
+      "lastName": "Patrick",
+      "email": "",
+      "phone": "653236870",
+      "company": "-",
+      "notes": "Table Bonté",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542521_zmbodqvdo",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "firstName": "Fogang",
+      "lastName": "Georges",
+      "email": "",
+      "phone": "682096325",
+      "company": "-",
+      "notes": "Table Harmonie",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "id": "gst_1762826542521_hlx7b9xf0",
+      "createdAt": "2025-11-11T02:02:22.516Z",
+      "updatedAt": "2025-11-11T02:02:22.516Z",
+      "scanned": false,
+      "scannedAt": null,
       "status": "pending"
     }
   ],
@@ -992,18 +1456,514 @@
         "includeLogo": true
       },
       "id": "qr_1762827337937_h9c2len67",
-      "updatedAt": "2025-11-11T11:29:03.709Z",
+      "updatedAt": "2025-11-11T02:21:07.805Z",
       "createdAt": "2025-11-11T02:15:37.937Z"
+    },
+    {
+      "guestId": "gst_1762826542516_itcpghvqo",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542516_itcpghvqo\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338037_z7jds5xs1",
+      "updatedAt": "2025-11-11T02:21:07.921Z",
+      "createdAt": "2025-11-11T02:15:38.037Z"
+    },
+    {
+      "guestId": "gst_1762826542516_yscci5qfk",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542516_yscci5qfk\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338137_ydndl29e6",
+      "updatedAt": "2025-11-11T02:21:08.022Z",
+      "createdAt": "2025-11-11T02:15:38.137Z"
+    },
+    {
+      "guestId": "gst_1762826542516_yb4db9p5n",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542516_yb4db9p5n\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338236_9d88zwene",
+      "updatedAt": "2025-11-11T02:21:08.129Z",
+      "createdAt": "2025-11-11T02:15:38.236Z"
+    },
+    {
+      "guestId": "gst_1762826542517_218mv5gwr",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542517_218mv5gwr\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338337_19joj9oax",
+      "updatedAt": "2025-11-11T02:21:08.258Z",
+      "createdAt": "2025-11-11T02:15:38.337Z"
+    },
+    {
+      "guestId": "gst_1762826542517_9o2vqr9qc",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542517_9o2vqr9qc\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338436_1dk1jfv95",
+      "updatedAt": "2025-11-11T02:21:08.371Z",
+      "createdAt": "2025-11-11T02:15:38.436Z"
+    },
+    {
+      "guestId": "gst_1762826542517_dgugxhxn7",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542517_dgugxhxn7\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338536_mhkyayt3z",
+      "updatedAt": "2025-11-11T02:21:08.471Z",
+      "createdAt": "2025-11-11T02:15:38.536Z"
+    },
+    {
+      "guestId": "gst_1762826542517_8nwo5jw9n",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542517_8nwo5jw9n\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338636_gr1yvy5zs",
+      "updatedAt": "2025-11-11T02:21:08.570Z",
+      "createdAt": "2025-11-11T02:15:38.636Z"
+    },
+    {
+      "guestId": "gst_1762826542518_4ln3di5ry",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542518_4ln3di5ry\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338736_cwubm2mvx",
+      "updatedAt": "2025-11-11T02:21:08.708Z",
+      "createdAt": "2025-11-11T02:15:38.736Z"
+    },
+    {
+      "guestId": "gst_1762826542518_jxdsby9te",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542518_jxdsby9te\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338836_hlj6eucy7",
+      "updatedAt": "2025-11-11T02:21:08.858Z",
+      "createdAt": "2025-11-11T02:15:38.836Z"
+    },
+    {
+      "guestId": "gst_1762826542518_lhx9ibbwk",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542518_lhx9ibbwk\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827338931_08w88urik",
+      "updatedAt": "2025-11-11T02:15:38.931Z",
+      "createdAt": "2025-11-11T02:15:38.931Z"
+    },
+    {
+      "guestId": "gst_1762826542518_pnxf263zw",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542518_pnxf263zw\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339037_2qz3k7sdp",
+      "updatedAt": "2025-11-11T02:21:09.095Z",
+      "createdAt": "2025-11-11T02:15:39.037Z"
+    },
+    {
+      "guestId": "gst_1762826542518_rxlohz6ig",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542518_rxlohz6ig\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339137_inuwsjgwz",
+      "updatedAt": "2025-11-11T02:21:09.223Z",
+      "createdAt": "2025-11-11T02:15:39.137Z"
+    },
+    {
+      "guestId": "gst_1762826542519_c8jaz3i7s",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542519_c8jaz3i7s\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339237_45cq80nsa",
+      "updatedAt": "2025-11-11T02:21:09.348Z",
+      "createdAt": "2025-11-11T02:15:39.237Z"
+    },
+    {
+      "guestId": "gst_1762826542519_faq7m2b0l",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542519_faq7m2b0l\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339337_bdhyxmst4",
+      "updatedAt": "2025-11-11T02:21:09.458Z",
+      "createdAt": "2025-11-11T02:15:39.337Z"
+    },
+    {
+      "guestId": "gst_1762826542519_itz2d1raj",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542519_itz2d1raj\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339437_719w49j69",
+      "updatedAt": "2025-11-11T02:21:09.572Z",
+      "createdAt": "2025-11-11T02:15:39.437Z"
+    },
+    {
+      "guestId": "gst_1762826542519_hoc5o2z3x",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542519_hoc5o2z3x\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339536_zi04htqpq",
+      "updatedAt": "2025-11-11T02:21:09.670Z",
+      "createdAt": "2025-11-11T02:15:39.536Z"
+    },
+    {
+      "guestId": "gst_1762826542519_7erwpo3lp",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542519_7erwpo3lp\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339636_dmj0z0bve",
+      "updatedAt": "2025-11-11T02:21:09.771Z",
+      "createdAt": "2025-11-11T02:15:39.636Z"
+    },
+    {
+      "guestId": "gst_1762826542519_ni7cb12ml",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542519_ni7cb12ml\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339737_exqoaqdyk",
+      "updatedAt": "2025-11-11T02:21:09.881Z",
+      "createdAt": "2025-11-11T02:15:39.737Z"
+    },
+    {
+      "guestId": "gst_1762826542519_kx6x6218g",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542519_kx6x6218g\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339837_or0lyy40o",
+      "updatedAt": "2025-11-11T02:15:39.837Z",
+      "createdAt": "2025-11-11T02:15:39.837Z"
+    },
+    {
+      "guestId": "gst_1762826542520_c9x81smht",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542520_c9x81smht\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827339938_r3lrx1qx8",
+      "updatedAt": "2025-11-11T02:21:10.100Z",
+      "createdAt": "2025-11-11T02:15:39.938Z"
+    },
+    {
+      "guestId": "gst_1762826542520_or3yg8emv",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542520_or3yg8emv\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340044_bbytpm8jz",
+      "updatedAt": "2025-11-11T02:21:10.204Z",
+      "createdAt": "2025-11-11T02:15:40.044Z"
+    },
+    {
+      "guestId": "gst_1762826542520_w1s4pvffw",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542520_w1s4pvffw\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340138_8kggq7qby",
+      "updatedAt": "2025-11-11T02:21:10.329Z",
+      "createdAt": "2025-11-11T02:15:40.138Z"
+    },
+    {
+      "guestId": "gst_1762826542520_0z2vxzlmi",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542520_0z2vxzlmi\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340266_ni84b6job",
+      "updatedAt": "2025-11-11T02:21:10.438Z",
+      "createdAt": "2025-11-11T02:15:40.266Z"
+    },
+    {
+      "guestId": "gst_1762826542520_25ofxfigr",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542520_25ofxfigr\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340388_ck1bwnrqv",
+      "updatedAt": "2025-11-11T02:21:10.537Z",
+      "createdAt": "2025-11-11T02:15:40.388Z"
+    },
+    {
+      "guestId": "gst_1762826542520_x4zvtas2u",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542520_x4zvtas2u\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340486_1vmz23yut",
+      "updatedAt": "2025-11-11T02:21:10.637Z",
+      "createdAt": "2025-11-11T02:15:40.486Z"
+    },
+    {
+      "guestId": "gst_1762826542520_rrziqgnfb",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542520_rrziqgnfb\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340589_opazpwinu",
+      "updatedAt": "2025-11-11T02:21:10.762Z",
+      "createdAt": "2025-11-11T02:15:40.589Z"
+    },
+    {
+      "guestId": "gst_1762826542520_2mdo7djn3",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542520_2mdo7djn3\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340686_9himzd4kh",
+      "updatedAt": "2025-11-11T02:21:10.870Z",
+      "createdAt": "2025-11-11T02:15:40.686Z"
+    },
+    {
+      "guestId": "gst_1762826542520_tzmlivk7j",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542520_tzmlivk7j\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340786_fumx8kmvm",
+      "updatedAt": "2025-11-11T02:21:10.971Z",
+      "createdAt": "2025-11-11T02:15:40.786Z"
+    },
+    {
+      "guestId": "gst_1762826542521_ybe91xo87",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542521_ybe91xo87\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340887_wes734zjt",
+      "updatedAt": "2025-11-11T02:21:11.071Z",
+      "createdAt": "2025-11-11T02:15:40.887Z"
+    },
+    {
+      "guestId": "gst_1762826542521_zmbodqvdo",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542521_zmbodqvdo\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827340986_9moeihhk3",
+      "updatedAt": "2025-11-11T02:21:11.172Z",
+      "createdAt": "2025-11-11T02:15:40.986Z"
+    },
+    {
+      "guestId": "gst_1762826542521_hlx7b9xf0",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "data": "{\"t\":\"INV\",\"e\":\"evt_1762787514697_wolaildj0\",\"g\":\"gst_1762826542521_hlx7b9xf0\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#D97706",
+        "background": "#FFFFFF",
+        "style": "square",
+        "errorLevel": "H",
+        "includeLogo": true
+      },
+      "id": "qr_1762827341087_r3ys2omh0",
+      "updatedAt": "2025-11-11T02:21:11.270Z",
+      "createdAt": "2025-11-11T02:15:41.087Z"
     }
   ],
   "scans": [
     {
-      "id": "scn_1762860697908_7r8t1il25",
-      "eventId": "sec_1762209757419_exl3pjlf0",
-      "guestId": "sec_1762209804227_yeswvlgek",
-      "guestName": "Christelle Ngassi",
-      "eventName": "Mariage de Rania et Gérard",
-      "scannedAt": "2025-11-11T11:31:37.908Z"
+      "id": "scn_1762827864309_2yutb77pv",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "guestId": "gst_1762826542520_or3yg8emv",
+      "guestName": "- Alain",
+      "eventName": "ANNIVERSAIRE DE STELLA ELSA",
+      "scannedAt": "2025-11-11T02:24:24.309Z"
     },
     {
       "id": "sec_1762300080024_nhcel6hxd",
@@ -1443,7 +2403,7 @@
     }
   ],
   "meta": {
-    "updatedAt": "2025-11-11T11:48:35.812Z",
+    "updatedAt": "2025-11-11T02:24:24.310Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }

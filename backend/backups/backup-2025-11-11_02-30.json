@@ -1,11 +1,25 @@
 {
   "events": [
     {
+      "name": "ANNIVERSAIRE DE STELLA ELSA",
+      "type": "anniversaire",
+      "date": "2026-07-11",
+      "time": "21:30",
+      "capacity": 15,
+      "location": "Club France",
+      "description": "Soiree de boivement et collation",
+      "welcomeMessage": "Bienvenue au Club France\nEn ce jour special , je vous souhaite la beinvenue a mon 21e anniversaire",
+      "active": true,
+      "id": "evt_1762787514697_wolaildj0",
+      "createdAt": "2025-11-10T15:11:54.697Z",
+      "updatedAt": "2025-11-10T15:11:54.697Z"
+    },
+    {
       "id": "sec_1762209757419_exl3pjlf0",
       "name": "Mariage de Rania et Gérard",
       "type": "marriage",
       "date": "2025-11-22",
-      "time": "19:00",
+      "time": "19:0",
       "capacity": 300,
       "location": "Florencia Palace",
       "description": "soirée",
@@ -453,16 +467,16 @@
       "status": "pending"
     },
     {
-      "id": "sec_1762302891221_ww88cmr6d",
-      "eventId": "sec_1762209757419_exl3pjlf0",
-      "firstName": "junior",
-      "lastName": "nana",
-      "email": "nana@gmail.com",
-      "phone": "674385703",
-      "company": "RIEN",
-      "notes": "rieen",
-      "updatedAt": "2025-11-05T00:34:51.221Z",
-      "createdAt": "2025-11-05T00:34:51.221Z",
+      "eventId": "evt_1762787514697_wolaildj0",
+      "firstName": "LAURAINE",
+      "lastName": "ATIWA",
+      "email": "elsa@gmail.com",
+      "phone": "674130989",
+      "company": "",
+      "notes": "Table AMOUR",
+      "id": "gst_1762787966383_wt4vksgwu",
+      "createdAt": "2025-11-10T15:19:26.383Z",
+      "updatedAt": "2025-11-10T15:19:26.383Z",
       "scanned": false,
       "status": "pending"
     }
@@ -753,7 +767,7 @@
         "includeLogo": true
       },
       "id": "sec_1762210665800_3iwrinvdj",
-      "updatedAt": "2025-11-04T00:47:53.801Z",
+      "updatedAt": "2025-11-08T12:02:37.263Z",
       "createdAt": "2025-11-03T22:57:45.800Z"
     },
     {
@@ -1372,8 +1386,40 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2025-11-05T00:36:32.179Z",
-    "version": "2.0",
-    "server": "SECURA-ULTRA-PRO"
-  }
+    "updatedAt": "2025-11-10T15:19:26.383Z",
+    "version": "3.0",
+    "server": "SECURA-ULTRA-PRO-V3"
+  },
+  "users": [
+    {
+      "id": "usr_1762603660862_2x88fbxbz",
+      "email": "admin@secura.cm",
+      "password": "$2b$10$cJh5vyYEoqUXVrF39vWPxOXdambto2/J/AGDaopR1pmZ1GZSyTPXq",
+      "firstName": "NANA",
+      "lastName": "JUNIOR",
+      "role": "user",
+      "createdAt": "2025-11-08T12:07:41.115Z",
+      "updatedAt": "2025-11-08T12:07:41.115Z"
+    },
+    {
+      "id": "usr_1762606689312_tg4o61hz2",
+      "email": "admin@secura.com",
+      "password": "$2b$10$yNy9fhXZbNE9OnO1EAv43ee4jGNJ11GXZIpOjEQmO435O9v/gIAR6",
+      "firstName": "NANA",
+      "lastName": "",
+      "role": "user",
+      "createdAt": "2025-11-08T12:58:09.499Z",
+      "updatedAt": "2025-11-08T12:58:09.499Z"
+    },
+    {
+      "id": "usr_1762608473263_a6kf6gcg3",
+      "email": "laurainaatiwa9@gmail.com",
+      "password": "$2b$10$g3l8IxFI3GYb4f4N3.5TfOU6d1pO2oLZ6sdjFysVSKGUrmEsRy24K",
+      "firstName": "Lauraine",
+      "lastName": "KUETE",
+      "role": "user",
+      "createdAt": "2025-11-08T13:27:53.461Z",
+      "updatedAt": "2025-11-08T13:27:53.461Z"
+    }
+  ]
 }

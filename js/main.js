@@ -1,108 +1,489 @@
 /**
- * SECURA - Main Scripts
- * Scripts communs à toutes les pages
+ * ╔═══════════════════════════════════════════════════════════════╗
+ * ║              🛡️  SECURA - MAIN SCRIPTS V5.0  🛡️              ║
+ * ║                                                               ║
+ * ║  🔐 Auth Guard automatique                                    ║
+ * ║  🎯 Mise à jour granulaire (pas de rerender complet)         ║
+ * ║  📊 Statistiques réactives                                    ║
+ * ║  🎨 Animations fluides                                        ║
+ * ║  🔔 SweetAlert2 partout                                       ║
+ * ╚═══════════════════════════════════════════════════════════════╝
  */
 
+// ═══════════════════════════════════════════════════════════════
+// 🔐 AUTH GUARD - VÉRIFIE TOKEN AVANT CHAQUE PAGE
+// ═══════════════════════════════════════════════════════════════
+(function authGuard() {
+
+    
+    const publicPages = ['/login', '/register', '/404'];
+    const currentPath = window.location.pathname;
+    
+    const isPublicPage = publicPages.some(page => currentPath.endsWith(page));
+    
+    if (!isPublicPage) {
+        const token = localStorage.getItem('secura_token');
+   
+        if (!token) {
+            storage.forceLogout();
+            console.warn('🔒 Accès refusé - Redirection vers login');
+            window.location.replace('/login');
+         
+            return;
+        }
+    }
+})();
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🚀 INITIALISATION PRINCIPALE
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async () => {
     if (!isValidRoute()) {
-
-        fetch('/404.html')
-            .then(response => {
-                if (!response.ok) throw new Error('404 page not found');
-                return response.text();
-            })
-            .then(html => {
-                document.open();
-                document.write(html);
-                document.close();
-                initialize404Scripts();
-            })
-            .catch(err => {
-                console.error('Erreur chargement 404:', err);
-                document.body.innerHTML = `
-                    <div style="text-align:center; padding:50px; font-family:sans-serif;">
-                        <h1>404 - Page non trouvée</h1>
-                        <p><a href="/">Retour à l'accueil</a></p>
-                    </div>
-                `;
-            });
-        return; 
+        load404Page();
+        return;
     }
-
 
     await window.storageReady;
 
     initializeNavigation();
     initializeScrollTop();
     initializeFullscreen();
-    updateStats();
-    loadRecentEvents();
+    initializeLogout();
+    setupGranularListeners();
+    
+    updateStatsGranular();
+    loadRecentEventsGranular();
 });
 
-
-function isValidRoute() {
-    const currentPath = window.location.pathname;
-
-    const validRoutes = [
-        '/',
-        '/index',
-        '/events',
-        '/guests',
-        '/qr-generator',
-        '/scanner',
-        '/events-list'
-    ];
-
-    const cleanPath = currentPath.replace(/\/$/, '') || '/';
-
-    // Vérifier si le chemin est dans la liste
-    if (validRoutes.includes(cleanPath)) {
-        return true;
-    }
-
-    if (
-        cleanPath.startsWith('/css/') ||
-        cleanPath.startsWith('/js/') ||
-        cleanPath.startsWith('/assets/') ||
-        cleanPath.startsWith('/api/') ||
-        cleanPath.startsWith('/db/') ||
-        cleanPath.endsWith('.json') ||
-        cleanPath.includes('.')
-    ) {
-        return true;
-    }
-
-    return false;
-}
-
-
-
-function initialize404Scripts() {
+// ═══════════════════════════════════════════════════════════════
+// 🎯 LISTENERS GRANULAIRES (Pas de rerender complet)
+// ═══════════════════════════════════════════════════════════════
+function setupGranularListeners() {
     
-    const script = document.createElement('script');
-    script.innerHTML = `
-        const particlesContainer = document.getElementById('particles');
-        if (particlesContainer) {
-            const particleCount = 20;
-            for ( régler i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                const size = Math.random() * 60 + 20;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 8 + 4) + 's';
-                particlesContainer.appendChild(particle);
-            }
+
+    storage.on('data:synced', (event) => {
+        updateStatsValues(storage.getStatistics());
+    });
+    // Écoute création d'événements
+    storage.on('event:created', (event) => {
+        prependEventCard(event.detail);
+        updateStatsValues(storage.getStatistics());
+    });
+
+    // Écoute mise à jour d'événements
+    storage.on('event:updated', (data) => {
+        updateEventCardValues(data.detail.new);
+        updateStatsValues(storage.getStatistics());
+    });
+
+    // Écoute suppression d'événements
+    storage.on('event:deleted', (event) => {
+        removeEventCardById(event.detail.id);
+        updateStatsValues(storage.getStatistics());
+    });
+
+    // Écoute invités
+    storage.on('guest:created', () => {
+        updateStatsValues(storage.getStatistics());
+    });
+
+    storage.on('guest:updated', () => {
+        updateStatsValues(storage.getStatistics());
+    });
+
+    storage.on('guest:deleted', () => {
+        updateStatsValues(storage.getStatistics());
+    });
+
+    // Écoute scans
+    storage.on('scan:created', () => {
+        updateStatsValues(storage.getStatistics());
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📊 MISE À JOUR GRANULAIRE DES STATS (Valeurs uniquement)
+// ═══════════════════════════════════════════════════════════════
+function updateStatsGranular() {
+    const stats = storage.getStatistics();
+   
+    updateStatsValues(stats);
+}
+
+function updateStatsValues(stats) {
+    const elements = {
+        totalEvents: document.getElementById('totalEvents'),
+        totalGuests: document.getElementById('totalGuests'),
+        totalQrCodes: document.getElementById('totalQrCodes'),
+        scannedQrCodes: document.getElementById('scannedQrCodes')
+    };
+
+    if (elements.totalEvents) {
+        animateNumber(elements.totalEvents, parseInt(elements.totalEvents.textContent) || 0, stats.totalEvents);
+    }
+    if (elements.totalGuests) {
+        animateNumber(elements.totalGuests, parseInt(elements.totalGuests.textContent) || 0, stats.totalGuests);
+    }
+    if (elements.totalQrCodes) {
+        animateNumber(elements.totalQrCodes, parseInt(elements.totalQrCodes.textContent) || 0, stats.totalQRCodes);
+    }
+    if (elements.scannedQrCodes) {
+        animateNumber(elements.scannedQrCodes, parseInt(elements.scannedQrCodes.textContent) || 0, stats.scannedGuests);
+    }
+}
+
+function animateNumber(element, start, target, duration = 800) {
+    if (start === target) return;
+    
+    const startTime = performance.now();
+    const diff = target - start;
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOutQuad = progress * (2 - progress);
+        const current = Math.floor(start + diff * easeOutQuad);
+        element.textContent = current;
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            element.textContent = target;
         }
-    `;
-    document.body.appendChild(script);
+    }
+
+    requestAnimationFrame(update);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🎴 GESTION GRANULAIRE DES CARTES D'ÉVÉNEMENTS
+// ═══════════════════════════════════════════════════════════════
+async function loadRecentEventsGranular() {
+    const recentEventsGrid = document.getElementById('recentEventsGrid');
+    if (!recentEventsGrid) return;
+
+    const events = storage.data.events;
+    const recentEvents = events.slice(-3).reverse();
+
+    if (recentEvents.length === 0) {
+        recentEventsGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-calendar-plus text-6xl mb-4 text-gray-400"></i>
+                <p class="text-lg text-gray-500">Aucun événement créé</p>
+                <button class="btn btn-primary mt-4" onclick="window.location.href='events-list.html'">
+                    <i class="fas fa-plus"></i> Créer votre premier événement
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    recentEventsGrid.innerHTML = '';
+    recentEvents.forEach(event => {
+        const card = createEventCardElement(event);
+        recentEventsGrid.appendChild(card);
+    });
+}
+
+function prependEventCard(event) {
+    const recentEventsGrid = document.getElementById('recentEventsGrid');
+    if (!recentEventsGrid) return;
+
+    const emptyState = recentEventsGrid.querySelector('.empty-state');
+    if (emptyState) {
+        recentEventsGrid.innerHTML = '';
+    }
+
+    const card = createEventCardElement(event);
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(-20px)';
+    
+    recentEventsGrid.insertBefore(card, recentEventsGrid.firstChild);
+
+    requestAnimationFrame(() => {
+        card.style.transition = 'all 0.4s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    });
+
+    const allCards = recentEventsGrid.querySelectorAll('.event-card-pro');
+    if (allCards.length > 3) {
+        const lastCard = allCards[allCards.length - 1];
+        lastCard.style.transition = 'all 0.3s ease';
+        lastCard.style.opacity = '0';
+        lastCard.style.transform = 'scale(0.95)';
+        setTimeout(() => lastCard.remove(), 300);
+    }
+}
+
+function updateEventCardValues(event) {
+    const card = document.querySelector(`[data-event-id="${event.id}"]`);
+    if (!card) return;
+
+    const guests = storage.getGuestsByEventId(event.id);
+    const scannedGuests = guests.filter(g => g.scanned).length;
+    const fillRate = event.capacity ? Math.round((guests.length / event.capacity) * 100) : 0;
+
+    const guestsValue = card.querySelector('.stat-circle:nth-child(1) .value');
+    const scannedValue = card.querySelector('.stat-circle:nth-child(2) .value');
+    const progressRing = card.querySelector('.progress-ring');
+    const progressText = card.querySelector('.progress-text');
+
+    if (guestsValue) {
+        animateNumber(guestsValue, parseInt(guestsValue.textContent) || 0, guests.length, 300);
+    }
+
+    if (scannedValue) {
+        animateNumber(scannedValue, parseInt(scannedValue.textContent) || 0, scannedGuests, 300);
+    }
+
+    if (progressRing && progressText && event.capacity) {
+        const circumference = 2 * Math.PI * 36;
+        const offset = circumference - (fillRate / 100) * circumference;
+        progressRing.style.transition = 'stroke-dashoffset 0.5s ease';
+        progressRing.style.strokeDashoffset = offset;
+        animateNumber(progressText, parseInt(progressText.textContent) || 0, fillRate, 400);
+    }
+
+    const titleEl = card.querySelector('.event-title');
+    if (titleEl && titleEl.textContent !== event.name) {
+        titleEl.style.transition = 'opacity 0.2s';
+        titleEl.style.opacity = '0';
+        setTimeout(() => {
+            titleEl.textContent = event.name;
+            titleEl.style.opacity = '1';
+        }, 200);
+    }
+}
+
+function removeEventCardById(eventId) {
+    const card = document.querySelector(`[data-event-id="${eventId}"]`);
+    if (!card) return;
+
+    card.style.transition = 'all 0.3s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+
+    setTimeout(() => {
+        card.remove();
+        
+        const recentEventsGrid = document.getElementById('recentEventsGrid');
+        if (recentEventsGrid && recentEventsGrid.children.length === 0) {
+            recentEventsGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-calendar-plus text-6xl mb-4 text-gray-400"></i>
+                    <p class="text-lg text-gray-500">Aucun événement créé</p>
+                    <button class="btn btn-primary mt-4" onclick="window.location.href='events-list.html'">
+                        <i class="fas fa-plus"></i> Créer votre premier événement
+                    </button>
+                </div>
+            `;
+        }
+    }, 300);
 }
 
 
-// ===== NAVIGATION =====
+// ═══════════════════════════════════════════════════════════════
+// ⚡ ACTIONS AVEC SWEETALERT2
+// ═══════════════════════════════════════════════════════════════
+async function exportEventFromMain(eventId) {
+    const event = storage.getEventById(eventId);
+    if (!event) {
+        await showError('Événement introuvable');
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: 'Exporter en CSV',
+        html: `Voulez-vous exporter les invités de <strong>"${event.name}"</strong> ?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-download"></i> Exporter',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#D97706',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+        title: 'Export en cours...',
+        text: 'Génération du fichier CSV',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        await new Promise(r => setTimeout(r, 500));
+        
+        const csv = storage.exportToCSV(eventId);
+        const filename = `${event.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+        downloadFile(csv, filename, 'text/csv');
+        
+        await Swal.fire({
+            icon: 'success',
+            title: 'Export réussi !',
+            text: `Le fichier "${filename}" a été téléchargé.`,
+            timer: 3000,
+            timerProgressBar: true,
+            confirmButtonColor: '#D97706'
+        });
+    } catch (err) {
+        await showError('Échec de l\'export : ' + err.message);
+    }
+}
+
+async function deleteEventFromMain(eventId) {
+    const event = storage.getEventById(eventId);
+    if (!event) {
+        await showError('Événement introuvable');
+        return;
+    }
+
+    const guestCount = storage.getGuestsByEventId(eventId).length;
+    
+    const result = await Swal.fire({
+        title: 'Supprimer l\'événement ?',
+        html: `
+            <p>Vous êtes sur le point de supprimer <strong>"${event.name}"</strong>.</p>
+            ${guestCount > 0 ? `<p class="text-warning"><i class="fas fa-exclamation-triangle"></i> ${guestCount} invité(s) seront également supprimés.</p>` : ''}
+            <p class="text-danger">Cette action est irréversible.</p>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-trash"></i> Supprimer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+        title: 'Suppression...',
+        text: 'Suppression de l\'événement et des données associées',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        const success = await storage.deleteEvent(eventId);
+        
+        if (success) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'Événement supprimé !',
+                text: 'L\'événement a été supprimé avec succès.',
+                timer: 2000,
+                timerProgressBar: true,
+                confirmButtonColor: '#D97706'
+            });
+        } else {
+            throw new Error('Échec de la suppression');
+        }
+    } catch (err) {
+        await showError('Échec de la suppression : ' + err.message);
+    }
+}
+
+
+function editEvent(eventId) {
+    const event = storage.getEventById(eventId);
+    if (!event) {
+        showError('Événement introuvable');
+        return;
+    }
+    openEventModal(eventId);
+}
+
+
+
+async function duplicateEvent(eventId) {
+    const event = storage.getEventById(eventId);
+    if (!event) {
+        await showError('Événement introuvable');
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: 'Dupliquer l\'événement',
+        html: `Voulez-vous dupliquer <strong>"${event.name}"</strong> avec tous ses invités ?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-copy"></i> Dupliquer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#D97706',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+        title: 'Duplication...',
+        text: 'Création de la copie de l\'événement',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        const newEvent = { ...event };
+        delete newEvent.id;
+        newEvent.name += ' (Copie)';
+        const saved = await storage.createEvent(newEvent);
+        
+        if (!saved?.id) throw new Error('Échec création événement');
+
+        const guests = storage.getGuestsByEventId(eventId);
+        for (const g of guests) {
+            const ng = { ...g };
+            delete ng.id;
+            ng.eventId = saved.id;
+            ng.scanned = false;
+            await storage.createGuest(ng);
+        }
+
+        await Swal.fire({
+            icon: 'success',
+            title: 'Événement dupliqué !',
+            html: `L'événement <strong>"${saved.name}"</strong> a été créé avec ${guests.length} invité(s).`,
+            timer: 3000,
+            timerProgressBar: true,
+            confirmButtonColor: '#D97706'
+        });
+    } catch (err) {
+        await showError('Échec de la duplication : ' + err.message);
+    }
+}
+
+async function showError(message) {
+    await Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: message,
+        confirmButtonColor: '#D97706'
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🧭 NAVIGATION
+// ═══════════════════════════════════════════════════════════════
 function initializeNavigation() {
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const navMenu = document.getElementById('navMenu');
@@ -112,7 +493,6 @@ function initializeNavigation() {
             navMenu.classList.toggle('active');
         });
 
-        // Fermer le menu lors du clic sur un lien
         navMenu.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 navMenu.classList.remove('active');
@@ -121,7 +501,9 @@ function initializeNavigation() {
     }
 }
 
-// ===== SCROLL TO TOP =====
+// ═══════════════════════════════════════════════════════════════
+// ⬆️ SCROLL TO TOP
+// ═══════════════════════════════════════════════════════════════
 function initializeScrollTop() {
     const scrollTopBtn = document.getElementById('scrollTop');
     
@@ -143,14 +525,15 @@ function initializeScrollTop() {
     }
 }
 
-// ===== FULLSCREEN =====
+// ═══════════════════════════════════════════════════════════════
+// 🖥️ FULLSCREEN
+// ═══════════════════════════════════════════════════════════════
 function initializeFullscreen() {
     const fullscreenToggle = document.getElementById('fullscreenToggle');
     
     if (fullscreenToggle) {
         fullscreenToggle.addEventListener('click', toggleFullscreen);
 
-        // Raccourci clavier F11
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F11') {
                 e.preventDefault();
@@ -158,7 +541,6 @@ function initializeFullscreen() {
             }
         });
 
-        // Mettre à jour l'icône lors du changement
         document.addEventListener('fullscreenchange', updateFullscreenIcon);
     }
 }
@@ -184,197 +566,21 @@ function updateFullscreenIcon() {
     }
 }
 
-// ===== STATISTICS =====
-function updateStats() {
-    const stats = storage.getStatistics();
-    
-    const elements = {
-        totalEvents: document.getElementById('totalEvents'),
-        totalGuests: document.getElementById('totalGuests'),
-        totalQrCodes: document.getElementById('totalQrCodes'),
-        scannedQrCodes: document.getElementById('scannedQrCodes')
-    };
-
-    if (elements.totalEvents) {
-        animateNumber(elements.totalEvents, stats.totalEvents);
-    }
-    if (elements.totalGuests) {
-        animateNumber(elements.totalGuests, stats.totalGuests);
-    }
-    if (elements.totalQrCodes) {
-        animateNumber(elements.totalQrCodes, stats.totalQRCodes);
-    }
-    if (elements.scannedQrCodes) {
-        animateNumber(elements.scannedQrCodes, stats.scannedGuests);
+// ═══════════════════════════════════════════════════════════════
+// 🚪 LOGOUT
+// ═══════════════════════════════════════════════════════════════
+function initializeLogout() {
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            storage.logout();
+        });
     }
 }
 
-function animateNumber(element, target) {
-    const duration = 1000;
-    const start = 0;
-    const startTime = performance.now();
-
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const current = Math.floor(progress * target);
-        element.textContent = current;
-
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        }
-    }
-
-    requestAnimationFrame(update);
-}
-
-// ===== RECENT EVENTS =====
-async function loadRecentEvents() {
-    const recentEventsGrid = document.getElementById('recentEventsGrid');
-    if (!recentEventsGrid) return;
-
-    const events = await storage.getAllEvents();
-    const recentEvents = events.slice(-3).reverse();
-
-    if (recentEvents.length === 0) {
-        recentEventsGrid.innerHTML = `
-            <!-- <div class="empty-state">
-                <i class="fas fa-calendar-plus"></i>
-                <p>Aucun événement créé</p>
-                <a href="events-list.html" class="btn btn-primary">Créer votre premier événement</a>
-            </div> -->
-
-            <div id="emptyState" class="text-center py-16 text-gray-500" style="display: none;">
-                <i class="fas fa-calendar-times text-6xl mb-4"></i>
-                <p class="text-lg">Aucun événement créé</p>
-                <button class="btn btn-primary mt-4" onclick="openEventModal()">
-                    Créer votre premier événement
-                </button>
-            </div>
-        `;
-        return;
-    }
-
-    recentEventsGrid.innerHTML = recentEvents.map(event => createEventCard(event)).join('');
-}
-
-function createEventCard(event) {
-    const guests =  storage.getGuestsByEventId(event.id);
-    
-    const scannedGuests = guests.filter(g => g.scanned).length;
-    const eventDate = new Date(event.date);
-    const isUpcoming = eventDate >= new Date();
-    const formattedDate = eventDate.toLocaleDateString('fr-FR', {
-        day: 'numeric', month: 'long', year: 'numeric'
-    });
-
-    // === IMAGES DE FOND PAR TYPE ===
-    const typeImages = {
-        marriage: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
-        anniversaire: 'https://images.unsplash.com/photo-1464349095433-7956a61b8a07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
-        conference: 'https://images.unsplash.com/photo-1540575467063-868f79e66c3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
-        autre: 'https://images.unsplash.com/photo-1501281668745-f7f579dff10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80'
-    };
-
-    const typeLabels = {
-        marriage: { label: 'MARIAGE', class: 'type-marriage' },
-        anniversaire: { label: 'ANNIVERSAIRE', class: 'type-anniversaire' },
-        conference: { label: 'CONFÉRENCE', class: 'type-conference' },
-        autre: { label: 'AUTRE', class: 'type-autre' }
-    };
-
-    const type = typeLabels[event.type] || { label: event.type.toUpperCase(), class: 'type-autre' };
-    const backgroundImage = typeImages[event.type] || typeImages.autre;
-    const fillRate = event.capacity ? Math.round((guests.length / event.capacity) * 100) : 0;
-
-    // === Progression circulaire (SVG) ===
-    const circumference = 2 * Math.PI * 36; // rayon = 36
-    const progressOffset = circumference - (fillRate / 100) * circumference;
-
-    return `
-        <div class="event-card-pro" onclick="viewEvent('${event.id}')" style="background-image: url('${backgroundImage}');">
-            ${isUpcoming ? '<div class="upcoming-ribbon">À VENIR</div>' : ''}
-           
-
-            <!-- Contenu principal -->
-            <div class="event-content">
-                <h3 class="event-title">${event.name}</h3>
-                
-                <div class="event-meta">
-                    <div class="meta-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>${formattedDate}</span>
-                    </div>
-                    ${event.time ? `
-                    <div class="meta-item">
-                        <i class="fas fa-clock"></i>
-                        <span>${event.time}</span>
-                    </div>` : ''}
-                    ${event.location ? `
-                    <div class="meta-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>${event.location}</span>
-                    </div>` : ''}
-                </div>
-
-                <!-- Stats en cercles -->
-                <div class="event-stats-circle">
-                    <div class="stat-circle">
-                        <div class="circle">
-                            <span class="value">${guests.length}</span>
-                            <span class="label">Invités</span>
-                        </div>
-                    </div>
-                    <div class="stat-circle">
-                        <div class="circle">
-                            <span class="value">${scannedGuests}</span>
-                            <span class="label">Présents</span>
-                        </div>
-                    </div>
-                    ${event.capacity ? `
-                    <div class="stat-circle progress">
-                        <svg width="80" height="80" viewBox="0 0 80 80">
-                            <circle class="track" cx="40" cy="40" r="36" stroke="#e0e0e0" stroke-width="8" fill="none"/>
-                            <circle class="progress-ring" cx="40" cy="40" r="36" stroke="#4ade80" stroke-width="8" fill="none"
-                                stroke-dasharray="${circumference}" stroke-dashoffset="${progressOffset}"
-                                transform="rotate(-90 40 40)"/>
-                            <text x="40" y="45" text-anchor="middle" class="progress-text">${fillRate}%</text>
-                        </svg>
-                        <span class="label">Remplissage</span>
-                    </div>
-                    ` : ''}
-                </div>
-
-                <!-- Statut actif -->
-                <div class="event-status">
-                    <i class="fas ${event.active ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'}"></i>
-                    <span>${event.active ? 'Actif' : 'Inactif'}</span>
-                </div>
-            </div>
-
-            <!-- Actions (flottantes) -->
-            <div class="event-actions" onclick="event.stopPropagation()">
-                <button class="action-btn" onclick="viewEvent('${event.id}')" title="Voir">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="action-btn" onclick="editEvent('${event.id}')" title="Modifier">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="action-btn" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
-                    <i class="fas fa-copy"></i>
-                </button>
-                <button class="action-btn" onclick="exportEvent('${event.id}')" title="Exporter">
-                    <i class="fas fa-download"></i>
-                </button>
-                <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// ===== NOTIFICATIONS =====
+// ═══════════════════════════════════════════════════════════════
+// 🔔 NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════
 function showNotification(type, message) {
     const icons = {
         success: 'success',
@@ -409,7 +615,6 @@ function showNotification(type, message) {
     }
 }
 
-// ===== CONFIRMATION DIALOG =====
 function confirmDialog(title, text, confirmText = 'Confirmer', cancelText = 'Annuler') {
     return new Promise((resolve) => {
         if (typeof Swal !== 'undefined') {
@@ -434,23 +639,9 @@ function confirmDialog(title, text, confirmText = 'Confirmer', cancelText = 'Ann
     });
 }
 
-// ===== LOADING OVERLAY =====
-function showLoading() {
-    const overlay = document.createElement('div');
-    overlay.id = 'loadingOverlay';
-    overlay.className = 'loading-overlay';
-    overlay.innerHTML = '<div class="loading-spinner"></div>';
-    document.body.appendChild(overlay);
-}
-
-function hideLoading() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-        overlay.remove();
-    }
-}
-
-// ===== DOWNLOAD FILE =====
+// ═══════════════════════════════════════════════════════════════
+// 📥 UTILITAIRES
+// ═══════════════════════════════════════════════════════════════
 function downloadFile(content, filename, mimeType) {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
@@ -463,7 +654,6 @@ function downloadFile(content, filename, mimeType) {
     URL.revokeObjectURL(url);
 }
 
-// ===== FORMAT DATE =====
 function formatDate(dateString, includeTime = false) {
     const date = new Date(dateString);
     const options = {
@@ -480,7 +670,6 @@ function formatDate(dateString, includeTime = false) {
     return date.toLocaleDateString('fr-FR', options);
 }
 
-// ===== DEBOUNCE =====
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -493,28 +682,182 @@ function debounce(func, wait) {
     };
 }
 
-// ===== VALIDATE EMAIL =====
 function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
 }
 
-// ===== VALIDATE PHONE =====
 function validatePhone(phone) {
     const re = /^[\d\s\-\+\(\)]+$/;
     return re.test(phone) && phone.replace(/\D/g, '').length >= 9;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// 🛣️ GESTION DES ROUTES (404)
+// ═══════════════════════════════════════════════════════════════
+function isValidRoute() {
+    const currentPath = window.location.pathname;
+
+    const validRoutes = [
+        '/',
+        '/index',
+        '/index.html',
+        '/events',
+        '/events.html',
+        '/guests',
+        '/guests.html',
+        '/qr-generator',
+        '/qr-generator.html',
+        '/scanner',
+        '/scanner.html',
+        '/events-list',
+        '/events-list.html',
+        '/login',
+        '/login.html',
+        '/register',
+        '/register.html'
+    ];
+
+    const cleanPath = currentPath.replace(/\/$/, '') || '/';
+
+    if (validRoutes.includes(cleanPath)) {
+        return true;
+    }
+
+    if (
+        cleanPath.startsWith('/css/') ||
+        cleanPath.startsWith('/js/') ||
+        cleanPath.startsWith('/assets/') ||
+        cleanPath.startsWith('/api/') ||
+        cleanPath.startsWith('/db/') ||
+        cleanPath.endsWith('.json') ||
+        cleanPath.endsWith('.css') ||
+        cleanPath.endsWith('.js') ||
+        cleanPath.endsWith('.png') ||
+        cleanPath.endsWith('.jpg') ||
+        cleanPath.endsWith('.svg') ||
+        cleanPath.includes('.')
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+function load404Page() {
+    fetch('/404.html')
+        .then(response => {
+            if (!response.ok) throw new Error('404 page not found');
+            return response.text();
+        })
+        .then(html => {
+            document.open();
+            document.write(html);
+            document.close();
+            initialize404Scripts();
+        })
+        .catch(err => {
+            console.error('Erreur chargement 404:', err);
+            document.body.innerHTML = `
+                <div style="text-align:center; padding:50px; font-family:sans-serif;">
+                    <h1>404 - Page non trouvée</h1>
+                    <p><a href="/">Retour à l'accueil</a></p>
+                </div>
+            `;
+        });
+}
+
+function initialize404Scripts() {
+    const script = document.createElement('script');
+    script.innerHTML = `
+        const particlesContainer = document.getElementById('particles');
+        if (particlesContainer) {
+            const particleCount = 20;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 60 + 20;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 8 + 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+    `;
+    document.body.appendChild(script);
+}
 
 
+    let _securaLoadingOpen = false;
 
+    /**
+     * Ouvre un modal de chargement SweetAlert2 non-bloquant.
+     * options: { title, text, allowOutsideClick, allowEscapeKey }
+     */
+    function showLoading(options = {}) {
+        if (_securaLoadingOpen) return;
+        const {
+            title = 'Chargement...',
+            text = '',
+            allowOutsideClick = false,
+            allowEscapeKey = false
+        } = options;
 
+        Swal.fire({
+            title,
+            text,
+            allowOutsideClick,
+            allowEscapeKey,
+            showConfirmButton: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        _securaLoadingOpen = true;
+    }
+
+    /**
+     * Ferme le modal de chargement si ouvert.
+     */
+    function hideLoading() {
+        if (!_securaLoadingOpen) return;
+        Swal.close();
+        _securaLoadingOpen = false;
+    }
+
+    /**
+     * Affiche le loader pendant l'exécution d'une Promise.
+     * await showLoadingFor(myPromise, { title, text })
+     */
+    async function showLoadingFor(promiseOrFn, options = {}) {
+        showLoading(options);
+        try {
+            // accepter soit une Promise, soit une fonction retournant une Promise
+            const result = typeof promiseOrFn === 'function' ? await promiseOrFn() : await promiseOrFn;
+            return result;
+        } finally {
+            hideLoading();
+        }
+
+    }
+// ═══════════════════════════════════════════════════════════════
+// 🌐 EXPORTS GLOBAUX
+// ═══════════════════════════════════════════════════════════════
 window.showNotification = showNotification;
 window.confirmDialog = confirmDialog;
-window.showLoading = showLoading;
-window.hideLoading = hideLoading;
 window.downloadFile = downloadFile;
 window.formatDate = formatDate;
 window.debounce = debounce;
 window.validateEmail = validateEmail;
 window.validatePhone = validatePhone;
+window.editEvent = editEvent;
+window.duplicateEvent = duplicateEvent;
+window.exportEventFromMain = exportEventFromMain;
+window.deleteEventFromMain = deleteEventFromMain;
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+window.showLoadingFor = showLoadingFor;
+
+console.log('✅ SECURA Main Scripts V5.0 chargé - Mode Observable actif !');

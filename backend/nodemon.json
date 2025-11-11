@@ -1,0 +1,13 @@
+{
+  "watch": ["server.js", "routes", "controllers"],
+  "ignore": [
+    "data/secura-data.json",
+    "data/secura-data copy.json",
+    "backups/",
+    "node_modules/",
+    "*.html"
+  ],
+  "ext": "js,json",
+  "delay": "300ms",
+  "legacyWatch": true
+}

@@ -13,7 +13,6 @@
 
 require('dotenv').config();
 const express = require('express');
-const jsonServer = require('json-server');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
@@ -126,7 +125,7 @@ app.use(cors({
     origin: '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key' , 'dash']
 }));
 
 app.use(express.json({ limit: '50mb' }));
@@ -192,6 +191,10 @@ const loadData = () => {
 
 const saveData = (data) => {
     try {
+        // Load existing data to preserve fields like 'users'
+        const existingData = loadData();
+        data.users = existingData.users || data.users;
+
         data.meta = {
             updatedAt: new Date().toISOString(),
             version: '3.0',
@@ -199,10 +202,8 @@ const saveData = (data) => {
         };
         fs.writeFileSync(CONFIG.DB_FILE, JSON.stringify(data, null, 2));
         log.db('Sauvegarde OK', `${data.events?.length || 0} événements`);
-        return true;
     } catch (err) {
-        log.error('Erreur sauvegarde', err.message);
-        return false;
+        log.error('Erreur sauvegarde DB', err.message);
     }
 };
 
@@ -239,45 +240,68 @@ const validateEvent = (event) => {
     return { valid: errors.length === 0, errors };
 };
 
+
 const validateGuest = (guest) => {
     const errors = [];
-    log.info('Validation invité', `${guest.firstName} ${guest.lastName}`);
-    
-    if (!guest.firstName || guest.firstName.trim().length < 2) {
-        errors.push('Prénom requis');
-        log.validation('firstName', false);
+
+    guest.firstName = (guest.firstName || '').toString().trim();
+    guest.lastName  = (guest.lastName  || '').toString().trim();
+    guest.email     = (guest.email     || '').toString().trim();
+    guest.phone     = (guest.phone     || '').toString().trim();
+    guest.company   = (guest.company   || '').toString().trim();
+    guest.notes     = (guest.notes     || '').toString().trim();
+
+    if (guest.email === '-' || guest.email.toLowerCase() === 'n/a') {
+        guest.email = '';
+    }
+
+    if (!guest.firstName && !guest.lastName) {
+        errors.push('Prénom ou nom requis');
+        log.validation('name', false);
     } else {
-        log.validation('firstName', true, guest.firstName);
+
+        if (guest.firstName) {
+            log.validation('firstName', true, guest.firstName);
+        } else {
+            log.validation('firstName', true, 'vide / optionnel');
+        }
+
+        if (guest.lastName) {
+            log.validation('lastName', true, guest.lastName);
+        } else {
+            log.validation('lastName', true, 'vide / optionnel');
+        }
     }
-    
-    if (!guest.lastName || guest.lastName.trim().length < 2) {
-        errors.push('Nom requis');
-        log.validation('lastName', false);
+
+    if (guest.email) {
+        if (!validateEmail(guest.email)) {
+            errors.push('Email invalide');
+            log.validation('email', false, guest.email);
+        } else {
+            log.validation('email', true, guest.email);
+        }
     } else {
-        log.validation('lastName', true, guest.lastName);
+        log.validation('email', true, 'vide / optionnel');
     }
-    
-    if (guest.email && !validateEmail(guest.email)) {
-        errors.push('Email invalide');
-        log.validation('email', false, guest.email);
-    } else if (guest.email) {
-        log.validation('email', true, guest.email);
+
+    if (guest.phone) {
+        if (!validatePhone(guest.phone)) {
+            errors.push('Téléphone invalide');
+            log.validation('phone', false, guest.phone);
+        } else {
+            log.validation('phone', true, guest.phone);
+        }
+    } else {
+        log.validation('phone', true, 'vide / optionnel');
     }
-    
-    if (guest.phone && !validatePhone(guest.phone)) {
-        errors.push('Téléphone invalide');
-        log.validation('phone', false);
-    } else if (guest.phone) {
-        log.validation('phone', true, guest.phone);
-    }
-    
+
     if (!guest.eventId) {
         errors.push('eventId requis');
         log.validation('eventId', false);
     } else {
         log.validation('eventId', true, guest.eventId);
     }
-    
+
     return { valid: errors.length === 0, errors };
 };
 
@@ -352,7 +376,7 @@ app.post('/api/auth/register', (req, res) => {
             updatedAt: new Date().toISOString()
         };
 
-        if (!data.users) data.users = [];
+       // if (!data.users) data.users = [];
         data.users.push(user);
         saveData(data);
 
@@ -374,32 +398,65 @@ app.post('/api/auth/register', (req, res) => {
 app.post('/api/auth/login', (req, res) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
-            return res.status(400).json({ success: false, error: 'Email et mot de passe requis' });
+            return res.json({
+                success: false,
+                message: 'E-mail et mot de passe sont requis.',
+                code: 'MISSING_FIELDS'
+            });
         }
 
         const data = loadData();
-        const user = data.users?.find(u => u.email === email);
+        const user = data.users?.find(u => u.email === email.trim().toLowerCase());
 
-        if (!user || !comparePassword(password, user.password)) {
-            log.warning('Login échoué', email);
-            return res.status(401).json({ success: false, error: 'Email ou mot de passe incorrect' });
+        if (!user) {
+            log.warning('Tentative login - utilisateur inconnu', email);
+            return res.status(404).json({
+                success: false,
+                message: 'E-mail ou mot de passe incorrect.',
+                code: 'INVALID_CREDENTIALS'
+            });
+        }
+
+        if (!comparePassword(password, user.password)) {
+            log.warning('Mot de passe incorrect', email);
+            return res.json({
+                success: false,
+                message: 'E-mail ou mot de passe incorrect.',
+                code: 'INVALID_CREDENTIALS'
+            });
         }
 
         const token = generateToken(user);
-
         log.success('Connexion réussie', `${email} (${user.role})`);
+
         res.json({
             success: true,
-            message: 'Connexion réussie',
+            message: 'Connexion réussie !',
+            code: 'LOGIN_SUCCESS',
             token,
-            user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName }
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                firstName: user.firstName,
+                lastName: user.lastName
+            }
         });
+
     } catch (err) {
         log.error('POST /api/auth/login', err.message);
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({
+            success: false,
+            message: 'Erreur interne du serveur.',
+            code: 'SERVER_ERROR'
+        });
     }
 });
+
+
+
 
 app.get('/api/auth/me', jwtAuth, (req, res) => {
     const data = loadData();
@@ -522,7 +579,6 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         version: '3.0.0'
     };
-    
     res.json(health);
 });
 
@@ -544,7 +600,6 @@ app.get('/api/statistics', (req, res) => {
             lastUpdate: data.meta?.updatedAt || new Date().toISOString()
         };
         
-        log.stats(stats);
         res.json({ success: true, data: stats });
     } catch (err) {
         log.error('Erreur statistiques', err.message);
@@ -753,7 +808,6 @@ app.get('/api/events/:id/statistics', (req, res) => {
             lastScan: scans.length > 0 ? scans[0].scannedAt : null
         };
         
-        log.stats(stats);
         res.json({ success: true, data: stats });
     } catch (err) {
         log.error('GET /api/events/:id/statistics', err.message);
@@ -858,55 +912,154 @@ app.post('/api/guests', (req, res) => {
     }
 });
 
-// CREATE MULTIPLE (BULK)
+// ──────────────────────────────────────────────────────────────
+//  POST /api/guests/bulk  –  Import CSV (réinitialisation totale)
+// ──────────────────────────────────────────────────────────────
 app.post('/api/guests/bulk', (req, res) => {
     try {
-        const { guests } = req.body;
-        
-        if (!Array.isArray(guests) || guests.length === 0) {
-            return res.status(400).json({ success: false, error: 'Array guests[] requis' });
+        const { guests: rawGuests } = req.body;      
+
+        if (!Array.isArray(rawGuests) || rawGuests.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Le corps doit contenir un tableau "guests" non vide.'
+            });
         }
-        
-        const data = loadData();
-        const now = new Date().toISOString();
+
+        const data   = loadData();                         
+        const now    = new Date().toISOString();
         const created = [];
-        const errors = [];
-        
-        guests.forEach((guest, index) => {
-            const validation = validateGuest(guest);
-            
-            if (!validation.valid) {
-                errors.push({ index, guest, errors: validation.errors });
-                log.validation(`Guest ${index}`, false, validation.errors[0]);
-            } else {
-                guest.id = generateId('gst');
-                guest.createdAt = now;
-                guest.updatedAt = now;
-                guest.scanned = false;
-                guest.status = guest.status || 'pending';
-                
+        const errors  = [];
+
+        // --------------------------------------------------------------
+        // 1. Parcours ligne par ligne
+        // --------------------------------------------------------------
+        rawGuests.forEach((raw, idx) => {
+            try {
+                // -----------------------------------------------------------------
+                //  a) Normalisation des champs (CSV → objet propre)
+                // -----------------------------------------------------------------
+                const guest = {
+                    firstName: (raw.firstName || raw.prenom || '').trim(),
+                    lastName : (raw.lastName  || raw.nom    || '').trim(),
+                    email    : (raw.email || '').trim().toLowerCase() || undefined,
+                    phone    : (raw.phone || raw.telephone || '').trim() || undefined,
+                    company  : (raw.company || raw.entreprise || '').trim() || '',
+                    notes    : (raw.notes || '').trim() || '',
+                    eventId  : raw.eventId || raw.event || undefined
+                };
+
+                // -----------------------------------------------------------------
+                //  b) Validation obligatoire
+                // -----------------------------------------------------------------
+                if (!guest.eventId) {
+                    errors.push({ index: idx, reason: 'eventId manquant', raw });
+                    log.validation(`Guest ${idx}`, false, 'eventId manquant');
+                    return;
+                }
+
+                // -----------------------------------------------------------------
+                //  c) Réinitialisation complète (NOUVEAU invité)
+                // -----------------------------------------------------------------
+                guest.id          = generateId('gst');   // ← **toujours** nouveau
+                guest.createdAt   = now;
+                guest.updatedAt   = now;
+                guest.scanned     = false;
+                guest.scannedAt   = null;
+                guest.status      = 'pending';
+
+                // Nettoyage de tout champ sensible qui aurait pu être copié du CSV
+                delete guest.qrCodeId;
+                delete guest.scans;
+                delete guest.qrData;
+                delete guest.previousEventId;
+
+                // -----------------------------------------------------------------
+                //  d) Validation métier (validateGuest)
+                // -----------------------------------------------------------------
+                const validation = validateGuest(guest);
+                if (!validation.valid) {
+                    errors.push({ index: idx, guest, errors: validation.errors });
+                    log.validation(`Guest ${idx}`, false, validation.errors.join('; '));
+                    return;
+                }
+
+                // -----------------------------------------------------------------
+                //  e) Unicité **dans l’événement cible**
+                // -----------------------------------------------------------------
+                const duplicateInDB = data.guests.find(g =>
+                    g.eventId === guest.eventId &&
+                    ((guest.email && g.email === guest.email) ||
+                     (!guest.email && g.firstName === guest.firstName && g.lastName === guest.lastName))
+                );
+
+                const duplicateInBatch = created.find(g =>
+                    g.eventId === guest.eventId &&
+                    ((guest.email && g.email === guest.email) ||
+                     (!guest.email && g.firstName === guest.firstName && g.lastName === guest.lastName))
+                );
+
+                if (duplicateInDB || duplicateInBatch) {
+                    errors.push({ index: idx, guest, errors: ['Doublon dans cet événement'] });
+                    log.validation(`Guest ${idx}`, false, 'Doublon');
+                    return;
+                }
+
+                // -----------------------------------------------------------------
+                //  f) Ajout à la base
+                // -----------------------------------------------------------------
                 data.guests.push(guest);
                 created.push(guest);
-                log.validation(`Guest ${index}`, true, `${guest.firstName} ${guest.lastName}`);
+                log.validation(`Guest ${idx}`, true,
+                    `${guest.firstName} ${guest.lastName} → event ${guest.eventId}`);
+            } catch (e) {
+                errors.push({ index: idx, error: e.message, raw });
+                log.error(`Bulk guest ${idx}`, e.message);
             }
         });
-        
+
+        // --------------------------------------------------------------
+        // 2. Nettoyage des références orphelines (facultatif mais sûr)
+        // --------------------------------------------------------------
+        // Si le CSV contenait d’anciens `id` (ex: export d’un autre événement),
+        // on supprime toute trace dans qrCodes / scans pour éviter des liens fantômes.
+        const oldIds = rawGuests
+            .map(g => g.id)
+            .filter(Boolean);
+
+        if (oldIds.length) {
+            data.qrCodes = data.qrCodes.filter(q => !oldIds.includes(q.guestId));
+            data.scans   = data.scans.filter(s   => !oldIds.includes(s.guestId));
+            log.info('Nettoyage références orphelines',
+                `${oldIds.length} anciens IDs supprimés de qrCodes/scans`);
+        }
+
+        // --------------------------------------------------------------
+        // 3. Sauvegarde
+        // --------------------------------------------------------------
         saveData(data);
-        
+
         log.crud('CREATE BULK', 'guests', { created: created.length, errors: errors.length });
-        log.success('Invités créés en masse', `${created.length}/${guests.length}`);
-        
+        log.success('Import CSV terminé',
+            `${created.length}/${rawGuests.length} invités créés (réinitialisés)`);
+
+        // --------------------------------------------------------------
+        // 4. Réponse
+        // --------------------------------------------------------------
         res.status(201).json({
             success: true,
-            data: created,
-            count: created.length,
-            errors: errors.length > 0 ? errors : undefined
+            data   : created,
+            count  : created.length,
+            errors : errors.length ? errors : undefined
         });
+
     } catch (err) {
         log.error('POST /api/guests/bulk', err.message);
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
+
 
 // UPDATE
 app.put('/api/guests/:id', (req, res) => {
@@ -992,7 +1145,7 @@ app.delete('/api/guests/:id', (req, res) => {
 });
 
 // DELETE MULTIPLE (BULK)
-app.delete('/api/guests/bulk', (req, res) => {
+app.delete('/api/guest/bulk', (req, res) => {
     try {
         const { ids } = req.body;
         
@@ -1095,11 +1248,19 @@ app.get('/api/qrcodes/guest/:guestId', (req, res) => {
         const qrCode = data.qrCodes.find(q => q.guestId === req.params.guestId);
         
         if (!qrCode) {
-            return res.status(404).json({ success: false, error: 'QR Code introuvable' });
+            log.info('QR Code absent pour invité', req.params.guestId);
+            return res.json({
+                success: true,
+                found: false,
+                message: "QR Code introuvable. Générer via l'interface admin.",
+                action: "generate",
+                guestId: req.params.guestId,
+                data: null
+            });
         }
         
         log.crud('READ', 'qrcode', { guestId: req.params.guestId });
-        res.json({ success: true, data: qrCode });
+        res.json({ success: true, found: true, data: qrCode });
     } catch (err) {
         log.error('GET /api/qrcodes/guest/:guestId', err.message);
         res.status(500).json({ success: false, error: err.message });
@@ -1277,16 +1438,19 @@ app.post('/api/qr/scan', (req, res) => {
             return res.status(404).json({ success: false, error: 'Invité ou événement introuvable' });
         }
         
-        // Déjà scanné ?
+       // Déjà scanné ?
         if (guest.scanned) {
+            // Cherche le scan existant lié à ce guest + event pour le retourner
+            const existingScan = data.scans.find(s => s.guestId === g && s.eventId === e) || null;
             log.warning('Déjà scanné', `${guest.firstName} ${guest.lastName}`);
             return res.status(200).json({
                 success: true,
                 alreadyScanned: true,
                 message: `${guest.firstName} ${guest.lastName} déjà scanné`,
-                data: { guest, event }
+                data: { scan: existingScan, guest, event }
             });
         }
+        
         
         // Créer scan
         const scan = {
@@ -1549,7 +1713,7 @@ app.get('/api/events/:id/guests', (req, res) => {
         const event = data.events.find(e => e.id === req.params.id);
         
         if (!event) {
-            return res.status(404).json({ success: false, error: 'Événement introuvable' });
+            return res.status(404).json({ success: false, error: 'Événement introuvable ' });
         }
         
         const guests = data.guests.filter(g => g.eventId === req.params.id);
@@ -1591,7 +1755,15 @@ app.get('/', (req, res) => {
 
 
 // 404 personnalisé
-app.get('*', (req, res) => {
+app.get('*', (req, res ,next) => {
+
+     const apiKey = req.headers['dash'];
+     
+    if (apiKey === "dashboard") {
+        res.status(404).json({ error: 'Endpoint non trouvé Consultez /api pour la documentation' });
+        next();
+    }
+
     if (!req.path.startsWith('/api') && !req.path.startsWith('/db')) {
         const notFoundPath = path.join(__dirname, '404.html');
         if (fs.existsSync(notFoundPath)) {

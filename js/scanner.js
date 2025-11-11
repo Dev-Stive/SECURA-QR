@@ -221,6 +221,151 @@ function displayScanResultFromAPI(data) {
     btn.dataset.eventId = event.id;
 }
 
+// =============================================================
+// ÉCOUTE GRANULAIRE DES SCANS (INTÉGRATION STORAGE)
+// =============================================================
+// Empêcher double-affichage quand plusieurs événements sont émis
+let _lastDisplayedScanId = null;
+
+// Mettre à jour l'affichage à partir d'un objet scan local (sans enveloppe API)
+function displayScanResultFromScan(scan) {
+    const guest = storage.getGuestById(scan.guestId) || { firstName: '', lastName: '', email: '', phone: '', notes: '', scanned: true, scannedAt: scan.scannedAt };
+    const event = storage.getEventById(scan.eventId) || { name: scan.eventName, date: '', time: '' };
+
+    document.getElementById('scanPlaceholder').style.display = 'none';
+    document.getElementById('scanResult').style.display = 'block';
+
+    const status = guest.scanned ? 'Présent' : 'Valide';
+    const icon = guest.scanned ? 'fa-check-circle' : 'fa-info-circle';
+    document.getElementById('resultStatus').innerHTML = `<i class="fas ${icon}"></i> <span>${status}</span>`;
+    document.getElementById('resultStatus').className = `status-badge ${guest.scanned ? 'success' : 'pending'}`;
+
+    document.getElementById('scanTime').textContent = new Date(scan.scannedAt).toLocaleTimeString('fr-FR');
+    document.getElementById('welcomeMessage').textContent = event.welcomeMessage || `Bienvenue ${guest.firstName} !`;
+    document.getElementById('resultName').textContent = `${guest.firstName} ${guest.lastName}`;
+    document.getElementById('resultEmail').textContent = guest.email || '-';
+    document.getElementById('resultPhone').textContent = guest.phone || '-';
+    document.getElementById('resultEvent').textContent = event.name || scan.eventName;
+
+    const date = event.date ? new Date(event.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+    document.getElementById('resultDateTime').textContent = `${date} ${event.time || ''}`;
+    document.getElementById('resultNote').textContent = guest.notes || '';
+    document.getElementById('resultLocation').textContent = event.location || '-';
+
+    const btn = document.getElementById('markPresentBtn');
+    btn.style.display = guest.scanned ? 'none' : 'inline-flex';
+    btn.dataset.guestId = guest.id || scan.guestId;
+    btn.dataset.eventId = event.id || scan.eventId;
+}
+
+// Écoute des événements de storage pour scans — mise à jour UI et notifications
+storage.on && storage.on('scan:created', (evt) => {
+    try {
+        const scan = evt.detail || evt;
+        if (!scan || !scan.id) return;
+
+        // Ignore duplicates rapides
+        if (_lastDisplayedScanId === scan.id) return;
+        _lastDisplayedScanId = scan.id;
+
+        // Affichage et son
+        SECURA_AUDIO.success();
+        displayScanResultFromScan(scan);
+        loadScanHistory();
+        updateScanStatistics();
+
+
+        const panel = document.getElementById('scanResult');
+        if (panel) {
+            panel.classList.remove('blink');
+            void panel.offsetWidth;
+            panel.classList.add('blink');
+        }
+    } catch (err) {
+        console.error('Error handling scan:created', err);
+    }
+});
+
+// Écoute suppression de scan (annulation)
+storage.on && storage.on('scan:deleted', (evt) => {
+    try {
+        const payload = evt.detail || evt;
+        const id = payload.id || payload;
+        if (!id) return;
+        // retirer de l'historique et mettre à jour stats
+        loadScanHistory();
+        updateScanStatistics();
+        showNotification('info', 'Scan annulé');
+    } catch (err) {
+        console.error('Error handling scan:deleted', err);
+    }
+});
+
+// =============================================================
+// MÉTHODES PUBLIQUES POUR LES SCANS (CONSULTER / ANNULER)
+// =============================================================
+async function getScansByEvent(eventId) {
+    return storage.getScansByEventId ? storage.getScansByEventId(eventId) : storage.getAllScans().filter(s => s.eventId === eventId);
+}
+
+async function getScanById(id) {
+    return storage.getScanById ? storage.getScanById(id) : storage.getAllScans().find(s => s.id === id) || null;
+}
+
+async function cancelScan(scanId) {
+    if (!scanId) return false;
+
+    // Try server-side first if API available
+    try {
+        if (storage.USE_API_DIRECT && storage.isOnline) {
+            // call delete endpoint if exists
+            try {
+                await storage.apiRequest(`/scans/${scanId}`, { method: 'DELETE' });
+                await storage.syncPull();
+                storage.emit('scan:deleted', { id: scanId });
+                storage.emitStatsUpdate();
+                return true;
+            } catch (err) {
+                // fallthrough to local
+                console.warn('API cancelScan failed, falling back to local', err.message);
+            }
+        }
+
+        // Local fallback: update storage directly
+        const scan = storage.getScanById ? storage.getScanById(scanId) : storage.data.scans.find(s => s.id === scanId);
+        if (!scan) return false;
+
+        // mark guest as not scanned
+        const guest = storage.getGuestById(scan.guestId);
+        if (guest) {
+            const old = { ...guest };
+            guest.scanned = false;
+            delete guest.scannedAt;
+            storage.emit('guest:updated', { old, new: guest });
+        }
+
+        // remove scan
+        storage.data.scans = storage.data.scans.filter(s => s.id !== scanId);
+        // persist
+        if (storage.saveToLocalStorage) storage.saveToLocalStorage();
+        if (storage.AUTO_SYNC_ON_CHANGE) storage.syncPush();
+
+        storage.emit('scan:deleted', { id: scanId });
+        storage.emitStatsUpdate();
+        loadScanHistory();
+        updateScanStatistics();
+        return true;
+    } catch (err) {
+        console.error('cancelScan error', err);
+        return false;
+    }
+}
+
+// Exposer globalement
+window.getScansByEvent = getScansByEvent;
+window.getScanById = getScanById;
+window.cancelScan = cancelScan;
+
 /* ============================================================= */
 /* ====================== FILE MODE ============================ */
 /* ============================================================= */
@@ -367,16 +512,47 @@ async function getCameras() {
     }
 }
 
+
+/*const color = stringToColor(`${guest.firstName} ${guest.lastName}`);
+    const initials = `${guest.firstName[0]}${guest.lastName[0]}`.toUpperCase();
+    const scanned = guest.scanned;
+
+    return `
+        <td><input type="checkbox" class="guest-checkbox" value="${guest.id}"></td>
+        <td>
+            <div class="guest-info">
+                <div class="guest-avatar-pro" style="background:${color}">${initials}</div>
+                <div>
+                    <div class="guest-name">${guest.firstName} ${guest.lastName}</div>
+                    ${guest.company && guest.company !== '-' ? `<div class="guest-company">${guest.company}</div>` : ''}
+                </div>
+            </div>
+        </td>
+        <td><a href="mailto:${guest.email}" class="email-link">${guest.email}</a></td>
+        <td>${guest.phone || '-'}</td>
+        <td>
+            <span class="status-badge-pro ${scanned ? 'present' : 'pending'}">
+                <i class="fas fa-${scanned ? 'check' : 'clock'}"></i>
+                ${scanned ? 'Présent' : 'En attente'}
+            </span>
+        </td>
+
+        */
+
+
+        
 function loadScanHistory() {
     const scans = storage.getAllScansDesc();
     const list = document.getElementById('scanHistory');
     list.innerHTML = scans.length ? scans.map(s => `
         <div class="history-item">
+        <div>
+        </div>
             <div>
                 <strong>${s.guestName}</strong>
-                <div class="text-sm text-muted">${s.eventName}</div>
+                <div class="text-sm ">${s.eventName}</div>
             </div>
-            <div class="text-sm text-muted">
+            <div class="text-sm ">
                 ${new Date(s.scannedAt).toLocaleDateString('fr-FR', {
                     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
                 })} - ${new Date(s.scannedAt).toLocaleTimeString('fr-FR', {
