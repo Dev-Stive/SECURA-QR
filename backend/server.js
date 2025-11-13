@@ -345,6 +345,16 @@ const requireRole = (role) => (req, res, next) => {
 };
 
 
+const generateAccessCode = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 4; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+};
+
+
 // ═══════════════════════════════════════════════════════════════
 // 🔐 AUTHENTIFICATION - LOGIN / REGISTER
 // ═══════════════════════════════════════════════════════════════
@@ -352,48 +362,122 @@ const requireRole = (role) => (req, res, next) => {
 app.post('/api/auth/register', (req, res) => {
     try {
         const { email, password, firstName, lastName } = req.body;
-
         if (!email || !password || password.length < 6) {
-            return res.status(400).json({ success: false, error: 'Email et mot de passe (6+ chars) requis' });
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Email et mot de passe (6+ chars) requis' 
+            });
         }
-
         const data = loadData();
 
-        // Empêcher doublon email
-        if (data.users?.some(u => u.email === email)) {
-            return res.status(400).json({ success: false, error: 'Email déjà utilisé' });
+        if (data.users?.some(u => u.email === email.trim().toLowerCase())) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Email déjà utilisé' 
+            });
         }
 
+        const accessCode = generateAccessCode();
 
         const user = {
             id: generateId('usr'),
-            email,
+            email: email.trim().toLowerCase(),
             password: hashPassword(password),
             firstName: firstName || '',
             lastName: lastName || '',
             role: data.users?.length === 0 ? 'admin' : 'user',
+            accessCode,
+            accessCodeUsed: false,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
 
-       // if (!data.users) data.users = [];
+        if (!data.users) data.users = [];
         data.users.push(user);
         saveData(data);
 
         const token = generateToken(user);
 
-        log.success('Utilisateur créé', `${email} (${user.role})`);
+        log.success('Utilisateur créé', `${email} | Code: ${accessCode}`);
+
         res.status(201).json({
             success: true,
-            message: 'Inscription réussie',
+            message: 'Inscription réussie. Utilisez le code d\'accès sur mobile.',
             token,
-            user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName }
+            user: { 
+                id: user.id, 
+                email: user.email, 
+                role: user.role, 
+                firstName: user.firstName, 
+                lastName: user.lastName,
+                accessCode // Retourné ici
+            }
         });
     } catch (err) {
         log.error('POST /api/auth/register', err.message);
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
+// VÉRIFICATION DU CODE D'ACCÈS (mobile → activation)
+app.post('/auth/verify-access-code', (req, res) => {
+    try {
+        const { code } = req.body;
+        if (!code || code.length !== 4 || !/^\d{4}$/.test(code)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Code à 4 chiffres requis'
+            });
+        }
+
+        const data = loadData();
+        const user = data.users?.find(u => u.accessCode === code);
+
+        if (!user) {
+            log.warning('Code d\'accès invalide', code);
+            return res.status(404).json({
+                success: false,
+                message: 'Code invalide'
+            });
+        }
+
+        if (user.accessCodeUsed) {
+            return res.json({
+                success: true,
+                message: 'Code déjà utilisé',
+                alreadyActivated: true,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName
+                }
+            });
+        }
+
+        // Marquer comme utilisé
+        user.accessCodeUsed = true;
+        user.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.success('Code d\'accès validé', `${user.email} (${code})`);
+
+        res.json({
+            success: true,
+            message: 'Accès activé avec succès',
+            user: {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName
+            }
+        });
+    } catch (err) {
+        log.error('POST /auth/verify-access-code', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 
 app.post('/api/auth/login', (req, res) => {
     try {
@@ -465,10 +549,146 @@ app.get('/api/auth/me', jwtAuth, (req, res) => {
 
     res.json({
         success: true,
-        user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName }
+        user: { 
+            id: user.id, 
+            email: user.email, 
+            role: user.role, 
+            firstName: user.firstName, 
+            lastName: user.lastName,
+            accessCode: user.accessCodeUsed ? null : user.accessCode
+        }
     });
 });
 
+// Régénérer un code d'accès (admin ou utilisateur)
+app.post('/api/auth/regenerate-access-code', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const user = data.users?.find(u => u.id === req.user.id);
+        if (!user) return res.status(404).json({ success: false, error: 'Utilisateur introuvable' });
+
+        const newCode = generateAccessCode();
+        user.accessCode = newCode;
+        user.accessCodeUsed = false;
+        user.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.success('Code régénéré', `${user.email} → ${newCode}`);
+
+        res.json({
+            success: true,
+            message: 'Nouveau code généré',
+            accessCode: newCode
+        });
+    } catch (err) {
+        log.error('POST /api/auth/regenerate-access-code', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+// ──────────────────────────────────────────────────
+// FORGOT PASSWORD
+// ──────────────────────────────────────────────────
+app.post('/api/auth/forgot-password', (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email requis.',
+                code: 'MISSING_EMAIL'
+            });
+        }
+
+        const data = loadData();
+        const user = data.users?.find(u => u.email === email.trim().toLowerCase());
+        if (!user) {
+            // Ne pas révéler si l'email existe
+            log.info('Demande reset - email inconnu', email);
+            return res.json({
+                success: true,
+                message: 'Si l\'email existe, un lien a été envoyé.',
+                code: 'RESET_LINK_SENT'
+            });
+        }
+
+        const resetToken = generateToken(user, { expiresIn: '15m' });
+        const resetLink = `${process.env.APP_URL}/reset-password?token=${resetToken}`;
+
+        // TODO: Envoyer email ici
+        log.success('Lien de réinitialisation généré', `${email} → $resetLink`);
+
+        res.json({
+            success: true,
+            message: 'Si l\'email existe, un lien a été envoyé.',
+            code: 'RESET_LINK_SENT'
+        });
+    } catch (err) {
+        log.error('POST /api/auth/forgot-password', err.message);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur serveur.',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
+// ──────────────────────────────────────────────────
+// RESET PASSWORD
+// ──────────────────────────────────────────────────
+app.post('/api/auth/reset-password', (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+        if (!token || !newPassword || newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'Token et mot de passe (6+ caractères) requis.',
+                code: 'INVALID_INPUT'
+            });
+        }
+
+        let decoded;
+        try {
+            decoded = verifyToken(token);
+        } catch (err) {
+            return res.status(401).json({
+                success: false,
+                message: 'Lien invalide ou expiré.',
+                code: 'INVALID_TOKEN'
+            });
+        }
+
+        const data = loadData();
+        const user = data.users?.find(u => u.id === decoded.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Utilisateur introuvable.',
+                code: 'USER_NOT_FOUND'
+            });
+        }
+
+        user.password = hashPassword(newPassword);
+        user.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.success('Mot de passe réinitialisé', user.email);
+
+        res.json({
+            success: true,
+            message: 'Mot de passe mis à jour avec succès.',
+            code: 'PASSWORD_RESET_SUCCESS'
+        });
+    } catch (err) {
+        log.error('POST /api/auth/reset-password', err.message);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur serveur.',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
 
 const crypto = require('crypto');
 
@@ -554,6 +774,8 @@ app.get('/api', (req, res) => {
             },
             auth: {
                 register: 'POST /api/auth/register',
+                verify: '/api/auth/verify-access-code',
+                generateCode: 'api/auth/verify-access-code',
                 login: 'POST /api/auth/login',
                 me: 'GET /api/auth/me (Bearer Token)'
             }
@@ -1776,29 +1998,6 @@ app.get('*', (req, res ,next) => {
 });
 
 
-
-// ═══════════════════════════════════════════════════════════════
-// 💾 BACKUP AUTOMATIQUE
-// ═══════════════════════════════════════════════════════════════
-
-if (CONFIG.BACKUP_ENABLED) {
-    cron.schedule(`*/${CONFIG.BACKUP_INTERVAL} * * * *`, () => {
-        try {
-            const data = loadData();
-            const filename = `backup-${moment().format('YYYY-MM-DD_HH-mm')}.json`;
-            const filepath = path.join(CONFIG.BACKUP_DIR, filename);
-            
-            fs.writeFileSync(filepath, JSON.stringify(data, null, 2));
-            log.backup(filename);
-            
-            cleanOldBackups();
-        } catch (err) {
-            log.error('Erreur backup auto', err.message);
-        }
-    });
-    
-    log.success('Backup automatique activé', `Toutes les ${CONFIG.BACKUP_INTERVAL}min`);
-}
 
 const cleanOldBackups = () => {
     try {

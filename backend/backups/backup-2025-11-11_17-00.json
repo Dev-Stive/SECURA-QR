@@ -1419,8 +1419,7 @@
       "lastName": "JUNIOR",
       "role": "user",
       "createdAt": "2025-11-08T12:07:41.115Z",
-      "updatedAt": "2025-11-08T12:07:41.115Z",
-      "accessCode": "4821"
+      "updatedAt": "2025-11-08T12:07:41.115Z"
     },
     {
       "id": "usr_1762606689312_tg4o61hz2",
@@ -1430,8 +1429,7 @@
       "lastName": "",
       "role": "user",
       "createdAt": "2025-11-08T12:58:09.499Z",
-      "updatedAt": "2025-11-08T12:58:09.499Z",
-      "accessCode": "4821"
+      "updatedAt": "2025-11-08T12:58:09.499Z"
     },
     {
       "id": "usr_1762608473263_a6kf6gcg3",
@@ -1441,8 +1439,7 @@
       "lastName": "KUETE",
       "role": "user",
       "createdAt": "2025-11-08T13:27:53.461Z",
-      "updatedAt": "2025-11-08T13:27:53.461Z",
-      "accessCode": "4821"
+      "updatedAt": "2025-11-08T13:27:53.461Z"
     }
   ],
   "meta": {
