@@ -1880,6 +1880,58 @@ body.dark-theme {
 .event-card-pro:nth-child(3) { animation-delay: 0.3s; }
 
 
+
+.swal-bulk-generation {
+    max-width: 600px !important;
+}
+
+.bulk-progress-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.progress-header h4 {
+    margin: 0 0 10px;
+    color: #D97706;
+}
+
+.progress-bar-container {
+    height: 12px;
+    background: #333;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #D97706, #F59E0B);
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+#qrPreviewScroll {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 15px;
+    padding: 10px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+#qrPreviewScroll img {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 @keyframes fadeInUp {
     to { opacity: 1; transform: translateY(0); }
 }

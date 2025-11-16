@@ -33,7 +33,7 @@ function formatFileName(...parts) {
         .replace(/\s+/g, '-')
         .replace(/[^a-zA-Z0-9-_]/g, '')
         .replace(/-+/g, '-')    
-        .replace(/^-|-$/g, '');      // retire tiret au début/fin
+        .replace(/^-|-$/g, '');      
 }
 
 // ===== INITIALISER LE DOSSIER (CHROME/EDGE) =====
@@ -217,117 +217,349 @@ async function downloadSingleQR() {
     });
 }
 
-// ===== GÉNÉRATION EN MASSE → ZIP OU DOSSIER =====
+// ===== GÉNÉRATION EN MASSE ULTRA COMPLÈTE AVEC PROGRESSION + APERÇU DÉFILANT =====
 async function bulkGenerateAndDownload() {
     const eventId = document.getElementById('qrEventSelector').value;
     if (!eventId) return showNotification('warning', 'Sélectionnez un événement');
 
-    const guests = storage.getGuestsByEventId(eventId);
+    const allGuests = storage.getGuestsByEventId(eventId);
     const event = storage.getEventById(eventId);
-    if (guests.length === 0) return showNotification('warning', 'Aucun invité');
+    if (!allGuests.length) return showNotification('warning', 'Aucun invité');
 
-    const confirmed = await confirmDialog(
-        'Génération en masse',
-        `Générer <strong>${guests.length}</strong> QR Codes ?`,
-        'Lancer',
-        'Annuler'
-    );
-    if (!confirmed) return;
+    const guestsWithoutQR = allGuests.filter(g => !storage.getQRCodeByGuestId(g.id));
+    const hasMissingQR = guestsWithoutQR.length > 0;
 
-    showLoading();
+    // === CHOIX INTELLIGENT ===
+    let targetGuests = allGuests;
+    let mode = 'all';
 
-    const useDirectory = !!downloadDirHandle && 'showDirectoryPicker' in window;
-    let successCount = 0;
+    if (hasMissingQR) {
+        const result = await Swal.fire({
+            title: 'Génération en masse',
+            html: `
+                <p><strong>${allGuests.length}</strong> invités au total</p>
+                <p><strong style="color:#10B981">${guestsWithoutQR.length}</strong> sans QR Code</p>
+                <p>Que voulez-vous générer ?</p>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: `Tous les invités (${allGuests.length})`,
+            cancelButtonText: `Seulement sans QR (${guestsWithoutQR.length})`,
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'btn btn-primary',
+                cancelButton: 'btn btn-success',
+                popup: 'animated fadeIn faster'
+            },
+            buttonsStyling: true
+        });
 
-    if (useDirectory) {
-        // CHROME/EDGE → DOSSIER
-        for (const guest of guests) {
-            try {
-                const qrData = { t: 'INV', e: eventId, g: guest.id };
-                const tempDiv = document.createElement('div');
-                tempDiv.style.display = 'none';
-                document.body.appendChild(tempDiv);
-
-                new QRCode(tempDiv, {
-                    text: JSON.stringify(qrData),
-                    width: qrConfig.size,
-                    height: qrConfig.size,
-                    colorDark: qrConfig.foreground,
-                    colorLight: qrConfig.background,
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-
-                await new Promise(r => setTimeout(r, 80));
-                const canvas = tempDiv.querySelector('canvas');
-                if (canvas) {
-                    const blob = await new Promise(resolve => canvas.toBlob(resolve));
-                    const cleanName = formatFileName(guest.firstName, guest.lastName);
-                    const filename = `QR_${cleanName}.png`;
-                    const fileHandle = await downloadDirHandle.getFileHandle(filename, { create: true });
-                    const writable = await fileHandle.createWritable();
-                    await writable.write(blob);
-                    await writable.close();
-                    successCount++;
-                }
-
-                storage.saveQRCode({ guestId: guest.id, eventId: event.id, data: JSON.stringify(qrData), config: qrConfig });
-                document.body.removeChild(tempDiv);
-            } catch (err) {
-                console.warn('Échec pour', guest.firstName);
-            }
+        if (result.isConfirmed) {
+            targetGuests = allGuests;
+            mode = 'all';
+        } else if (result.isDismissed) {
+            targetGuests = guestsWithoutQR;
+            mode = 'missing';
+        } else {
+            return; 
         }
     } else {
-        // TOUS NAVIGATEURS → ZIP
-        const zip = new JSZip();
-        const folder = zip.folder(`SECURA_QR_${event.name.replace(/\s+/g, '_')}`);
+        const confirmed = await Swal.fire({
+            title: 'Génération en masse',
+            text: `Générer ${allGuests.length} QR Codes ? (tous ont déjà un QR)`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Générer',
+            cancelButtonText: 'Annuler',
+            customClass: { popup: 'animated fadeIn faster' }
+        });
+        if (!confirmed.value) return;
+    }
 
-        for (const guest of guests) {
-            try {
-                const qrData = { t: 'INV', e: eventId, g: guest.id };
-                const tempDiv = document.createElement('div');
-                tempDiv.style.display = 'none';
-                document.body.appendChild(tempDiv);
-
-                new QRCode(tempDiv, {
-                    text: JSON.stringify(qrData),
-                    width: qrConfig.size,
-                    height: qrConfig.size,
-                    colorDark: qrConfig.foreground,
-                    colorLight: qrConfig.background,
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-
-                await new Promise(r => setTimeout(r, 80));
-                const canvas = tempDiv.querySelector('canvas');
-                if (canvas) {
-                    const blob = await new Promise(resolve => canvas.toBlob(resolve));
-                    const cleanName = formatFileName(guest.firstName, guest.lastName);
-const filename = `QR_${cleanName}.png`;
-                    folder.file(filename, blob);
-                    successCount++;
-                }
-
-                storage.saveQRCode({ guestId: guest.id, eventId: event.id, data: JSON.stringify(qrData), config: qrConfig });
-                document.body.removeChild(tempDiv);
-            } catch (err) {
-                console.warn('Échec pour', guest.firstName);
+    // === STYLES CSS POUR L'ANIMATION ===
+    if (!document.getElementById('qr-bulk-styles')) {
+        const style = document.createElement('style');
+        style.id = 'qr-bulk-styles';
+        style.textContent = `
+            .bulk-progress-container {
+                padding: 20px;
+                min-height: 400px;
             }
-        }
+            .progress-header h4 {
+                margin: 0 0 10px 0;
+                color: #1f2937;
+                font-size: 1.5rem;
+            }
+            .progress-header p {
+                margin: 0;
+                color: #6b7280;
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+            .progress-bar-container {
+                width: 100%;
+                height: 30px;
+                background: #e5e7eb;
+                border-radius: 15px;
+                overflow: hidden;
+                margin: 20px 0;
+                box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .progress-bar {
+                height: 100%;
+                background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+                transition: width 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 0.9rem;
+            }
+            .qr-preview-scroll {
+                max-height: 280px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                background: #f9fafb;
+                border: 2px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 15px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+                scroll-behavior: smooth;
+            }
+            .qr-preview-scroll::-webkit-scrollbar {
+                width: 8px;
+            }
+            .qr-preview-scroll::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+            .qr-preview-scroll::-webkit-scrollbar-thumb {
+                background: #10b981;
+                border-radius: 10px;
+            }
+            .qr-preview-item {
+                position: relative;
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+                animation: qrFadeIn 0.4s ease forwards;
+            }
+            .qr-preview-item img {
+                width: 90px;
+                height: 90px;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border: 3px solid #10b981;
+                transition: transform 0.2s ease;
+            }
+            .qr-preview-item:hover img {
+                transform: scale(1.1);
+            }
+            .qr-preview-item .guest-name {
+                position: absolute;
+                bottom: -22px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(16, 185, 129, 0.95);
+                color: white;
+                padding: 3px 8px;
+                border-radius: 6px;
+                font-size: 0.7rem;
+                font-weight: 600;
+                white-space: nowrap;
+                max-width: 100px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            }
+            @keyframes qrFadeIn {
+                to {
+                    opacity: 1;
+                    transform: scale(1) translateY(0);
+                }
+            }
+            .swal-bulk-generation {
+                width: 650px !important;
+            }
+            .text-muted {
+                color: #9ca3af;
+                text-align: center;
+                font-style: italic;
+            }
+        `;
+        document.head.appendChild(style);
+    }
 
-        // GÉNÉRER ZIP
+    // === MODAL DE PROGRESSION AVEC APERÇU DÉFILANT ===
+    const progressHtml = `
+        <div class="bulk-progress-container">
+            <div class="progress-header">
+                <h4>🎯 Génération en cours...</h4>
+                <p id="progress-text">0 sur ${targetGuests.length}</p>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width:0%">
+                    <span id="progressPercent">0%</span>
+                </div>
+            </div>
+            <div class="qr-preview-scroll" id="qrPreviewScroll">
+                <p class="text-muted">⏳ Les QR apparaîtront ici au fur et à mesure...</p>
+            </div>
+        </div>
+    `;
+
+    // Ouvrir la modal SANS attendre de confirmation
+    Swal.fire({
+        html: progressHtml,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        showCloseButton: false,
+        customClass: { popup: 'swal-bulk-generation' },
+        didOpen: () => {
+            // Ne pas afficher le loader par défaut
+            Swal.hideLoading();
+        }
+    });
+
+    // === ÉLÉMENTS DE LA MODALE (disponibles immédiatement) ===
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progress-text');
+    const progressPercent = document.getElementById('progressPercent');
+    const previewScroll = document.getElementById('qrPreviewScroll');
+
+    // Vider le message initial
+    previewScroll.innerHTML = '';
+
+    // === PRÉPARATION ===
+    const useDirectory = !!downloadDirHandle && 'showDirectoryPicker' in window;
+    let zip = null;
+    let folder = null;
+    if (!useDirectory) {
+        zip = new JSZip();
+        folder = zip.folder(`SECURA_QR_${formatFileName(event.name)}`);
+    }
+
+    let successCount = 0;
+    const total = targetGuests.length;
+
+    // === BOUCLE DE GÉNÉRATION ===
+    for (let i = 0; i < total; i++) {
+        const guest = targetGuests[i];
+        const qrData = { t: 'INV', e: eventId, g: guest.id };
+
+        try {
+            // Créer QR temporaire
+            const tempDiv = document.createElement('div');
+            tempDiv.style.cssText = 'position:absolute; left:-9999px; top:-9999px;';
+            document.body.appendChild(tempDiv);
+
+            new QRCode(tempDiv, {
+                text: JSON.stringify(qrData),
+                width: qrConfig.size,
+                height: qrConfig.size,
+                colorDark: qrConfig.foreground,
+                colorLight: qrConfig.background,
+                correctLevel: QRCode.CorrectLevel[qrConfig.errorLevel]
+            });
+
+            // Attendre rendu
+            await new Promise(r => setTimeout(r, 120));
+            const canvas = tempDiv.querySelector('canvas');
+            if (!canvas) throw new Error('Canvas non trouvé');
+
+            const blob = await new Promise(resolve => canvas.toBlob(resolve));
+
+            // === SAUVEGARDE FICHIER ===
+            const cleanName = formatFileName(guest.firstName, guest.lastName);
+            const filename = `QR_${cleanName}.png`;
+
+            if (useDirectory) {
+                const fileHandle = await downloadDirHandle.getFileHandle(filename, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+            } else {
+                folder.file(filename, blob);
+            }
+
+            // === SAUVEGARDE DANS STORAGE (seulement si pas déjà existant) ===
+            if (!storage.getQRCodeByGuestId(guest.id)) {
+                storage.saveQRCode({
+                    guestId: guest.id,
+                    eventId: event.id,
+                    data: JSON.stringify(qrData),
+                    config: { ...qrConfig }
+                });
+            }
+
+            successCount++;
+
+            // === MISE À JOUR UI ===
+            const percentage = Math.round((successCount / total) * 100);
+            progressBar.style.width = `${percentage}%`;
+            progressPercent.textContent = `${percentage}%`;
+            progressText.textContent = `${successCount} sur ${total}`;
+
+            // === AJOUTER APERÇU ANIMÉ ===
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'qr-preview-item';
+            
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(blob);
+            img.alt = `${guest.firstName} ${guest.lastName}`;
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'guest-name';
+            nameSpan.textContent = `${guest.firstName} ${guest.lastName}`;
+            
+            itemDiv.appendChild(img);
+            itemDiv.appendChild(nameSpan);
+            previewScroll.appendChild(itemDiv);
+
+            // Scroll automatique vers le bas
+            previewScroll.scrollTop = previewScroll.scrollHeight;
+
+            // Nettoyer
+            document.body.removeChild(tempDiv);
+
+            // Petit délai pour fluidité de l'animation
+            await new Promise(r => setTimeout(r, 80));
+
+        } catch (err) {
+            console.warn(`Échec pour ${guest.firstName} ${guest.lastName}:`, err);
+        }
+    }
+
+    // === FINALISATION ===
+    if (!useDirectory && successCount > 0) {
+        progressText.textContent = `Création du fichier ZIP...`;
         const zipBlob = await zip.generateAsync({ type: 'blob' });
         const url = URL.createObjectURL(zipBlob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `SECURA_QR_${event.name.replace(/\s+/g, '_')}.zip`;
+        a.download = `SECURA_QR_${formatFileName(event.name)}.zip`;
         a.click();
         URL.revokeObjectURL(url);
     }
 
-    hideLoading();
-    SECURA_AUDIO.success();
-    showNotification('success', `${successCount} QR générés !`);
+    // === FERMETURE MODALE + NOTIF ===
+    Swal.close();
+    
+    if (typeof SECURA_AUDIO !== 'undefined' && SECURA_AUDIO.success) {
+        SECURA_AUDIO.success();
+    }
+    
+    showNotification('success', `✅ ${successCount} QR Codes générés avec succès !`);
+
+    if (mode === 'missing' && hasMissingQR) {
+        setTimeout(() => loadGuestsByQREvent(eventId), 500);
+    }
 }
+
 
 // ===== AFFICHAGE INFO =====
 function displayGuestInfo(guest, event) {

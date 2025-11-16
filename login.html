@@ -306,87 +306,145 @@
 
     <!-- Scripts -->
     <script src="js/particles-config.js"></script>
-    <script src="js/storage.js"></script>
     <script src="js/main.js"></script>
 
-    <script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // ═══════════════════════════════════════════════════════════════
+    // 🔐 SECURA LOGIN - SCRIPT AUTONOME (SANS storage.js)
+    // ═══════════════════════════════════════════════════════════════
+    const API_URL = 'http://localhost:3000/api'; // Change en prod si besoin
+    const LOGIN_ENDPOINT = '/auth/login';
+    const ME_ENDPOINT = '/auth/me';
 
-        // === REDIRECTION SI DÉJÀ CONNECT;
-        (async () => {
-         if (window.storageReady) await window.storageReady;
-         try {
-             if (window.storage && window.storage.token) {
-                 
-                await window.storage.apiRequest('/auth/me', { 
-                    method: 'GET' , 
-                    headers: { 
-                        'Authorization': `Bearer ${window.storage.token}`,
-                    } 
-                });
-
-
-                 window.location.href = '/index.html';
-                 return;
-             }
-         } catch (err) {
-             if (window.storage && typeof window.storage.forceLogout === 'function') {
-                 window.storage.forceLogout();
-             } else {
-                 localStorage.removeItem('secura_token');
-             }
-         }
-     })();
-   
-    // === PASSWORD TOGGLE (ACCESSIBLE) ===
-    const toggleBtn = document.getElementById('togglePassword');
+    // Éléments DOM
+    const form = document.getElementById('login-form');
+    const emailInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePassword');
+    const submitBtn = document.getElementById('login-btn');
+    const btnText = document.getElementById('login-text');
+    const spinner = document.getElementById('login-spinner');
 
-    toggleBtn?.addEventListener('click', togglePassword);
+    // État
+    let isSubmitting = false;
+
+    // === UTILS ===
+    const setLoading = (loading) => {
+        isSubmitting = loading;
+        submitBtn.disabled = loading;
+        btnText.style.display = loading ? 'none' : 'inline';
+        spinner.style.display = loading ? 'inline-block' : 'none';
+    };
+
+    const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    const saveToken = (token) => localStorage.setItem('secura_token', token);
+    const getToken = () => localStorage.getItem('secura_token');
+    const removeToken = () => localStorage.removeItem('secura_token');
+
+    const apiRequest = async (endpoint, options = {}) => {
+        const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+
+        const token = getToken();
+        if (token && !endpoint.includes('/auth/')) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        try {
+            const res = await fetch(url, { ...options, headers });
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(data.message || data.error || `HTTP ${res.status}`);
+            }
+            return { success: true, ...data };
+        } catch (err) {
+            console.error('API Error:', err);
+            return { success: false, message: err.message };
+        }
+    };
+
+    // === REDIRECTION SI DÉJÀ CONNECTÉ ===
+    (async () => {
+        const token = getToken();
+        if (!token) return;
+
+        const result = await apiRequest(ME_ENDPOINT);
+        if (result.success && result.user) {
+            window.location.href = '/index.html';
+        } else {
+            removeToken();
+        }
+    })();
+
+    // === TOGGLE PASSWORD ===
+    toggleBtn?.addEventListener('click', () => togglePasswordVisibility());
     toggleBtn?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            togglePassword();
+            togglePasswordVisibility();
         }
     });
 
-    function togglePassword() {
-        if (!passwordInput) return;
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            toggleBtn.classList.replace('bi-eye', 'bi-eye-slash');
-            toggleBtn.setAttribute('aria-label', 'Masquer le mot de passe');
-        } else {
-            passwordInput.type = 'password';
-            toggleBtn.classList.replace('bi-eye-slash', 'bi-eye');
-            toggleBtn.setAttribute('aria-label', 'Afficher le mot de passe');
-        }
+    function togglePasswordVisibility() {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        toggleBtn.classList.replace(isPassword ? 'bi-eye' : 'bi-eye-slash', isPassword ? 'bi-eye-slash' : 'bi-eye');
+        toggleBtn.setAttribute('aria-label', isPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
     }
 
-    // === LOGIN AVEC SWEETALERT2 ===
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    // === FORM SUBMIT ===
+    form?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
 
-        const email = document.getElementById('username')?.value.trim() || '';
-        const password = document.getElementById('password')?.value || '';
-        const submitBtn = document.getElementById('login-btn');
-        const btnText = document.getElementById('login-text');
-        const spinner = document.getElementById('login-spinner');
+        const email = emailInput?.value.trim();
+        const password = passwordInput?.value;
 
-        if (!submitBtn || !btnText || !spinner) return;
+        // Validation
+        if (!email || !password) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Champs requis',
+                text: 'Veuillez remplir l’e-mail et le mot de passe.',
+                confirmButtonColor: '#D97706'
+            });
+            return;
+        }
 
-        // Désactiver le bouton
-        submitBtn.disabled = true;
-        btnText.style.display = 'none';
-        spinner.style.display = 'inline-block';
+        if (!isValidEmail(email)) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'E-mail invalide',
+                text: 'Veuillez entrer une adresse e-mail correcte.',
+                confirmButtonColor: '#D97706'
+            });
+            return;
+        }
+
+        setLoading(true);
 
         try {
-            const result = await storage.login(email, password);
+            const result = await apiRequest(LOGIN_ENDPOINT, {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
 
             if (result.success) {
+                saveToken(result.token);
+                const name = result.user?.firstName
+                    ? `${result.user.firstName} ${result.user.lastName || ''}`.trim()
+                    : email.split('@')[0];
+
                 await Swal.fire({
                     icon: 'success',
                     title: 'Connexion réussie !',
-                    text: `Bienvenue, ${result.user.firstName || email.split('@')[0]} !`,
+                    text: `Bienvenue, ${name} !`,
                     timer: 1800,
                     timerProgressBar: true,
                     showConfirmButton: false,
@@ -395,33 +453,33 @@
                     }
                 });
             } else {
-                const text = result.message;
-                
-                Swal.fire({
+                const msg = result.message || 'E-mail ou mot de passe incorrect.';
+                await Swal.fire({
                     icon: 'error',
                     title: 'Échec de connexion',
-                    text,
+                    text: msg,
                     confirmButtonText: 'Réessayer',
                     confirmButtonColor: '#D97706'
                 });
             }
         } catch (err) {
-            // === ERREUR INATTENDUE (ex: crash API, CORS, etc.) ===
-            console.error('Erreur critique login:', err);
-            Swal.fire({
+            console.error('Login error:', err);
+            await Swal.fire({
                 icon: 'error',
                 title: 'Erreur système',
-                text: 'Une erreur inattendue est survenue. Veuillez réessayer.',
+                text: 'Impossible de contacter le serveur. Vérifiez votre connexion.',
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#D97706'
             });
         } finally {
-            // Réactiver le bouton
-            submitBtn.disabled = false;
-            btnText.style.display = 'inline';
-            spinner.style.display = 'none';
+            setLoading(false);
         }
     });
-    </script>
+
+    // === FOCUS AUTO SUR E-MAIL AU CHARGEMENT ===
+    document.addEventListener('DOMContentLoaded', () => {
+        emailInput?.focus();
+    });
+</script>
 </body>
 </html>

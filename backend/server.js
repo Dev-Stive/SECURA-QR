@@ -354,6 +354,67 @@ const generateAccessCode = () => {
   return code;
 };
 
+// ═══════════════════════════════════════════════════════════════
+// 🔍 VÉRIFICATION TOKEN (BACKEND)
+// ═══════════════════════════════════════════════════════════════
+app.post('/api/auth/verify-token', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        valid: false,
+        error: 'Token requis'
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        valid: false,
+        error: 'Token manquant'
+      });
+    }
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const data = loadData();
+    const user = data.users?.find(u => u.id === payload.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        valid: false,
+        error: 'Utilisateur introuvable'
+      });
+    }
+
+    log.info('Token vérifié', user.email);
+    res.json({
+      success: true,
+      valid: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
+
+  } catch (err) {
+    log.warning('Token invalide ou expiré', req.ip);
+    res.status(401).json({
+      success: false,
+      valid: false,
+      error: 'Token invalide ou expiré'
+    });
+  }
+});
+
+
+
+
 
 // ═══════════════════════════════════════════════════════════════
 // 🔐 AUTHENTIFICATION - LOGIN / REGISTER
@@ -419,7 +480,7 @@ app.post('/api/auth/register', (req, res) => {
     }
 });
 
-// VÉRIFICATION DU CODE D'ACCÈS (mobile → activation)
+
 app.post('/auth/verify-access-code', (req, res) => {
     try {
         const { code } = req.body;
@@ -777,6 +838,7 @@ app.get('/api', (req, res) => {
                 verify: '/api/auth/verify-access-code',
                 generateCode: 'api/auth/verify-access-code',
                 login: 'POST /api/auth/login',
+                token: '/api/auth/verify-token',
                 me: 'GET /api/auth/me (Bearer Token)'
             }
         }

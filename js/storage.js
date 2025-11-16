@@ -16,8 +16,8 @@
 
 class SecuraStorage {
     constructor() {
-        //this.API_URL = 'http://localhost:3000/api';
-        this.API_URL = 'https://secura-qr.onrender.com/api';
+        this.API_URL = 'http://localhost:3000/api';
+        //this.API_URL = 'https://secura-qr.onrender.com/api';
 
         this.token = localStorage.getItem('secura_token') || null;
         this.user = null;
@@ -167,7 +167,7 @@ class SecuraStorage {
             const res = await fetch(url, { 
                 ...options, 
                 headers,
-                signal: options.signal || AbortSignal.timeout(15000)
+               //signal: options.signal || AbortSignal.timeout(15000)
             });
             
             if (!res.ok) {
@@ -178,6 +178,9 @@ class SecuraStorage {
             return await res.json();
         } catch (err) {
             console.error(`API Error [${endpoint}]:`, err.message);
+            if(err.message.contains('Token invalide')){
+                this.forceLogout();
+            }
             throw err;
         }
     }
@@ -548,7 +551,7 @@ class SecuraStorage {
         localStorage.removeItem('secura_token');
         localStorage.removeItem('secura_user');
         localStorage.removeItem('secura_data');
-        
+        window.location.href='/login.html';        
 
        
     }
@@ -1841,6 +1844,8 @@ class SecuraStorage {
             this.forceLogout();
         }
     }catch(err){
+
+        this.forceLogout();
         
     }
     }
