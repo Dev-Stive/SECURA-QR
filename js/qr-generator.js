@@ -5,13 +5,15 @@
 let currentQRCode = null;
 let currentGuestId = null;
 let qrConfig = {
-    size: 300,
-    foreground: '#D97706',
-    background: '#FFFFFF',
-    style: 'square',
-    errorLevel: 'H', // H = max robustesse
-    includeLogo: true
+  size: 300,
+  foreground: '#000000',     // ← NOIR PUR
+  background: '#FFFFFF',
+  style: 'square',
+  errorLevel: 'H',
+  includeLogo: true
 };
+
+
 let downloadDirHandle = null;
 
 // ===== DOM LOADED =====

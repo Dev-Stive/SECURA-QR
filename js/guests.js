@@ -1314,18 +1314,21 @@ async function viewGuestQR(id) {
     document.body.appendChild(tempDiv);
 
     new QRCode(tempDiv, {
-        text: JSON.stringify(qrData),
-        width: size,
-        height: size,
-        colorDark: config.foreground,
-        colorLight: config.background,
-        correctLevel: QRCode.CorrectLevel[config.errorLevel]
+                text: JSON.stringify(qrData),
+            width: 300,
+        height: 300,
+        colorDark: '#000000',    // ← Noir pour détection
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.H
     });
 
     await new Promise(r => setTimeout(r, 100));
     const canvas = tempDiv.querySelector('canvas');
     const dataUrl = canvas?.toDataURL('image/png') || '';
     document.body.removeChild(tempDiv);
+
+    canvas.style.border = '8px solid #D97706 !      !!';
+canvas.style.borderRadius = '16px';
 
     const color = stringToColor(`${guest.firstName} ${guest.lastName}`);
     const initials = `${guest.firstName[0]}${guest.lastName[0]}`.toUpperCase();
