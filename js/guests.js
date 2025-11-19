@@ -766,7 +766,7 @@ function createGuestRowElement(guest) {
 }
 
 function createGuestRowHTML(guest) {
-    // Fonction de nettoyage : supprime les tirets, espaces vides, "null", etc.
+
     const clean = value => {
         if (!value || value.trim() === '' || value.trim() === '-' || value.trim().toLowerCase() === 'null') {
             return '';
@@ -826,6 +826,9 @@ function createGuestRowHTML(guest) {
                 </button>
                 <button class="icon-btn delete" onclick="deleteGuest('${guest.id}')" title="Supprimer">
                     <i class="bi bi-trash3"></i>
+                </button>
+                <button class="icon-btn" onclick="generateTicketForGuest('${guest.id}')" title="Générer Billet">
+                    <i class="bi bi-ticket-perforated"></i>
                 </button>
             </div>
         </td>
@@ -1290,95 +1293,171 @@ function closeModal(id) {
 
 
 // ═══════════════════════════════════════════════════════════════
-// 📱 VIEW GUEST QR - APERÇU MAGNIFIQUE AVEC BOOTSTRAP ICONS
+// QR CODE GUEST VIEW – ÉDITION ULTRA PREMIUM 2025
 // ═══════════════════════════════════════════════════════════════
 async function viewGuestQR(id) {
     const guest = storage.getGuestById(id);
     const event = storage.getEventById(guest.eventId);
-    if (!guest || !event) return showNotification('error', 'Données manquantes');
+    if (!guest || !event) return showNotification('error', 'Invité ou événement introuvable');
 
-    const qr = storage.getQRCodeByGuestId(id);
-    if (!qr) {
-        showNotification('warning', 'Aucun QR Code. Veuillez le générer d’abord.');
-        return;
+    const qrRecord = storage.getQRCodeByGuestId(id);
+    if (!qrRecord) {
+        return showNotification('warning', 'QR Code non généré pour cet invité');
     }
 
-    const qrData = typeof qr.data === 'string' ? JSON.parse(qr.data) : qr.data;
-    const size = 260;
-    const config = qr.config || { foreground: '#D97706', background: '#FFFFFF', errorLevel: 'H' };
+    const qrData = typeof qrRecord.data === 'string' ? JSON.parse(qrRecord.data) : qrRecord.data;
 
-    // Crée QR
+    // Génération du QR Code en haute qualité
     const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
+    tempDiv.style.cssText = 'position:absolute; left:-9999px; top:-9999px;';
     document.body.appendChild(tempDiv);
 
     new QRCode(tempDiv, {
-                text: JSON.stringify(qrData),
-            width: 300,
-        height: 300,
-        colorDark: '#000000',    // ← Noir pour détection
+        text: JSON.stringify(qrData),
+        width: 512,
+        height: 512,
+        colorDark: '#000000',
         colorLight: '#FFFFFF',
         correctLevel: QRCode.CorrectLevel.H
     });
 
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 150));
     const canvas = tempDiv.querySelector('canvas');
-    const dataUrl = canvas?.toDataURL('image/png') || '';
+    const qrImageUrl = canvas.toDataURL('image/png');
     document.body.removeChild(tempDiv);
 
-    canvas.style.border = '8px solid #D97706 !      !!';
-canvas.style.borderRadius = '16px';
-
-    const color = stringToColor(`${guest.firstName} ${guest.lastName}`);
+    // Couleur d'accent personnalisée pour l'avatar
+    const accentColor = stringToColor(`${guest.firstName} ${guest.lastName}`);
     const initials = `${guest.firstName[0]}${guest.lastName[0]}`.toUpperCase();
 
+    // Date formatée élégamment
+    const eventDate = new Date(event.date).toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+
+    const scannedStatus = guest.scanned 
+        ? `<span class="status-badge success"><i class="bi bi-check-circle-fill"></i> Présent</span><small class="block mt-1 opacity-80">Le ${new Date(guest.scannedAt).toLocaleString('fr-FR')}</small>`
+        : `<span class="status-badge pending"><i class="bi bi-hourglass-split"></i> En attente</span>`;
+
     openModal('qrPreviewModal', `
-            <div class="flex items-center justify-between mb-5">
-                <div class="guest-info flex items-center gap-3">
-                    <div class="guest-avatar-pro w-8" style="background:${color}">
-                        ${initials}
+        <div class="qr-modal-content animate-fadeIn">
+            <!-- En-tête élégante -->
+            <div class="modal-header-premium">
+                <div class="flex items-center gap-4" style="dispay:flex; align-items:center;">
+                    <div class="avatar-glow" style="background: ${accentColor}">
+                        <span class="avatar-initials">${initials}</span>
                     </div>
                     <div>
-                        <h3 class="guest-name text-2xl font-semibold text-gray-800">${guest.firstName} ${guest.lastName}</h3>
-                        <p class="text-sm text-gray-600"><i class="bi bi-calendar-event"></i> ${event.name}</p>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">${guest.firstName} ${guest.lastName}</h2>
+                        <p class="text-lg opacity-90 flex items-center gap-2 mt-1">
+                            <i class="bi bi-ticket-perforated text-var(--secura-red)"></i>
+                            <span>${event.name}</span>
+                        </p>
                     </div>
                 </div>
+                <div class="text-right">
+                    ${scannedStatus}
+                </div>
+            </div>
 
+            <!-- QR Code avec effet glow premium -->
+            <div class="qr-container-glow mt-8">
+                <div class="qr-frame">
+                    <img src="${qrImageUrl}" alt="QR Code de ${guest.firstName}" class="qr-image" />
+                    <div class="qr-overlay">
+                        <i class="bi bi-shield-check text-white text-6xl opacity-30"></i>
+                    </div>
+                </div>
+                <p class="text-center mt-4 text-gray-600 dark:text-gray-400 font-medium">
+                    <i class="bi bi-qr-code-scan"></i> Scannez pour valider l'entrée
+                </p>
+            </div>
 
-                <div class="text-right text-sm text-gray-500">
-                 <span class="status-badge-pro ${guest.scanned ? 'present' : 'pending'}">
-                <i class="bi ${guest.scanned ? 'bi-check-circle-fill' : 'bi-qr-code'}"></i>
-                ${guest.scanned ? 'Présent' : 'En attente'}
-            </span>
-                    ${guest.scannedAt ? `<p>Le ${new Date(guest.scannedAt).toLocaleString('fr-FR')}</p>` : ''}
+            <!-- Informations détaillées -->
+            <div class="info-grid mt-8">
+                <div class="info-card">
+                    <i class="bi bi-calendar-event"></i>
+                    <div>
+                        <small>Date de l'événement</small>
+                        <strong>${eventDate}</strong>
+                    </div>
                 </div>
+                ${event.time ? `
+                <div class="info-card">
+                    <i class="bi bi-clock"></i>
+                    <div>
+                        <small>Heure</small>
+                        <strong>${event.time}</strong>
+                    </div>
+                </div>` : ''}
+                ${event.location ? `
+                <div class="info-card">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <div>
+                        <small>Lieu</small>
+                        <strong>${event.location}</strong>
+                    </div>
+                </div>` : ''}
+                <div class="info-card">
+                    <i class="bi bi-envelope"></i>
+                    <div>
+                        <small>Email</small>
+                        <strong>${guest.email || '—'}</strong>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <i class="bi bi-telephone"></i>
+                    <div>
+                        <small>Téléphone</small>
+                        <strong>${guest.phone || '—'}</strong>
+                    </div>
+                </div>
+                ${guest.company ? `
+                <div class="info-card">
+                    <i class="bi bi-building"></i>
+                    <div>
+                        <small>Entreprise</small>
+                        <strong>${guest.company}</strong>
+                    </div>
+                </div>` : ''}
             </div>
-            <div class="p-6 rounded-2xl shadow-inner text-center">
-                <img src="${dataUrl}" alt="QR Code" class="w-64 h-64 mx-auto rounded-xl shadow">
-                <p class="text-xs text-gray-500 mt-3">Scannez pour vérifier l’invitation</p>
+
+            <!-- Actions premium -->
+            <div class="modal-actions-premium mt-8">
+                <button onclick="copyQRToClipboard('${qrImageUrl}')" class="btn-action secondary">
+                    <i class="bi bi-clipboard-check"></i> Copier
+                </button>
+                <button onclick="downloadQRImage('${qrImageUrl}', 'QR_${guest.firstName}-${guest.lastName}')" class="btn-action primary">
+                    <i class="bi bi-download"></i> Télécharger
+                </button>
+                <button onclick="shareGuest('${id}')" class="btn-action success">
+                    <i class="bi bi-share-fill"></i> Partager
+                </button>
             </div>
-            <div class="grid grid-cols-2 gap-3 mt-5 text-sm">
-            <div class=" p-3">
-                    <i class="bi bi-envelope text-amber-600"></i> <strong>Email :</strong> ${guest.email}
-                </div>
-                <div class=" p-3">
-                    <i class="bi bi-telephone text-amber-600"></i> <strong>Téléphone :</strong> ${guest.phone || '-'}
-                </div>
-                <div class="p-3">
-                    <i class="bi bi-building text-amber-600"></i> <strong>Entreprise :</strong> ${guest.company || '-'}
-                </div>
-                <div class="p-3">
-                    <i class="bi bi-geo-alt text-amber-600"></i> <strong>Lieu :</strong> ${event.location || '-'}
-                </div>
-            </div>
-            <div class="action-button">
-                <button class="btn btn-outline" onclick="copyQRToClipboard('${dataUrl}')"><i class="bi bi-clipboard"></i> Copier</button>
-                <button class="btn btn-primary" onclick="downloadQRImage('${dataUrl}', '${guest.firstName}-${guest.lastName}')"><i class="bi bi-download"></i> Télécharger</button>
-                <button class="btn btn-success" onclick="shareGuest('${id}')"><i class="bi bi-share"></i> Partager</button>
-            </div>
-    `);
+        </div>
+    `, { width: '620px' });
+
+    // Animation d'apparition fluide
+    setTimeout(() => {
+        document.querySelectorAll('.qr-modal-content > *').forEach((el, i) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                el.style.transition = 'all 0.5s ease';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, i * 100);
+        });
+    }, 100);
 }
+
+function adjustBrightness(color, amount) {
+    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+(Math.min(255, Math.max(0, parseInt(color, 16) + amount))).toString(16)).substr(-2));
+}
+
 
 
 // Fonctions utilitaires pour SweetAlert
@@ -1527,7 +1606,11 @@ function stringToColor(str) {
     return "#" + "00000".substring(0, 6 - c.length) + c;
 }
 
-
+async function generateTicketForGuest(guestId){
+     const guest = storage.getGuestById(guestId);
+    if (!guest) return;
+    window.location.href = `ticket-generator.html?event=${guest.eventId}&guest=${guestId}`;
+}
 // ═══════════════════════════════════════════════════════════════
 // 🗑️ SUPPRESSION INVITÉ
 // ═══════════════════════════════════════════════════════════════

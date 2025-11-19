@@ -715,7 +715,9 @@ function isValidRoute() {
         '/login',
         '/login.html',
         '/register',
-        '/register.html'
+        '/register.html',
+        '/ticket-generator',
+        '/ticket-generator.html'
     ];
 
     const cleanPath = currentPath.replace(/\/$/, '') || '/';

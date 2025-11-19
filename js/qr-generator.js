@@ -133,47 +133,88 @@ async function generateQRCodeWithConfirmation() {
     generateQRCode();
 }
 
-// ===== GÉNÉRER QR CODE (ULTRA-LÉGER) =====
+// ═══════════════════════════════════════════════════════════════
+// 🔗 REDIRECTION VERS GÉNÉRATEUR DE BILLETS
+// ═══════════════════════════════════════════════════════════════
 function generateQRCode() {
     const guestId = document.getElementById('qrGuestSelector').value;
     const eventId = document.getElementById('qrEventSelector').value;
+    
     if (!guestId || !eventId) return;
+
+    // Proposer de générer un billet complet
+    Swal.fire({
+        title: 'Choisissez votre format',
+        html: `
+            <div style="display: flex; flex-direction:column; grid-template-columns: 2fr 1fr; gap: 1rem; margin-top: 1rem;">
+                <button class="btn btn-outline" id="qrOnlyBtn" style="padding: 1.5rem;">
+                    <i class="bi bi-qr-code" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                    <strong>QR Code simple</strong>
+                    <small style="display: block; margin-top: 0.5rem;">Code seul (rapide)</small>
+                </button>
+                <button class="btn btn-primary" id="ticketBtn" style="padding: 1.5rem;">
+                    <i class="bi bi-ticket-perforated" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                    <strong>Billet complet</strong>
+                    <small style="display: block; margin-top: 0.5rem;">Design professionnel</small>
+                </button>
+            </div>
+        `,
+        showConfirmButton: false,
+        showCancelButton: true,
+        cancelButtonText: 'Annuler',
+        width: '600px',
+        didOpen: () => {
+            document.getElementById('qrOnlyBtn').onclick = () => {
+                Swal.close();
+                generateSimpleQR(guestId, eventId);
+            };
+            document.getElementById('ticketBtn').onclick = () => {
+                Swal.close();
+                window.location.href = `ticket-generator.html?event=${eventId}&guest=${guestId}`;
+            };
+        }
+    });
+}
+
+function generateSimpleQR(guestId, eventId) {
     const guest = storage.getGuestById(guestId);
     const event = storage.getEventById(eventId);
     if (!guest || !event) return;
-    currentGuestId = guestId;
 
+    currentGuestId = guestId;
     const qrData = { t: 'INV', e: eventId, g: guestId };
+    
     const container = document.getElementById('qrPreviewContainer');
-    container.innerHTML = '<div id="qrcode"></div';
+    container.innerHTML = '<div id="qrcode"></div>';
 
     try {
         currentQRCode = new QRCode(document.getElementById('qrcode'), {
             text: JSON.stringify(qrData),
-            width: qrConfig.size,
-            height: qrConfig.size,
-            colorDark: qrConfig.foreground,
-            colorLight: qrConfig.background,
-            correctLevel: QRCode.CorrectLevel[qrConfig.errorLevel]
+            width: 300,
+            height: 300,
+            colorDark: '#000000', 
+            colorLight: '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel.H
         });
 
         storage.saveQRCode({
-        guestId: guest.id,
-        eventId: event.id,
-        data: JSON.stringify(qrData),
-        config: qrConfig
-    });
+            guestId: guest.id,
+            eventId: event.id,
+            data: JSON.stringify(qrData),
+            config: { size: 300, foreground: '#000000', background: '#FFFFFF' }
+        });
 
-    displayGuestInfo(guest, event);
-    showQRActions();
+        displayGuestInfo(guest, event);
+        showQRActions();
 
-    SECURA_AUDIO.success();
-    showNotification('success', 'QR Code généré !');
+        SECURA_AUDIO.success();
+        showNotification('success', 'QR Code généré !');
     } catch (err) {
         console.error(err);
         showNotification('error', 'Erreur de génération');
     }
 }
+
 
 function regenerateQRCode() {
     if (currentGuestId) {

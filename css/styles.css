@@ -405,7 +405,7 @@ body.dark-theme {
 
 /* ===== CONTAINER ===== */
 .container {
-    max-width: 1400px;
+    max-width: 1500px;
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
 }
@@ -2841,3 +2841,6 @@ body.dark-theme {
         grid-template-columns: 1fr; /* une seule colonne */
     }
 }
+
+
+

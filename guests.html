@@ -48,6 +48,144 @@
 }
 
 
+/* ===== QR MODAL PREMIUM DESIGN ===== */
+.qr-modal-content { padding: var(--spacing-2xl); max-width: 100%; }
+.modal-header-premium { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start; 
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--secura-light-gray);
+}
+
+.avatar-glow {
+    width: 80px; height: 80px; border-radius: var(--radius-full);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 2rem; color: white;
+    box-shadow: 0 0 30px rgba(217, 119, 6, 0.4);
+    border: 4px solid white;
+    animation: pulseGlow 4s infinite;
+}
+.avatar-initials { font-size: 1.8rem; font-weight: 800; }
+
+.qr-container-glow {
+    text-align: center;
+    padding: var(--spacing-xl);
+    background: linear-gradient(145deg, #f8f8f8, #ffffff);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg), inset 0 4px 10px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.qr-frame {
+    position: relative; 
+    display: inline-block;
+    padding: 20px;
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border: 8px solid var(--secura-red);
+}
+
+.qr-image {
+    width: 280px; height: 280px; 
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.qr-overlay {
+    position: absolute; top: 50%; left: 50%; 
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.info-grid {
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.info-card {
+    background: var(--secura-light-bg);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    display: flex; align-items: center; gap: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-base);
+    border: 1px solid var(--secura-light-gray);
+}
+
+.info-card:hover { 
+    transform: translateY(-4px); 
+    box-shadow: var(--shadow-md);
+    border-color: var(--secura-red);
+}
+
+.info-card i { 
+    font-size: 1.8rem; 
+    color: var(--secura-red); 
+    width: 50px; 
+    text-align: center; 
+}
+
+.info-card strong { display: block; margin-top: 4px; }
+
+.modal-actions-premium {
+    display: flex; 
+    justify-content: center; 
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-2xl);
+}
+
+.btn-action {
+    padding: 14px 28px;
+    border-radius: var(--radius-xl);
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    min-width: 160px;
+    justify-content: center;
+}
+
+.btn-action.secondary { 
+    background: transparent; 
+    border: 2px solid var(--secura-red); 
+    color: var(--secura-red); 
+}
+.btn-action.primary { 
+    background: var(--secura-red); 
+    color: white; 
+    box-shadow: var(--shadow-glow);
+}
+.btn-action.success { 
+    background: var(--secura-success); 
+    color: white; 
+}
+
+.btn-action:hover { 
+    transform: translateY(-3px); 
+    box-shadow: 0 10px 20px rgba94(217, 119, 6, 0.3); 
+}
+
+.status-badge { 
+    padding: 6px 14px; 
+    border-radius: 50px; 
+    font-size: 0.85rem; 
+    font-weight: 600; 
+}
+.status-badge.success { background: #d1fae5; color: #065f46; }
+.status-badge.pending { background: #fef3c7; color: #92400e; }
+
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(217, 119, 6, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(217, 119, 6, 0.6); }
+}
+
     </style>
 </head>
 <body class="light-theme">
@@ -72,6 +210,7 @@
             <a href="events.html" class="nav-link">Événements</a>
             <a href="guests.html" class="nav-link active">Invités</a>
             <a href="qr-generator.html" class="nav-link">Générateur QR</a>
+            <a href="ticket-generator.html" class="nav-link">Billets</a>
             <a href="scanner.html" class="nav-link">Scanner</a>
         </nav>
 

@@ -16,8 +16,8 @@
 
 class SecuraStorage {
     constructor() {
-       //this.API_URL = 'http://localhost:3000/api';
-    this.API_URL = 'https://secura-qr.onrender.com/api';
+       this.API_URL = 'http://localhost:3000/api';
+   //this.API_URL = 'https://secura-qr.onrender.com/api';
 
         this.token = localStorage.getItem('secura_token') || null;
         this.user = null;
@@ -152,8 +152,11 @@ class SecuraStorage {
         }
     }
 
-    async apiRequest(endpoint, options = {}) {
-        const url = endpoint.startsWith('http') ? endpoint : `${this.API_URL}${endpoint}`;
+   async apiRequest(endpoint, options = {}) {
+        const url = endpoint.startsWith('http')
+            ? endpoint
+            : `${this.API_URL}${endpoint}`;
+
         const headers = {
             'Content-Type': 'application/json',
             ...options.headers
@@ -164,26 +167,32 @@ class SecuraStorage {
         }
 
         try {
-            const res = await fetch(url, { 
-                ...options, 
+            const res = await fetch(url, {
+                ...options,
                 headers,
-               //signal: options.signal || AbortSignal.timeout(15000)
+                //signal: options.signal || AbortSignal.timeout(15000)
             });
-            
+
             if (!res.ok) {
                 const errorText = await res.text();
-                throw new Error(errorText);
+                throw new Error(errorText || `HTTP ${res.status}`);
             }
-            
+
             return await res.json();
         } catch (err) {
-            console.error(`API Error [${endpoint}]:`, err.message);
-            if(err.message.contains('Token invalide')){
+            const msg = err?.message || 'Unknown error';
+
+            console.error(`API Error [${endpoint}]:`, msg);
+
+            // Sécurisé : includes() + null safety
+            if (msg.includes('Token invalide') || msg.includes('expired')) {
                 this.forceLogout();
             }
+
             throw err;
         }
     }
+
 
 
     // ═══════════════════════════════════════════════════════════════

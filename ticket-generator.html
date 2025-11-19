@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURA - Générateur de Billets d'Invitation Royaux</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dash.css">
+    <link rel="stylesheet" href="css/tickets.css">
+
+        <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+
+    <style>
+
+        :root {
+            --secura-gold: #D4AF37;
+            --secura-dark: #1A1A2E;
+            --secura-red: #D97706;
+            --secura-cream: #FFF8E7;
+        }
+        
+
+        .ticket-container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        /* Billet Principal */
+        .ticket-premium {
+            position: relative;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(212, 175, 55, 0.2),
+                inset 0 0 100px rgba(255, 255, 255, 0.1);
+            aspect-ratio: 16 / 9;
+        }
+
+        /* Canvas pour bordures majestueuses */
+        #borderCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+
+         #borderCanva {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 10%;
+            height: 10%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+
+        /* Image de fond avec effet */
+        .ticket-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.85) saturate(1.2);
+        }
+
+        .ticket-background::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(26, 26, 46, 0.75) 0%,
+                rgba(26, 26, 46, 0.45) 40%,
+                rgba(212, 175, 55, 0.15) 70%,
+                rgba(255, 255, 255, 0.25) 100%
+            );
+        }
+
+        /* Contenu principal */
+        .ticket-content {
+            position: relative;
+            z-index: 5;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 3rem;
+        }
+
+        /* Header avec titre central */
+        .ticket-header {
+            text-align: center;
+            margin-bottom: auto;
+            padding-top: 1rem;
+        }
+
+        .event-type-badge-ticket {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(212, 175, 55, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            border-radius: 50px;
+            color: var(--secura-gold);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .event-title-ticket {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.3),
+                0 4px 8px rgba(0, 0, 0, 0.2),
+                0 0 30px rgba(212, 175, 55, 0.3);
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .event-welcome {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-style: italic;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer avec info discrète dans coin et QR */
+        .ticket-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 2rem;
+            margin-top: auto;
+        }
+
+        /* Informations discrètes (coin gauche) */
+        .info-corner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05); /* Très légère opacité */
+    backdrop-filter: blur(15px); /* Flou d'arrière-plan */
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Bordure très subtile */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    min-width: 300px;
+}
+
+        .info-item-ticket {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .info-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(212, 175, 55, 0.2);
+            border-radius: 10px;
+            color: var(--secura-gold);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .info-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Zone QR avec logo SECURA */
+        .qr-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    /* Nouveau style glassmorphism */
+    background: rgba(255, 255, 255, 0.05); /* Très légère opacité */
+    backdrop-filter: blur(15px); /* Flou d'arrière-plan */
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Bordure subtile */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+        .qr-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+            width: 100%;
+        }
+
+        .secura-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--secura-red), #B8650E);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        }
+
+        .qr-label {
+            flex: 1;
+            font-weight: 700;
+            color: var(--secura-dark);
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .qr-wrapper {
+    width: 300px;
+    height: 300px;
+
+
+    
+    padding: 10px; /* Réduit un peu le padding */
+    background: white; /* DOIT RESTER BLANC pour le scan */
+    border: 4px solid var(--secura-gold); /* Bordure en or */
+    border-radius: 18px; /* Léger arrondi */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Ombre plus prononcée */
+}
+
+        #qrcode {
+            width: 95%;
+            height: 95%;
+        }
+
+        #qrcode img,
+        #qrcode canvas {
+            width: 100% !important;
+            height: 100% !important;
+            image-rendering: crisp-edges;
+        }
+
+        .qr-instruction {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            margin-top: 1rem;
+            max-width: 300px;
+            line-height: 1.4;
+        }
+
+        .qr-code-id {
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            color: #999;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+        }
+
+        /* Message personnel en bas */
+        .personal-warning {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.788);
+            z-index: 5;
+            max-width: 500px;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Boutons d'action */
+        .actions {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .btn-action {
+            padding: 1rem 2rem;
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-action:hover {
+            background: rgba(212, 175, 55, 0.9);
+            color: var(--secura-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .ticket-content {
+                padding: 2rem;
+            }
+
+            .event-title {
+                font-size: 2.5rem;
+            }
+
+            .ticket-footer {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .info-corner {
+                width: 100%;
+            }
+
+            .actions {
+                position: static;
+                margin-top: 2rem;
+                justify-content: center;
+            }
+        }
+
+        /* Print */
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .actions {
+                display: none !important;
+            }
+
+            .ticket-premium {
+                box-shadow: none;
+                max-width: 100%;
+            }
+        }
+
+        .qr-canvas-wrapper {
+               position: absolute;
+    top: -7px;
+    border-radius: 36rem;
+    left: -7px;
+    width: 105%;
+    height: 105%;
+    pointer-events: none;
+    z-index: 10;
+        }
+
+        #qrBorderCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+</head>
+<body class="light-theme">
+    <div id="particles-js"></div>
+
+    <!-- Header Premium -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <img src="assets/images/icon.png" alt="SECURA Logo" style="width: 45px; height: 45px; object-fit: contain;">
+                </div>
+                <div class="logo-text">
+                    <h1>SECURA</h1>
+                    <p>Générateur de Billets Premium</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu" id="navMenu">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="events.html" class="nav-link">Événements</a>
+                <a href="guests.html" class="nav-link">Invités</a>
+                <a href="qr-generator.html" class="nav-link">QR Code</a>
+                <a href="ticket-generator.html" class="nav-link active">Billets</a>
+                <a href="scanner.html" class="nav-link">Scanner</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Changer le thème">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="fullscreen-toggle" id="fullscreenToggle" aria-label="Plein écran">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <button class="profile-toggle header-profile-btn" id="profileToggle">
+                <div class="profile-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-info">
+                    <span class="profile-name" id="profileName">Chargement...</span>
+                    <span class="profile-role" id="profileRole">Utilisateur</span>
+                </div>
+                <i class="bi bi-chevron-down profile-arrow"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="floating-profile-menu" id="floatingProfileMenu">
+        <div class="profile-dropdown show" id="profileDropdown" role="menu">
+            <div class="profile-header">
+                <div class="profile-avatar large">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-details">
+                    <strong id="dropdownName">Chargement...</strong>
+                    <small id="dropdownEmail">email@exemple.com</small>
+                    <span class="badge-role" id="dropdownRole">Utilisateur</span>
+                </div>
+            </div>
+            <div class="dropdown-actions">
+                <a href="profile.html" class="dropdown-item"><i class="bi bi-person"></i> Mon Profil</a>
+                <a href="settings.html" class="dropdown-item"><i class="bi bi-gear"></i> Paramètres</a>
+                <hr class="dropdown-divider">
+                <button class="dropdown-item text-danger" id="logout-btn"><i class="bi bi-box-arrow-right"></i> Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="container-fluid px-4">
+            <div class="secura-header animate-fade-in">
+                <div class="header-top">
+                    <div class="header-title">
+                        <h1><i class="bi bi-ticket-perforated-fill"></i> Générateur de Billets d'Invitation Royaux</h1>
+                        <p class="header-subtitle">Choisissez un événement pour générer des billets d'invitation personnalisés</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grille des Événements -->
+            <div class="events-grid-container" id="eventsGridContainer">
+                
+                  <!-- Events Grid -->
+             <div id="eventsLoader" class="events-loader">
+                <div class="spinner"></div>
+                <span>Chargement des événements...</span>
+            </div>
+
+            
+                <div class="row g-4 justify-content-center" id="eventsGrid">
+                    <!-- Les cartes d'événements seront injectées ici dynamiquement -->
+                    <div class="event-card-placeholder text-center py-5">
+                        <div class="placeholder-icon mb-3">
+                            <i class="bi bi-calendar-x-fill" style="font-size: 4rem; color: #D1D5DB;"></i>
+                        </div>
+                        <p class="placeholder-text">Chargement des événements...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interface principale générateur -->
+            <div id="ticketInterface" style="display: none;">
+                <div class="ticket-generator-grid">
+                    <!-- Panel Configuration -->
+                    <div class="ticket-config-panel">
+                        <div class="config-header">
+                            <i class="bi bi-sliders2"></i>
+                            <h3>Configuration du Billet Royal</h3>
+                        </div>
+
+                        <div class="config-section">
+                            <label class="config-label"><i class="bi bi-palette-fill"></i> Template de Design Royal</label>
+                            <div class="template-selector">
+                                <div class="template-option" data-template="marriage">
+                                    <div class="template-icon"><i class="bi bi-heart-fill"></i></div>
+                                    <span class="template-name">Mariage Royal</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #FF6B9D 0%, #FEC163 100%);"></div>
+                                </div>
+                                <div class="template-option" data-template="anniversary">
+                                    <div class="template-icon"><i class="bi bi-cake2-fill"></i></div>
+                                    <span class="template-name">Anniversaire Prestige</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);"></div>
+                                </div>
+                                <div class="template-option" data-template="conference">
+                                    <div class="template-icon"><i class="bi bi-person-workspace"></i></div>
+                                    <span class="template-name">Conférence Élite</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                                </div>
+                                <div class="template-option active" data-template="football">
+                                    <div class="template-icon"><i class="bi bi-trophy-fill"></i></div>
+                                    <span class="template-name">Événement Sportif</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);"></div>
+                                </div>
+                                <div class="template-option" data-template="corporate">
+                                    <div class="template-icon"><i class="bi bi-building"></i></div>
+                                    <span class="template-name">Corporate</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);"></div>
+                                </div>
+                                <div class="template-option" data-template="concert">
+                                    <div class="template-icon"><i class="bi bi-music-note-beamed"></i></div>
+                                    <span class="template-name">Concert VIP</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #F093FB 0%, #F5576C 100%);"></div>
+                                </div>
+                                <div class="template-option" data-template="gala">
+                                    <div class="template-icon"><i class="bi bi-gem"></i></div>
+                                    <span class="template-name">Gala d'Exception</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #C79081 0%, #DFA579 100%);"></div>
+                                </div>
+                                <div class="template-option" data-template="graduation">
+                                    <div class="template-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                                    <span class="template-name">Remise de Diplômes</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);"></div>
+                                </div>
+                                <div class="template-option" data-template="exhibition">
+                                    <div class="template-icon"><i class="bi bi-palette-fill"></i></div>
+                                    <span class="template-name">Exposition Artistique</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #FA709A 0%, #FEE140 100%);"></div>
+                                </div>
+                                <div class="template-option" data-template="vip">
+                                    <div class="template-icon"><i class="bi bi-star-fill"></i></div>
+                                    <span class="template-name">VIP Premium</span>
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="config-divider"></div>
+
+                        <div class="config-section">
+                            <label class="config-label" for="ticketGuestSelect"><i class="bi bi-person-badge"></i> Sélection de l'Invité</label>
+                            <select id="ticketGuestSelect" class="form-input-royal">
+                                <option value="">-- Aperçu premier invité --</option>
+                            </select>
+                            <small class="config-help">Sélectionnez un invité spécifique pour prévisualiser son billet personnalisé</small>
+                        </div>
+
+                        <div class="config-section">
+                            <label class="config-label" for="ticketFormat"><i class="bi bi-aspect-ratio"></i> Format du Billet Royal</label>
+                            <select id="ticketFormat" class="form-input-royal">
+                                <option value="landscape">🖼️ Paysage (16:9) - Recommandé</option>
+                                <option value="portrait">📱 Portrait (9:16) - Format vertical</option>
+                                <option value="square">⬜ Carré (1:1) - Design équilibré</option>
+                            </select>
+                        </div>
+
+                        <div class="config-section">
+                            <label class="config-label" for="ticketQuality"><i class="bi bi-stars"></i> Qualité d'Export Royale</label>
+                            <select id="ticketQuality" class="form-input-royal">
+                                <option value="2">Standard (2x) - Rapide</option>
+                                <option value="3" selected>✨ Haute (3x) - Recommandé</option>
+                                <option value="4">💎 Ultra (4x) - Maximum</option>
+                                <option value="5">👑 Royal (5x) - Qualité exceptionnelle</option>
+                            </select>
+                        </div>
+
+                        <div class="config-divider"></div>
+
+                        <div class="config-actions">
+                            <button class="btn-royal btn-primary-royal" id="generateTicketBtn">
+                                <i class="bi bi-magic"></i>
+                                <span>Générer l'Aperçu Royal</span>
+                            </button>
+
+                            <button class="btn-royal btn-success-royal" id="generateAllTicketsBtn" style="display: none;">
+                                <i class="bi bi-collection-fill"></i>
+                                <span>Générer Tous les Billets (ZIP)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Panel Aperçu -->
+                    <div class="ticket-preview-panel">
+                        <div class="preview-header">
+                            <i class="bi bi-eye-fill"></i>
+                            <h3>Aperçu du Billet Royal</h3>
+                        </div>
+                       
+                        <div class="ticket-container" id="ticketPreviewContainer">
+                            <div class="ticket-placeholder">
+                                <div class="placeholder-icon">
+                                    <i class="bi bi-ticket-detailed-fill"></i>
+                                </div>
+                                <p class="placeholder-text">Votre billet royal apparaîtra ici</p>
+                                <small class="placeholder-hint">Configurez les options et cliquez sur "Générer l'Aperçu Royal" pour créer votre billet d'invitation majestueux</small>
+                            </div>
+                        </div>
+
+                        <div class="ticket-actions" id="ticketActions" style="display: none;">
+                            <button class="btn-action-royal btn-download-royal" id="downloadTicketBtn">
+                                <i class="bi bi-download"></i>
+                                <span>Télécharger PNG</span>
+                            </button>
+                            <button class="btn-action-royal btn-pdf-royal" id="downloadTicketPdfBtn">
+                                <i class="bi bi-file-pdf-fill"></i>
+                                <span>Télécharger PDF</span>
+                            </button>
+                            <button class="btn-action-royal btn-share-royal" id="shareTicketBtn">
+                                <i class="bi bi-share-fill"></i>
+                                <span>Partager</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="assets/images/icon.png" alt="SECURA" style="width: 30px; height: 30px;">
+                    <span style="font-weight:600;">SECURA Premium</span>
+                </div>
+                <p class="mb-0">© 2025 SECURA. Tous droits réservés.</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="footer-link">Confidentialité</a>
+                    <a href="#" class="footer-link">Conditions</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <button class="scroll-top" id="scrollTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="js/particles-config.js"></script>
+    <script src="js/audio-utils.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ticket-service.js"></script>
+    <script src="js/ticket-generator.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

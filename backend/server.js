@@ -518,7 +518,7 @@ app.post('/auth/verify-access-code', (req, res) => {
 
         // Marquer comme utilisé
         user.accessCodeUsed = true;
-        user.updatedAt = new Date().toISOString();
+        
         saveData(data);
 
         log.success('Code d\'accès validé', `${user.email} (${code})`);

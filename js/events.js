@@ -298,6 +298,8 @@ function createEventCardElement(event) {
     return card;
 }
 
+
+// REMPLACER la fonction createEventCardHTML par celle-ci :
 function createEventCardHTML(event) {
     const guests = storage.getGuestsByEventId(event.id);
     const scannedGuests = guests.filter(g => g.scanned).length;
@@ -307,83 +309,88 @@ function createEventCardHTML(event) {
         day: 'numeric', month: 'long', year: 'numeric'
     });
 
+    // Images par type d'événement
     const typeImages = {
-        marriage: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
-        anniversaire: 'https://images.unsplash.com/photo-1569415860599-5514567fde28?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8JUVDJTgzJTlEJUVDJTlEJUJDJTIwJUVDJUI0JTlCJUVCJUI2JTg4fGVufDB8fDB8fHww&fm=jpg&q=60&w=3000',
-        conference: 'https://images.unsplash.com/photo-1540575467063-868f79e66c3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
-        autre: 'https://images.unsplash.com/photo-1501281668745-f7f579dff10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80'
+        marriage: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80',
+        anniversaire: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800&q=80',
+        anniversary: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800&q=80',
+        conference: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+        football: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80',
+        corporate: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&q=80',
+        concert: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80',
+        gala: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&q=80',
+        graduation: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80',
+        exhibition: 'https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=800&q=80',
+        vip: 'https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?w=800&q=80',
+        autre: 'https://images.unsplash.com/photo-1501281668745-f7f579dff10e?w=800&q=80'
     };
 
     const backgroundImage = typeImages[event.type] || typeImages.autre;
-    const fillRate = event.capacity ? Math.round((guests.length / event.capacity) * 100) : 0;
-    const circumference = 2 * Math.PI * 36;
-    const progressOffset = circumference - (fillRate / 100) * circumference;
 
     return `
-
-      <div class="col-12 col-md-6 col-lg-6 d-flex justify-content-center">
-        <div class="event-card-pro w-100" onclick="viewEvent('${event.id}')" style="background-image: url('${backgroundImage}');">
-            ${isUpcoming ? '<div class="upcoming-ribbon">À VENIR</div>' : ''}
-            
-            <div class="event-content">
-                <h3 class="event-title">${event.name}</h3>
+        <div class="col-12 col-md-6 col-lg-6 d-flex justify-content-center">
+            <div class="event-card-pro w-100" onclick="handleEventSelect('${event.id}')" style="background-image: url('${backgroundImage}');">
+                ${isUpcoming ? '<div class="upcoming-ribbon">À VENIR</div>' : ''}
                 
-                <div class="event-meta">
-                    <div class="meta-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>${formattedDate}</span>
+                <div class="event-content">
+                    <h3 class="event-title">${event.name}</h3>
+                    
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>${formattedDate}</span>
+                        </div>
+                        ${event.time ? `
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>${event.time}</span>
+                        </div>` : ''}
+                        ${event.location ? `
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${event.location}</span>
+                        </div>` : ''}
                     </div>
-                    ${event.time ? `
-                    <div class="meta-item">
-                        <i class="fas fa-clock"></i>
-                        <span>${event.time}</span>
-                    </div>` : ''}
-                    ${event.location ? `
-                    <div class="meta-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>${event.location}</span>
-                    </div>` : ''}
-                </div>
 
-                <div class="event-stats-circle">
-                    <div class="stat-circle">
-                        <div class="circle">
-                            <span class="value">${guests.length}</span>
-                            <span class="label">Invités</span>
+                    <div class="event-stats-circle">
+                        <div class="stat-circle">
+                            <div class="circle">
+                                <span class="value">${guests.length}</span>
+                                <span class="label">Invités</span>
+                            </div>
+                        </div>
+                        <div class="stat-circle">
+                            <div class="circle">
+                                <span class="value">${scannedGuests}</span>
+                                <span class="label">Présents</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="stat-circle">
-                        <div class="circle">
-                            <span class="value">${scannedGuests}</span>
-                            <span class="label">Présents</span>
-                        </div>
+
+                    <div class="event-status">
+                        <i class="fas ${event.active ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'}"></i>
+                        <span>${event.active ? 'Actif' : 'Inactif'}</span>
                     </div>
                 </div>
 
-                <div class="event-status">
-                    <i class="fas ${event.active ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'}"></i>
-                    <span>${event.active ? 'Actif' : 'Inactif'}</span>
+                <div class="event-actions" onclick="event.stopPropagation()">
+                    <button class="action-btn" onclick="viewEvent('${event.id}')" title="Voir">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn" onclick="editEvent('${event.id}')" title="Modifier">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button class="action-btn" onclick="exportEvent('${event.id}')" title="Exporter">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
-
-            <div class="event-actions" onclick="event.stopPropagation()">
-                <button class="action-btn" onclick="viewEvent('${event.id}')" title="Voir">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="action-btn" onclick="editEvent('${event.id}')" title="Modifier">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="action-btn" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
-                    <i class="fas fa-copy"></i>
-                </button>
-                <button class="action-btn" onclick="exportEvent('${event.id}')" title="Exporter">
-                    <i class="fas fa-download"></i>
-                </button>
-                <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
         </div>
     `;
 }

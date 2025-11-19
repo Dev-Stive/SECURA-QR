@@ -19,7 +19,7 @@
       "name": "Mariage de Rania et Gérard",
       "type": "marriage",
       "date": "2025-11-22",
-      "time": "19:0",
+      "time": "19:00",
       "capacity": 300,
       "location": "Florencia Palace",
       "description": "soirée",
@@ -1499,6 +1499,20 @@
       "updatedAt": "2025-11-15T08:39:12.728Z",
       "scanned": false,
       "scannedAt": null,
+      "status": "pending"
+    },
+    {
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "PK6",
+      "lastName": "PK6",
+      "email": "pk6@gmail.com",
+      "phone": "",
+      "company": "",
+      "notes": "Table Motivation",
+      "id": "gst_1763557513182_ytbjlcxku",
+      "createdAt": "2025-11-19T13:05:13.182Z",
+      "updatedAt": "2025-11-19T13:05:13.182Z",
+      "scanned": false,
       "status": "pending"
     }
   ],
@@ -3102,6 +3116,19 @@
       "id": "qr_1763197930640_bbjkjohgf",
       "updatedAt": "2025-11-15T09:12:10.640Z",
       "createdAt": "2025-11-15T09:12:10.640Z"
+    },
+    {
+      "guestId": "gst_1763557513182_ytbjlcxku",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"gst_1763557513182_ytbjlcxku\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#000000",
+        "background": "#FFFFFF"
+      },
+      "id": "qr_1763559051887_0kekg980r",
+      "updatedAt": "2025-11-19T13:30:51.887Z",
+      "createdAt": "2025-11-19T13:30:51.887Z"
     }
   ],
   "scans": [
@@ -3554,7 +3581,7 @@
     }
   ],
   "meta": {
-    "updatedAt": "2025-11-15T09:12:10.667Z",
+    "updatedAt": "2025-11-19T13:30:51.898Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }

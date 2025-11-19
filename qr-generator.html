@@ -34,7 +34,8 @@
             <a href="index.html" class="nav-link">Accueil</a>
             <a href="events.html" class="nav-link">Événements</a>
             <a href="guests.html" class="nav-link">Invités</a>
-            <a href="qr-generator.html" class="nav-link active">Générateur QR</a>
+            <a href="qr-generator.html" class="nav-link active">QR Code</a>
+            <a href="ticket-generator.html" class="nav-link">Billets</a>
             <a href="scanner.html" class="nav-link">Scanner</a>
         </nav>
 
@@ -317,6 +318,26 @@
             document.addEventListener('DOMContentLoaded', () => {
                 SECURA_AUDIO.preload();
             });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventParam = urlParams.get('event');
+            const guestParam = urlParams.get('guest');
+
+            if (eventParam) {
+                setTimeout(() => {
+                    document.getElementById('eventSelect').value = eventParam;
+                    document.getElementById('eventSelect').dispatchEvent(new Event('change'));
+                    
+                    if (guestParam) {
+                        setTimeout(() => {
+                            document.getElementById('ticketGuestSelect').value = guestParam;
+                            document.getElementById('ticketGuestSelect').dispatchEvent(new Event('change'));
+                            currentGuest = storage.getGuestById(guestParam);
+                            generateTicketPreview();
+                        }, 500);
+                    }
+                }, 300);
+            }
         </script>
 
         

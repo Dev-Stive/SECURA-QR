@@ -1,0 +1,2693 @@
+mes fichiers :\
+\
+ticket.css :\
+\
+/**\
+ * ╔═══════════════════════════════════════════════════════════════╗\
+ * ║ 🎫 SECURA TICKETS - DESIGN ULTRA PROFESSIONNEL ║\
+ * ║ Design moderne avec gestion complète responsive ║\
+ * ╚═══════════════════════════════════════════════════════════════╝\
+ */\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   🎨 VARIABLES & CONFIGURATION\
+   ═══════════════════════════════════════════════════════════════ */\
+:root {\
+    --ticket-primary: #D97706;\
+    --ticket-secondary: #F59E0B;\
+    --ticket-success: #10B981;\
+    --ticket-danger: #EF4444;\
+    --ticket-dark: #1F2937;\
+    --ticket-light: #F9FAFB;\
+    --ticket-border: #E5E7EB;\
+    --ticket-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);\
+    --ticket-shadow-hover: 0 15px 50px rgba(0, 0, 0, 0.15);\
+    --ticket-radius: 16px;\
+    --ticket-radius-sm: 12px;\
+    --ticket-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   🎯 SÉLECTEUR D'ÉVÉNEMENT\
+   ═══════════════════════════════════════════════════════════════ */\
+.ticket-event-selector {\
+    max-width: 700px;\
+    margin: 3rem auto;\
+    animation: fadeInUp 0.6s ease;\
+}\
+\
+\
+.event-selector-card {\
+    background: white;\
+    padding: 3rem;\
+    border-radius: var(--ticket-radius);\
+    box-shadow: var(--ticket-shadow);\
+    text-align: center;\
+    border: 2px solid var(--ticket-border);\
+    transition: var(--ticket-transition);\
+}\
+\
+\
+.event-selector-card:hover {\
+    box-shadow: var(--ticket-shadow-hover);\
+    transform: translateY(-4px);\
+}\
+\
+\
+.selector-header {\
+    margin-bottom: 2rem;\
+}\
+\
+\
+.selector-header i {\
+    font-size: 4rem;\
+    color: var(--ticket-primary);\
+    margin-bottom: 1rem;\
+}\
+\
+\
+.selector-header h3 {\
+    font-size: 1.8rem;\
+    font-weight: 700;\
+    color: var(--ticket-dark);\
+    margin: 0;\
+}\
+\
+\
+.event-select {\
+    width: 100%;\
+    padding: 1rem 1.5rem;\
+    font-size: 1.1rem;\
+    border: 2px solid var(--ticket-border);\
+    border-radius: var(--ticket-radius-sm);\
+    background: white;\
+    color: var(--ticket-dark);\
+    font-weight: 600;\
+    transition: var(--ticket-transition);\
+    cursor: pointer;\
+}\
+\
+\
+.event-select:focus {\
+    outline: none;\
+    border-color: var(--ticket-primary);\
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);\
+}\
+\
+\
+.selector-help {\
+    margin-top: 1rem;\
+    color: #9CA3AF;\
+    font-size: 0.95rem;\
+    display: flex;\
+    align-items: center;\
+    justify-content: center;\
+    gap: 0.5rem;\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   🎨 GRILLE PRINCIPALE\
+   ═══════════════════════════════════════════════════════════════ */\
+.ticket-generator-grid {\
+    display: grid;\
+    grid-template-columns: 400px 1fr;\
+    gap: 2rem;\
+    animation: fadeInUp 0.6s ease;\
+}\
+\
+\
+@media (max-width: 1200px) {\
+    .ticket-generator-grid {\
+        grid-template-columns: 1fr;\
+    }\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   ⚙️ PANEL CONFIGURATION\
+   ═══════════════════════════════════════════════════════════════ */\
+.ticket-config-panel {\
+    background: white;\
+    padding: 2rem;\
+    border-radius: var(--ticket-radius);\
+    box-shadow: var(--ticket-shadow);\
+    border: 2px solid var(--ticket-border);\
+    height: fit-content;\
+    position: sticky;\
+    top: 100px;\
+}\
+\
+\
+.config-header {\
+    display: flex;\
+    align-items: center;\
+    gap: 1rem;\
+    margin-bottom: 2rem;\
+    padding-bottom: 1rem;\
+    border-bottom: 3px solid var(--ticket-primary);\
+}\
+\
+\
+.config-header i {\
+    font-size: 1.8rem;\
+    color: var(--ticket-primary);\
+}\
+\
+\
+.config-header h3 {\
+    margin: 0;\
+    font-size: 1.5rem;\
+    font-weight: 700;\
+    color: var(--ticket-dark);\
+}\
+\
+\
+.config-section {\
+    margin-bottom: 1.5rem;\
+}\
+\
+\
+.config-label {\
+    display: flex;\
+    align-items: center;\
+    gap: 0.5rem;\
+    font-weight: 600;\
+    color: var(--ticket-dark);\
+    margin-bottom: 0.75rem;\
+    font-size: 0.95rem;\
+}\
+\
+\
+.config-label i {\
+    color: var(--ticket-primary);\
+}\
+\
+\
+.config-divider {\
+    height: 2px;\
+    background: linear-gradient(90deg, transparent, var(--ticket-border), transparent);\
+    margin: 1.5rem 0;\
+}\
+\
+\
+.config-help {\
+    display: block;\
+    margin-top: 0.5rem;\
+    color: #9CA3AF;\
+    font-size: 0.85rem;\
+    font-style: italic;\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   🎨 SÉLECTEUR DE TEMPLATES\
+   ═══════════════════════════════════════════════════════════════ */\
+.template-selector {\
+    display: grid;\
+    grid-template-columns: repeat(2, 1fr);\
+    gap: 1rem;\
+}\
+\
+\
+.template-option {\
+    position: relative;\
+    background: white;\
+    border: 2px solid var(--ticket-border);\
+    border-radius: var(--ticket-radius-sm);\
+    padding: 1.25rem;\
+    cursor: pointer;\
+    transition: var(--ticket-transition);\
+    text-align: center;\
+    overflow: hidden;\
+}\
+\
+\
+.template-option:hover {\
+    border-color: var(--ticket-primary);\
+    transform: translateY(-3px);\
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);\
+}\
+\
+\
+.template-option.active {\
+    border-color: var(--ticket-primary);\
+    border-width: 3px;\
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.05), rgba(245, 158, 11, 0.05));\
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);\
+}\
+\
+\
+.template-icon {\
+    font-size: 2rem;\
+    margin-bottom: 0.5rem;\
+    color: var(--ticket-primary);\
+}\
+\
+\
+.template-name {\
+    display: block;\
+    font-weight: 600;\
+    color: var(--ticket-dark);\
+    font-size: 0.9rem;\
+    margin-bottom: 0.75rem;\
+}\
+\
+\
+.template-preview {\
+    height: 4px;\
+    border-radius: 2px;\
+    margin-top: 0.75rem;\
+}\
+\
+\
+.template-option.active::after {\
+    content: '✓';\
+    position: absolute;\
+    top: 0.5rem;\
+    right: 0.5rem;\
+    width: 24px;\
+    height: 24px;\
+    background: var(--ticket-primary);\
+    color: white;\
+    border-radius: 50%;\
+    display: flex;\
+    align-items: center;\
+    justify-content: center;\
+    font-weight: bold;\
+    font-size: 0.8rem;\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   🎯 INPUTS MODERNES\
+   ═══════════════════════════════════════════════════════════════ */\
+.form-input-modern {\
+    width: 100%;\
+    padding: 0.875rem 1.25rem;\
+    font-size: 0.95rem;\
+    border: 2px solid var(--ticket-border);\
+    border-radius: var(--ticket-radius-sm);\
+    background: white;\
+    color: var(--ticket-dark);\
+    font-weight: 500;\
+    transition: var(--ticket-transition);\
+    cursor: pointer;\
+}\
+\
+\
+.form-input-modern:focus {\
+    outline: none;\
+    border-color: var(--ticket-primary);\
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);\
+}\
+\
+\
+.form-input-modern:hover {\
+    border-color: var(--ticket-secondary);\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   🎬 BOUTONS MODERNES\
+   ═══════════════════════════════════════════════════════════════ */\
+.config-actions {\
+    display: flex;\
+    flex-direction: column;\
+    gap: 1rem;\
+}\
+\
+\
+.btn-modern {\
+    width: 100%;\
+    padding: 1rem 1.5rem;\
+    border: none;\
+    border-radius: var(--ticket-radius-sm);\
+    font-size: 1rem;\
+    font-weight: 700;\
+    cursor: pointer;\
+    transition: var(--ticket-transition);\
+    display: flex;\
+    align-items: center;\
+    justify-content: center;\
+    gap: 0.75rem;\
+    text-transform: uppercase;\
+    letter-spacing: 0.5px;\
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);\
+}\
+\
+\
+.btn-modern i {\
+    font-size: 1.2rem;\
+}\
+\
+\
+.btn-primary-modern {\
+    background: linear-gradient(135deg, var(--ticket-primary), var(--ticket-secondary));\
+    color: white;\
+}\
+\
+\
+.btn-primary-modern:hover {\
+    transform: translateY(-2px);\
+    box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);\
+}\
+\
+\
+.btn-success-modern {\
+    background: linear-gradient(135deg, #10B981, #059669);\
+    color: white;\
+}\
+\
+\
+.btn-success-modern:hover {\
+    transform: translateY(-2px);\
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   👁️ PANEL APERÇU\
+   ═══════════════════════════════════════════════════════════════ */\
+.ticket-preview-panel {\
+    background: white;\
+    padding: 2rem;\
+    border-radius: var(--ticket-radius);\
+    box-shadow: var(--ticket-shadow);\
+    border: 2px solid var(--ticket-border);\
+}\
+\
+\
+.preview-header {\
+    display: flex;\
+    align-items: center;\
+    gap: 1rem;\
+    margin-bottom: 2rem;\
+    padding-bottom: 1rem;\
+    border-bottom: 3px solid var(--ticket-primary);\
+}\
+\
+\
+.preview-header i {\
+    font-size: 1.8rem;\
+    color: var(--ticket-primary);\
+}\
+\
+\
+.preview-header h3 {\
+    margin: 0;\
+    font-size: 1.5rem;\
+    font-weight: 700;\
+    color: var(--ticket-dark);\
+}\
+\
+\
+.ticket-preview-container {\
+    min-height: 500px;\
+    display: flex;\
+    align-items: center;\
+    justify-content: center;\
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf3 100%);\
+    border-radius: var(--ticket-radius-sm);\
+    border: 2px dashed var(--ticket-border);\
+    padding: 2rem;\
+    margin-bottom: 2rem;\
+}\
+\
+\
+.ticket-placeholder {\
+    text-align: center;\
+    color: #9CA3AF;\
+}\
+\
+\
+.placeholder-icon {\
+    font-size: 5rem;\
+    color: #D1D5DB;\
+    margin-bottom: 1.5rem;\
+    animation: pulse 2s infinite;\
+}\
+\
+\
+.placeholder-text {\
+    font-size: 1.2rem;\
+    font-weight: 600;\
+    color: #6B7280;\
+    margin: 0 0 0.5rem 0;\
+}\
+\
+\
+.placeholder-hint {\
+    font-size: 0.9rem;\
+    color: #9CA3AF;\
+    font-style: italic;\
+}\
+\
+\
+@keyframes pulse {\
+    0%, 100% { opacity: 1; }\
+    50% { opacity: 0.5; }\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   🎫 DESIGN DU BILLET - ULTRA PROFESSIONNEL\
+   ═══════════════════════════════════════════════════════════════ */\
+.ticket-canvas {\
+    position: relative;\
+    background: white;\
+    border-radius: 20px;\
+    overflow: hidden;\
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);\
+    display: flex;\
+    width: 100%;\
+    max-width: 90rem;\
+    margin: 0 auto;\
+    transition: var(--ticket-transition);\
+}\
+\
+\
+.ticket-canvas.landscape {\
+    aspect-ratio: 16 / 9;\
+    flex-direction: row;\
+}\
+\
+\
+.ticket-canvas.portrait {\
+    aspect-ratio: 9 / 16;\
+    flex-direction: column;\
+}\
+\
+\
+.ticket-canvas.square {\
+    aspect-ratio: 1 / 1;\
+    flex-direction: column;\
+}\
+\
+\
+/* Perforation décorative */\
+.ticket-perforation {\
+    position: absolute;\
+    right: 35%;\
+    top: 0;\
+    bottom: 0;\
+    width: 3px;\
+    background-image: repeating-linear-gradient(\
+        0deg,\
+        transparent,\
+        transparent 8px,\
+        var(--ticket-border) 8px,\
+        var(--ticket-border) 16px\
+    );\
+    z-index: 2;\
+}\
+\
+\
+.ticket-canvas.portrait .ticket-perforation,\
+.ticket-canvas.square .ticket-perforation {\
+    right: 0;\
+    left: 0;\
+    top: 65%;\
+    width: auto;\
+    height: 3px;\
+    background-image: repeating-linear-gradient(\
+        90deg,\
+        transparent,\
+        transparent 8px,\
+        var(--ticket-border) 8px,\
+        var(--ticket-border) 16px\
+    );\
+}\
+\
+\
+/* Décorations */\
+.ticket-decoration {\
+    position: absolute;\
+    font-size: 3rem;\
+    opacity: 0.08;\
+    z-index: 0;\
+    pointer-events: none;\
+}\
+\
+\
+.ticket-decoration.top-left {\
+    top: 1rem;\
+    left: 1rem;\
+}\
+\
+\
+.ticket-decoration.bottom-right {\
+    bottom: 1rem;\
+    right: 1rem;\
+}\
+\
+\
+/* Content */\
+.ticket-content {\
+    display: flex;\
+    width: 100%;\
+    height: 100%;\
+    position: relative;\
+    z-index: 1;\
+}\
+\
+\
+.ticket-canvas.landscape .ticket-content {\
+    flex-direction: row;\
+}\
+\
+\
+.ticket-canvas.portrait .ticket-content,\
+.ticket-canvas.square .ticket-content {\
+    flex-direction: column;\
+}\
+\
+\
+/* LEFT SECTION */\
+.ticket-left {\
+    flex: 1;\
+    padding: 2.5rem;\
+    display: flex;\
+    flex-direction: column;\
+    justify-content: space-between;\
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));\
+}\
+\
+\
+.ticket-canvas.landscape .ticket-left {\
+    width: 65%;\
+}\
+\
+\
+.ticket-canvas.portrait .ticket-left,\
+.ticket-canvas.square .ticket-left {\
+    width: 100%;\
+    height: 65%;\
+}\
+\
+\
+.ticket-header {\
+    margin-bottom: 1.5rem;\
+}\
+\
+\
+.ticket-type {\
+    display: inline-flex;\
+    align-items: center;\
+    gap: 0.5rem;\
+    padding: 0.5rem 1rem;\
+    background: rgba(217, 119, 6, 0.1);\
+    border: 2px solid var(--ticket-primary);\
+    border-radius: 50px;\
+    color: var(--ticket-primary);\
+    font-weight: 700;\
+    font-size: 0.85rem;\
+    text-transform: uppercase;\
+    letter-spacing: 1px;\
+    margin-bottom: 1rem;\
+}\
+\
+\
+.ticket-title {\
+    font-size: 2.2rem;\
+    font-weight: 900;\
+    color: var(--ticket-dark);\
+    margin: 0 0 0.75rem 0;\
+    font-family: 'Playfair Display', serif;\
+    line-height: 1.2;\
+}\
+\
+\
+.ticket-subtitle {\
+    font-size: 1rem;\
+    color: #6B7280;\
+    margin: 0;\
+    font-style: italic;\
+}\
+\
+\
+.ticket-details {\
+    display: flex;\
+    flex-direction: column;\
+    gap: 1rem;\
+}\
+\
+\
+.ticket-detail-row {\
+    display: flex;\
+    align-items: flex-start;\
+    gap: 1rem;\
+    padding: 0.75rem;\
+    background: rgba(249, 250, 251, 0.8);\
+    border-radius: 12px;\
+    border-left: 3px solid var(--ticket-primary);\
+}\
+\
+\
+.ticket-detail-icon {\
+    width: 36px;\
+    height: 36px;\
+    background: linear-gradient(135deg, var(--ticket-primary), var(--ticket-secondary));\
+    border-radius: 10px;\
+    display: flex;\
+    align-items: center;\
+    justify-content: center;\
+    color: white;\
+    font-size: 1.1rem;\
+    flex-shrink: 0;\
+}\
+\
+\
+.ticket-detail-text {\
+    flex: 1;\
+}\
+\
+\
+.ticket-detail-label {\
+    font-size: 0.75rem;\
+    color: #9CA3AF;\
+    text-transform: uppercase;\
+    letter-spacing: 0.5px;\
+    font-weight: 600;\
+    margin-bottom: 0.25rem;\
+}\
+\
+\
+.ticket-detail-value {\
+    font-size: 1rem;\
+    font-weight: 700;\
+    color: var(--ticket-dark);\
+}\
+\
+\
+/* RIGHT SECTION - QR CODE */\
+.ticket-right {\
+    display: flex;\
+    flex-direction: column;\
+    justify-content: space-between;\
+    align-items: center;\
+    padding: 2rem;\
+    background: white;\
+    position: relative;\
+}\
+\
+\
+.ticket-canvas.landscape .ticket-right {\
+    width: 35%;\
+}\
+\
+\
+.ticket-canvas.portrait .ticket-right,\
+.ticket-canvas.square .ticket-right {\
+    width: 100%;\
+    height: 35%;\
+}\
+\
+\
+.ticket-qr-section {\
+    display: flex;\
+    flex-direction: column;\
+    align-items: center;\
+    gap: 1rem;\
+    flex: 1;\
+    justify-content: center;\
+}\
+\
+\
+.ticket-qr-wrapper {\
+    padding: 1rem;\
+    background: white;\
+    border: 3px solid var(--ticket-dark);\
+    border-radius: 16px;\
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);\
+}\
+\
+\
+.ticket-qr-code {\
+    width: 200px;\
+    height: 200px;\
+    display: flex;\
+    align-items: center;\
+    justify-content: center;\
+    background: white;\
+}\
+\
+\
+.ticket-qr-code img,\
+.ticket-qr-code canvas {\
+    max-width: 100%;\
+    max-height: 100%;\
+    image-rendering: crisp-edges;\
+}\
+\
+\
+.ticket-qr-text {\
+    text-align: center;\
+    padding: 0.75rem 1.5rem;\
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.1), rgba(245, 158, 11, 0.1));\
+    border-radius: 12px;\
+    border: 2px solid var(--ticket-primary);\
+}\
+\
+\
+.ticket-qr-text strong {\
+    display: block;\
+    font-size: 0.95rem;\
+    color: var(--ticket-dark);\
+    margin-bottom: 0.25rem;\
+    text-transform: uppercase;\
+    letter-spacing: 0.5px;\
+}\
+\
+\
+.ticket-qr-text small {\
+    font-size: 0.8rem;\
+    color: #6B7280;\
+}\
+\
+\
+.ticket-secura-logo {\
+    display: flex;\
+    align-items: center;\
+    gap: 0.5rem;\
+    padding: 0.75rem 1.5rem;\
+    background: var(--ticket-dark);\
+    color: white;\
+    border-radius: 50px;\
+    font-weight: 800;\
+    font-size: 1.1rem;\
+    letter-spacing: 1px;\
+}\
+\
+\
+.ticket-secura-logo i {\
+    font-size: 1.3rem;\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   🎬 ACTIONS BILLET\
+   ═══════════════════════════════════════════════════════════════ */\
+.ticket-actions {\
+    display: grid;\
+    grid-template-columns: repeat(3, 1fr);\
+    gap: 1rem;\
+    animation: fadeInUp 0.5s ease;\
+}\
+\
+\
+.btn-action {\
+    padding: 1rem;\
+    border: none;\
+    border-radius: var(--ticket-radius-sm);\
+    font-weight: 700;\
+    cursor: pointer;\
+    transition: var(--ticket-transition);\
+    display: flex;\
+    flex-direction: column;\
+    align-items: center;\
+    gap: 0.5rem;\
+    font-size: 0.9rem;\
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);\
+}\
+\
+\
+.btn-action i {\
+    font-size: 1.5rem;\
+}\
+\
+\
+.btn-download {\
+    background: linear-gradient(135deg, #3B82F6, #2563EB);\
+    color: white;\
+}\
+\
+\
+.btn-download:hover {\
+    transform: translateY(-3px);\
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);\
+}\
+\
+\
+.btn-pdf {\
+    background: linear-gradient(135deg, #EF4444, #DC2626);\
+    color: white;\
+}\
+\
+\
+.btn-pdf:hover {\
+    transform: translateY(-3px);\
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);\
+}\
+\
+\
+.btn-share {\
+    background: linear-gradient(135deg, #8B5CF6, #7C3AED);\
+    color: white;\
+}\
+\
+\
+.btn-share:hover {\
+    transform: translateY(-3px);\
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   📱 RESPONSIVE - PAYSAGE\
+   ═══════════════════════════════════════════════════════════════ */\
+@media (max-width: 1400px) {\
+    .ticket-canvas.landscape {\
+        max-width: 800px;\
+    }\
+   \
+    .ticket-title {\
+        font-size: 1.8rem;\
+    }\
+   \
+    .ticket-qr-code {\
+        width: 160px;\
+        height: 160px;\
+    }\
+}\
+\
+\
+@media (max-width: 768px) {\
+    .ticket-generator-grid {\
+        grid-template-columns: 1fr;\
+    }\
+   \
+    .ticket-config-panel {\
+        position: static;\
+    }\
+   \
+    .template-selector {\
+        grid-template-columns: repeat(2, 1fr);\
+    }\
+   \
+    .ticket-canvas {\
+        max-width: 100%;\
+    }\
+   \
+    .ticket-actions {\
+        grid-template-columns: 1fr;\
+    }\
+}\
+\
+\
+@media (max-width: 576px) {\
+    .ticket-left {\
+        padding: 1.5rem;\
+    }\
+   \
+    .ticket-right {\
+        padding: 1.5rem;\
+    }\
+   \
+    .ticket-title {\
+        font-size: 1.5rem;\
+    }\
+   \
+    .ticket-qr-code {\
+        width: 140px;\
+        height: 140px;\
+    }\
+}\
+\
+\
+/* ═══════════════════════════════════════════════════════════════\
+   ✨ ANIMATIONS\
+   ═══════════════════════════════════════════════════════════════ */\
+@keyframes fadeInUp {\
+    from {\
+        opacity: 0;\
+        transform: translateY(30px);\
+    }\
+    to {\
+        opacity: 1;\
+        transform: translateY(0);\
+    }\
+}\
+\
+\
+@keyframes fadeIn {\
+    from { opacity: 0; }\
+    to { opacity: 1; }\
+}\
+\
+\
+.animate-fade-in {\
+    animation: fadeIn 0.6s ease;\
+}\
+\
+\
+\
+<!DOCTYPE html>\
+<html lang="fr">\
+<head>\
+    <meta charset="UTF-8">\
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
+    <title>SECURA - Générateur de Billets Premium</title>\
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">\
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">\
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">\
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">\
+    <link rel="stylesheet" href="css/styles.css">\
+    <link rel="stylesheet" href="css/dash.css">\
+    <link rel="stylesheet" href="css/tickets.css">\
+</head>\
+<body class="light-theme">\
+    <div id="particles-js"></div>\
+\
+\
+    <!-- Header Premium -->\
+    <header class="header">\
+        <div class="header-content">\
+            <div class="logo-section">\
+                <div class="logo-icon">\
+                    <img src="assets/images/icon.png" alt="SECURA Logo" style="width: 45px; height: 45px; object-fit: contain;">\
+                </div>\
+                <div class="logo-text">\
+                    <h1>SECURA</h1>\
+                    <p>Générateur de Billets Premium</p>\
+                </div>\
+            </div>\
+\
+\
+            <nav class="nav-menu" id="navMenu">\
+                <a href="index.html" class="nav-link">Accueil</a>\
+                <a href="events.html" class="nav-link">Événements</a>\
+                <a href="guests.html" class="nav-link">Invités</a>\
+                <a href="qr-generator.html" class="nav-link">QR Code</a>\
+                <a href="ticket-generator.html" class="nav-link active">Billets</a>\
+                <a href="scanner.html" class="nav-link">Scanner</a>\
+            </nav>\
+\
+\
+            <div class="header-actions">\
+                <button class="theme-toggle" id="themeToggle" aria-label="Changer le thème">\
+                    <i class="fas fa-moon"></i>\
+                </button>\
+                <button class="fullscreen-toggle" id="fullscreenToggle" aria-label="Plein écran">\
+                    <i class="fas fa-expand"></i>\
+                </button>\
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">\
+                    <i class="fas fa-bars"></i>\
+                </button>\
+            </div>\
+\
+\
+            <button class="profile-toggle header-profile-btn" id="profileToggle">\
+                <div class="profile-avatar">\
+                    <i class="bi bi-person-circle"></i>\
+                </div>\
+                <div class="profile-info">\
+                    <span class="profile-name" id="profileName">Chargement...</span>\
+                    <span class="profile-role" id="profileRole">Utilisateur</span>\
+                </div>\
+                <i class="bi bi-chevron-down profile-arrow"></i>\
+            </button>\
+        </div>\
+    </header>\
+\
+\
+    <div class="floating-profile-menu" id="floatingProfileMenu">\
+        <div class="profile-dropdown show" id="profileDropdown" role="menu">\
+            <div class="profile-header">\
+                <div class="profile-avatar large">\
+                    <i class="bi bi-person-circle"></i>\
+                </div>\
+                <div class="profile-details">\
+                    <strong id="dropdownName">Chargement...</strong>\
+                    <small id="dropdownEmail">email@exemple.com</small>\
+                    <span class="badge-role" id="dropdownRole">Utilisateur</span>\
+                </div>\
+            </div>\
+            <div class="dropdown-actions">\
+                <a href="profile.html" class="dropdown-item"><i class="bi bi-person"></i> Mon Profil</a>\
+                <a href="settings.html" class="dropdown-item"><i class="bi bi-gear"></i> Paramètres</a>\
+                <hr class="dropdown-divider">\
+                <button class="dropdown-item text-danger" id="logout-btn"><i class="bi bi-box-arrow-right"></i> Déconnexion</button>\
+            </div>\
+        </div>\
+    </div>\
+\
+\
+    <main class="main-content">\
+        <div class="container-fluid px-4">\
+            <div class="secura-header animate-fade-in">\
+                <div class="header-top">\
+                    <div class="header-title">\
+                        <h1><i class="bi bi-ticket-perforated-fill"></i> Générateur de Billets d'Invitation</h1>\
+                        <p class="header-subtitle">Créez des billets professionnels ultra design avec QR Code sécurisé intégré</p>\
+                    </div>\
+                </div>\
+            </div>\
+\
+\
+            <!-- Sélection événement -->\
+            <div class="ticket-event-selector" id="ticketEventSelector">\
+                <div class="event-selector-card">\
+                    <div class="selector-header">\
+                        <i class="bi bi-calendar-event"></i>\
+                        <h3>Sélectionnez un événement</h3>\
+                    </div>\
+                    <select id="eventSelect" class="form-input event-select">\
+                        <option value="">-- Choisir un événement --</option>\
+                    </select>\
+                    <p class="selector-help"><i class="bi bi-info-circle"></i> Les billets seront générés automatiquement pour cet événement</p>\
+                </div>\
+            </div>\
+\
+\
+            <!-- Interface principale -->\
+            <div id="ticketInterface" style="display: none;">\
+                <div class="ticket-generator-grid">\
+                    <!-- Panel Configuration -->\
+                    <div class="ticket-config-panel">\
+                        <div class="config-header">\
+                            <i class="bi bi-sliders2"></i>\
+                            <h3>Configuration du Billet</h3>\
+                        </div>\
+\
+\
+                        <div class="config-section">\
+                            <label class="config-label"><i class="bi bi-palette-fill"></i> Template de Design</label>\
+                            <div class="template-selector">\
+                                <div class="template-option" data-template="marriage">\
+                                    <div class="template-icon"><i class="bi bi-heart-fill"></i></div>\
+                                    <span class="template-name">Mariage</span>\
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #FF6B9D 0%, #FEC163 100%);"></div>\
+                                </div>\
+                                <div class="template-option" data-template="anniversary">\
+                                    <div class="template-icon"><i class="bi bi-cake2-fill"></i></div>\
+                                    <span class="template-name">Anniversaire</span>\
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);"></div>\
+                                </div>\
+                                <div class="template-option" data-template="conference">\
+                                    <div class="template-icon"><i class="bi bi-person-workspace"></i></div>\
+                                    <span class="template-name">Conférence</span>\
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>\
+                                </div>\
+                                <div class="template-option active" data-template="football">\
+                                    <div class="template-icon"><i class="bi bi-trophy-fill"></i></div>\
+                                    <span class="template-name">Sport</span>\
+                                    <div class="template-preview" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);"></div>\
+                                </div>\
+                            </div>\
+                        </div>\
+\
+\
+                        <div class="config-divider"></div>\
+\
+\
+                        <div class="config-section">\
+                            <label class="config-label" for="ticketGuestSelect"><i class="bi bi-person-badge"></i> Invité</label>\
+                            <select id="ticketGuestSelect" class="form-input-modern">\
+                                <option value="">-- Aperçu premier invité --</option>\
+                            </select>\
+                            <small class="config-help">Sélectionnez un invité spécifique pour prévisualiser</small>\
+                        </div>\
+\
+\
+                        <div class="config-section">\
+                            <label class="config-label" for="ticketFormat"><i class="bi bi-aspect-ratio"></i> Format du billet</label>\
+                            <select id="ticketFormat" class="form-input-modern">\
+                                <option value="landscape">🖼️ Paysage (16:9) - Recommandé</option>\
+                                <option value="portrait">📱 Portrait (9:16)</option>\
+                                <option value="square">⬜ Carré (1:1)</option>\
+                            </select>\
+                        </div>\
+\
+\
+                        <div class="config-section">\
+                            <label class="config-label" for="ticketQuality"><i class="bi bi-stars"></i> Qualité d'export</label>\
+                            <select id="ticketQuality" class="form-input-modern">\
+                                <option value="2">Standard (2x) - Rapide</option>\
+                                <option value="3" selected>✨ Haute (3x) - Recommandé</option>\
+                                <option value="4">💎 Ultra (4x) - Maximum</option>\
+                            </select>\
+                        </div>\
+\
+\
+                        <div class="config-divider"></div>\
+\
+\
+                        <div class="config-actions">\
+                            <button class="btn-modern btn-primary-modern" id="generateTicketBtn">\
+                                <i class="bi bi-magic"></i>\
+                                <span>Générer l'Aperçu</span>\
+                            </button>\
+\
+\
+                            <button class="btn-modern btn-success-modern" id="generateAllTicketsBtn" style="display: none;">\
+                                <i class="bi bi-collection-fill"></i>\
+                                <span>Générer Tous les Billets (ZIP)</span>\
+                            </button>\
+                        </div>\
+                    </div>\
+\
+\
+                    <!-- Panel Aperçu -->\
+                    <div class="ticket-preview-panel">\
+                        <div class="preview-header">\
+                            <i class="bi bi-eye-fill"></i>\
+                            <h3>Aperçu du Billet</h3>\
+                        </div>\
+                       \
+                        <div class="ticket-preview-container" id="ticketPreviewContainer">\
+                            <div class="ticket-placeholder">\
+                                <div class="placeholder-icon">\
+                                    <i class="bi bi-ticket-detailed-fill"></i>\
+                                </div>\
+                                <p class="placeholder-text">L'aperçu du billet apparaîtra ici</p>\
+                                <small class="placeholder-hint">Configurez les options et cliquez sur "Générer l'Aperçu"</small>\
+                            </div>\
+                        </div>\
+\
+\
+                        <div class="ticket-actions" id="ticketActions" style="display: none;">\
+                            <button class="btn-action btn-download" id="downloadTicketBtn">\
+                                <i class="bi bi-download"></i>\
+                                <span>Télécharger PNG</span>\
+                            </button>\
+                            <button class="btn-action btn-pdf" id="downloadTicketPdfBtn">\
+                                <i class="bi bi-file-pdf-fill"></i>\
+                                <span>Télécharger PDF</span>\
+                            </button>\
+                            <button class="btn-action btn-share" id="shareTicketBtn">\
+                                <i class="bi bi-share-fill"></i>\
+                                <span>Partager</span>\
+                            </button>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>\
+    </main>\
+\
+\
+    <footer class="footer">\
+        <div class="container">\
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">\
+                <div class="d-flex align-items-center gap-2">\
+                    <img src="assets/images/icon.png" alt="SECURA" style="width: 30px; height: 30px;">\
+                    <span style="font-weight:600;">SECURA Premium</span>\
+                </div>\
+                <p class="mb-0">© 2025 SECURA. Tous droits réservés.</p>\
+                <div class="d-flex gap-3">\
+                    <a href="#" class="footer-link">Confidentialité</a>\
+                    <a href="#" class="footer-link">Conditions</a>\
+                    <a href="#" class="footer-link">Support</a>\
+                </div>\
+            </div>\
+        </div>\
+    </footer>\
+\
+\
+    <button class="scroll-top" id="scrollTop">\
+        <i class="fas fa-arrow-up"></i>\
+    </button>\
+\
+\
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>\
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>\
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>\
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>\
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>\
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>\
+    <script src="js/particles-config.js"></script>\
+    <script src="js/audio-utils.js"></script>\
+    <script src="js/theme.js"></script>\
+    <script src="js/storage.js"></script>\
+    <script src="js/ticket-service.js"></script>\
+    <script src="js/ticket-generator.js"></script>\
+    <script src="js/main.js"></script>\
+</body>\
+</html>\
+\
+\
+\
+ticket-generator :\
+\
+/**\
+ * ╔═══════════════════════════════════════════════════════════════╗\
+ * ║ 🎫 SECURA TICKET GENERATOR - ULTRA PROFESSIONNEL ║\
+ * ║ ║\
+ * ║ ✨ Interface utilisateur moderne et intuitive ║\
+ * ║ 📦 Génération en masse avec aperçus dynamiques ║\
+ * ║ 🎨 Gestion complète des templates et formats ║\
+ * ║ 💾 Export PNG/PDF haute qualité ║\
+ * ║ 🔄 Suivi en temps réel de la progression ║\
+ * ╚═══════════════════════════════════════════════════════════════╝\
+ */\
+\
+\
+let currentEvent = null;\
+let currentGuest = null;\
+let currentTemplate = 'football';\
+let currentFormat = 'landscape';\
+let currentQuality = 3;\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 🚀 INITIALISATION\
+// ═══════════════════════════════════════════════════════════════\
+document.addEventListener('DOMContentLoaded', async () => {\
+    await window.storageReady;\
+   \
+    initializeTicketListeners();\
+    loadEvents();\
+    injectBulkGenerationStyles();\
+});\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 🎧 LISTENERS\
+// ═══════════════════════════════════════════════════════════════\
+function initializeTicketListeners() {\
+    // Sélection événement\
+    const eventSelect = document.getElementById('eventSelect');\
+    if (eventSelect) {\
+        eventSelect.addEventListener('change', handleEventSelect);\
+    }\
+\
+\
+    // Templates\
+    document.querySelectorAll('.template-option').forEach(option => {\
+        option.addEventListener('click', () => {\
+            document.querySelectorAll('.template-option').forEach(o => o.classList.remove('active'));\
+            option.classList.add('active');\
+            currentTemplate = option.dataset.template;\
+           \
+            if (currentEvent && currentGuest) {\
+                generateTicketPreview();\
+            }\
+        });\
+    });\
+\
+\
+    // Sélection invité\
+    const guestSelect = document.getElementById('ticketGuestSelect');\
+    if (guestSelect) {\
+        guestSelect.addEventListener('change', (e) => {\
+            const guestId = e.target.value;\
+            if (guestId) {\
+                currentGuest = storage.getGuestById(guestId);\
+                if (currentEvent && currentGuest) {\
+                    generateTicketPreview();\
+                }\
+            } else {\
+                const guests = storage.getGuestsByEventId(currentEvent.id);\
+                currentGuest = guests[0] || null;\
+            }\
+        });\
+    }\
+\
+\
+    // Format\
+    const formatSelect = document.getElementById('ticketFormat');\
+    if (formatSelect) {\
+        formatSelect.addEventListener('change', (e) => {\
+            currentFormat = e.target.value;\
+            if (currentEvent && currentGuest) {\
+                generateTicketPreview();\
+            }\
+        });\
+    }\
+\
+\
+    // Qualité\
+    const qualitySelect = document.getElementById('ticketQuality');\
+    if (qualitySelect) {\
+        qualitySelect.addEventListener('change', (e) => {\
+            currentQuality = parseInt(e.target.value);\
+        });\
+    }\
+\
+\
+    // Boutons\
+    document.getElementById('generateTicketBtn')?.addEventListener('click', generateTicketPreview);\
+    document.getElementById('downloadTicketBtn')?.addEventListener('click', downloadSingleTicket);\
+    document.getElementById('downloadTicketPdfBtn')?.addEventListener('click', downloadSingleTicketPDF);\
+    document.getElementById('generateAllTicketsBtn')?.addEventListener('click', generateAllTickets);\
+    document.getElementById('shareTicketBtn')?.addEventListener('click', shareTicket);\
+}\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 📋 CHARGEMENT DES ÉVÉNEMENTS\
+// ═══════════════════════════════════════════════════════════════\
+function loadEvents() {\
+    const events = storage.getAllEvents();\
+    const select = document.getElementById('eventSelect');\
+   \
+    if (!select) return;\
+\
+\
+    select.innerHTML = '<option value="">-- Choisir un événement --</option>';\
+   \
+    events.forEach(event => {\
+        const date = new Date(event.date).toLocaleDateString('fr-FR');\
+        select.innerHTML += `<option value="${event.id}">${event.name} (${date})</option>`;\
+    });\
+}\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 🎯 SÉLECTION ÉVÉNEMENT\
+// ═══════════════════════════════════════════════════════════════\
+function handleEventSelect(e) {\
+    const eventId = e.target.value;\
+   \
+    if (!eventId) {\
+        currentEvent = null;\
+        currentGuest = null;\
+        document.getElementById('ticketInterface').style.display = 'none';\
+        document.getElementById('ticketEventSelector').style.display = 'block';\
+        return;\
+    }\
+\
+\
+    currentEvent = storage.getEventById(eventId);\
+    if (!currentEvent) return;\
+\
+\
+    // Charger les invités\
+    const guests = storage.getGuestsByEventId(eventId);\
+    const guestSelect = document.getElementById('ticketGuestSelect');\
+   \
+    guestSelect.innerHTML = '<option value="">-- Aperçu premier invité --</option>';\
+    guests.forEach(guest => {\
+        guestSelect.innerHTML += `<option value="${guest.id}">${guest.firstName} ${guest.lastName}</option>`;\
+    });\
+\
+\
+    // Sélectionner le premier invité par défaut\
+    currentGuest = guests[0] || null;\
+\
+\
+    // Auto-sélectionner le template selon le type d'événement\
+    const templateMap = {\
+        'marriage': 'marriage',\
+        'anniversaire': 'anniversary',\
+        'anniversary': 'anniversary',\
+        'conference': 'conference',\
+        'corporate': 'corporate',\
+        'concert': 'concert',\
+        'gala': 'gala',\
+        'graduation': 'graduation',\
+        'exhibition': 'exhibition',\
+        'vip': 'vip',\
+        'autre': 'football'\
+    };\
+   \
+    currentTemplate = templateMap[currentEvent.type] || 'football';\
+   \
+    document.querySelectorAll('.template-option').forEach(option => {\
+        option.classList.toggle('active', option.dataset.template === currentTemplate);\
+    });\
+\
+\
+    // Afficher l'interface\
+    document.getElementById('ticketEventSelector').style.display = 'none';\
+    document.getElementById('ticketInterface').style.display = 'block';\
+\
+\
+    // Générer automatiquement un aperçu si on a un invité\
+    if (currentGuest) {\
+        setTimeout(() => generateTicketPreview(), 300);\
+    }\
+}\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 🎨 GÉNÉRATION APERÇU BILLET\
+// ═══════════════════════════════════════════════════════════════\
+async function generateTicketPreview() {\
+    if (!currentEvent || !currentGuest) {\
+        await Swal.fire({\
+            icon: 'warning',\
+            title: 'Données manquantes',\
+            text: 'Veuillez sélectionner un événement et un invité',\
+            confirmButtonColor: '#D97706'\
+        });\
+        return;\
+    }\
+\
+\
+    const container = document.getElementById('ticketPreviewContainer');\
+   \
+    // Loading\
+    container.innerHTML = `\
+        <div class="ticket-placeholder">\
+            <div class="placeholder-icon">\
+                <i class="bi bi-hourglass-split" style="animation: spin 2s linear infinite;"></i>\
+            </div>\
+            <p class="placeholder-text">Génération du billet en cours...</p>\
+            <small class="placeholder-hint">Veuillez patienter</small>\
+        </div>\
+    `;\
+\
+\
+    // Générer le HTML du billet\
+    await new Promise(r => setTimeout(r, 300));\
+   \
+    const ticketHTML = window.ticketService.generateTicketHTML(\
+        currentEvent,\
+        currentGuest,\
+        currentTemplate,\
+        currentFormat\
+    );\
+\
+\
+    container.innerHTML = ticketHTML;\
+\
+\
+    // Attendre le rendu\
+    await new Promise(r => setTimeout(r, 100));\
+\
+\
+    // Générer le QR Code\
+    const qrData = { t: 'INV', e: currentEvent.id, g: currentGuest.id };\
+    window.ticketService.generateQRCode('ticketQRCode', qrData);\
+\
+\
+    // Afficher les actions\
+    document.getElementById('ticketActions').style.display = 'grid';\
+    document.getElementById('generateAllTicketsBtn').style.display = 'block';\
+\
+\
+    // Animation d'apparition\
+    const ticket = container.querySelector('.ticket-canvas');\
+    if (ticket) {\
+        ticket.style.opacity = '0';\
+        ticket.style.transform = 'scale(0.95)';\
+        setTimeout(() => {\
+            ticket.style.transition = 'all 0.4s ease';\
+            ticket.style.opacity = '1';\
+            ticket.style.transform = 'scale(1)';\
+        }, 50);\
+    }\
+\
+\
+    if (typeof SECURA_AUDIO !== 'undefined') {\
+        SECURA_AUDIO.success?.();\
+    }\
+   \
+    showNotification('success', '✅ Billet généré avec succès !');\
+}\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 💾 TÉLÉCHARGEMENT BILLET UNIQUE PNG\
+// ═══════════════════════════════════════════════════════════════\
+async function downloadSingleTicket() {\
+    const ticketElement = document.querySelector('.ticket-canvas');\
+    if (!ticketElement || !currentEvent || !currentGuest) return;\
+\
+\
+    const loading = Swal.fire({\
+        title: 'Préparation du téléchargement...',\
+        html: '<p>Génération de l\'image haute qualité</p>',\
+        icon: 'info',\
+        allowOutsideClick: false,\
+        showConfirmButton: false,\
+        didOpen: () => Swal.showLoading()\
+    });\
+\
+\
+    try {\
+        const filename = window.ticketService.formatFileName(\
+            currentGuest.firstName,\
+            currentGuest.lastName,\
+            currentEvent.name\
+        );\
+\
+\
+        const success = await window.ticketService.downloadTicketPNG(\
+            ticketElement,\
+            filename,\
+            currentQuality\
+        );\
+\
+\
+        await loading.close();\
+\
+\
+        if (success) {\
+            if (typeof SECURA_AUDIO !== 'undefined') {\
+                SECURA_AUDIO.play?.('notify');\
+            }\
+            await Swal.fire({\
+                icon: 'success',\
+                title: '✅ Téléchargement réussi !',\
+                html: `<p>Le billet a été téléchargé :</p><p style="font-weight:600; color:#D97706;">${filename}</p>`,\
+                timer: 2500,\
+                showConfirmButton: false\
+            });\
+        } else {\
+            throw new Error('Échec téléchargement');\
+        }\
+    } catch (err) {\
+        await loading.close();\
+        await Swal.fire({\
+            icon: 'error',\
+            title: '❌ Erreur',\
+            text: 'Impossible de télécharger le billet',\
+            confirmButtonColor: '#D97706'\
+        });\
+    }\
+}\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 📄 TÉLÉCHARGEMENT BILLET UNIQUE PDF\
+// ═══════════════════════════════════════════════════════════════\
+async function downloadSingleTicketPDF() {\
+    const ticketElement = document.querySelector('.ticket-canvas');\
+    if (!ticketElement || !currentEvent || !currentGuest) return;\
+\
+\
+    const loading = Swal.fire({\
+        title: 'Génération du PDF...',\
+        html: '<p>Conversion en format PDF professionnel</p>',\
+        icon: 'info',\
+        allowOutsideClick: false,\
+        showConfirmButton: false,\
+        didOpen: () => Swal.showLoading()\
+    });\
+\
+\
+    try {\
+        const filename = window.ticketService.formatFileName(\
+            currentGuest.firstName,\
+            currentGuest.lastName,\
+            currentEvent.name\
+        ).replace('.png', '.pdf');\
+\
+\
+        const success = await window.ticketService.downloadTicketPDF(\
+            ticketElement,\
+            filename,\
+            currentQuality\
+        );\
+\
+\
+        await loading.close();\
+\
+\
+        if (success) {\
+            if (typeof SECURA_AUDIO !== 'undefined') {\
+                SECURA_AUDIO.play?.('notify');\
+            }\
+            await Swal.fire({\
+                icon: 'success',\
+                title: '✅ PDF téléchargé !',\
+                html: `<p>Le billet PDF a été téléchargé :</p><p style="font-weight:600; color:#EF4444;">${filename}</p>`,\
+                timer: 2500,\
+                showConfirmButton: false\
+            });\
+        } else {\
+            throw new Error('Échec téléchargement PDF');\
+        }\
+    } catch (err) {\
+        await loading.close();\
+        await Swal.fire({\
+            icon: 'error',\
+            title: '❌ Erreur',\
+            text: 'Impossible de générer le PDF',\
+            confirmButtonColor: '#D97706'\
+        });\
+    }\
+}\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 📦 GÉNÉRATION EN MASSE ULTRA COMPLÈTE\
+// ═══════════════════════════════════════════════════════════════\
+async function generateAllTickets() {\
+    if (!currentEvent) return;\
+\
+\
+    const allGuests = storage.getGuestsByEventId(currentEvent.id);\
+   \
+    if (allGuests.length === 0) {\
+        await Swal.fire({\
+            icon: 'warning',\
+            title: 'Aucun invité',\
+            text: 'Cet événement n\'a pas d\'invités',\
+            confirmButtonColor: '#D97706'\
+        });\
+        return;\
+    }\
+\
+\
+    // Vérifier quels invités ont déjà un billet\
+    const guestsWithTicket = allGuests.filter(g => storage.getQRCodeByGuestId(g.id));\
+    const guestsWithoutTicket = allGuests.filter(g => !storage.getQRCodeByGuestId(g.id));\
+    const hasMissingTickets = guestsWithoutTicket.length > 0;\
+\
+\
+    let targetGuests = allGuests;\
+    let mode = 'all';\
+\
+\
+    // === CHOIX INTELLIGENT ===\
+    if (hasMissingTickets) {\
+        const result = await Swal.fire({\
+            title: '📦 Génération en masse',\
+            html: `\
+                <div style="text-align: left; padding: 1.5rem; background: #F9FAFB; border-radius: 12px; margin: 1rem 0;">\
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid #D97706;">\
+                        <span style="font-weight: 600;">Total invités</span>\
+                        <span style="font-weight: 800; color: #D97706;">${allGuests.length}</span>\
+                    </div>\
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid #10B981;">\
+                        <span style="font-weight: 600;">Sans billet</span>\
+                        <span style="font-weight: 800; color: #10B981;">${guestsWithoutTicket.length}</span>\
+                    </div>\
+                    <div style="display: flex; justify-content: space-between; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid #6B7280;">\
+                        <span style="font-weight: 600;">Avec billet</span>\
+                        <span style="font-weight: 800; color: #6B7280;">${guestsWithTicket.length}</span>\
+                    </div>\
+                </div>\
+                <p style="font-size: 1rem; margin-top: 1.5rem; color: #1F2937;">Que voulez-vous générer ?</p>\
+            `,\
+            icon: 'question',\
+            showCancelButton: true,\
+            showDenyButton: true,\
+            confirmButtonText: `📥 Tous (${allGuests.length})`,\
+            denyButtonText: `✨ Manquants (${guestsWithoutTicket.length})`,\
+            cancelButtonText: 'Annuler',\
+            reverseButtons: true,\
+            confirmButtonColor: '#D97706',\
+            denyButtonColor: '#10B981',\
+            cancelButtonColor: '#6B7280',\
+            width: '600px'\
+        });\
+\
+\
+        if (result.isConfirmed) {\
+            targetGuests = allGuests;\
+            mode = 'all';\
+        } else if (result.isDenied) {\
+            targetGuests = guestsWithoutTicket;\
+            mode = 'missing';\
+        } else {\
+            return;\
+        }\
+    } else {\
+        const confirmed = await Swal.fire({\
+            title: '📦 Génération en masse',\
+            html: `\
+                <p style="font-size: 1.1rem; margin: 1rem 0;">Générer <strong style="color: #D97706;">${allGuests.length}</strong> billets ?</p>\
+                <p style="font-size: 0.95rem; color: #6B7280; margin-top: 1rem; padding: 1rem; background: #FEF3C7; border-radius: 8px; border-left: 4px solid #F59E0B;">\
+                    ℹ️ Tous les invités ont déjà un billet.<br>\
+                    Les billets seront régénérés.\
+                </p>\
+            `,\
+            icon: 'question',\
+            showCancelButton: true,\
+            confirmButtonText: '✅ Générer',\
+            cancelButtonText: 'Annuler',\
+            confirmButtonColor: '#D97706'\
+        });\
+       \
+        if (!confirmed.isConfirmed) return;\
+    }\
+\
+\
+    // === MODAL DE PROGRESSION ULTRA PROFESSIONNELLE ===\
+    const progressHtml = `\
+        <div class="bulk-progress-container">\
+            <div class="progress-header">\
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem;">\
+                    <i class="bi bi-collection-fill" style="font-size: 2rem; color: #D97706;"></i>\
+                    <h4 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #1F2937;">Génération en cours</h4>\
+                </div>\
+                <p id="progress-text" style="font-size: 1.3rem; font-weight: 700; color: #D97706; margin: 0;">0 sur ${targetGuests.length}</p>\
+                <p class="progress-subtitle" id="progress-subtitle" style="color: #6B7280; font-size: 0.95rem; margin: 0.5rem 0 0 0;">Préparation...</p>\
+            </div>\
+           \
+            <div class="progress-bar-container">\
+                <div class="progress-bar" id="progressBar" style="width:0%">\
+                    <span id="progressPercent" style="font-weight: 800;">0%</span>\
+                </div>\
+            </div>\
+\
+\
+            <div class="stats-container">\
+                <div class="stat-item">\
+                    <div class="stat-value" id="stat-success" style="color: #10B981;">0</div>\
+                    <div class="stat-label">✅ Succès</div>\
+                </div>\
+                <div class="stat-item">\
+                    <div class="stat-value" id="stat-errors" style="color: #EF4444;">0</div>\
+                    <div class="stat-label">❌ Erreurs</div>\
+                </div>\
+                <div class="stat-item">\
+                    <div class="stat-value" id="stat-remaining" style="color: #6B7280;">${targetGuests.length}</div>\
+                    <div class="stat-label">⏳ Restants</div>\
+                </div>\
+            </div>\
+\
+\
+            <div class="ticket-preview-scroll" id="ticketPreviewScroll">\
+                <p class="text-muted">⏳ Les billets apparaîtront ici au fur et à mesure...</p>\
+            </div>\
+        </div>\
+    `;\
+\
+\
+    Swal.fire({\
+        html: progressHtml,\
+        allowOutsideClick: false,\
+        allowEscapeKey: false,\
+        showConfirmButton: false,\
+        showCloseButton: false,\
+        width: '750px',\
+        customClass: { popup: 'swal-bulk-generation' },\
+        didOpen: () => Swal.hideLoading()\
+    });\
+\
+\
+    // === ÉLÉMENTS DE LA MODALE ===\
+    const progressBar = document.getElementById('progressBar');\
+    const progressText = document.getElementById('progress-text');\
+    const progressPercent = document.getElementById('progressPercent');\
+    const progressSubtitle = document.getElementById('progress-subtitle');\
+    const previewScroll = document.getElementById('ticketPreviewScroll');\
+    const statSuccess = document.getElementById('stat-success');\
+    const statErrors = document.getElementById('stat-errors');\
+    const statRemaining = document.getElementById('stat-remaining');\
+\
+\
+    previewScroll.innerHTML = '';\
+\
+\
+    let successCount = 0;\
+    let errorCount = 0;\
+    const total = targetGuests.length;\
+    const tickets = [];\
+\
+\
+    // === BOUCLE DE GÉNÉRATION ===\
+    for (let i = 0; i < total; i++) {\
+        const guest = targetGuests[i];\
+       \
+        try {\
+            progressSubtitle.textContent = ` Génération pour🎫 ${guest.firstName} ${guest.lastName}...`;\
+\
+\
+            // Créer conteneur temporaire\
+            const tempDiv = document.createElement('div');\
+            tempDiv.style.position = 'absolute';\
+            tempDiv.style.left = '-9999px';\
+            tempDiv.style.width = currentFormat === 'landscape' ? '900px' : currentFormat === 'portrait' ? '500px' : '700px';\
+            document.body.appendChild(tempDiv);\
+\
+\
+            // Générer HTML\
+            const ticketHTML = window.ticketService.generateTicketHTML(\
+                currentEvent,\
+                guest,\
+                currentTemplate,\
+                currentFormat\
+            );\
+\
+\
+            tempDiv.innerHTML = ticketHTML;\
+            await new Promise(r => setTimeout(r, 100));\
+\
+\
+            // Générer QR Code\
+            const qrData = { t: 'INV', e: currentEvent.id, g: guest.id };\
+            window.ticketService.generateQRCode('ticketQRCode', qrData);\
+            await new Promise(r => setTimeout(r, 150));\
+\
+\
+            // Convertir en canvas\
+            const ticketElement = tempDiv.querySelector('.ticket-canvas');\
+            const canvas = await html2canvas(ticketElement, {\
+                scale: currentQuality,\
+                useCORS: true,\
+                allowTaint: true,\
+                backgroundColor: '#ffffff',\
+                logging: false\
+            });\
+\
+\
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));\
+\
+\
+            tickets.push({\
+                guest: guest,\
+                blob: blob,\
+                filename: window.ticketService.formatFileName(\
+                    guest.firstName,\
+                    guest.lastName,\
+                    currentEvent.name\
+                )\
+            });\
+\
+\
+            // Sauvegarder dans storage si pas déjà fait\
+            if (!storage.getQRCodeByGuestId(guest.id)) {\
+                storage.saveQRCode({\
+                    guestId: guest.id,\
+                    eventId: currentEvent.id,\
+                    data: JSON.stringify(qrData),\
+                    config: {\
+                        template: currentTemplate,\
+                        format: currentFormat,\
+                        quality: currentQuality\
+                    }\
+                });\
+            }\
+\
+\
+            successCount++;\
+            document.body.removeChild(tempDiv);\
+\
+\
+            // === MISE À JOUR UI ===\
+            const percentage = Math.round((successCount / total) * 100);\
+            progressBar.style.width = `${percentage}%`;\
+            progressPercent.textContent = `${percentage}%`;\
+            progressText.textContent = `${successCount} sur ${total}`;\
+           \
+            statSuccess.textContent = successCount;\
+            statErrors.textContent = errorCount;\
+            statRemaining.textContent = total - successCount - errorCount;\
+\
+\
+            // Aperçu miniature\
+            const itemDiv = document.createElement('div');\
+            itemDiv.className = 'ticket-preview-item';\
+            itemDiv.style.animationDelay = `${i * 0.05}s`;\
+           \
+            const img = document.createElement('img');\
+            img.src = URL.createObjectURL(blob);\
+            img.alt = `${guest.firstName} ${guest.lastName}`;\
+           \
+            const nameSpan = document.createElement('span');\
+            nameSpan.className = 'guest-name';\
+            nameSpan.textContent = `${guest.firstName} ${guest.lastName}`;\
+           \
+            const statusSpan = document.createElement('span');\
+            statusSpan.className = 'guest-status success';\
+            statusSpan.textContent = '✓';\
+           \
+            itemDiv.appendChild(img);\
+            itemDiv.appendChild(nameSpan);\
+            itemDiv.appendChild(statusSpan);\
+            previewScroll.appendChild(itemDiv);\
+\
+\
+            previewScroll.scrollTop = previewScroll.scrollHeight;\
+            await new Promise(r => setTimeout(r, 50));\
+\
+\
+        } catch (err) {\
+            console.error(`❌ Erreur pour ${guest.firstName} ${guest.lastName}:`, err);\
+            errorCount++;\
+           \
+            const errorDiv = document.createElement('div');\
+            errorDiv.className = 'ticket-preview-item error';\
+            errorDiv.innerHTML = `\
+                <div class="error-icon">⚠️</div>\
+                <span class="guest-name">${guest.firstName} ${guest.lastName}</span>\
+                <span class="guest-status error">✗</span>\
+            `;\
+            previewScroll.appendChild(errorDiv);\
+           \
+            statErrors.textContent = errorCount;\
+            statRemaining.textContent = total - successCount - errorCount;\
+        }\
+    }\
+\
+\
+    // === FINALISATION - CRÉATION ZIP ===\
+    if (successCount > 0) {\
+        progressSubtitle.textContent = '📦 Création du fichier ZIP...';\
+       \
+        const zipBlob = await window.ticketService.createTicketsZip(tickets, currentEvent.name);\
+\
+\
+        if (zipBlob) {\
+            const url = URL.createObjectURL(zipBlob);\
+            const a = document.createElement('a');\
+            a.href = url;\
+            a.download = `SECURA_Billets_${window.ticketService.cleanFileName(currentEvent.name)}.zip`;\
+            a.click();\
+            URL.revokeObjectURL(url);\
+        }\
+    }\
+\
+\
+    Swal.close();\
+   \
+    if (typeof SECURA_AUDIO !== 'undefined') {\
+        SECURA_AUDIO.success?.();\
+    }\
+   \
+    // Notification finale\
+    if (successCount === total) {\
+        await Swal.fire({\
+            icon: 'success',\
+            title: '🎉 Génération terminée !',\
+            html: `\
+                <div style="padding: 1rem; background: linear-gradient(135deg, #D4F1F4, #E8F5E9); border-radius: 12px; margin: 1rem 0;">\
+                    <p style="font-size: 1.3rem; font-weight: 800; color: #10B981; margin: 0;">✅ ${successCount} billets générés</p>\
+                    <p style="font-size: 1rem; color: #6B7280; margin: 0.5rem 0 0 0;">Le fichier ZIP a été téléchargé automatiquement</p>\
+                </div>\
+            `,\
+            timer: 4000,\
+            showConfirmButton: false\
+        });\
+    } else {\
+        await Swal.fire({\
+            icon: successCount > 0 ? 'warning' : 'error',\
+            title: successCount > 0 ? '⚠️ Terminé avec des erreurs' : '❌ Échec',\
+            html: `\
+                <div style="padding: 1rem; background: #FEF3C7; border-radius: 12px; margin: 1rem 0;">\
+                    <p style="margin: 0.5rem 0;"><strong style="color: #10B981; font-size: 1.2rem;">${successCount}</strong> billets générés</p>\
+                    <p style="margin: 0.5rem 0;"><strong style="color: #EF4444; font-size: 1.2rem;">${errorCount}</strong> erreurs</p>\
+                    ${successCount > 0 ? '<p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #6B7280;">Le fichier ZIP a été téléchargé</p>' : ''}\
+                </div>\
+            `,\
+            confirmButtonColor: '#D97706'\
+        });\
+    }\
+}\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 🎨 INJECTION DES STYLES CSS POUR LA MODAL\
+// ═══════════════════════════════════════════════════════════════\
+function injectBulkGenerationStyles() {\
+    if (document.getElementById('ticket-bulk-styles')) return;\
+\
+\
+    const style = document.createElement('style');\
+    style.id = 'ticket-bulk-styles';\
+    style.textContent = `\
+        .bulk-progress-container { padding: 1.5rem; min-height: 500px; }\
+        .progress-header { text-align: center; margin-bottom: 1.5rem; }\
+        .progress-subtitle { font-style: italic; }\
+        .progress-bar-container { width: 100%; height: 32px; background: #E5E7EB; border-radius: 16px; overflow: hidden; margin: 1.5rem 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }\
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #D97706 0%, #F59E0B 100%); transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.95rem; }\
+        .stats-container { display: flex; justify-content: space-around; margin: 1.5rem 0; padding: 1.25rem; background: #F9FAFB; border-radius: 12px; border: 2px solid #E5E7EB; }\
+        .stat-item { text-align: center; }\
+        .stat-value { display: block; font-size: 2rem; font-weight: 900; margin-bottom: 0.25rem; }\
+        .stat-label { font-size: 0.85rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }\
+        .ticket-preview-scroll { max-height: 280px; overflow-y: auto; overflow-x: hidden; background: #F9FAFB; border: 2px solid #E5E7EB; border-radius: 12px; padding: 1rem; display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; scroll-behavior: smooth; }\
+        .ticket-preview-scroll::-webkit-scrollbar { width: 8px; }\
+        .ticket-preview-scroll::-webkit-scrollbar-track { background: #F1F1F1; border-radius: 10px; }\
+        .ticket-preview-scroll::-webkit-scrollbar-thumb { background: #D97706; border-radius: 10px; }\
+        .ticket-preview-scroll::-webkit-scrollbar-thumb:hover { background: #F59E0B; }\
+        .ticket-preview-item { position: relative; opacity: 0; transform: scale(0.8) translateY(20px); animation: ticketFadeIn 0.5s ease forwards; }\
+        .ticket-preview-item img { width: 130px; height: 85px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); border: 3px solid #10B981; transition: transform 0.2s ease; object-fit: cover; }\
+        .ticket-preview-item.error { opacity: 0; animation: ticketErrorFade 0.5s ease forwards; }\
+        .ticket-preview-item.error img { border-color: #EF4444; filter: grayscale(0.9); opacity: 0.6; }\
+        .ticket-preview-item:hover img { transform: scale(1.08) rotate(2deg); }\
+        .ticket-preview-item .guest-name { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #10B981, #059669); color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 2px 8px rgba(16,185,129,0.4); }\
+        .ticket-preview-item.error .guest-name { background: linear-gradient(135deg, #EF4444, #DC2626); box-shadow: 0 2px 8px rgba(239,68,68,0.4); }\
+        .guest-status { position: absolute; top: -10px; right: -10px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }\
+        .guest-status.success { background: linear-gradient(135deg, #10B981, #059669); color: white; }\
+        .guest-status.error { background: linear-gradient(135deg, #EF4444, #DC2626); color: white; }\
+        .error-icon { font-size: 2rem; text-align: center; margin-bottom: 0.5rem; }\
+        @keyframes ticketFadeIn { to { opacity: 1; transform: scale(1) translateY(0); } }\
+        @keyframes ticketErrorFade { to { opacity: 0.7; transform: scale(0.95) translateY(0); } }\
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }\
+        .swal-bulk-generation { width: 750px !important; }\
+        .text-muted { color: #9CA3AF; text-align: center; font-style: italic; width: 100%; padding: 2rem; }\
+    `;\
+    document.head.appendChild(style);\
+}\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 📤 PARTAGE BILLET\
+// ═══════════════════════════════════════════════════════════════\
+async function shareTicket() {\
+    if (!currentGuest || !currentEvent) return;\
+\
+\
+    const shareOptions = `\
+        <div style="padding: 1.5rem;">\
+            <p style="margin-bottom: 1.5rem; color: #6B7280; font-size: 0.95rem;">\
+                Partagez le billet de <strong style="color: #D97706;">${currentGuest.firstName} ${currentGuest.lastName}</strong>\
+            </p>\
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">\
+                <button onclick="shareTicketViaEmail()" style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 1.5rem; background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; font-weight: 600;">\
+                    <i class="bi bi-envelope-fill" style="font-size: 2rem;"></i>\
+                    <span>Email</span>\
+                </button>\
+                <button onclick="shareTicketViaWhatsApp()" style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 1.5rem; background: linear-gradient(135deg, #25D366, #128C7E); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; font-weight: 600;">\
+                    <i class="bi bi-whatsapp" style="font-size: 2rem;"></i>\
+                    <span>WhatsApp</span>\
+                </button>\
+                <button onclick="shareTicketViaSMS()" style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 1.5rem; background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; font-weight: 600;">\
+                    <i class="bi bi-chat-dots-fill" style="font-size: 2rem;"></i>\
+                    <span>SMS</span>\
+                </button>\
+                <button onclick="copyTicketLink()" style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 1.5rem; background: linear-gradient(135deg, #6B7280, #4B5563); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; font-weight: 600;">\
+                    <i class="bi bi-link-45deg" style="font-size: 2rem;"></i>\
+                    <span>Copier lien</span>\
+                </button>\
+            </div>\
+        </div>\
+    `;\
+\
+\
+    await Swal.fire({\
+        title: '<i class="bi bi-share-fill"></i> Partager le billet',\
+        html: shareOptions,\
+        showConfirmButton: false,\
+        showCloseButton: true,\
+        width: '550px',\
+        customClass: {\
+            title: 'swal-share-title'\
+        }\
+    });\
+}\
+\
+\
+// Fonctions de partage\
+window.shareTicketViaEmail = () => {\
+    if (!currentGuest || !currentGuest.email) {\
+        Swal.fire({\
+            icon: 'warning',\
+            title: '⚠️ Email manquant',\
+            text: 'Cet invité n\'a pas d\'adresse email enregistrée',\
+            confirmButtonColor: '#D97706'\
+        });\
+        return;\
+    }\
+   \
+    const subject = encodeURIComponent(`🎫 Votre billet pour ${currentEvent.name}`);\
+    const body = encodeURIComponent(`Bonjour ${currentGuest.firstName},\n\nVeuillez trouver ci-joint votre billet d'invitation pour l'événement :\n\n📅 ${currentEvent.name}\n📍 ${currentEvent.location || 'Lieu à confirmer'}\n🕐 ${currentEvent.date} ${currentEvent.time || ''}\n\nPrésentez ce billet à l'entrée.\n\nCordialement,\nL'équipe SECURA`);\
+   \
+    window.location.href = `mailto:${currentGuest.email}?subject=${subject}&body=${body}`;\
+    Swal.close();\
+   \
+    setTimeout(() => {\
+        Swal.fire({\
+            icon: 'success',\
+            title: '✉️ Email ouvert',\
+            text: 'Votre client email a été ouvert',\
+            timer: 2000,\
+            showConfirmButton: false\
+        });\
+    }, 500);\
+};\
+\
+\
+window.shareTicketViaWhatsApp = () => {\
+    if (!currentGuest || !currentGuest.phone) {\
+        Swal.fire({\
+            icon: 'warning',\
+            title: '⚠️ Téléphone manquant',\
+            text: 'Cet invité n\'a pas de numéro de téléphone enregistré',\
+            confirmButtonColor: '#D97706'\
+        });\
+        return;\
+    }\
+   \
+    const message = encodeURIComponent(`🎫 *Votre billet pour ${currentEvent.name}*\n\n📅 Date : ${currentEvent.date}\n📍 Lieu : ${currentEvent.location || 'À confirmer'}\n\nPrésentez votre billet à l'entrée.\n\n_Sécurisé par SECURA_`);\
+    const phoneNumber = currentGuest.phone.replace(/\D/g, '');\
+   \
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');\
+    Swal.close();\
+   \
+    setTimeout(() => {\
+        Swal.fire({\
+            icon: 'success',\
+            title: '✅ WhatsApp ouvert',\
+            text: 'Le message a été préparé',\
+            timer: 2000,\
+            showConfirmButton: false\
+        });\
+    }, 500);\
+};\
+\
+\
+window.shareTicketViaSMS = () => {\
+    if (!currentGuest || !currentGuest.phone) {\
+        Swal.fire({\
+            icon: 'warning',\
+            title: '⚠️ Téléphone manquant',\
+            text: 'Cet invité n\'a pas de numéro de téléphone enregistré',\
+            confirmButtonColor: '#D97706'\
+        });\
+        return;\
+    }\
+   \
+    const message = encodeURIComponent(`🎫 Votre billet pour ${currentEvent.name}. Date: ${currentEvent.date}. Lieu: ${currentEvent.location || 'À confirmer'}. Présentez ce billet à l'entrée.`);\
+   \
+    window.location.href = `sms:${currentGuest.phone}?body=${message}`;\
+    Swal.close();\
+   \
+    setTimeout(() => {\
+        Swal.fire({\
+            icon: 'success',\
+            title: '💬 SMS ouvert',\
+            text: 'Votre application SMS a été ouverte',\
+            timer: 2000,\
+            showConfirmButton: false\
+        });\
+    }, 500);\
+};\
+\
+\
+window.copyTicketLink = async () => {\
+    const link = `${window.location.origin}/ticket.html?event=${currentEvent.id}&guest=${currentGuest.id}`;\
+   \
+    try {\
+        await navigator.clipboard.writeText(link);\
+        Swal.close();\
+       \
+        await Swal.fire({\
+            icon: 'success',\
+            title: '✅ Lien copié !',\
+            html: `<p style="word-break: break-all; padding: 1rem; background: #F3F4F6; border-radius: 8px; font-family: monospace; font-size: 0.85rem;">${link}</p>`,\
+            timer: 3000,\
+            showConfirmButton: false\
+        });\
+    } catch (err) {\
+        Swal.fire({\
+            icon: 'error',\
+            title: '❌ Erreur',\
+            text: 'Impossible de copier le lien',\
+            confirmButtonColor: '#D97706'\
+        });\
+    }\
+};\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 🔔 NOTIFICATION HELPER\
+// ═══════════════════════════════════════════════════════════════\
+function showNotification(type, message) {\
+    const Toast = Swal.mixin({\
+        toast: true,\
+        position: 'top-end',\
+        showConfirmButton: false,\
+        timer: 3000,\
+        timerProgressBar: true,\
+        didOpen: (toast) => {\
+            toast.addEventListener('mouseenter', Swal.stopTimer);\
+            toast.addEventListener('mouseleave', Swal.resumeTimer);\
+        }\
+    });\
+\
+\
+    const icons = {\
+        success: 'success',\
+        error: 'error',\
+        warning: 'warning',\
+        info: 'info'\
+    };\
+\
+\
+    Toast.fire({\
+        icon: icons[type] || 'info',\
+        title: message\
+    });\
+}\
+\
+\
+console.log('✅ Ticket Generator Ultra Pro initialisé');\
+\
+\
+\
+\
+ticket-service :\
+\
+/**\
+ * ╔═══════════════════════════════════════════════════════════════╗\
+ * ║ 🎫 SECURA TICKET SERVICE - GÉNÉRATEUR ULTRA PREMIUM ║\
+ * ║ ║\
+ * ║ 🎨 10 Templates personnalisés professionnels ║\
+ * ║ 📱 QR Code noir sur blanc parfait ║\
+ * ║ 🖼️ Export PNG/PDF ultra haute qualité ║\
+ * ║ ⚡ Logo SECURA intégré ║\
+ * ║ 📐 Gestion complète responsive toutes orientations ║\
+ * ╚═══════════════════════════════════════════════════════════════╝\
+ */\
+\
+\
+class TicketService {\
+    constructor() {\
+        this.logoPath = 'assets/images/icon.png';\
+       \
+        this.templates = {\
+            marriage: {\
+                gradient: 'linear-gradient(135deg, #FF6B9D 0%, #FEC163 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(255,107,157,0.05) 0%, rgba(254,193,99,0.05) 100%)',\
+                icon: 'bi-heart-fill',\
+                decorIcon: '💕',\
+                accentColor: '#FF6B9D',\
+                name: 'MARIAGE'\
+            },\
+            anniversary: {\
+                gradient: 'linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(168,237,234,0.05) 0%, rgba(254,214,227,0.05) 100%)',\
+                icon: 'bi-cake2-fill',\
+                decorIcon: '🎂',\
+                accentColor: '#A8EDEA',\
+                name: 'ANNIVERSAIRE'\
+            },\
+            conference: {\
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%)',\
+                icon: 'bi-person-workspace',\
+                decorIcon: '🎯',\
+                accentColor: '#667eea',\
+                name: 'CONFÉRENCE'\
+            },\
+            football: {\
+                gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(17,153,142,0.05) 0%, rgba(56,239,125,0.05) 100%)',\
+                icon: 'bi-trophy-fill',\
+                decorIcon: '⚽',\
+                accentColor: '#11998e',\
+                name: 'SPORT'\
+            },\
+            corporate: {\
+                gradient: 'linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(44,62,80,0.05) 0%, rgba(76,161,175,0.05) 100%)',\
+                icon: 'bi-building',\
+                decorIcon: '🏢',\
+                accentColor: '#2C3E50',\
+                name: 'ENTREPRISE'\
+            },\
+            concert: {\
+                gradient: 'linear-gradient(135deg, #F093FB 0%, #F5576C 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(240,147,251,0.05) 0%, rgba(245,87,108,0.05) 100%)',\
+                icon: 'bi-music-note-beamed',\
+                decorIcon: '🎵',\
+                accentColor: '#F093FB',\
+                name: 'CONCERT'\
+            },\
+            gala: {\
+                gradient: 'linear-gradient(135deg, #C79081 0%, #DFA579 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(199,144,129,0.05) 0%, rgba(223,165,121,0.05) 100%)',\
+                icon: 'bi-gem',\
+                decorIcon: '💎',\
+                accentColor: '#C79081',\
+                name: 'GALA'\
+            },\
+            graduation: {\
+                gradient: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(78,205,196,0.05) 0%, rgba(68,160,141,0.05) 100%)',\
+                icon: 'bi-mortarboard-fill',\
+                decorIcon: '🎓',\
+                accentColor: '#4ECDC4',\
+                name: 'REMISE DE DIPLÔMES'\
+            },\
+            exhibition: {\
+                gradient: 'linear-gradient(135deg, #FA709A 0%, #FEE140 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(250,112,154,0.05) 0%, rgba(254,225,64,0.05) 100%)',\
+                icon: 'bi-palette-fill',\
+                decorIcon: '🎨',\
+                accentColor: '#FA709A',\
+                name: 'EXPOSITION'\
+            },\
+            vip: {\
+                gradient: 'linear-gradient(135deg, #D4AF37 0%, #FFD700 100%)',\
+                bgPattern: 'linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(255,215,0,0.05) 100%)',\
+                icon: 'bi-star-fill',\
+                decorIcon: '⭐',\
+                accentColor: '#D4AF37',\
+                name: 'VIP PREMIUM'\
+            }\
+        };\
+    }\
+\
+\
+    /**\
+     * 🎨 Génère le HTML ultra professionnel d'un billet avec QR Code\
+     */\
+    generateTicketHTML(event, guest, template = 'football', format = 'landscape') {\
+        const templateConfig = this.templates[template] || this.templates.football;\
+        const qrData = { t: 'INV', e: event.id, g: guest.id };\
+\
+\
+        // Formater la date avec style français\
+        const date = new Date(event.date);\
+        const formattedDate = date.toLocaleDateString('fr-FR', {\
+            weekday: 'long',\
+            day: 'numeric',\
+            month: 'long',\
+            year: 'numeric'\
+        });\
+\
+\
+        const formattedTime = event.time ? event.time : '';\
+        const eventType = templateConfig.name;\
+\
+\
+        return `\
+            <div class="ticket-canvas ticket-${template} ${format}">\
+                <!-- Décorations d'ambiance -->\
+                <div class="ticket-decoration top-left">${templateConfig.decorIcon}</div>\
+                <div class="ticket-decoration bottom-right">${templateConfig.decorIcon}</div>\
+                <div class="ticket-perforation"></div>\
+               \
+                <div class="ticket-content" style="background: ${templateConfig.bgPattern};">\
+                    <!-- SECTION GAUCHE - INFORMATIONS -->\
+                    <div class="ticket-left">\
+                        <div class="ticket-header">\
+                            <div class="ticket-type" style="border-color: ${templateConfig.accentColor}; color: ${templateConfig.accentColor}; background: ${templateConfig.accentColor}15;">\
+                                <i class="bi ${templateConfig.icon}"></i> ${eventType}\
+                            </div>\
+                            <h1 class="ticket-title">${this.escapeHtml(event.name)}</h1>\
+                            ${event.welcomeMessage ? `\
+                                <p class="ticket-subtitle">${this.escapeHtml(event.welcomeMessage.split('\n')[0])}</p>\
+                            ` : ''}\
+                        </div>\
+\
+\
+                        <div class="ticket-details">\
+                            <!-- Date -->\
+                            <div class="ticket-detail-row">\
+                                <div class="ticket-detail-icon" style="background: ${templateConfig.gradient};">\
+                                    <i class="bi bi-calendar-event"></i>\
+                                </div>\
+                                <div class="ticket-detail-text">\
+                                    <div class="ticket-detail-label">Date de l'événement</div>\
+                                    <div class="ticket-detail-value">${this.capitalizeFirst(formattedDate)}</div>\
+                                </div>\
+                            </div>\
+\
+\
+                            ${formattedTime ? `\
+                            <!-- Heure -->\
+                            <div class="ticket-detail-row">\
+                                <div class="ticket-detail-icon" style="background: ${templateConfig.gradient};">\
+                                    <i class="bi bi-clock-fill"></i>\
+                                </div>\
+                                <div class="ticket-detail-text">\
+                                    <div class="ticket-detail-label">Heure</div>\
+                                    <div class="ticket-detail-value">${formattedTime}</div>\
+                                </div>\
+                            </div>\
+                            ` : ''}\
+\
+\
+                            ${event.location ? `\
+                            <!-- Lieu -->\
+                            <div class="ticket-detail-row">\
+                                <div class="ticket-detail-icon" style="background: ${templateConfig.gradient};">\
+                                    <i class="bi bi-geo-alt-fill"></i>\
+                                </div>\
+                                <div class="ticket-detail-text">\
+                                    <div class="ticket-detail-label">Lieu</div>\
+                                    <div class="ticket-detail-value">${this.escapeHtml(event.location)}</div>\
+                                </div>\
+                            </div>\
+                            ` : ''}\
+\
+\
+                            ${event.capacity ? `\
+                            <!-- Capacité -->\
+                            <div class="ticket-detail-row">\
+                                <div class="ticket-detail-icon" style="background: ${templateConfig.gradient};">\
+                                    <i class="bi bi-people-fill"></i>\
+                                </div>\
+                                <div class="ticket-detail-text">\
+                                    <div class="ticket-detail-label">Capacité</div>\
+                                    <div class="ticket-detail-value">${event.capacity} personnes</div>\
+                                </div>\
+                            </div>\
+                            ` : ''}\
+                        </div>\
+\
+\
+                        <!-- Logo SECURA en bas à gauche -->\
+                        <div style="margin-top: auto; padding-top: 1.5rem;">\
+                            <div style="display: flex; align-items: center; gap: 0.75rem; opacity: 0.6;">\
+                                <img src="${this.logoPath}" alt="SECURA" style="width: 50px; height: 50px; object-fit: contain; ">\
+                                <span style="font-weight: 700; font-size: 0.9rem; color: var(--secura-red); letter-spacing: 1px;">Sécurisé par SECURA</span>\
+                            </div>\
+                        </div>\
+                    </div>\
+\
+\
+                    <!-- SECTION DROITE - QR CODE -->\
+                    <div class="ticket-right">\
+                        <div class="ticket-qr-section">\
+                            <div class="ticket-qr-wrapper">\
+                                <div class="ticket-qr-code" id="ticketQRCode"></div>\
+                            </div>\
+                            <div class="ticket-qr-text" style="border-color: ${templateConfig.accentColor}; background: ${templateConfig.accentColor}15; color: ${templateConfig.accentColor};">\
+                                <strong style="color: #1F2937;">Scannez ce QR à l'entrée</strong>\
+                                <small style="color: #6B7280;">Présentez-vous à l'accueil<br>pour valider votre identité</small>\
+                            </div>\
+                        </div>\
+\
+\
+                        <!-- Logo SECURA en bas -->\
+                        <div class="ticket-secura-logo" style="background: ${templateConfig.gradient};">\
+                            <img src="${this.logoPath}" alt="SECURA" style="width: 24px; height: 24px; object-fit: contain; f">\
+                            <span>SECURA</span>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>\
+        `;\
+    }\
+\
+\
+    /**\
+     * 📷 Génère le QR Code noir sur blanc parfait\
+     */\
+    generateQRCode(containerId, qrData) {\
+        const container = document.getElementById(containerId);\
+        if (!container) return null;\
+\
+\
+        container.innerHTML = '';\
+\
+\
+        try {\
+            const qr = new QRCode(container, {\
+                text: JSON.stringify(qrData),\
+                width: 200,\
+                height: 200,\
+                colorDark: '#000000', // Noir pur\
+                colorLight: '#FFFFFF', // Blanc pur\
+                correctLevel: QRCode.CorrectLevel.H // Haute correction d'erreur\
+            });\
+            return qr;\
+        } catch (err) {\
+            console.error('❌ Erreur génération QR Code:', err);\
+            return null;\
+        }\
+    }\
+\
+\
+    /**\
+     * 🖼️ Convertit le billet en Canvas ultra haute qualité\
+     */\
+    async ticketToCanvas(ticketElement, scale = 3) {\
+        if (!ticketElement) return null;\
+\
+\
+        try {\
+            const canvas = await html2canvas(ticketElement, {\
+                scale: scale,\
+                useCORS: true,\
+                allowTaint: true,\
+                backgroundColor: '#ffffff',\
+                logging: false,\
+                width: ticketElement.offsetWidth,\
+                height: ticketElement.offsetHeight,\
+                imageTimeout: 0,\
+                removeContainer: true\
+            });\
+\
+\
+            return canvas;\
+        } catch (err) {\
+            console.error('❌ Erreur conversion canvas:', err);\
+            return null;\
+        }\
+    }\
+\
+\
+    /**\
+     * 💾 Télécharge le billet en PNG haute qualité\
+     */\
+    async downloadTicketPNG(ticketElement, filename, scale = 3) {\
+        const canvas = await this.ticketToCanvas(ticketElement, scale);\
+        if (!canvas) return false;\
+\
+\
+        try {\
+            canvas.toBlob(blob => {\
+                const url = URL.createObjectURL(blob);\
+                const a = document.createElement('a');\
+                a.href = url;\
+                a.download = filename;\
+                a.click();\
+                URL.revokeObjectURL(url);\
+            }, 'image/png', 1.0);\
+            return true;\
+        } catch (err) {\
+            console.error('❌ Erreur téléchargement PNG:', err);\
+            return false;\
+        }\
+    }\
+\
+\
+    /**\
+     * 📄 Télécharge le billet en PDF professionnel\
+     */\
+    async downloadTicketPDF(ticketElement, filename, scale = 3) {\
+        const canvas = await this.ticketToCanvas(ticketElement, scale);\
+        if (!canvas) return false;\
+\
+\
+        try {\
+            const { jsPDF } = window.jspdf;\
+            const imgData = canvas.toDataURL('image/png', 1.0);\
+           \
+            // Format A4 paysage pour meilleure qualité\
+            const pdf = new jsPDF({\
+                orientation: 'landscape',\
+                unit: 'mm',\
+                format: 'a4',\
+                compress: true\
+            });\
+\
+\
+            const pdfWidth = pdf.internal.pageSize.getWidth();\
+            const pdfHeight = pdf.internal.pageSize.getHeight();\
+           \
+            // Calculer dimensions pour centrage parfait\
+            const imgWidth = pdfWidth - 20;\
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;\
+           \
+            const x = 10;\
+            const y = (pdfHeight - imgHeight) / 2;\
+\
+\
+            pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST');\
+            pdf.save(filename);\
+            return true;\
+        } catch (err) {\
+            console.error('❌ Erreur téléchargement PDF:', err);\
+            return false;\
+        }\
+    }\
+\
+\
+    /**\
+     * 📦 Crée un ZIP avec tous les billets\
+     */\
+    async createTicketsZip(tickets, eventName) {\
+        if (typeof JSZip === 'undefined') {\
+            console.error('❌ JSZip non disponible');\
+            return null;\
+        }\
+\
+\
+        try {\
+            const zip = new JSZip();\
+            const folderName = `SECURA_Billets_${this.cleanFileName(eventName)}`;\
+            const folder = zip.folder(folderName);\
+\
+\
+            tickets.forEach(ticket => {\
+                folder.file(ticket.filename, ticket.blob);\
+            });\
+\
+\
+            const zipBlob = await zip.generateAsync({\
+                type: 'blob',\
+                compression: 'DEFLATE',\
+                compressionOptions: { level: 9 } // Compression maximale\
+            });\
+\
+\
+            return zipBlob;\
+        } catch (err) {\
+            console.error('❌ Erreur création ZIP:', err);\
+            return null;\
+        }\
+    }\
+\
+\
+    /**\
+     * 🔧 UTILITAIRES\
+     */\
+    getEventTypeLabel(type) {\
+        const labels = {\
+            marriage: 'MARIAGE',\
+            anniversary: 'ANNIVERSAIRE',\
+            anniversaire: 'ANNIVERSAIRE',\
+            conference: 'CONFÉRENCE',\
+            football: 'ÉVÉNEMENT SPORTIF',\
+            corporate: 'ÉVÉNEMENT ENTREPRISE',\
+            concert: 'CONCERT',\
+            gala: 'GALA',\
+            graduation: 'REMISE DE DIPLÔMES',\
+            exhibition: 'EXPOSITION',\
+            vip: 'VIP PREMIUM',\
+            autre: 'ÉVÉNEMENT'\
+        };\
+        return labels[type] || 'ÉVÉNEMENT';\
+    }\
+\
+\
+    formatFileName(firstName, lastName, eventName) {\
+        const clean = (str) => str.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();\
+        return `Billet_${clean(firstName)}_${clean(lastName)}_${clean(eventName)}.png`;\
+    }\
+\
+\
+    cleanFileName(str) {\
+        return str.replace(/[^a-zA-Z0-9\-_]/g, '_').replace(/_{2,}/g, '_');\
+    }\
+\
+\
+    escapeHtml(text) {\
+        if (!text) return '';\
+        const div = document.createElement('div');\
+        div.textContent = text;\
+        return div.innerHTML;\
+    }\
+\
+\
+    capitalizeFirst(str) {\
+        return str.charAt(0).toUpperCase() + str.slice(1);\
+    }\
+}\
+\
+\
+// ═══════════════════════════════════════════════════════════════\
+// 🌐 EXPOSITION GLOBALE\
+// ═══════════════════════════════════════════════════════════════\
+window.ticketService = new TicketService();\
+console.log('✅ Ticket Service Ultra Pro chargé avec 10 templates');\
+\
+\
+\
+\
+\
+cosignere\
+ dans un genration ultra meg a meoire le respect de mon theme , pas de bouton multocolor masis respect mon theme , et je veux des billet d'inviation tres bien designe ui/ux san aniation convertisabl en png , des bordure majestuex selon le type däevenemenst , donne moi des code ultra long te tres designe , voici mes ressources: data: json { "id": "sec_1762209757419_exl3pjlf0", "name": "Mariage de Rania et Gérard", "type": "marriage", "date": "2025-11-22", "time": "19:0", "capacity": 300, "location": "Florencia Palace", "description": "soirée", "welcomeMessage": "Raina ❤️ Gérard\nsont ravis de vous accueillir pour célébrer leur union !\nPréparez-vous à vivre une journée pleine d’amour, de sourires et de souvenirs inoubliables.", "active": true, "updatedAt": "2025-11-03T22:42:37.419Z", "createdAt": "2025-11-03T22:42:37.419Z" } n'afficheque les info de l'evenemnet , petit message , petit en bas de l'initation , de ne pas partager ce bien a une autre personne , genre moi les codes ultra mega complet et ameliore de ces fichiers : pas de select sur les evenesmnt , represente des card 'evenements avce inf comme ici : dans un deish ultra complet , genre la page /home/stive-junior/secura-qr/ticket-generator.html /home/stive-junior/secura-qr/js/ticket-generator.js /home/stive-junior/secura-qr/js/ticket-service.js /home/stive-junior/secura-qr/css/tickets.css cide ultar vast et beaucou p d'investigation sur les template avce un design ultra canvas des icone , boostarp et toup ( ne mat pas les incformation aligne comme c'est resenation , je veux que ca soit bine dispositionne sur le bilet comme une veritable inviation a imprimer , garde la lign qui seprar le qr t les info sur l'inivaion legere , , des bordure majestuse , des icone d'illustration avce opacite comme present deja , la mise a en avnt importate du qr , les inforation avec polce par trop rand Afficher plus Je vais créer un système de génération de billets d'invitation royaux ultra-premium avec des bordures majestueuses, une mise en page parfaite pour l'impression et un respect total de votre thème SECURA. nb: genre fihier par fichier notemment le css uniquement dasn ticket.css , le fichier de ticket-generator.html , le ticket-generator.js et le ticekt-service.js , genre moi ces 4 fichiers
+ 
+ 
+ 
+ 
+genre d'abrd le lon ultra complet fichier css d'abordm tickets.css
+ 
+ 
+ ne reduis pas mon cde plus de 1000 ligne , ene moi tout cela au gran complet
