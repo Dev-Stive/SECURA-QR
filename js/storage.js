@@ -16,8 +16,8 @@
 
 class SecuraStorage {
     constructor() {
-   //    this.API_URL = 'http://localhost:3000/api';
-   this.API_URL = 'https://secura-qr.onrender.com/api';
+      this.API_URL = 'http://localhost:3000/api';
+   //this.API_URL = 'https://secura-qr.onrender.com/api';
 
         this.token = localStorage.getItem('secura_token') || null;
         this.user = null;

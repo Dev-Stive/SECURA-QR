@@ -3226,6 +3226,17 @@
       "accessCode": "9330",
       "createdAt": "2025-11-22T09:39:17.001Z",
       "updatedAt": "2025-11-22T09:39:17.001Z"
+    },
+    {
+      "id": "usr_1763805778964_4xpe5lckl",
+      "email": "nana@gmail.com",
+      "password": "$2b$10$WS5Ya3hNDmoHE1KAvRlVVO72FMSbyIefQYHNhH6oAeC.ETqtOy0f2",
+      "firstName": "Junior",
+      "lastName": "NANA",
+      "role": "user",
+      "accessCode": "3135",
+      "createdAt": "2025-11-22T10:02:59.352Z",
+      "updatedAt": "2025-11-22T10:02:59.352Z"
     }
   ],
   "sessions": [],
@@ -3234,7 +3245,7 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2025-11-22T09:39:17.001Z",
+    "updatedAt": "2025-11-22T10:02:59.352Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }
