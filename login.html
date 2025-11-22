@@ -310,6 +310,24 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
+    // === REDIRECTION SI DÉJÀ CONNECTÉ ===
+    (() => {
+        
+        const token =  localStorage.getItem('secura_token');
+        if (!token) return;
+
+        
+
+        const result =  apiRequest(ME_ENDPOINT);
+        if (result.success && result.user) {
+            window.location.href = '/index.html';
+        } else {
+            removeToken();
+        }
+    })();
+
+
     // ═══════════════════════════════════════════════════════════════
     // 🔐 SECURA LOGIN - SCRIPT AUTONOME (SANS storage.js)
     // ═══════════════════════════════════════════════════════════════
@@ -371,18 +389,7 @@
         }
     };
 
-    // === REDIRECTION SI DÉJÀ CONNECTÉ ===
-    (async () => {
-        const token = getToken();
-        if (!token) return;
-
-        const result = await apiRequest(ME_ENDPOINT);
-        if (result.success && result.user) {
-            window.location.href = '/index.html';
-        } else {
-            removeToken();
-        }
-    })();
+    
 
     // === TOGGLE PASSWORD ===
     toggleBtn?.addEventListener('click', () => togglePasswordVisibility());

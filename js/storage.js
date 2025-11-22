@@ -13,7 +13,6 @@
  * ╚═══════════════════════════════════════════════════════════════╝
  */
 
-
 class SecuraStorage {
     constructor() {
    //   this.API_URL = 'http://localhost:3000/api';
@@ -170,7 +169,7 @@ class SecuraStorage {
             const res = await fetch(url, {
                 ...options,
                 headers,
-                //signal: options.signal || AbortSignal.timeout(15000)
+                signal: options.signal || AbortSignal.timeout(150000)
             });
 
             if (!res.ok) {
@@ -184,10 +183,7 @@ class SecuraStorage {
 
             console.error(`API Error [${endpoint}]:`, msg);
 
-            // Sécurisé : includes() + null safety
-            if (msg.includes('Token invalide') || msg.includes('expired')) {
-                this.forceLogout();
-            }
+           
 
             throw err;
         }
@@ -1810,12 +1806,12 @@ class SecuraStorage {
     // === CHARGER LES INFOS UTILISATEUR ===
     async updateProfileInfo() {
 
-    if (!this.token) {
+  /*  if (!this.token) {
     
     this.forceLogout();
     return;
 
-    }
+    }*/
 
     try{
     const data = await this.apiRequest('/auth/me', {
@@ -1850,11 +1846,11 @@ class SecuraStorage {
         }
         }else{
             console.log('Utilisateur introuvable , deconnexion forcee');
-            this.forceLogout();
+           // this.forceLogout();
         }
     }catch(err){
 
-        this.forceLogout();
+       // this.forceLogout();
         
     }
     }

@@ -16,7 +16,7 @@
 (function authGuard() {
 
     
-    const publicPages = ['/login','/login.html','/regsiter.html', '/register', '/404' , '/404.html'];
+    const publicPages = ['/login','/login.html','/regsiter.html', '/register', '/404' , '/404.html','/ticket-generator.html','/ticket-generator'];
     const currentPath = window.location.pathname;
     
     const isPublicPage = publicPages.some(page => currentPath.endsWith(page));
@@ -25,7 +25,6 @@
         const token = localStorage.getItem('secura_token');
    
        if (!token) {
-            storage.forceLogout();
             console.warn('🔒 Accès refusé - Redirection vers login');
             window.location.href = '/login.html';
             return;
