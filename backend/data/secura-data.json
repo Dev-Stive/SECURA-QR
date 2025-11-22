@@ -71,7 +71,7 @@
       "id": "sec_1762209804227_rkafbq7b5",
       "updatedAt": "2025-11-03T22:43:24.227Z",
       "createdAt": "2025-11-03T22:43:24.227Z",
-      "scanned": true,
+      "scanned": false,
       "status": "pending",
       "scannedAt": "2025-11-04T23:48:00.024Z"
     },
@@ -199,7 +199,7 @@
       "id": "sec_1762209804227_zngiqkhud",
       "updatedAt": "2025-11-04T00:53:36.855Z",
       "createdAt": "2025-11-03T22:43:24.227Z",
-      "scanned": true,
+      "scanned": false,
       "status": "pending",
       "scannedAt": "2025-11-04T00:53:36.855Z"
     },
@@ -284,7 +284,7 @@
       "id": "sec_1762209804227_yeswvlgek",
       "updatedAt": "2025-11-03T22:43:24.227Z",
       "createdAt": "2025-11-03T22:43:24.227Z",
-      "scanned": true,
+      "scanned": false,
       "status": "pending",
       "scannedAt": "2025-11-11T11:31:37.908Z"
     },
