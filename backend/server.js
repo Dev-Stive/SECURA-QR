@@ -179,20 +179,30 @@ const apiKeyAuth = (req, res, next) => {
 
 const loadData = () => {
     try {
+        if (!fs.existsSync(CONFIG.DB_FILE)) {
+            const initialData = {
+                events: [],
+                guests: [],
+                qrCodes: [],
+                scans: [],
+                users: [],
+                sessions: [],
+                settings: {},
+                meta: {
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    version: '3.0'
+                }
+            };
+            fs.writeFileSync(CONFIG.DB_FILE, JSON.stringify(initialData, null, 2));
+            return initialData;
+        }
+        
         const raw = fs.readFileSync(CONFIG.DB_FILE, 'utf8');
         const data = JSON.parse(raw);
-        log.db('Chargement OK', `${data.events?.length || 0} événements`);
-        return data;
-    } catch (err) {
-        log.error('Erreur chargement DB', err.message);
-        return { events: [], guests: [], qrCodes: [], scans: [], settings: {} };
-    }
-};
-
-const saveData = (data) => {
-    try {
-        // S'assurer que tous les champs essentiels existent
-        const completeData = {
+        
+        // S'assurer que toutes les clés essentielles existent
+        return {
             events: data.events || [],
             guests: data.guests || [],
             qrCodes: data.qrCodes || [],
@@ -200,6 +210,40 @@ const saveData = (data) => {
             users: data.users || [],
             sessions: data.sessions || [],
             settings: data.settings || {},
+            meta: data.meta || {
+                updatedAt: new Date().toISOString(),
+                version: '3.0'
+            }
+        };
+    } catch (err) {
+        log.error('Erreur chargement DB', err.message);
+        return { 
+            events: [], 
+            guests: [], 
+            qrCodes: [], 
+            scans: [], 
+            users: [], 
+            sessions: [], 
+            settings: {} 
+        };
+    }
+};
+
+const saveData = (data) => {
+    try {
+        // Charger les données EXISTANTES d'abord
+        const existingData = loadData();
+        
+        // Fusionner intelligemment pour préserver les utilisateurs
+        const completeData = {
+            events: data.events || existingData.events || [],
+            guests: data.guests || existingData.guests || [],
+            qrCodes: data.qrCodes || existingData.qrCodes || [],
+            scans: data.scans || existingData.scans || [],
+            // ⚠️ TOUJOURS PRÉSERVER LES UTILISATEURS EXISTANTS
+            users: data.users || existingData.users || [],
+            sessions: data.sessions || existingData.sessions || [],
+            settings: { ...existingData.settings, ...(data.settings || {}) },
             meta: {
                 updatedAt: new Date().toISOString(),
                 version: '3.0',
@@ -208,12 +252,11 @@ const saveData = (data) => {
         };
         
         fs.writeFileSync(CONFIG.DB_FILE, JSON.stringify(completeData, null, 2));
-        log.db('Sauvegarde OK', `${completeData.events?.length || 0} événements, ${completeData.users?.length || 0} utilisateurs, ${completeData.sessions?.length || 0} sessions`);
+        log.db('Sauvegarde OK', `${completeData.events?.length || 0} événements, ${completeData.users?.length || 0} utilisateurs`);
     } catch (err) {
         log.error('Erreur sauvegarde DB', err.message);
     }
 };
-
 
 
 const generateId = (prefix = 'sec') => `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -461,7 +504,6 @@ app.post('/api/auth/register', (req, res) => {
             updatedAt: new Date().toISOString()
         };
 
-        if (!data.users) data.users = [];
         data.users.push(user);
         saveData(data);
 

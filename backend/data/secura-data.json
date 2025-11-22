@@ -3146,6 +3146,19 @@
       "id": "qr_1763559051887_0kekg980r",
       "updatedAt": "2025-11-19T13:30:51.887Z",
       "createdAt": "2025-11-19T13:30:51.887Z"
+    },
+    {
+      "guestId": "gst_1763622404050_3gq5s69d7",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "data": "{\"t\":\"INV\",\"e\":\"sec_1762209757419_exl3pjlf0\",\"g\":\"gst_1763622404050_3gq5s69d7\"}",
+      "config": {
+        "size": 300,
+        "foreground": "#000000",
+        "background": "#FFFFFF"
+      },
+      "id": "qr_1763807158430_6f511ppiy",
+      "updatedAt": "2025-11-22T10:25:58.430Z",
+      "createdAt": "2025-11-22T10:25:58.430Z"
     }
   ],
   "scans": [],
@@ -3245,7 +3258,7 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2025-11-22T10:02:59.352Z",
+    "updatedAt": "2025-11-22T10:25:58.513Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }
