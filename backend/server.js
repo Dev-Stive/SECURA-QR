@@ -2559,6 +2559,14 @@ app.get('/', (req, res) => {
     res.sendFile(dashboard);
 });
 
+app.get('/regsiter', (req, res) => {
+    const registerPath = path.join(__dirname, 'register.html');
+
+        log.success('Accès au register secret', req.ip);
+        res.sendFile(registerPath);
+   
+});
+
 
 
 // ═══════════════════════════════════════════════════════════════
