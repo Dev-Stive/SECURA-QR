@@ -30,19 +30,21 @@
     }
   ],
   "guests": [
+    
     {
+      "id": "sec_1762209804227_mquxez5su",
       "eventId": "sec_1762209757419_exl3pjlf0",
       "firstName": "Maman",
-      "lastName": " Françoise ",
-      "email": "-",
+      "lastName": "Françoise",
+      "email": "francoise@gmail.com",
       "phone": "693592328",
       "company": "-",
-      "notes": "Table Ensemble ",
-      "id": "sec_1762209804227_mquxez5su",
-      "updatedAt": "2025-11-03T22:43:24.227Z",
-      "createdAt": "2025-11-03T22:43:24.227Z",
+      "notes": "Table Ensemble",
+      "status": "pending",
       "scanned": false,
-      "status": "pending"
+      "scannedAt": null,
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "updatedAt": "2025-11-21T21:37:16.990Z"
     },
     {
       "eventId": "sec_1762209757419_exl3pjlf0",
@@ -130,18 +132,19 @@
       "status": "pending"
     },
     {
+      "id": "sec_1762209804227_1fzi6enfw",
       "eventId": "sec_1762209757419_exl3pjlf0",
       "firstName": "Cyrille",
-      "lastName": "Kwemo ",
-      "email": "-",
+      "lastName": "Kwemo",
+      "email": "cyrille@gmail.com",
       "phone": "689159074",
       "company": "-",
-      "notes": "Table Harmonie",
-      "id": "sec_1762209804227_1fzi6enfw",
-      "updatedAt": "2025-11-03T22:43:24.227Z",
-      "createdAt": "2025-11-03T22:43:24.227Z",
+      "notes": "Table Sagesse",
+      "status": "pending",
       "scanned": false,
-      "status": "pending"
+      "scannedAt": null,
+      "createdAt": "2025-11-03T22:43:24.227Z",
+      "updatedAt": "2025-11-21T21:37:00.911Z"
     },
     {
       "eventId": "sec_1762209757419_exl3pjlf0",
@@ -468,20 +471,6 @@
       "status": "pending"
     },
     {
-      "eventId": "evt_1762787514697_wolaildj0",
-      "firstName": "LAURAINE",
-      "lastName": "ATIWA",
-      "email": "elsa@gmail.com",
-      "phone": "674130989",
-      "company": "",
-      "notes": "Table AMOUR",
-      "id": "gst_1762787966383_wt4vksgwu",
-      "createdAt": "2025-11-10T15:19:26.383Z",
-      "updatedAt": "2025-11-10T15:19:26.383Z",
-      "scanned": false,
-      "status": "pending"
-    },
-    {
       "firstName": "jacqueline",
       "lastName": "Masoa",
       "email": "",
@@ -722,19 +711,19 @@
       "status": "pending"
     },
     {
+      "id": "gst_1763195952732_h4z7jpov9",
+      "eventId": "sec_1762209757419_exl3pjlf0",
       "firstName": "Mr",
       "lastName": "Blaise",
-      "email": "",
+      "email": "blaise@gmail.com",
       "phone": "683690291",
       "company": "-",
-      "notes": "Table Force",
-      "eventId": "sec_1762209757419_exl3pjlf0",
-      "id": "gst_1763195952732_h4z7jpov9",
-      "createdAt": "2025-11-15T08:39:12.728Z",
-      "updatedAt": "2025-11-15T08:39:12.728Z",
+      "notes": "Table Grace",
+      "status": "pending",
       "scanned": false,
       "scannedAt": null,
-      "status": "pending"
+      "createdAt": "2025-11-15T08:39:12.728Z",
+      "updatedAt": "2025-11-21T21:36:41.208Z"
     },
     {
       "firstName": "Mr & Mme",
@@ -1352,19 +1341,19 @@
       "status": "pending"
     },
     {
+      "id": "gst_1763195952739_e5ysx5626",
+      "eventId": "sec_1762209757419_exl3pjlf0",
       "firstName": "Mr",
       "lastName": "Zoberi",
-      "email": "",
+      "email": "admin@gmail.com",
       "phone": "695068736",
       "company": "-",
-      "notes": "Endurance",
-      "eventId": "sec_1762209757419_exl3pjlf0",
-      "id": "gst_1763195952739_e5ysx5626",
-      "createdAt": "2025-11-15T08:39:12.728Z",
-      "updatedAt": "2025-11-15T08:39:12.728Z",
+      "notes": "Table Endurance",
+      "status": "pending",
       "scanned": false,
       "scannedAt": null,
-      "status": "pending"
+      "createdAt": "2025-11-15T08:39:12.728Z",
+      "updatedAt": "2025-11-21T19:26:02.797Z"
     },
     {
       "firstName": "Mr David",
@@ -1514,7 +1503,37 @@
       "updatedAt": "2025-11-19T13:05:13.182Z",
       "scanned": false,
       "status": "pending"
+    },
+    {
+      "id": "gst_1763622404050_3gq5s69d7",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "firstName": "Rebecca",
+      "lastName": "Amerique",
+      "email": "rebecca@gmail.com",
+      "phone": "690151051",
+      "company": "-",
+      "notes": "Table Grace",
+      "status": "pending",
+      "scanned": false,
+      "scannedAt": null,
+      "createdAt": "2025-11-20T07:06:44.050Z",
+      "updatedAt": "2025-11-21T21:37:38.452Z"
+    },
+    {
+      "eventId": "evt_1762787514697_wolaildj0",
+      "firstName": "LAURAINE",
+      "lastName": "ATIWA",
+      "email": "elsa@gmail.com",
+      "phone": "674130989",
+      "company": "",
+      "notes": "Table AMOUR",
+      "id": "gst_1762787966383_wt4vksgwu",
+      "createdAt": "2025-11-10T15:19:26.383Z",
+      "updatedAt": "2025-11-10T15:19:26.383Z",
+      "scanned": false,
+      "status": "pending"
     }
+    
   ],
   "qrCodes": [
     {
@@ -3541,10 +3560,6 @@
       "scannedAt": "2025-11-05T00:08:28.878Z"
     }
   ],
-  "settings": {
-    "theme": "light",
-    "language": "fr"
-  },
   "users": [
     {
       "id": "usr_1762603660862_2x88fbxbz",
@@ -3578,10 +3593,48 @@
       "createdAt": "2025-11-08T13:27:53.461Z",
       "updatedAt": "2025-11-08T13:27:53.461Z",
       "accessCode": "4821"
+    },
+    {
+      "id": "usr_1763734882900_71m9i4ref",
+      "email": "naginguioadeline@gmail.com",
+      "password": "$2b$10$UJqXzRietVaRZeAby0jwbOP9LR/2sGJCR1hjAUwPBC01EHKOjoX12",
+      "firstName": "OKAY",
+      "lastName": "OKAY",
+      "role": "user",
+      "accessCode": "7164",
+      "createdAt": "2025-11-21T14:21:23.169Z",
+      "updatedAt": "2025-11-21T14:21:23.169Z"
+    },
+    {
+      "id": "usr_1763735545803_bkpcemaqt",
+      "email": "tagnefonodavid@gmail.com",
+      "password": "$2b$10$DtFY7708iD64kgRqXji4T.7MWQtLGGCMfLeeXC50M4Q/UVDwLejDC",
+      "firstName": "dave",
+      "lastName": "tagne",
+      "role": "user",
+      "accessCode": "1411",
+      "createdAt": "2025-11-21T14:32:26.093Z",
+      "updatedAt": "2025-11-21T14:32:26.093Z"
+    },
+    {
+      "id": "usr_1763735752334_nrzf6yjhn",
+      "email": "angedemanou0@gmail.com",
+      "password": "$2b$10$fc6oVAJL1Zlw95NnOTxJiein7fr6KeiKMNr9GWnunxlsaXJxHZl36",
+      "firstName": "Ange",
+      "lastName": "Demanou",
+      "role": "user",
+      "accessCode": "4058",
+      "createdAt": "2025-11-21T14:35:52.633Z",
+      "updatedAt": "2025-11-21T14:35:52.633Z"
     }
   ],
+  "sessions": [],
+  "settings": {
+    "theme": "light",
+    "language": "fr"
+  },
   "meta": {
-    "updatedAt": "2025-11-19T13:30:51.898Z",
+    "updatedAt": "2025-11-21T14:35:52.633Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }

@@ -313,7 +313,7 @@ class TicketService {
         container.innerHTML = this.generateTicketHTML(event, guest, type);
 
         // Générer QR
-        this.generateQRCode('qrcode', { event: event.id, guest: guest.id || 'guest' });
+        this.generateQRCode('qrcode', { t: 'INV', e: event.id, g: guest.id || 'guest' });
 
         // Dessiner les bordures Canvas
         const mainCanvas = document.getElementById('borderCanvas');

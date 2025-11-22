@@ -191,21 +191,30 @@ const loadData = () => {
 
 const saveData = (data) => {
     try {
-        // Load existing data to preserve fields like 'users'
-        const existingData = loadData();
-        data.users = existingData.users || data.users;
-
-        data.meta = {
-            updatedAt: new Date().toISOString(),
-            version: '3.0',
-            server: 'SECURA-ULTRA-PRO-V3'
+        // S'assurer que tous les champs essentiels existent
+        const completeData = {
+            events: data.events || [],
+            guests: data.guests || [],
+            qrCodes: data.qrCodes || [],
+            scans: data.scans || [],
+            users: data.users || [],
+            sessions: data.sessions || [],
+            settings: data.settings || {},
+            meta: {
+                updatedAt: new Date().toISOString(),
+                version: '3.0',
+                server: 'SECURA-ULTRA-PRO-V3'
+            }
         };
-        fs.writeFileSync(CONFIG.DB_FILE, JSON.stringify(data, null, 2));
-        log.db('Sauvegarde OK', `${data.events?.length || 0} événements`);
+        
+        fs.writeFileSync(CONFIG.DB_FILE, JSON.stringify(completeData, null, 2));
+        log.db('Sauvegarde OK', `${completeData.events?.length || 0} événements, ${completeData.users?.length || 0} utilisateurs, ${completeData.sessions?.length || 0} sessions`);
     } catch (err) {
         log.error('Erreur sauvegarde DB', err.message);
     }
 };
+
+
 
 const generateId = (prefix = 'sec') => `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -346,7 +355,7 @@ const requireRole = (role) => (req, res, next) => {
 
 
 const generateAccessCode = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const chars = '0123456789';
   let code = '';
   for (let i = 0; i < 4; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -448,7 +457,6 @@ app.post('/api/auth/register', (req, res) => {
             lastName: lastName || '',
             role: data.users?.length === 0 ? 'admin' : 'user',
             accessCode,
-            accessCodeUsed: false,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -472,7 +480,8 @@ app.post('/api/auth/register', (req, res) => {
                 firstName: user.firstName, 
                 lastName: user.lastName,
                 accessCode // Retourné ici
-            }
+            },
+            accessCode
         });
     } catch (err) {
         log.error('POST /api/auth/register', err.message);
@@ -480,44 +489,42 @@ app.post('/api/auth/register', (req, res) => {
     }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// 🔐 VÉRIFICATION CODE D'ACCÈS (MIS À JOUR)
+// ═══════════════════════════════════════════════════════════════
 
-app.post('/auth/verify-access-code', (req, res) => {
+app.post('/api/auth/verify-access-code', jwtAuth, (req, res) => {
     try {
         const { code } = req.body;
-        if (!code || code.length !== 4 || !/^\d{4}$/.test(code)) {
+        if (!code || code.length !== 4 || !/^[A-Z0-9]{4}$/.test(code)) {
             return res.status(400).json({
                 success: false,
-                message: 'Code à 4 chiffres requis'
+                message: 'Code à 4 caractères (chiffres/majuscules) requis'
             });
         }
 
         const data = loadData();
-        const user = data.users?.find(u => u.accessCode === code);
+        const user = data.users?.find(u => u.id === req.user.id);
 
         if (!user) {
-            log.warning('Code d\'accès invalide', code);
+            log.warning('Utilisateur introuvable lors de la vérification', req.user.id);
             return res.status(404).json({
                 success: false,
-                message: 'Code invalide'
+                message: 'Utilisateur introuvable'
             });
         }
 
-        if (user.accessCodeUsed) {
-            return res.json({
-                success: true,
-                message: 'Code déjà utilisé',
-                alreadyActivated: true,
-                user: {
-                    id: user.id,
-                    email: user.email,
-                    firstName: user.firstName,
-                    lastName: user.lastName
-                }
+        if (user.accessCode !== code) {
+            log.warning('Code d\'accès incorrect', `${user.email} - Code fourni: ${code}`);
+            return res.status(400).json({
+                success: false,
+                message: 'Code d\'accès incorrect'
             });
         }
 
-        // Marquer comme utilisé
-        user.accessCodeUsed = true;
+       
+
+        user.updatedAt = new Date().toISOString();
         
         saveData(data);
 
@@ -534,10 +541,11 @@ app.post('/auth/verify-access-code', (req, res) => {
             }
         });
     } catch (err) {
-        log.error('POST /auth/verify-access-code', err.message);
+        log.error('POST /api/auth/verify-access-code', err.message);
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
 
 app.post('/api/auth/login', (req, res) => {
     try {
@@ -615,7 +623,7 @@ app.get('/api/auth/me', jwtAuth, (req, res) => {
             role: user.role, 
             firstName: user.firstName, 
             lastName: user.lastName,
-            accessCode: user.accessCodeUsed ? null : user.accessCode
+            accessCode: user.accessCode
         }
     });
 });
@@ -629,7 +637,6 @@ app.post('/api/auth/regenerate-access-code', jwtAuth, (req, res) => {
 
         const newCode = generateAccessCode();
         user.accessCode = newCode;
-        user.accessCodeUsed = false;
         user.updatedAt = new Date().toISOString();
         saveData(data);
 
@@ -750,13 +757,467 @@ app.post('/api/auth/reset-password', (req, res) => {
     }
 });
 
+
+// ═══════════════════════════════════════════════════════════════
+// 🚀 JOIN SESSION - Agent rejoint une session (crée si n'existe pas)
+// ═══════════════════════════════════════════════════════════════
+app.post('/api/sessions/:eventId/join', jwtAuth, (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const userId = req.user.id;
+        const data = loadData();
+
+        // Vérifier que l'événement existe
+        const event = data.events?.find(e => e.id === eventId);
+        if (!event) {
+            log.warning('Session join - Événement introuvable', eventId);
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Événement introuvable' 
+            });
+        }
+
+        // Récupérer l'utilisateur
+        const user = data.users?.find(u => u.id === userId);
+        if (!user) {
+            log.warning('Session join - Utilisateur introuvable', userId);
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Utilisateur introuvable' 
+            });
+        }
+
+        // Initialiser sessions si nécessaire
+        if (!data.sessions) data.sessions = [];
+
+        // Chercher ou créer la session
+        let session = data.sessions.find(s => s.eventId === eventId);
+        const now = new Date().toISOString();
+        
+        if (!session) {
+            // Créer nouvelle session
+            session = {
+                id: generateId('sess'),
+                eventId,
+                eventName: event.name,
+                agents: [],
+                createdAt: now,
+                updatedAt: now
+            };
+            data.sessions.push(session);
+            log.success('🆕 Session créée', `Event: ${event.name}`);
+        }
+
+        // Nettoyer les agents inactifs (pas de ping depuis 45s)
+        const nowMs = Date.now();
+        session.agents = session.agents.filter(agent => {
+            const lastPing = new Date(agent.lastPing).getTime();
+            return (nowMs - lastPing) < 45000;
+        });
+
+        // Vérifier si l'agent est déjà dans la session
+        const existingAgent = session.agents.find(a => a.id === userId);
+
+        if (existingAgent) {
+            // Mettre à jour le ping
+            existingAgent.lastPing = now;
+            existingAgent.status = 'active';
+            log.info('Agent déjà présent, ping mis à jour', user.email);
+        } else {
+            // Ajouter le nouvel agent
+            const agentName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            session.agents.push({
+                id: userId,
+                name: agentName || user.email.split('@')[0],
+                email: user.email,
+                firstName: user.firstName || null,
+                lastName: user.lastName || null,
+                avatar: user.avatar || null,
+                joinedAt: now,
+                lastPing: now,
+                status: 'active'
+            });
+            log.success('✅ Agent rejoint session', `${user.email} → ${event.name} (${session.agents.length} agents)`);
+        }
+
+        session.updatedAt = now;
+        saveData(data);
+
+        res.json({
+            success: true,
+            message: 'Session rejointe',
+            data: {
+                session,
+                currentAgent: session.agents.find(a => a.id === userId)
+            }
+        });
+    } catch (err) {
+        log.error('POST /api/sessions/:eventId/join', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 💓 PING SESSION - Heartbeat pour maintenir la connexion
+// ═══════════════════════════════════════════════════════════════
+app.post('/api/sessions/:eventId/ping', jwtAuth, (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const userId = req.user.id;
+        const data = loadData();
+
+        if (!data.sessions) data.sessions = [];
+
+        const session = data.sessions.find(s => s.eventId === eventId);
+        if (!session) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Session introuvable',
+                shouldRejoin: true
+            });
+        }
+
+        // Nettoyer les agents inactifs
+        const nowMs = Date.now();
+        session.agents = session.agents.filter(agent => {
+            const lastPing = new Date(agent.lastPing).getTime();
+            return (nowMs - lastPing) < 45000;
+        });
+
+        // Trouver et mettre à jour l'agent
+        const agent = session.agents.find(a => a.id === userId);
+        if (!agent) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Agent non trouvé dans la session',
+                shouldRejoin: true
+            });
+        }
+
+        const now = new Date().toISOString();
+        agent.lastPing = now;
+        agent.status = 'active';
+        session.updatedAt = now;
+
+        // Si la session est vide après nettoyage, la supprimer
+        if (session.agents.length === 0) {
+            const sessionIndex = data.sessions.findIndex(s => s.eventId === eventId);
+            if (sessionIndex !== -1) {
+                data.sessions.splice(sessionIndex, 1);
+                log.info('🗑️ Session vide supprimée', eventId);
+            }
+            saveData(data);
+            return res.json({
+                success: true,
+                data: { agents: [], agentCount: 0, sessionDeleted: true }
+            });
+        }
+
+        saveData(data);
+
+        res.json({
+            success: true,
+            data: {
+                agents: session.agents,
+                agentCount: session.agents.length,
+                updatedAt: session.updatedAt
+            }
+        });
+    } catch (err) {
+        log.error('POST /api/sessions/:eventId/ping', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 🚪 LEAVE SESSION - Agent quitte une session
+// ═══════════════════════════════════════════════════════════════
+app.post('/api/sessions/:eventId/leave', jwtAuth, (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const userId = req.user.id;
+        const data = loadData();
+
+        if (!data.sessions) {
+            return res.json({ success: true, message: 'Aucune session active' });
+        }
+
+        const sessionIndex = data.sessions.findIndex(s => s.eventId === eventId);
+        if (sessionIndex === -1) {
+            return res.json({ success: true, message: 'Session déjà terminée' });
+        }
+
+        const session = data.sessions[sessionIndex];
+        const agentIndex = session.agents.findIndex(a => a.id === userId);
+        let removedAgent = null;
+
+        if (agentIndex !== -1) {
+            removedAgent = session.agents.splice(agentIndex, 1)[0];
+            log.info('🚪 Agent quitte session', `${removedAgent.email} ← ${session.eventName}`);
+        }
+
+        // Si plus d'agents, supprimer la session
+        if (session.agents.length === 0) {
+            data.sessions.splice(sessionIndex, 1);
+            log.success('🗑️ Session supprimée (dernier agent parti)', session.eventName);
+            saveData(data);
+            return res.json({
+                success: true,
+                message: 'Session terminée (vous étiez le dernier)',
+                data: { 
+                    removedAgent, 
+                    sessionDeleted: true,
+                    remainingAgents: 0
+                }
+            });
+        }
+
+        session.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({
+            success: true,
+            message: 'Session quittée',
+            data: {
+                removedAgent,
+                sessionDeleted: false,
+                remainingAgents: session.agents.length
+            }
+        });
+    } catch (err) {
+        log.error('POST /api/sessions/:eventId/leave', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 📊 GET SESSION AGENTS - Liste des agents d'une session
+// ═══════════════════════════════════════════════════════════════
+app.get('/api/sessions/:eventId/agents', jwtAuth, (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const data = loadData();
+
+        if (!data.sessions) {
+            return res.json({ 
+                success: true, 
+                data: { agents: [], count: 0 } 
+            });
+        }
+
+        const session = data.sessions.find(s => s.eventId === eventId);
+        if (!session) {
+            return res.json({ 
+                success: true, 
+                data: { agents: [], count: 0 } 
+            });
+        }
+
+        // Nettoyer les agents inactifs
+        const nowMs = Date.now();
+        const activeAgents = session.agents.filter(agent => {
+            const lastPing = new Date(agent.lastPing).getTime();
+            return (nowMs - lastPing) < 45000;
+        });
+
+        // Mettre à jour si des agents ont été nettoyés
+        if (activeAgents.length !== session.agents.length) {
+            session.agents = activeAgents;
+            session.updatedAt = new Date().toISOString();
+            
+            // Supprimer la session si vide
+            if (activeAgents.length === 0) {
+                const sessionIndex = data.sessions.findIndex(s => s.eventId === eventId);
+                if (sessionIndex !== -1) {
+                    data.sessions.splice(sessionIndex, 1);
+                }
+            }
+            saveData(data);
+        }
+
+        res.json({
+            success: true,
+            data: {
+                agents: activeAgents,
+                count: activeAgents.length,
+                sessionId: session.id,
+                eventName: session.eventName
+            }
+        });
+    } catch (err) {
+        log.error('GET /api/sessions/:eventId/agents', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 🔍 GET SESSION BY EVENT - Récupérer une session
+// ═══════════════════════════════════════════════════════════════
+app.get('/api/sessions/event/:eventId', jwtAuth, (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const data = loadData();
+
+        if (!data.sessions) {
+            return res.json({ 
+                success: true, 
+                data: null,
+                exists: false
+            });
+        }
+
+        const session = data.sessions.find(s => s.eventId === eventId);
+        
+        if (!session) {
+            return res.json({ 
+                success: true, 
+                data: null,
+                exists: false
+            });
+        }
+
+        // Nettoyer les agents inactifs
+        const nowMs = Date.now();
+        session.agents = session.agents.filter(agent => {
+            const lastPing = new Date(agent.lastPing).getTime();
+            return (nowMs - lastPing) < 45000;
+        });
+
+        session.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({ 
+            success: true, 
+            data: session,
+            exists: true
+        });
+    } catch (err) {
+        log.error('GET /api/sessions/event/:eventId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 📋 GET ALL ACTIVE SESSIONS - Liste toutes les sessions actives
+// ═══════════════════════════════════════════════════════════════
+app.get('/api/sessions', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const sessions = data.sessions || [];
+
+        // Nettoyer et compter
+        const nowMs = Date.now();
+        const activeSessions = sessions.map(session => {
+            const activeAgents = session.agents.filter(agent => {
+                const lastPing = new Date(agent.lastPing).getTime();
+                return (nowMs - lastPing) < 45000;
+            });
+            return {
+                ...session,
+                agents: activeAgents,
+                agentCount: activeAgents.length
+            };
+        }).filter(s => s.agents.length > 0);
+
+        res.json({
+            success: true,
+            data: activeSessions,
+            count: activeSessions.length
+        });
+    } catch (err) {
+        log.error('GET /api/sessions', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🗑️ DELETE SESSION - Terminer une session manuellement
+// ═══════════════════════════════════════════════════════════════
+app.delete('/api/sessions/:eventId', jwtAuth, (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const data = loadData();
+
+        if (!data.sessions) {
+            return res.json({ success: true, message: 'Aucune session' });
+        }
+
+        const sessionIndex = data.sessions.findIndex(s => s.eventId === eventId);
+        
+        if (sessionIndex === -1) {
+            return res.json({ success: true, message: 'Session déjà supprimée' });
+        }
+
+        const removedSession = data.sessions.splice(sessionIndex, 1)[0];
+        saveData(data);
+
+        log.warning('🗑️ Session supprimée manuellement', removedSession.eventName);
+
+        res.json({
+            success: true,
+            message: 'Session terminée',
+            data: { removedSession }
+        });
+    } catch (err) {
+        log.error('DELETE /api/sessions/:eventId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🔄 CRON JOB POUR NETTOYER LES SESSIONS INACTIVES
+// ═══════════════════════════════════════════════════════════════
+// Ajouter ce code après l'initialisation du serveur
+
+cron.schedule('*/2 * * * *', () => {
+    try {
+        const data = loadData();
+        if (!data.sessions || data.sessions.length === 0) return;
+
+        const nowMs = Date.now();
+        let cleanedCount = 0;
+        let deletedSessions = 0;
+
+        data.sessions = data.sessions.filter(session => {
+            const initialCount = session.agents.length;
+            
+            session.agents = session.agents.filter(agent => {
+                const lastPing = new Date(agent.lastPing).getTime();
+                return (nowMs - lastPing) < 60000;
+            });
+
+            cleanedCount += (initialCount - session.agents.length);
+
+            // Supprimer la session si vide
+            if (session.agents.length === 0) {
+                deletedSessions++;
+                return false;
+            }
+            return true;
+        });
+
+        if (cleanedCount > 0 || deletedSessions > 0) {
+            saveData(data);
+            log.info('🧹 Nettoyage sessions', `${cleanedCount} agents, ${deletedSessions} sessions supprimées`);
+        }
+    } catch (err) {
+        log.error('Erreur cron nettoyage sessions', err.message);
+    }
+});
+
+
+
+
 const crypto = require('crypto');
 
 const SECRET_REGISTER_PATH = "mon_evenement_ultra_secret_2025";
 const SECRET_HASH = crypto.createHash('md5').update(SECRET_REGISTER_PATH).digest('hex');
-const SECRET_ROUTE = `/secure-register-${SECRET_HASH.substring(0, 16)}`;
+//const SECRET_ROUTE = `/secure-register-${SECRET_HASH.substring(0, 16)}`;
 
-app.get(SECRET_ROUTE, (req, res) => {
+app.get('/regsiter', (req, res) => {
     const registerPath = path.join(__dirname, 'register.html');
     if (fs.existsSync(registerPath)) {
         log.success('Accès au register secret', req.ip);
@@ -865,10 +1326,34 @@ app.get('/health', (req, res) => {
     res.json(health);
 });
 
+
+
+// ═══════════════════════════════════════════════════════════════
+// 📊 MISE À JOUR DE /api/statistics POUR INCLURE LES SESSIONS
+// ═══════════════════════════════════════════════════════════════
+
 app.get('/api/statistics', (req, res) => {
     try {
         const data = loadData();
         const today = new Date().toDateString();
+        
+        // Compter les agents actifs dans toutes les sessions
+        const nowMs = Date.now();
+        let totalActiveAgents = 0;
+        let activeSessions = 0;
+        
+        if (data.sessions) {
+            data.sessions.forEach(session => {
+                const activeAgents = session.agents.filter(agent => {
+                    const lastPing = new Date(agent.lastPing).getTime();
+                    return (nowMs - lastPing) < 45000;
+                });
+                if (activeAgents.length > 0) {
+                    activeSessions++;
+                    totalActiveAgents += activeAgents.length;
+                }
+            });
+        }
         
         const stats = {
             activeEvents: data.events?.filter(e => e.active)?.length || 0,
@@ -880,6 +1365,9 @@ app.get('/api/statistics', (req, res) => {
             scannedGuests: data.guests?.filter(g => g.scanned)?.length || 0,
             pendingGuests: data.guests?.filter(g => !g.scanned)?.length || 0,
             scanRate: data.guests?.length > 0 ? Math.round((data.guests.filter(g => g.scanned).length / data.guests.length) * 100) : 0,
+            // NOUVELLES STATS SESSIONS
+            activeSessions: activeSessions,
+            totalActiveAgents: totalActiveAgents,
             lastUpdate: data.meta?.updatedAt || new Date().toISOString()
         };
         
@@ -889,6 +1377,8 @@ app.get('/api/statistics', (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
+
 
 // ═══════════════════════════════════════════════════════════════
 // 🎫 CRUD ÉVÉNEMENTS

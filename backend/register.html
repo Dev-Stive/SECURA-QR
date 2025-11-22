@@ -22,21 +22,17 @@
             --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-       
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        
-
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--dark);
             color: #fff;
             min-height: 100vh;
-            min-height: 50vh;
             display: flex;
             align-items: center;
             padding: 10px;
@@ -46,12 +42,6 @@
                 radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.15) 0%, transparent 30%),
                 radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
             overflow-x: hidden;
-        }
-
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
 
         .register-container {
@@ -387,6 +377,77 @@
             color: rgba(255,255,255,0.5);
         }
 
+        /* Code Display Styles */
+        .code-display {
+            text-align: center;
+            padding: 30px;
+            background: rgba(217, 119, 6, 0.1);
+            border-radius: 20px;
+            border: 2px solid rgba(217, 119, 6, 0.3);
+            margin-top: 20px;
+        }
+
+        .code-display h3 {
+            color: var(--primary-light);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .code-display p {
+            opacity: 0.8;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .access-code {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--primary-light);
+            letter-spacing: 10px;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(217, 119, 6, 0.5);
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn-copy {
+            background: var(--gradient);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto;
+        }
+
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(217, 119, 6, 0.4);
+        }
+
+        .btn-copy.copied {
+            background: var(--success);
+        }
+
+        .warning-note {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .warning-note i {
+            color: var(--warning);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .register-container {
@@ -410,6 +471,11 @@
             .logo-icon {
                 font-size: 2.5rem;
             }
+
+            .access-code {
+                font-size: 3rem;
+                letter-spacing: 8px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -428,10 +494,12 @@
             .form-control {
                 padding: 14px 18px 14px 48px;
             }
+
+            .access-code {
+                font-size: 2.5rem;
+                letter-spacing: 6px;
+            }
         }
-
-
-
     </style>
 </head>
 <body>
@@ -570,11 +638,35 @@
             </button>
         </form>
 
+        <!-- Code Display (hidden by default) -->
+        <div id="codeDisplay" style="display: none;">
+            <div class="code-display">
+                <h3><i class="bi bi-key"></i> Code d'Accès Généré</h3>
+                <p>Ce code vous permettra d'accéder à l'application mobile. <strong>Il ne s'affichera qu'une seule fois !</strong></p>
+                
+                <div class="access-code" id="accessCodeDisplay"></div>
+                
+                <button class="btn-copy" id="copyCodeBtn">
+                    <i class="bi bi-clipboard"></i>
+                    Copier le Code
+                </button>
+            </div>
+
+            <div class="warning-note">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p><strong>Important :</strong> Conservez ce code en lieu sûr. Vous en aurez besoin pour configurer l'accès mobile.</p>
+            </div>
+
+            <div class="login-link">
+                <p>Vous pouvez maintenant <a href="/">vous connecter</a> avec vos identifiants</p>
+            </div>
+        </div>
+
         <!-- Messages -->
         <div id="alertContainer"></div>
 
         <!-- Login Link -->
-        <div class="login-link">
+        <div class="login-link" id="loginLink">
             <p>Vous avez déjà un compte ? <a href="/">Se connecter</a></p>
         </div>
     </div>
@@ -643,6 +735,9 @@
             const submitBtn = document.getElementById('submitBtn');
             const spinner = document.getElementById('spinner');
             const alertContainer = document.getElementById('alertContainer');
+            const registerForm = document.getElementById('registerForm');
+            const codeDisplay = document.getElementById('codeDisplay');
+            const loginLink = document.getElementById('loginLink');
 
             // Disable button
             submitBtn.disabled = true;
@@ -659,19 +754,27 @@
                 const json = await res.json();
 
                 if (json.success) {
-                    alertContainer.innerHTML = `
-                        <div class="alert alert-success">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <div>
-                                <strong>Succès !</strong><br>
-                                Compte administrateur créé avec succès. Redirection...
-                            </div>
-                        </div>
-                    `;
+                    // Hide form and show code
+                    registerForm.style.display = 'none';
+                    loginLink.style.display = 'none';
+                    
+                    // Display access code
+                    document.getElementById('accessCodeDisplay').textContent = json.accessCode;
+                    codeDisplay.style.display = 'block';
 
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 2000);
+                    // Setup copy functionality
+                    const copyBtn = document.getElementById('copyCodeBtn');
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(json.accessCode).then(() => {
+                            copyBtn.innerHTML = '<i class="bi bi-check-lg"></i> Code Copié !';
+                            copyBtn.classList.add('copied');
+                            setTimeout(() => {
+                                copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copier le Code';
+                                copyBtn.classList.remove('copied');
+                            }, 2000);
+                        });
+                    });
+
                 } else {
                     alertContainer.innerHTML = `
                         <div class="alert alert-error">
