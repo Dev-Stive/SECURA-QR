@@ -2330,6 +2330,103 @@ app.get('/api/scans/event/:eventId', (req, res) => {
     }
 });
 
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🗑️ DELETE SCAN - Réinitialiser un scan d'invité
+// ═══════════════════════════════════════════════════════════════
+
+app.delete('/api/scans/:scanId', jwtAuth, (req, res) => {
+    try {
+        const { scanId } = req.params;
+        const data = loadData();
+
+        const scanIndex = data.scans.findIndex(s => s.id === scanId);
+        if (scanIndex === -1) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Scan introuvable' 
+            });
+        }
+
+        const scan = data.scans[scanIndex];
+        
+        // Supprimer le scan
+        data.scans.splice(scanIndex, 1);
+
+        // Réinitialiser l'invité
+        const guestIndex = data.guests.findIndex(g => g.id === scan.guestId);
+        if (guestIndex !== -1) {
+            data.guests[guestIndex].scanned = false;
+            data.guests[guestIndex].scannedAt = null;
+        }
+
+        saveData(data);
+
+        log.crud('DELETE', 'scan', { id: scanId, guest: scan.guestName });
+        log.success('🗑️ Scan supprimé', `${scan.guestName} réinitialisé`);
+
+        res.json({
+            success: true,
+            message: 'Scan supprimé et invité réinitialisé',
+            data: {
+                deletedScan: scan,
+                resetGuest: guestIndex !== -1 ? data.guests[guestIndex] : null
+            }
+        });
+    } catch (err) {
+        log.error('DELETE /api/scans/:scanId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Suppression par guestId (alternative)
+app.delete('/api/scans/guest/:guestId', jwtAuth, (req, res) => {
+    try {
+        const { guestId } = req.params;
+        const data = loadData();
+
+        // Trouver tous les scans de cet invité
+        const scansToDelete = data.scans.filter(s => s.guestId === guestId);
+        
+        if (scansToDelete.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Aucun scan trouvé pour cet invité' 
+            });
+        }
+
+        // Supprimer tous les scans
+        data.scans = data.scans.filter(s => s.guestId !== guestId);
+
+        // Réinitialiser l'invité
+        const guestIndex = data.guests.findIndex(g => g.id === guestId);
+        if (guestIndex !== -1) {
+            data.guests[guestIndex].scanned = false;
+            data.guests[guestIndex].scannedAt = null;
+        }
+
+        saveData(data);
+
+        log.crud('DELETE BULK', 'scans', { guestId, count: scansToDelete.length });
+        log.success('🗑️ Scans supprimés', `${scansToDelete.length} scan(s)`);
+
+        res.json({
+            success: true,
+            message: `${scansToDelete.length} scan(s) supprimé(s)`,
+            data: {
+                deletedScans: scansToDelete,
+                resetGuest: guestIndex !== -1 ? data.guests[guestIndex] : null
+            }
+        });
+    } catch (err) {
+        log.error('DELETE /api/scans/guest/:guestId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
 // ═══════════════════════════════════════════════════════════════
 // 🔄 SYNCHRONISATION
 // ═══════════════════════════════════════════════════════════════
