@@ -35,6 +35,7 @@ class SecuraStorage {
 
     // 🌐 URL d'accès au frontend
     FRONTEND_URL = 'https://secura-qr.vercel.app';
+    BACKEND_URL = 'https://secura-qr.onrender.com/api';
     // Alternative locale pour développement
     // FRONTEND_URL = 'http://localhost:5500';
     

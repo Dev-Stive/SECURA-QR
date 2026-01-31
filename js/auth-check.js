@@ -233,7 +233,7 @@
     // Redirection basée sur le rôle
     async function redirectBasedOnRole(token) {
         try {
-            const response = await fetch(`${CONFIG.apiUrl}/auth/me`, {
+            const response = await fetch(`${storage.BACKEND_URL}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },
