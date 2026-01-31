@@ -1301,7 +1301,6 @@ function initImageLoadingOverlays() {
         .image-loading-container {
             position: relative;
             display: inline-block;
-            width: 100%;
         }
         
         .image-loading-overlay {
@@ -1338,27 +1337,22 @@ function initImageLoadingOverlays() {
     
     // Traiter toutes les images existantes et futures
     function setupImageLoadingOverlay(img) {
-        // Éviter de traiter deux fois la même image
         if (img.dataset.loadingOverlaySetup === 'true') return;
         
         img.dataset.loadingOverlaySetup = 'true';
         
-        // Envelopper l'image dans un conteneur
         const container = document.createElement('div');
         container.className = 'image-loading-container';
         
-        // Copier les classes et styles pertinents
         if (img.className) container.className += ' ' + img.className;
         if (img.style.width) container.style.width = img.style.width;
         if (img.style.height) container.style.height = img.style.height;
         if (img.style.maxWidth) container.style.maxWidth = img.style.maxWidth;
         if (img.style.maxHeight) container.style.maxHeight = img.style.maxHeight;
         
-        // Créer l'overlay
         const overlay = document.createElement('div');
         overlay.className = 'image-loading-overlay';
         
-        // Insérer dans le DOM
         img.parentNode.insertBefore(container, img);
         container.appendChild(img);
         container.appendChild(overlay);

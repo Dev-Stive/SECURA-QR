@@ -233,7 +233,12 @@
     // Redirection basée sur le rôle
     async function redirectBasedOnRole(token) {
         try {
-            const response = await fetch(`${storage.BACKEND_URL}/auth/me`, {
+            // Construire l'URL API sans dépendre de storage.js
+            const apiUrl = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000/api'
+                : 'https://secura-qr.onrender.com/api';
+            
+            const response = await fetch(`${apiUrl}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },
@@ -347,13 +352,15 @@
 
     // Accès accordé
     function grantAccess(type = 'public') {
+        // Signal to storage.js that auth verification is complete
+        document.body.classList.add('auth-verified');
         
         setTimeout(() => {
             const overlay = document.getElementById('secura-loading-overlay');
             if (overlay) {
                 overlay.classList.add('hidden');
             }
-        }, 800);
+        }, 400); // Réduit pour éviter les blocages
         
         setTimeout(() => {
             const hideStyle = document.getElementById('secura-initial-hide');
@@ -366,11 +373,14 @@
             document.querySelectorAll('.animate-fade-in').forEach(el => {
                 el.style.animationPlayState = 'running';
             });
-        }, 1200);
+        }, 600); // Réduit aussi ici
     }
 
     // Accès refusé
     function denyAccess(reason, redirectTo = '/index.html') {
+        // Signal to storage.js that auth verification is complete (denied)
+        document.body.classList.add('auth-denied');
+        
         console.warn(`❌ Accès refusé: ${reason}`);
         
         // Nettoyer le token invalide
@@ -398,7 +408,7 @@
     
     verifyAccess();
     
-    // Timeout de sécurité
+    // Timeout de sécurité - force l'accès après 3s si pas de réponse
     setTimeout(() => {
         const overlay = document.getElementById('secura-loading-overlay');
         if (overlay && !overlay.classList.contains('hidden')) {

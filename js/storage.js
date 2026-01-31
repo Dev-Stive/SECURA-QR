@@ -124,6 +124,29 @@ class SecuraStorage {
             this.stopAutoSync();
         });
 
+        // Wait for auth-check to complete (indicated by body class change)
+        const waitForAuthCheck = () => {
+            return new Promise((resolve) => {
+                if (document.body.classList.contains('auth-verified') || document.body.classList.contains('auth-denied')) {
+                    resolve();
+                } else {
+                    const checkInterval = setInterval(() => {
+                        if (document.body.classList.contains('auth-verified') || document.body.classList.contains('auth-denied')) {
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 50);
+                    // Fallback timeout after 2 seconds
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        resolve();
+                    }, 2000);
+                }
+            });
+        };
+
+        await waitForAuthCheck();
+
         const serverOnline = await this.checkServerStatus();
         if (serverOnline && this.SYNC_ENABLED) {
             
