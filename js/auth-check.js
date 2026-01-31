@@ -241,6 +241,12 @@
             });
             
             if (!response.ok) {
+                // 401 = Token expiré/invalide
+                if (response.status === 401) {
+                    console.error('❌ API 401 - Token expiré/invalide');
+                    denyAccess('Token invalid', '/login.html');
+                    return;
+                }
                 throw new Error(`HTTP ${response.status}`);
             }
             
@@ -368,16 +374,19 @@
         console.warn(`❌ Accès refusé: ${reason}`);
         
         // Nettoyer le token invalide
-        if (reason.includes('token')) {
-            localStorage.removeItem(CONFIG.sessionKeys.user);
-            console.log(redirectTo);
+        if (reason.includes('token') || reason.includes('Invalid')) {
+            localStorage.removeItem('secura_token');
+            localStorage.removeItem('secura_user');
+            redirectTo = '/login.html';
+            console.log('🧹 Token nettoyé');
         }
         
         setTimeout(() => {
             if (!window.location.pathname.includes(redirectTo)) {
+                console.log(`🚀 Redirection rapide vers ${redirectTo}`);
                 window.location.replace(redirectTo);
             }
-        }, 500);
+        }, 300); // Réduit de 500 à 300ms
     }
 
     // Initialisation

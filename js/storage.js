@@ -213,6 +213,12 @@ class SecuraStorage {
             });
 
             if (!res.ok) {
+                // 401 = Token invalide/expiré
+                if (res.status === 401) {
+                    console.error('❌ API 401 - Token invalide/expiré');
+                    this.handleInvalidToken();
+                    throw new Error(`HTTP 401: Token invalide`);
+                }
                 const errorText = await res.text();
                 throw new Error(errorText || `HTTP ${res.status}`);
             }
@@ -4347,22 +4353,29 @@ async checkTokenIfNeeded() {
         if (response.success && response.valid) {
             console.log('✅ Token valide');
             return true;
+        } else {
+            console.error('❌ Token invalide selon le serveur:', response.error);
+            this.handleInvalidToken();
+            return false;
         }
     } catch (err) {
         console.warn('⚠️ Vérif token échouée (réseau?), présumé valide:', err.message);
         return true;
     }
-    
-    return false;
 }
 
     handleInvalidToken() {
+        console.error('❌ Token invalide - Nettoyage et redirection');
         this.token = null;
         this.user = null;
-        //localStorage.removeItem('secura_token');
-       
-          // window.location.href = '/login.html';
+        localStorage.removeItem('secura_token');
+        localStorage.removeItem('secura_user');
+        localStorage.removeItem('secura_data');
+        this.stopAutoSync();
         
+        if (!window.location.pathname.includes('login.html')) {
+            window.location.replace('/login.html');
+        }
     }
 
 
