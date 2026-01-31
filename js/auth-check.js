@@ -261,7 +261,11 @@
                 const user = result.user;
                 const path = window.location.pathname.toLowerCase();
                 
-                // Mettre à jour le stockage local
+                // Mettre à jour le localStorage (utilisé par storage.js et auth.js)
+                localStorage.setItem('secura_user', JSON.stringify(user));
+                localStorage.setItem('secura_token', token);
+                
+                // Mettre à jour l'objet storage si disponible
                 if (window.storage) {
                     window.storage.user = user;
                     window.storage.token = token;

@@ -40,11 +40,16 @@ class SecuraStorage {
     // FRONTEND_URL = 'http://localhost:5500';
     
     constructor() {
-     // this.API_URL = 'http://localhost:3000/api';
-   this.API_URL = 'https://secura-qr.onrender.com/api';
+        // Construire l'URL API en fonction de l'environnement
+        if (window.location.hostname === 'localhost') {
+            this.API_URL = 'http://localhost:3000/api';
+        } else {
+            this.API_URL = 'https://secura-qr.onrender.com/api';
+        }
 
+        // Récupérer le token et l'utilisateur depuis localStorage (synchronisé avec auth.js)
         this.token = localStorage.getItem('secura_token') || null;
-        this.user = null;
+        this.user = JSON.parse(localStorage.getItem('secura_user') || 'null');
         this.isAuthenticated = !!this.token;
 
         this.SYNC_ENABLED = true;
@@ -106,6 +111,9 @@ class SecuraStorage {
     // ═══════════════════════════════════════════════════════════════
     async init() {
         console.log('🚀 SECURA Storage V5.0 - Initialisation...');
+
+        // Synchroniser d'abord avec localStorage en cas de changements d'auth
+        this.syncAuthFromStorage();
 
     this.loadFromLocalStorage();
     window.dispatchEvent(new CustomEvent('secura:storage-ready'));
@@ -178,6 +186,27 @@ class SecuraStorage {
         this._listeners = this._listeners || {};
         if (!this._listeners[eventName]) return;
         this._listeners[eventName] = this._listeners[eventName].filter(cb => cb !== callback);
+    }
+
+    // Synchroniser l'authentification depuis localStorage (appelé par auth.js ou auth-check.js)
+    syncAuthFromStorage() {
+        const storedToken = localStorage.getItem('secura_token');
+        const storedUser = localStorage.getItem('secura_user');
+        
+        if (storedToken) {
+            this.token = storedToken;
+            this.isAuthenticated = true;
+        }
+        
+        if (storedUser) {
+            try {
+                this.user = JSON.parse(storedUser);
+            } catch (err) {
+                console.error('Error parsing stored user:', err);
+            }
+        }
+        
+        console.log('🔄 Storage synced from auth', { token: !!this.token, user: !!this.user });
     }
 
     emit(eventName, payload) {
