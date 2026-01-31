@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informations - SECURA Event</title>
+    <link rel="icon" href="../assets/images/icon.png" type="image/x-icon">
+    
+    <!-- Ressources essentielles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dash.css">
+    <link rel="stylesheet" href="../css/toastify.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .info-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .info-section h4 {
+            color: #D97706;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        .info-value {
+            font-weight: 600;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay de vérification -->
+    <div id="secura-loading-overlay" style="display: none;"></div>
+    
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1><i class="fas fa-info-circle"></i> Informations Événement</h1>
+                    <a href="dashboard.html" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations Événement -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-section">
+                    <h4>
+                        <i class="fas fa-calendar"></i> Détails Événement
+                    </h4>
+                    <div class="info-item">
+                        <span class="info-label">Nom</span>
+                        <span class="info-value" id="eventName">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Date</span>
+                        <span class="info-value" id="eventDate">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Heure</span>
+                        <span class="info-value" id="eventTime">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Lieu</span>
+                        <span class="info-value" id="eventLocation">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Capacité</span>
+                        <span class="info-value" id="eventCapacity">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="info-section">
+                    <h4>
+                        <i class="fas fa-chart-bar"></i> Statistiques
+                    </h4>
+                    <div class="info-item">
+                        <span class="info-label">Total invités</span>
+                        <span class="info-value" id="totalGuests">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Confirmés</span>
+                        <span class="info-value text-success" id="confirmedGuests">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Arrivés</span>
+                        <span class="info-value text-info" id="arrivedGuests">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Taux de présence</span>
+                        <span class="info-value text-warning" id="attendanceRate">0%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Tables</span>
+                        <span class="info-value" id="totalTables">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="row">
+            <div class="col-12">
+                <div class="info-section">
+                    <h4>
+                        <i class="fas fa-file-alt"></i> Description
+                    </h4>
+                    <p id="eventDescription" class="text-muted mb-0">Pas de description</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/storage.js"></script>
+    <script src="../js/toastify.js"></script>
+    <script src="../js/auth-check.js"></script>
+    
+    <script>
+        async function initInfo() {
+            try {
+                const sessionData = localStorage.getItem('secura_event_session');
+                if (!sessionData) {
+                    window.location.href = '/access.html';
+                    return;
+                }
+
+                const currentEvent = JSON.parse(sessionData);
+                const storage = window.storage;
+                
+                // Afficher les informations
+                document.getElementById('eventName').textContent = currentEvent.name || '-';
+                document.getElementById('eventDate').textContent = currentEvent.date || '-';
+                document.getElementById('eventTime').textContent = currentEvent.time || '-';
+                document.getElementById('eventLocation').textContent = currentEvent.location || '-';
+                document.getElementById('eventCapacity').textContent = currentEvent.capacity || '-';
+                document.getElementById('eventDescription').textContent = currentEvent.description || 'Pas de description';
+
+                if (storage) {
+                    const guests = storage.getGuestsByEventId(currentEvent.id) || [];
+                    const tables = storage.data.tables?.filter(t => t.eventId === currentEvent.id) || [];
+                    const arrivedCount = guests.filter(g => g.scanned).length;
+                    const attendanceRate = guests.length > 0 ? Math.round((arrivedCount / guests.length) * 100) : 0;
+
+                    document.getElementById('totalGuests').textContent = guests.length;
+                    document.getElementById('confirmedGuests').textContent = 
+                        guests.filter(g => g.status === 'confirmed').length;
+                    document.getElementById('arrivedGuests').textContent = arrivedCount;
+                    document.getElementById('attendanceRate').textContent = attendanceRate + '%';
+                    document.getElementById('totalTables').textContent = tables.length;
+                }
+            } catch (err) {
+                console.error('Erreur initialisation info:', err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initInfo);
+    </script>
+</body>
+</html>

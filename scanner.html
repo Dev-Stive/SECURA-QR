@@ -9,7 +9,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/loading.css">
     <link rel="stylesheet" href="css/dash.css">
+    <link rel="stylesheet" href="css/toastify.css">
     
 </head>
 <body class="light-theme">
@@ -162,7 +164,7 @@
                 <div class="results-panel">
                     <h3><i class="fas fa-clipboard-check"></i> Résultat</h3>
                     <div class="scan-result-placeholder" id="scanPlaceholder">
-                        <i class="fas fa-qrcode"></i> <p>En attente...</p>
+                        <i class="bi bi-qr-code"></i> <p>En attente...</p>
                     </div>
                     <div class="scan-result-card" id="scanResult" style="display: none;">
                         <div class="result-header">
@@ -231,16 +233,104 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-shield-check" style="font-size:1.5rem;"></i>
-                    <span style="font-weight:600;">SECURA</span>
+            <div class="footer-top">
+                <div class="row">
+                    <div class="col-lg-4 mb-5 mb-lg-0">
+                        <div class="footer-brand">
+                            <div class="footer-logo">
+                                <img src="assets/images/icon.png" alt="SECURA Logo">
+                            </div>
+                            <div class="footer-title">
+                                <h3>SECURA</h3>
+                                <p>Plateforme d'accès événementiel</p>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            SECURA révolutionne l'accès aux événements avec des solutions innovantes, 
+                            sécurisées et intuitives pour organisateurs et participants.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Navigation</h4>
+                        <ul class="footer-links">
+                            <li><a href="index.html">Accueil</a></li>
+                            <li><a href="access.html">Accès événement</a></li>
+                            <li><a href="#features">Fonctionnalités</a></li>
+                            <li><a href="#how-it-works">Comment ça marche</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Compte</h4>
+                        <ul class="footer-links">
+                            <li><a href="login.html">Connexion</a></li>
+                            <li><a href="register.html">Inscription</a></li>
+                            <li><a href="forgot-password.html">Mot de passe oublié</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4">
+                        <h4>Newsletter</h4>
+                        <p class="mb-4">Inscrivez-vous pour recevoir nos actualités et offres exclusives.</p>
+                        <form class="newsletter-form" id="newsletterForm">
+                            <div class="newsletter-input-group">
+                                <input type="email" class="newsletter-input" placeholder="Votre email" required>
+                                <button type="submit" class="newsletter-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                   
+                                </button>
+                            </div>
+                        </form>
+                       
+                        <div class="footer-controls-inline">
+                            <!-- Theme Switch Button -->
+                            <div class="theme-switch-footer">
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="themeSwitchFooter" aria-label="Basculer le thème">
+                                    <span class="theme-switch-slider">
+                                        <i class="fas fa-moon"></i>
+                                        <i class="fas fa-sun"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Language Selector -->
+                            <div class="language-selector"></div>
+                        </div>
+                    </div>
                 </div>
-                <p class="mb-0">© 2025 SECURA. Tous droits réservés.</p>
-                <div class="d-flex gap-3">
-                    <a href="#" class="footer-link">Confidentialité</a>
-                    <a href="#" class="footer-link">Conditions</a>
-                    <a href="#" class="footer-link">Support</a>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright">© 2025 SECURA. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-legal">
+                            <a href="#">Mentions légales</a>
+                            <a href="#">Confidentialité</a>
+                            <a href="#">CGU</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -250,8 +340,11 @@
 
 
 
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="js/toastify.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="preload" href="js/auth-check.js" as="script">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
@@ -269,4 +362,24 @@
     <script src="js/storage.js"></script>
     <script src="js/scanner.js"></script>
     <script src="js/main.js"></script>
+
+    <!-- Active Navigation Link Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentPath = window.location.pathname.toLowerCase();
+            const links = document.querySelectorAll('.sidebar-link, .nav-link');
+            links.forEach(link => {
+                const href = link.getAttribute('href')?.toLowerCase() || '';
+                const linkPath = href.replace('index.html', '').replace('.html', '');
+                const currentPagePath = currentPath.replace('index.html', '').replace('.html', '');
+                
+                if ((currentPagePath === '/' && href.includes('index')) ||
+                    (currentPagePath !== '/' && currentPagePath.includes(linkPath))) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>

@@ -3,288 +3,2880 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SECURA - Mes Événements</title>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>SECURA | Mes Événements</title>
+    <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
+
+    <!-- 🚀 Autres ressources essentielles -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/dash.css">
     
+    <!-- Styles locaux -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/dash.css">
+    <link rel="stylesheet" href="css/toastify.css">
+    <link rel="stylesheet" href="css/index.css">
+
+    <link rel="preload" href="js/auth-check.js" as="script">
+    <script src="js/auth-check.js"></script>
+    <link rel="preload" href="js/auth-check.js" as="script">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .main-content {
+            padding-top: 120px;
+            padding-bottom:120px;
+            min-height: calc(100vh - 300px);
+        }
+        
+        .actions-bar {
+            background: var(--secura-white);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 20px;
+            position: relative;
+            display: none;
+        }
+
+        .dark-theme .actions-bar {
+            background: var(--secura-light-gray);
+        }
+
+        .actions-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .actions-left {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .actions-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* Section filtres déroulante - Version compacte */
+    .filters-dropdown-section {
+        display: none;
+        background: var(--secura-light-gray);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        margin-top: 15px;
+        animation: slideDown 0.3s ease;
+    }
+
+    .dark-theme .filters-dropdown-section {
+        background: var(--secura-brown);
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .filter-section {
+        background: var(--secura-white);
+        border-radius: var(--radius-md);
+        padding: 15px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .dark-theme .filter-section {
+        background: var(--secura-light-gray);
+    }
+
+    .filter-section-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: var(--secura-red);
+        font-size: 0.9rem;
+    }
+
+    .filter-section-header i {
+        font-size: 0.8rem;
+    }
+
+    /* Groupes de chips */
+    .filter-chips-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .filter-chips-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .filter-chips-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Chips de filtre - Version petite */
+    .filter-chip-small,
+    .filter-chip-type,
+    .filter-chip-status {
+        padding: 6px 12px;
+        background: var(--secura-light-gray);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        flex: 1;
+        min-width: fit-content;
+    }
+
+    .dark-theme .filter-chip-small,
+    .dark-theme .filter-chip-type,
+    .dark-theme .filter-chip-status {
+        background: var(--secura-brown);
+    }
+
+    .filter-chip-small:hover,
+    .filter-chip-type:hover,
+    .filter-chip-status:hover {
+        background: var(--secura-red-light);
+        transform: translateY(-1px);
+    }
+
+    .filter-chip-small.active,
+    .filter-chip-type.active,
+    .filter-chip-status.active {
+        background: var(--secura-red);
+        color: white;
+        border-color: var(--secura-red-dark);
+    }
+
+    .filter-chip-small i,
+    .filter-chip-type i,
+    .filter-chip-status i {
+        font-size: 0.75rem;
+    }
+
+    /* Dates */
+    .filter-dates-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .date-input-group {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--secura-light-gray);
+        padding: 6px 10px;
+        border-radius: var(--radius-md);
+    }
+
+    .dark-theme .date-input-group {
+        background: var(--secura-brown);
+    }
+
+    .date-label {
+        font-size: 0.8rem;
+        color: var(--secura-text-gray);
+        white-space: nowrap;
+    }
+
+    .date-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        color: var(--secura-black);
+        font-size: 0.8rem;
+        padding: 2px;
+        min-width: 0;
+    }
+
+    .dark-theme .date-input {
+        color: var(--secura-white);
+    }
+
+    .date-input:focus {
+        outline: none;
+    }
+
+    /* Slider capacité */
+    .capacity-slider-container {
+        padding: 10px 0;
+    }
+
+    .capacity-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.75rem;
+        color: var(--secura-text-gray);
+    }
+
+    .capacity-slider {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--secura-light-gray);
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .dark-theme .capacity-slider {
+        background: var(--secura-brown);
+    }
+
+    .capacity-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--secura-red);
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .capacity-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--secura-red);
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .capacity-hint {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 0.75rem;
+        color: var(--secura-text-gray);
+    }
+
+    .capacity-hint i {
+        font-size: 0.7rem;
+    }
+
+    /* Actions des filtres */
+    .filters-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 15px;
+        border-top: 1px solid var(--secura-medium-gray);
+    }
+
+    .filters-actions .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-chips-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .filter-dates-row {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .filter-chips-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filters-actions {
+            flex-direction: column;
+        }
+
+        .filters-actions .btn {
+            width: 100%;
+        }
+    }
+
+     /* Badges filtres actifs */
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--secura-light-gray);
+        }
+
+        .filter-badge {
+            background: var(--secura-red);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .filter-badge .remove-filter {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .filter-badge .remove-filter:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Filtres Rapides */
+        .quick-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: var(--secura-light-gray);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .dark-theme .filter-chip {
+            background: var(--secura-brown);
+        }
+
+        .btn-filter{
+            padding: 8px 16px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            background: var(--secura-red);
+            color: white;
+
+        }
+
+        .filter-chip:hover, .btn-filter:hover {
+            background: var(--secura-red);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .filter-chip.active {
+            background: var(--secura-red);
+            color: white;
+            border: 1px solid white;
+        }
+
+        /* Barre de recherche */
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                width: 100%;
+            }
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secura-text-gray);
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 2px solid var(--secura-light-gray);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            background: var(--secura-white);
+            transition: all 0.3s ease;
+        }
+
+        .dark-theme .search-container input {
+            background: var(--secura-light-gray);
+            border-color: var(--secura-brown);
+            color: var(--secura-white);
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--secura-red);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+
+        /* Statistiques avancées */
+        .stats-advanced {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .stat-card-pro {
+            background: var(--secura-white);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            transition: all 0.3s ease;
+            border-top: 4px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-theme .stat-card-pro {
+            background: var(--secura-light-gray);
+        }
+
+        .stat-card-pro:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card-pro::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+
+        .stat-icon-pro {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-content-pro {
+            margin-bottom: 15px;
+        }
+
+        .stat-number-pro {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label-pro {
+            color: var(--secura-text-gray);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .stat-trend.down {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+
+        /* Graphiques */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .chart-card {
+            background: var(--secura-white);
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .dark-theme .chart-card {
+            background: var(--secura-light-gray);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .chart-header h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--secura-red);
+            font-size: 1.2rem;
+        }
+
+        .chart-canvas {
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Performance grid */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .performance-card {
+            background: var(--secura-white);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .dark-theme .performance-card {
+            background: var(--secura-light-gray);
+        }
+
+        .performance-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .performance-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .performance-content {
+            flex: 1;
+        }
+
+        .performance-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--secura-black);
+        }
+
+        .dark-theme .performance-title {
+            color: var(--secura-white);
+        }
+
+        .performance-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--secura-red);
+        }
+
+        /* Grille d'événements */
+        .events-grid-container {
+            background: var(--secura-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .dark-theme .events-grid-container {
+            background: var(--secura-light-gray);
+        }
+
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--secura-light-gray);
+        }
+
+        .dark-theme .grid-header {
+            border-bottom-color: var(--secura-brown);
+        }
+
+        .grid-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            color: var(--secura-black);
+        }
+
+        .dark-theme .grid-header h3 {
+            color: var(--secura-white);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+            background: var(--secura-light-gray);
+            padding: 5px;
+            border-radius: var(--radius-md);
+        }
+
+        .dark-theme .view-toggle {
+            background: var(--secura-brown);
+        }
+
+        .view-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-lg);
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--secura-text-gray);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .view-btn:hover ,.create:hover  {
+            background: var(--secura-red) !important;
+            color: white;
+        }
+
+        .view-btn.active {
+            background: var(--secura-red);
+            color: white;
+        }
+
+        .view-btn.create {
+            background:  var(--secura-brown);
+            color: white;
+        }
+
+        .dark-theme .view-btn.create{
+            background: var(--secura-light-gray);
+        }
+
+
+      
+
+        /* Mode Table */
+        .events-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .events-table th {
+            background: var(--secura-light-gray);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--secura-black);
+            border-bottom: 2px solid var(--secura-medium-gray);
+        }
+
+        .dark-theme .events-table th {
+            background: var(--secura-brown);
+            color: var(--secura-white);
+        }
+
+        .events-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--secura-light-gray);
+        }
+
+        .dark-theme .events-table td {
+            border-bottom-color: var(--secura-brown);
+        }
+
+        .events-table tbody tr:hover {
+            background: rgba(217, 119, 6, 0.05);
+        }
+
+        /* État vide */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--secura-text-gray);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--secura-black);
+        }
+
+        .dark-theme .empty-state h3 {
+            color: var(--secura-white);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--secura-light-gray);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dark-theme .page-btn {
+            background: var(--secura-brown);
+        }
+
+        .page-btn:hover {
+            background: var(--secura-red);
+            color: white;
+        }
+
+        .page-btn.active {
+            background: var(--secura-red);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .events-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 100px;
+            }
+            
+            .actions-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .actions-left, .actions-right {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card-pro {
+                padding: 20px;
+            }
+            
+            .stat-number-pro {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .view-toggle {
+                justify-content: center;
+            }
+            
+            .view-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .stat-icon-pro {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+        }
+
+       
+
+        .animate-slide-in {
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
 </head>
-<body class="light-theme">
-    <div id="particles-js"></div>
-
-
- <!-- Header Premium -->
-<header class="header">
-    <div class="header-content">
-        <div class="logo-section">
-            <div class="logo-icon">
-                <i class="bi bi-shield-check"></i>
+    <body class="light-theme">
+        <!-- Particles Background -->
+        <div id="particles-js"></div>
+        
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">
+                        <img src="assets/images/icon.png" alt="logo secura">
+                    </div>
+                    <div class="sidebar-logo-text">
+                        <h1>SECURA</h1>
+                        <p>Gestion Sécurisée</p>
+                    </div>
+                </div>
+                <button class="sidebar-close" id="sidebarClose" aria-label="Fermer le menu">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="logo-text">
-                <h1>SECURA</h1>
-                <p>Tableau de Bord • Gestion Sécurisée</p>
+            <!-- Profile Section -->
+            <div class="sidebar-profile">
+                <div class="profile-avatar large">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-details">
+                    <strong id="sidebarProfileName">Chargement...</strong>
+                    <small id="sidebarProfileEmail">email@exemple.com</small>
+                    <span class="badge-role" id="sidebarProfileRole">Utilisateur</span>
+                </div>
             </div>
-        </div>
-
-        <nav class="nav-menu" id="navMenu">
-            <a href="index.html" class="nav-link ">Accueil</a>
-            <a href="events.html" class="nav-link active">Événements</a>
-            <a href="guests.html" class="nav-link">Invités</a>
-            <a href="qr-generator.html" class="nav-link">Générateur QR</a>
-            <a href="scanner.html" class="nav-link">Scanner</a>
+            <!-- Navigation Links -->
+            <div id="navMenu" class="sidebar-menu">
+                <a href="index.html" class="sidebar-link">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil</span>
+                </a>
+                <a href="events.html" class="sidebar-link">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Événements</span>
+                </a>
+                <a href="guests.html" class="sidebar-link">
+                    <i class="fas fa-users"></i>
+                    <span>Invités</span>
+                </a>
+            <a href="tables.html" class="sidebar-link">
+                <i class="fas fa-chair"></i>
+                <span>Tables</span>
+            </a>
+                <a href="qr-generator.html" class="sidebar-link">
+                    <i class="bi bi-qr-code"></i>
+                    <span>Générateur QR</span>
+                </a>
+                <a href="ticket-generator.html" class="sidebar-link">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Billets</span>
+                </a>
+                <a href="scanner.html" class="sidebar-link">
+                    <i class="fas fa-camera"></i>
+                    <span>Scanner</span>
+                </a>
+                <hr class="sidebar-divider">
+                <a href="access.html" class="sidebar-link" id="accessEventLink">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Accès Événement</span>
+                </a>
+                <a href="profile.html" class="sidebar-link">
+                    <i class="fas fa-user"></i>
+                    <span>Mon Profil</span>
+                </a>
+                <a href="settings.html" class="sidebar-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Paramètres</span>
+                </a>
+                <button class="sidebar-link text-danger" id="sidebarLogout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </button>
+            </div>
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                    <span>Mode Sombre</span>
+                </button>
+                <button class="fullscreen-toggle" id="fullscreenToggle">
+                    <i class="fas fa-expand"></i>
+                    <span>Plein écran</span>
+                </button>
+                
+            </div>
         </nav>
-
-        <div class="header-actions">
-            <button class="theme-toggle" id="themeToggle" aria-label="Changer le thème">
-                <i class="fas fa-moon"></i>
-            </button>
-            <button class="fullscreen-toggle" id="fullscreenToggle" aria-label="Plein écran">
-                <i class="fas fa-expand"></i>
-            </button>
-            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-
-        <!-- BOUTON PROFIL DANS LE HEADER -->
-        <button class="profile-toggle header-profile-btn" id="profileToggle" aria-haspopup="true" aria-expanded="false">
-            <div class="profile-avatar">
-                <i class="bi bi-person-circle"></i>
-            </div>
-            <div class="profile-info">
-                <span class="profile-name" id="profileName">Chargement...</span>
-                <span class="profile-role" id="profileRole">Utilisateur</span>
-            </div>
-            <i class="bi bi-chevron-down profile-arrow"></i>
+        
+        <!-- Overlay pour fermer la sidebar -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
+        <!-- Bouton flottant pour ouvrir la sidebar -->
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
+            <i class="fas fa-bars"></i>
         </button>
-    </div>
-</header>
-
-<!-- MENU PROFIL FLOTTANT (HORS HEADER) -->
-<div class="floating-profile-menu" id="floatingProfileMenu">
-    <div class="profile-dropdown show" id="profileDropdown" role="menu">
-        <div class="profile-header">
-            <div class="profile-avatar large">
-                <i class="bi bi-person-circle"></i>
+        
+        <!-- Top Bar -->
+        <header class="header">
+            <div class="header-content">
+                <a href="index.html" class="logo-section" style="text-decoration: none; display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                    <div class="logo-icon">
+                        <img src="assets/images/icon.png" alt="logo secura">
+                    </div>
+                    <div class="logo-text">
+                        <h1>SECURA</h1>
+                        <p>Tableau de Bord </p>
+                    </div>
+                </a>
+                
+                
+                <!-- Profile Button -->
+                <button class="profile-toggle header-profile-btn" id="profileToggle" aria-haspopup="true" aria-expanded="false">
+                    <div class="profile-avatar">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="profile-info">
+                        <span class="profile-name" id="profileName">Chargement...</span>
+                        <span class="profile-role" id="profileRole">Utilisateur</span>
+                    </div>
+                    <i class="bi bi-chevron-down profile-arrow"></i>
+                </button>
             </div>
-            <div class="profile-details">
-                <strong id="dropdownName">Chargement...</strong>
-                <small id="dropdownEmail">email@exemple.com</small>
-                <span class="badge-role" id="dropdownRole">Utilisateur</span>
+        </header>
+        
+        <!-- Profile Menu -->
+        <div class="floating-profile-menu" id="floatingProfileMenu">
+            <div class="profile-dropdown show" id="profileDropdown" role="menu">
+                <div class="profile-header">
+                    <div class="profile-avatar large">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="profile-details">
+                        <strong id="dropdownName">Chargement...</strong>
+                        <small id="dropdownEmail">email@exemple.com</small>
+                        <span class="badge-role" id="dropdownRole">Utilisateur</span>
+                    </div>
+                </div>
+                <div class="dropdown-actions">
+                    <a href="profile.html" class="dropdown-item" role="menuitem">
+                        <i class="bi bi-person"></i> Mon Profil
+                    </a>
+                    <a href="settings.html" class="dropdown-item" role="menuitem">
+                        <i class="bi bi-gear"></i> Paramètres
+                    </a>
+                    <hr class="dropdown-divider">
+                    <button class="dropdown-item text-danger" id="logout-btn" role="menuitem">
+                        <i class="bi bi-box-arrow-right"></i> Déconnexion
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="dropdown-actions">
-            <a href="profile.html" class="dropdown-item" role="menuitem">
-                <i class="bi bi-person"></i> Mon Profil
-            </a>
-            <a href="settings.html" class="dropdown-item" role="menuitem">
-                <i class="bi bi-gear"></i> Paramètres
-            </a>
-            <hr class="dropdown-divider">
-            <button class="dropdown-item text-danger" id="logout-btn" role="menuitem">
-                <i class="bi bi-box-arrow-right"></i> Déconnexion
-            </button>
-        </div>
-    </div>
-</div>
-
-    <!-- Hero Section -->
-  
-
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <div class="container">
             <div class="page-header animate-fade-in">
                 <div>
                     <h1><i class="fas fa-calendar-alt"></i> Mes Événements</h1>
                     <p>Gérez vos mariages, anniversaires et autres événements</p>
                 </div>
-                <button class="btn btn-primary" id="createEventBtn">
-                    <i class="fas fa-plus"></i>
-                    Créer un Événement
+                 <button class="btn btn-filter" id="toggleFiltersBar">
+                    <i class="fas fa-sliders-h"></i> Filtres
                 </button>
             </div>
 
-            <!-- Search and Filter -->
-            <div class="search-filter-bar animate-slide-up">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchEvents" placeholder="Rechercher un événement...">
+            <!-- Barre d'actions -->
+            <div id="actions-bar" class="actions-bar animate-slide-in">
+                <div class="actions-top">
+                    <div class="actions-left">
+                        <button class="btn btn-filter" id="toggleFiltersBtn">
+                            <i class="fas fa-sliders-h"></i> Filtres avancés
+                            <span class="badge bg-danger ms-2" id="activeFiltersCount" style="display: none;">0</span>
+                        </button>
+                        <div class="quick-filters">
+                            <div class="filter-chip active" data-filter="all">
+                                <i class="fas fa-layer-group"></i> Tous
+                            </div>
+                            <div class="filter-chip" data-filter="active">
+                                <i class="fas fa-play-circle"></i> Actifs
+                            </div>
+                            <div class="filter-chip" data-filter="upcoming">
+                                <i class="fas fa-clock"></i> À venir
+                            </div>
+                            <div class="filter-chip" data-filter="past">
+                                <i class="fas fa-history"></i> Passés
+                            </div>
+                        </div>
+                    </div>
+                    <div class="actions-right">
+                        <div class="search-container">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchEvents" placeholder="Rechercher un événement...">
+                        </div>
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <select id="filterType" class="filter-select">
-                        <option value="all">Tous les types</option>
-                        <option value="marriage">Mariage</option>
-                        <option value="anniversaire">Anniversaire</option>
-                        <option value="conference">Conférence</option>
-                        <option value="autre">Autre</option>
-                    </select>
-                    <select id="sortEvents" class="filter-select">
-                        <option value="date-desc">Date (récent)</option>
-                        <option value="date-asc">Date (ancien)</option>
-                        <option value="name-asc">Nom (A-Z)</option>
-                        <option value="name-desc">Nom (Z-A)</option>
-                    </select>
+
+               <!-- Section filtres déroulante -->
+                <div class="filters-dropdown-section" id="filtersDropdown">
+                    <div class="filters-grid">
+                        <!-- Période -->
+                        <div class="filter-section">
+                            <div class="filter-section-header">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Période</span>
+                            </div>
+                            <div class="filter-chips-group">
+                                <div class="filter-chip-small" data-period="today">
+                                    <i class="fas fa-sun"></i>
+                                    <span>Aujourd'hui</span>
+                                </div>
+                                <div class="filter-chip-small" data-period="week">
+                                    <i class="fas fa-calendar-week"></i>
+                                    <span>Cette semaine</span>
+                                </div>
+                                <div class="filter-chip-small" data-period="month">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>Ce mois</span>
+                                </div>
+                                <div class="filter-chip-small" data-period="year">
+                                    <i class="fas fa-calendar-star"></i>
+                                    <span>Cette année</span>
+                                </div>
+                            </div>
+                            <div class="filter-dates-row">
+                                <div class="date-input-group">
+                                    <span class="date-label">Du</span>
+                                    <input type="date" id="filterStartDate" class="date-input">
+                                </div>
+                                
+                            </div>
+                            <div class="filter-dates-row">
+                                
+                                <div class="date-input-group">
+                                    <span class="date-label">Au</span>
+                                    <input type="date" id="filterEndDate" class="date-input">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Type d'événement -->
+                        <div class="filter-section">
+                            <div class="filter-section-header">
+                                <i class="fas fa-tags"></i>
+                                <span>Type</span>
+                            </div>
+                            <div class="filter-chips-grid">
+                                <div class="filter-chip-type" data-type="marriage">
+                                    <i class="fas fa-ring"></i>
+                                    <span>Mariage</span>
+                                </div>
+                                <div class="filter-chip-type" data-type="anniversaire">
+                                    <i class="fas fa-birthday-cake"></i>
+                                    <span>Anniversaire</span>
+                                </div>
+                                <div class="filter-chip-type" data-type="conference">
+                                    <i class="fas fa-microphone"></i>
+                                    <span>Conférence</span>
+                                </div>
+                                <div class="filter-chip-type" data-type="corporate">
+                                    <i class="fas fa-building"></i>
+                                    <span>Corporate</span>
+                                </div>
+                                <div class="filter-chip-type" data-type="concert">
+                                    <i class="fas fa-music"></i>
+                                    <span>Concert</span>
+                                </div>
+                                <div class="filter-chip-type" data-type="gala">
+                                    <i class="fas fa-glass-cheers"></i>
+                                    <span>Gala</span>
+                                </div>
+                                <div class="filter-chip-type" data-type="football">
+                                    <i class="fas fa-futbol"></i>
+                                    <span>Football</span>
+                                </div>
+                                <div class="filter-chip-type" data-type="autre">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                    <span>Autre</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statut -->
+                        <div class="filter-section">
+                            <div class="filter-section-header">
+                                <i class="fas fa-power-off"></i>
+                                <span>Statut</span>
+                            </div>
+                            <div class="filter-chips-row">
+                                <div class="filter-chip-status" data-status="active">
+                                    <i class="fas fa-play-circle"></i>
+                                    <span>Actifs</span>
+                                </div>
+                                <div class="filter-chip-status" data-status="draft">
+                                    <i class="bi bi-pencil-square"></i>
+                                    <span>Brouillons</span>
+                                </div>
+                                <div class="filter-chip-status" data-status="archived">
+                                    <i class="fas fa-archive"></i>
+                                    <span>Archivés</span>
+                                </div>
+                                <div class="filter-chip-status" data-status="cancelled">
+                                    <i class="fas fa-ban"></i>
+                                    <span>Annulés</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Capacité -->
+                        <div class="filter-section">
+                            <div class="filter-section-header">
+                                <i class="fas fa-users"></i>
+                                <span>Remplissage</span>
+                            </div>
+                            <div class="capacity-slider-container">
+                                <div class="capacity-labels">
+                                    <span>0%</span>
+                                    <span id="capacityValue">50%</span>
+                                    <span>100%</span>
+                                </div>
+                                <input type="range" id="filterCapacity" min="0" max="100" value="50" class="capacity-slider">
+                                <div class="capacity-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Événements remplis à <span id="capacityValueDisplay">50%</span> minimum</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filters-actions">
+                        <button class="btn btn-outline-secondary" id="resetFilters">
+                            <i class="fas fa-undo"></i> Réinitialiser
+                        </button>
+                        <button class="btn btn-primary" id="applyFilters">
+                            <i class="fas fa-check"></i> Appliquer
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Badges filtres actifs -->
+                <div class="active-filters" id="activeFilters"></div>
             </div>
 
-            <!-- Events Grid -->
-             <div id="eventsLoader" class="events-loader">
-                <div class="spinner"></div>
-                <span>Chargement des événements...</span>
+            <!-- Statistiques avancées (cachée par défaut) -->
+            <div class="stats-advanced" id="statsAdvanced" style="display: none;">
+                <!-- Les cartes de stats seront injectées ici -->
             </div>
 
-            
-             <div class="row g-4 justify-content-center" id="eventsGrid">
-                
-                
-                
-                
-                    <div class="col-12 d-flex justify-content-center">
-                        <div class="empty-state text-center">
+            <!-- Conteneur grille/table -->
+            <div class="events-grid-container">
+                <div class="grid-header">
+                    <h3 id="gridTitle"><i class="fas fa-list-ul"></i> Liste des événements</h3>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th-large"></i>
+                            <span>Grille</span>
+                        </button>
+                        <button class="view-btn" data-view="table">
+                            <i class="fas fa-table"></i>
+                            <span>Tableau</span>
+                        </button>
+                        <button class="view-btn" data-view="stats">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Statistiques</span>
+                        </button>
+                         <button class="view-btn create" id="createEventBtn">
+                            <i class="fas fa-plus"></i>
+                            Créer
+                        </button>
+                    </div>
+                </div>
 
-                    <i class="fas fa-calendar-plus"></i>
-                    <p>Aucun événement créé</p>
-                    <button class="btn btn-primary" onclick="document.getElementById('createEventBtn').click()">
-                        Créer votre premier événement
+                <!-- Mode Grille -->
+                <div id="gridView" class="events-grid">
+                    <!-- Les cartes seront injectées ici -->
+                </div>
+
+                <!-- Mode Table -->
+                <div id="tableView" class="events-table-container" style="display: none;">
+                    <table class="events-table">
+                        <thead>
+                            <tr>
+                                <th>Événement</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Invitations</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Les lignes seront injectées ici -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="statsView" style="display: none;">
+                    <div class="performance-grid" id="performanceGrid">
+                    </div>
+
+                    <!-- Graphiques -->
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fas fa-chart-pie"></i> Répartition par Type</h4>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="downloadChart('typesChart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                            <canvas id="typesChart" class="chart-canvas"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fas fa-chart-line"></i> Évolution Mensuelle</h4>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="downloadChart('monthlyChart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                            <canvas id="monthlyChart" class="chart-canvas"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fas fa-calendar-check"></i> Taux de Présence</h4>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="downloadChart('attendanceChart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                            <canvas id="attendanceChart" class="chart-canvas"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fas fa-star"></i> Top 5 Événements</h4>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="downloadChart('topEventsChart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                            <canvas id="topEventsChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- État vide -->
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>Aucun événement trouvé</h3>
+                    <p>Commencez par créer votre premier événement</p>
+                    <button class="btn btn-primary" id="createFirstEvent">
+                         Créer un événement
                     </button>
                 </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination" style="display: none;">
+                    <!-- La pagination sera injectée ici -->
                 </div>
-
-
-               
             </div>
         </div>
     </main>
 
-    <!-- Create/Edit Event Modal -->
-    <div class="modal" id="eventModal">
-        <div class="modal-overlay" onclick="closeEventModal()"></div>
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h2 id="eventModalTitle">
-                    <i class="fas fa-calendar-plus"></i>
-                    Créer un Événement
-                </h2>
-                <button class="modal-close" onclick="closeEventModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="eventForm" class="modal-body">
-                <input type="hidden" id="eventId">
-                
-                <div class="form-group">
-                    <label for="eventName">Nom de l'événement *</label>
-                    <input type="text" id="eventName" class="form-input" placeholder="Ex: Mariage de Marie et Jean" required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="eventType">Type d'événement *</label>
-                        <select id="eventType" class="form-input" required>
-                            <option value="">Sélectionner...</option>
-                            <option value="marriage">Mariage</option>
-                            <option value="anniversaire">Anniversaire</option>
-                            <option value="conference">Conférence</option>
-                            <option value="autre">Autre</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="eventDate">Date de l'événement *</label>
-                        <input type="date" id="eventDate" class="form-input" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="eventTime">Heure</label>
-                        <input type="time" id="eventTime" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label for="eventCapacity">Capacité</label>
-                        <input type="number" id="eventCapacity" class="form-input" placeholder="Ex: 150" min="1">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="eventLocation">Lieu</label>
-                    <input type="text" id="eventLocation" class="form-input" placeholder="Ex: Salle des Fêtes, Paris">
-                </div>
-
-                <div class="form-group">
-                    <label for="eventDescription">Description</label>
-                    <textarea id="eventDescription" class="form-input" rows="3" placeholder="Décrivez votre événement..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="welcomeMessage">Message de bienvenue personnalisé</label>
-                    <textarea id="welcomeMessage" class="form-input" rows="2" placeholder="Ex: Bienvenue au mariage de Marie et Jean !"></textarea>
-                    <small class="form-help">Ce message apparaîtra lors du scan du QR Code</small>
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="eventActive" checked>
-                        <span>Événement actif</span>
-                    </label>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Annuler</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i>
-                        Enregistrer
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-shield-check" style="font-size:1.5rem;"></i>
-                    <span style="font-weight:600;">SECURA</span>
+            <div class="footer-top">
+                <div class="row">
+                    <div class="col-lg-4 mb-5 mb-lg-0">
+                        <div class="footer-brand">
+                            <div class="footer-logo">
+                                <img src="assets/images/icon.png" alt="SECURA Logo">
+                            </div>
+                            <div class="footer-title">
+                                <h3>SECURA</h3>
+                                <p>Plateforme d'accès événementiel</p>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            SECURA révolutionne l'accès aux événements avec des solutions innovantes, 
+                            sécurisées et intuitives pour organisateurs et participants.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Navigation</h4>
+                        <ul class="footer-links">
+                            <li><a href="index.html">Accueil</a></li>
+                            <li><a href="access.html">Accès événement</a></li>
+                            <li><a href="#features">Fonctionnalités</a></li>
+                            <li><a href="#how-it-works">Comment ça marche</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Compte</h4>
+                        <ul class="footer-links">
+                            <li><a href="login.html">Connexion</a></li>
+                            <li><a href="register.html">Inscription</a></li>
+                            <li><a href="forgot-password.html">Mot de passe oublié</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4">
+                        <h4>Newsletter</h4>
+                        <p class="mb-4">Inscrivez-vous pour recevoir nos actualités et offres exclusives.</p>
+                        <form class="newsletter-form" id="newsletterForm">
+                            <div class="newsletter-input-group">
+                                <input type="email" class="newsletter-input" placeholder="Votre email" required>
+                                <button type="submit" class="newsletter-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                   
+                                </button>
+                            </div>
+                        </form>
+                       
+                        <div class="footer-controls-inline">
+                            <!-- Theme Switch Button -->
+                            <div class="theme-switch-footer">
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="themeSwitchFooter" aria-label="Basculer le thème">
+                                    <span class="theme-switch-slider">
+                                        <i class="fas fa-moon"></i>
+                                        <i class="fas fa-sun"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Language Selector -->
+                            <div class="language-selector"></div>
+                        </div>
+                    </div>
                 </div>
-                <p class="mb-0">© 2025 SECURA. Tous droits réservés.</p>
-                <div class="d-flex gap-3">
-                    <a href="#" class="footer-link">Confidentialité</a>
-                    <a href="#" class="footer-link">Conditions</a>
-                    <a href="#" class="footer-link">Support</a>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright">© 2025 SECURA. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-legal">
+                            <a href="#">Mentions légales</a>
+                            <a href="#">Confidentialité</a>
+                            <a href="#">CGU</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
+
+    
     <button class="scroll-top" id="scrollTop" aria-label="Retour en haut">
         <i class="fas fa-arrow-up"></i>
     </button>
-
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-     <!-- Précharge audio -->
+    
+    <link rel="preload" href="js/auth-check.js" as="script">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/audio-utils.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                SECURA_AUDIO.preload();
-            });
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            SECURA_AUDIO.preload();
+        });
     </script>
-
-
-    <script src="js/particles-config.js"></script>
-    <script src="js/theme.js"></script>
+    <!-- Librairies essentielles -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="js/toastify.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <!-- Scripts locaux -->
+    <script defer src="js/particles-config.js"></script>
+    <script defer src="js/theme.js"></script>
+    <script defer src="js/events.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/sidebar.js"></script>
+    <script defer src="js/langue.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/storage.js"></script>
-    <script src="js/events.js"></script>
-    <script src="js/main.js"></script>
+    <script>
+    // Variables globales
+    let currentUser = null;
+    let allEvents = [];
+    let filteredEvents = [];
+    let currentView = 'grid';
+    let charts = {};
+    let currentPage = 1;
+    const eventsPerPage = 12;
+    
+    // Variables pour les filtres (unifiées)
+    let currentFilters = {
+        quickFilter: 'all',
+        search: '',
+        type: 'all',
+        status: 'all',
+        period: 'all',
+        startDate: '',
+        endDate: '',
+        minCapacity: 0
+    };
+    
+    // Variables pour l'UI des filtres avancés
+    let selectedPeriod = 'all';
+    let selectedType = 'all';
+    let selectedStatus = 'all';
+    let selectedStartDate = '';
+    let selectedEndDate = '';
+    let selectedMinCapacity = 0;
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Charger les événements
+        await loadEvents();
+        
+        // Initialiser les écouteurs
+        initEventListeners();
+        initAdvancedFilters();
+        updateFilterBadges();
+    });
+
+    // Charger les événements
+    async function loadEvents() {
+        try {
+            const events = await storage.getAllEvents();
+            currentUser = await authManager.getProfile();
+            
+            if (currentUser.role === 'admin') {
+                allEvents = events;
+            } else {
+                allEvents = events.filter(event => 
+                    event.organizerId == currentUser.id
+                );
+            }
+            
+            applyFilters();
+            renderEvents();
+            
+        } catch (error) {
+            console.error('Erreur chargement événements:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Impossible de charger les événements',
+                confirmButtonColor: '#D97706'
+            });
+        }
+    }
+
+    // Appliquer les filtres (version unifiée)
+    function applyFilters() {
+        filteredEvents = [...allEvents];
+        
+        // 1. Filtre rapide
+        if (currentFilters.quickFilter !== 'all') {
+            switch(currentFilters.quickFilter) {
+                case 'active':
+                    filteredEvents = filteredEvents.filter(e => e.active && e.status === 'active');
+                    break;
+                case 'upcoming':
+                    filteredEvents = filteredEvents.filter(e => {
+                        const eventDate = new Date(e.date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return eventDate >= today && e.active;
+                    });
+                    break;
+                case 'past':
+                    filteredEvents = filteredEvents.filter(e => {
+                        const eventDate = new Date(e.date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return eventDate < today;
+                    });
+                    break;
+            }
+        }
+        
+        // 2. Recherche
+        if (currentFilters.search) {
+            const searchTerm = currentFilters.search.toLowerCase();
+            filteredEvents = filteredEvents.filter(event =>
+                event.name.toLowerCase().includes(searchTerm) ||
+                event.location?.toLowerCase().includes(searchTerm) ||
+                event.description?.toLowerCase().includes(searchTerm) ||
+                event.metadata?.tags?.some(tag => tag.toLowerCase().includes(searchTerm))
+            );
+        }
+        
+        // 3. Filtre par type
+        if (currentFilters.type !== 'all') {
+            filteredEvents = filteredEvents.filter(e => e.type === currentFilters.type);
+        }
+        
+        // 4. Filtre par statut
+        if (currentFilters.status !== 'all') {
+            filteredEvents = filteredEvents.filter(e => e.status === currentFilters.status);
+        }
+        
+        // 5. Filtre par période
+        if (currentFilters.period !== 'all') {
+            const today = new Date();
+            filteredEvents = filteredEvents.filter(e => {
+                const eventDate = new Date(e.date);
+                
+                switch(currentFilters.period) {
+                    case 'today':
+                        return eventDate.toDateString() === today.toDateString();
+                    case 'week':
+                        const weekStart = new Date(today);
+                        weekStart.setDate(today.getDate() - today.getDay());
+                        const weekEnd = new Date(weekStart);
+                        weekEnd.setDate(weekStart.getDate() + 6);
+                        return eventDate >= weekStart && eventDate <= weekEnd;
+                    case 'month':
+                        return eventDate.getMonth() === today.getMonth() && 
+                               eventDate.getFullYear() === today.getFullYear();
+                    case 'year':
+                        return eventDate.getFullYear() === today.getFullYear();
+                    default:
+                        return true;
+                }
+            });
+        }
+        
+        // 6. Filtre par dates spécifiques
+        if (currentFilters.startDate) {
+            const startDate = new Date(currentFilters.startDate);
+            filteredEvents = filteredEvents.filter(e => new Date(e.date) >= startDate);
+        }
+        
+        if (currentFilters.endDate) {
+            const endDate = new Date(currentFilters.endDate);
+            endDate.setHours(23, 59, 59, 999);
+            filteredEvents = filteredEvents.filter(e => new Date(e.date) <= endDate);
+        }
+        
+        // 7. Filtre par capacité
+        if (currentFilters.minCapacity > 0) {
+            filteredEvents = filteredEvents.filter(e => {
+                if (!e.capacity || e.capacity === 0) return true;
+                const guests = storage.getGuestsByEventId(e.id);
+                const occupancyRate = (guests.length / e.capacity) * 100;
+                return occupancyRate >= currentFilters.minCapacity;
+            });
+        }
+        
+        // Tri par date (plus récent d'abord)
+        filteredEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        updatePagination();
+        updateFilterBadges();
+        updateGridTitle();
+    }
+
+    // Mettre à jour les badges de filtre
+    function updateFilterBadges() {
+        const activeFiltersContainer = document.getElementById('activeFilters');
+        const filtersCount = document.getElementById('activeFiltersCount');
+        const activeFilters = [];
+        
+        // Filtre rapide
+        if (currentFilters.quickFilter !== 'all') {
+            activeFilters.push({
+                type: 'quick',
+                label: getQuickFilterLabel(currentFilters.quickFilter),
+                value: currentFilters.quickFilter
+            });
+        }
+        
+        // Recherche
+        if (currentFilters.search) {
+            activeFilters.push({
+                type: 'search',
+                label: `Recherche: "${currentFilters.search}"`,
+                value: currentFilters.search
+            });
+        }
+        
+        // Type
+        if (currentFilters.type !== 'all') {
+            activeFilters.push({
+                type: 'type',
+                label: `Type: ${getTypeLabel(currentFilters.type)}`,
+                value: currentFilters.type
+            });
+        }
+        
+        // Statut
+        if (currentFilters.status !== 'all') {
+            activeFilters.push({
+                type: 'status',
+                label: `Statut: ${getStatusLabel(currentFilters.status)}`,
+                value: currentFilters.status
+            });
+        }
+        
+        // Période
+        if (currentFilters.period !== 'all') {
+            activeFilters.push({
+                type: 'period',
+                label: `Période: ${getPeriodLabel(currentFilters.period)}`,
+                value: currentFilters.period
+            });
+        }
+        
+        // Dates
+        if (currentFilters.startDate) {
+            activeFilters.push({
+                type: 'startDate',
+                label: `À partir du: ${currentFilters.startDate}`,
+                value: currentFilters.startDate
+            });
+        }
+        
+        if (currentFilters.endDate) {
+            activeFilters.push({
+                type: 'endDate',
+                label: `Jusqu'au: ${currentFilters.endDate}`,
+                value: currentFilters.endDate
+            });
+        }
+        
+        // Capacité
+        if (currentFilters.minCapacity > 0) {
+            activeFilters.push({
+                type: 'capacity',
+                label: `Remplissage min: ${currentFilters.minCapacity}%`,
+                value: currentFilters.minCapacity
+            });
+        }
+        
+        // Mettre à jour l'affichage
+        if (activeFilters.length === 0) {
+            activeFiltersContainer.innerHTML = '';
+            activeFiltersContainer.style.display = 'none';
+            filtersCount.style.display = 'none';
+        } else {
+            activeFiltersContainer.style.display = 'flex';
+            filtersCount.textContent = activeFilters.length;
+            filtersCount.style.display = 'flex';
+            
+            activeFiltersContainer.innerHTML = activeFilters.map(filter => `
+                <div class="filter-badge">
+                    ${escapeHtml(filter.label)}
+                    <button class="remove-filter" onclick="removeFilter('${filter.type}', '${escapeHtml(filter.value)}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+    }
+
+    // Supprimer un filtre
+    window.removeFilter = function(type, value) {
+        const decodedValue = decodeHtml(value);
+        
+        switch(type) {
+            case 'quick':
+                currentFilters.quickFilter = 'all';
+                document.querySelectorAll('.filter-chip').forEach(c => {
+                    c.classList.remove('active');
+                    if (c.dataset.filter === 'all') c.classList.add('active');
+                });
+                break;
+            case 'search':
+                currentFilters.search = '';
+                document.getElementById('searchEvents').value = '';
+                break;
+            case 'type':
+                currentFilters.type = 'all';
+                selectedType = 'all';
+                document.querySelectorAll('.filter-chip-type').forEach(c => c.classList.remove('active'));
+                break;
+            case 'status':
+                currentFilters.status = 'all';
+                selectedStatus = 'all';
+                document.querySelectorAll('.filter-chip-status').forEach(c => c.classList.remove('active'));
+                break;
+            case 'period':
+                currentFilters.period = 'all';
+                selectedPeriod = 'all';
+                document.querySelectorAll('.filter-chip-small').forEach(c => c.classList.remove('active'));
+                break;
+            case 'startDate':
+                currentFilters.startDate = '';
+                selectedStartDate = '';
+                document.getElementById('filterStartDate').value = '';
+                break;
+            case 'endDate':
+                currentFilters.endDate = '';
+                selectedEndDate = '';
+                document.getElementById('filterEndDate').value = '';
+                break;
+            case 'capacity':
+                currentFilters.minCapacity = 0;
+                selectedMinCapacity = 0;
+                document.getElementById('filterCapacity').value = 0;
+                document.getElementById('capacityValue').textContent = '50%';
+                document.getElementById('capacityValueDisplay').textContent = '50%';
+                break;
+        }
+        
+        applyFilters();
+        renderEvents();
+    };
+
+    // Initialiser les écouteurs pour les filtres avancés
+    function initAdvancedFilters() {
+        // Chips de période
+        document.querySelectorAll('.filter-chip-small').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.filter-chip-small').forEach(c => c.classList.remove('active'));
+                if (selectedPeriod === this.dataset.period) {
+                    selectedPeriod = 'all';
+                } else {
+                    this.classList.add('active');
+                    selectedPeriod = this.dataset.period;
+                }
+            });
+        });
+
+        // Chips de type
+        document.querySelectorAll('.filter-chip-type').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.filter-chip-type').forEach(c => c.classList.remove('active'));
+                if (selectedType === this.dataset.type) {
+                    selectedType = 'all';
+                } else {
+                    this.classList.add('active');
+                    selectedType = this.dataset.type;
+                }
+            });
+        });
+
+        // Chips de statut
+        document.querySelectorAll('.filter-chip-status').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.filter-chip-status').forEach(c => c.classList.remove('active'));
+                if (selectedStatus === this.dataset.status) {
+                    selectedStatus = 'all';
+                } else {
+                    this.classList.add('active');
+                    selectedStatus = this.dataset.status;
+                }
+            });
+        });
+
+        // Dates
+        document.getElementById('filterStartDate').addEventListener('change', function() {
+            selectedStartDate = this.value;
+        });
+
+        document.getElementById('filterEndDate').addEventListener('change', function() {
+            selectedEndDate = this.value;
+        });
+
+        // Slider capacité
+        const capacitySlider = document.getElementById('filterCapacity');
+        const capacityDisplay = document.getElementById('capacityValueDisplay');
+        
+        capacitySlider.addEventListener('input', function() {
+            selectedMinCapacity = parseInt(this.value);
+            capacityDisplay.textContent = `${this.value}%`;
+            document.getElementById('capacityValue').textContent = `${this.value}%`;
+        });
+    }
+
+    // Appliquer les filtres avancés
+    document.getElementById('applyFilters').addEventListener('click', () => {
+        // Mettre à jour les filtres globaux depuis les filtres avancés
+        currentFilters.type = selectedType;
+        currentFilters.status = selectedStatus;
+        currentFilters.period = selectedPeriod;
+        currentFilters.startDate = selectedStartDate;
+        currentFilters.endDate = selectedEndDate;
+        currentFilters.minCapacity = selectedMinCapacity;
+        
+        // Appliquer et afficher
+        applyFilters();
+        renderEvents();
+        document.getElementById('filtersDropdown').style.display = 'none';
+        document.getElementById('toggleFiltersBtn').innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés <span class="badge bg-danger ms-2" id="activeFiltersCount" ></span>';
+        updateFilterBadges();
+    });
+
+    // Réinitialiser tous les filtres
+    document.getElementById('resetFilters').addEventListener('click', () => {
+        // Réinitialiser les variables des filtres avancés
+        selectedPeriod = 'all';
+        selectedType = 'all';
+        selectedStatus = 'all';
+        selectedStartDate = '';
+        selectedEndDate = '';
+        selectedMinCapacity = 0;
+        
+        // Réinitialiser l'UI des filtres avancés
+        document.querySelectorAll('.filter-chip-small').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.filter-chip-type').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.filter-chip-status').forEach(c => c.classList.remove('active'));
+        document.getElementById('filterStartDate').value = '';
+        document.getElementById('filterEndDate').value = '';
+        document.getElementById('filterCapacity').value = 50;
+        document.getElementById('capacityValue').textContent = '50%';
+        document.getElementById('capacityValueDisplay').textContent = '50%';
+        
+        // Réinitialiser les filtres globaux
+        currentFilters = {
+            quickFilter: 'all',
+            search: '',
+            type: 'all',
+            status: 'all',
+            period: 'all',
+            startDate: '',
+            endDate: '',
+            minCapacity: 0
+        };
+        
+        // Réinitialiser l'UI des filtres rapides
+        document.querySelectorAll('.filter-chip').forEach(c => {
+            c.classList.remove('active');
+            if (c.dataset.filter === 'all') c.classList.add('active');
+        });
+        
+        document.getElementById('searchEvents').value = '';
+        
+        // Appliquer et afficher
+        applyFilters();
+        renderEvents();
+    });
+
+    // Rendre les événements
+    function renderEvents() {
+        const startIndex = (currentPage - 1) * eventsPerPage;
+        const endIndex = startIndex + eventsPerPage;
+        const eventsToShow = filteredEvents.slice(startIndex, endIndex);
+        
+        // Afficher/masquer l'état vide
+        const emptyState = document.getElementById('emptyState');
+        if (filteredEvents.length === 0) {
+            emptyState.style.display = 'block';
+            document.getElementById('gridView').innerHTML = '';
+            document.getElementById('tableBody').innerHTML = '';
+            document.getElementById('pagination').style.display = 'none';
+            document.getElementById('statsAdvanced').style.display = 'none';
+            document.getElementById('performanceGrid').innerHTML = '';
+            document.getElementById('statsView').style.display = 'none';
+            return;
+        } else {
+            emptyState.style.display = 'none';
+            document.getElementById('pagination').style.display = 'flex';
+        }
+        
+        // Mode grille
+        if (currentView === 'grid') {
+            document.getElementById('gridView').style.display = 'grid';
+            document.getElementById('tableView').style.display = 'none';
+            document.getElementById('statsView').style.display = 'none';
+            document.getElementById('statsAdvanced').style.display = 'none';
+            renderGridView(eventsToShow);
+        } else if (currentView === 'table') {
+            document.getElementById('gridView').style.display = 'none';
+            document.getElementById('tableView').style.display = 'block';
+            document.getElementById('statsView').style.display = 'none';
+            document.getElementById('statsAdvanced').style.display = 'none';
+            renderTableView(eventsToShow);
+        } else if (currentView === 'stats') {
+            document.getElementById('gridView').style.display = 'none';
+            document.getElementById('tableView').style.display = 'none';
+            document.getElementById('statsView').style.display = 'block';
+            document.getElementById('statsAdvanced').style.display = 'grid';
+            renderStatsView();
+        }
+    }
+
+    // Mettre à jour le titre de la grille
+    function updateGridTitle() {
+        const gridTitle = document.getElementById('gridTitle');
+        let title = '';
+        let icon = '';
+        
+        switch(currentView) {
+            case 'grid':
+                icon = '<i class="fas fa-th-large"></i>';
+                title = `Liste des événements (${filteredEvents.length})`;
+                break;
+            case 'table':
+                icon = '<i class="fas fa-table"></i>';
+                title = `Tableau des événements (${filteredEvents.length})`;
+                break;
+            case 'stats':
+                icon = '<i class="fas fa-chart-bar"></i>';
+                title = `Statistiques avancées (${filteredEvents.length} événements)`;
+                break;
+        }
+        
+        gridTitle.innerHTML = `${icon} ${title}`;
+    }
+
+    // Rendre la vue grille
+    function renderGridView(events) {
+        const gridView = document.getElementById('gridView');
+        gridView.innerHTML = '';
+        
+        events.forEach(event => {
+            const guests = storage.getGuestsByEventId(event.id);
+            const scannedGuests = guests.filter(g => g.scanned).length;
+            const eventDate = new Date(event.date);
+            const isUpcoming = eventDate >= new Date();
+            
+            const eventCard = document.createElement('div');
+            eventCard.className = 'event-card-pro';
+            eventCard.style.backgroundImage = `url('${getEventImage(event.type)}')`;
+            eventCard.style.borderLeft = `4px solid ${event.design?.primaryColor || '#D97706'}`;
+            eventCard.onclick = () => viewEvent(event.id);
+            
+            eventCard.innerHTML = `
+                ${isUpcoming ? '<div class="upcoming-ribbon" style="background: linear-gradient(45deg, #3B82F6, #8B5CF6);">À VENIR</div>' : ''}
+                
+                <div class="event-type-badge" style="background: ${getTypeColor(event.type)}">
+                    ${getTypeLabel(event.type)}
+                </div>
+                
+                <div class="event-content">
+                    <h3 class="event-title">${escapeHtml(event.name)}</h3>
+                    
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>${eventDate.toLocaleDateString('fr-FR')}</span>
+                        </div>
+                        ${event.time ? `
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>${event.time}</span>
+                        </div>` : ''}
+                        ${event.location ? `
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${event.location}</span>
+                        </div>` : ''}
+                    </div>
+
+                    <div class="event-stats-circle">
+                        <div class="stat-circle">
+                            <div class="circle" style="border-color: ${event.design?.primaryColor || '#D97706'}20;">
+                                <span class="value">${guests.length}</span>
+                                <span class="label">Invités</span>
+                            </div>
+                        </div>
+                        <div class="stat-circle">
+                            <div class="circle" style="border-color: #10B98120;">
+                                <span class="value">${scannedGuests}</span>
+                                <span class="label">Présents</span>
+                            </div>
+                        </div>
+                        <div class="stat-circle">
+                            <div class="circle" style="border-color: #3B82F620;">
+                                <span class="value">${event.capacity || '∞'}</span>
+                                <span class="label">Capacité</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="event-footer">
+                        <div class="event-status" style="background: ${event.active ? '#10B981' : '#EF4444'} !important; color: white">
+                            <i class="fas ${event.active ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            <span>${event.active ? 'Actif' : 'Inactif'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="event-actions" onclick="event.stopPropagation()">
+                    <button class="action-btn view" onclick="viewEvent('${event.id}')" title="Voir invités">
+                        <i class="fas fa-users"></i>
+                    </button>
+                    <button class="action-btn edit" onclick="editEvent('${event.id}')" title="Modifier">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="action-btn duplicate" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button class="action-btn stats" onclick="viewEventStats('${event.id}')" title="Statistiques">
+                        <i class="fas fa-chart-bar"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>
+            `;
+            
+            gridView.appendChild(eventCard);
+        });
+    }
+
+    // Rendre la vue table
+    function renderTableView(events) {
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = '';
+        
+        events.forEach(event => {
+            const guests = storage.getGuestsByEventId(event.id);
+            const scannedGuests = guests.filter(g => g.scanned).length;
+            const eventDate = new Date(event.date);
+            
+            const row = document.createElement('tr');
+            row.onclick = () => viewEvent(event.id);
+            row.style.cursor = 'pointer';
+            
+            row.innerHTML = `
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: ${event.design?.primaryColor || '#D97706'}; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-calendar" style="color: white; font-size: 1.2rem;"></i>
+                        </div>
+                        <div>
+                            <strong>${escapeHtml(event.name)}</strong>
+                            <div style="font-size: 0.85rem; color: var(--secura-text-gray);">
+                                ${event.location || 'Non spécifié'}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div>${eventDate.toLocaleDateString('fr-FR')}</div>
+                    ${event.time ? `<div style="font-size: 0.85rem; color: var(--secura-text-gray);">${event.time}</div>` : ''}
+                </td>
+                <td>
+                    <span class="status-badge" style="background: ${getTypeColor(event.type)}; color: white; padding: 4px 12px; border-radius: 20px;">
+                        ${getTypeLabel(event.type)}
+                    </span>
+                </td>
+                <td>
+                    <div style="text-align: center;">
+                        <div style="font-weight: 600;">${guests.length}</div>
+                        <div style="font-size: 0.85rem; color: var(--secura-text-gray);">
+                            ${scannedGuests} présents
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="status-badge ${event.active ? 'success' : 'error'}">
+                        <i class="fas ${event.active ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                        ${event.active ? 'Actif' : 'Inactif'}
+                    </div>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                        <button class="icon-btn" onclick="event.stopPropagation(); viewEvent('${event.id}')" title="Voir">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="icon-btn" onclick="event.stopPropagation(); editEvent('${event.id}')" title="Modifier">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="icon-btn" onclick="event.stopPropagation(); deleteEvent('${event.id}')" title="Supprimer">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Rendre la vue statistiques
+    function renderStatsView() {
+        // Calculer les statistiques globales
+        let totalGuests = 0;
+        let totalScanned = 0;
+        let totalCapacity = 0;
+        let typeDistribution = {};
+        let monthlyData = {};
+        let eventPerformance = [];
+        let attendanceRates = [];
+        
+        filteredEvents.forEach(event => {
+            const guests = storage.getGuestsByEventId(event.id);
+            const scanned = guests.filter(g => g.scanned).length;
+            
+            totalGuests += guests.length;
+            totalScanned += scanned;
+            totalCapacity += event.capacity || 0;
+            
+            // Distribution par type
+            typeDistribution[event.type] = (typeDistribution[event.type] || 0) + 1;
+            
+            // Données mensuelles
+            const eventDate = new Date(event.date);
+            const monthKey = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}`;
+            monthlyData[monthKey] = (monthlyData[monthKey] || 0) + 1;
+            
+            // Performance par événement
+            const rate = guests.length > 0 ? (scanned / guests.length) * 100 : 0;
+            attendanceRates.push(rate);
+            eventPerformance.push({
+                name: event.name,
+                rate: rate,
+                guests: guests.length,
+                scanned: scanned
+            });
+        });
+        
+        const avgAttendance = attendanceRates.length > 0 ? 
+            attendanceRates.reduce((a, b) => a + b, 0) / attendanceRates.length : 0;
+        
+        // Afficher les statistiques avancées
+        renderAdvancedStats(totalGuests, totalScanned, avgAttendance, eventPerformance.length);
+        
+        // Afficher la grille de performance
+        renderPerformanceGrid(eventPerformance);
+        
+        // Initialiser les graphiques
+        initCharts(typeDistribution, monthlyData, eventPerformance, attendanceRates);
+    }
+
+    // Rendre les statistiques avancées
+    function renderAdvancedStats(totalGuests, totalScanned, avgAttendance, totalEvents) {
+        const statsAdvanced = document.getElementById('statsAdvanced');
+        const scanRate = totalGuests > 0 ? (totalScanned / totalGuests) * 100 : 0;
+        const avgGuestsPerEvent = filteredEvents.length > 0 ? totalGuests / filteredEvents.length : 0;
+        
+        const statsData = [
+            {
+                title: "Événements",
+                value: filteredEvents.length,
+                icon: "fas fa-calendar-alt",
+                color: "#D97706",
+                trend: "+12%",
+                trendUp: true
+            },
+            {
+                title: "Invitations",
+                value: totalGuests,
+                icon: "fas fa-users",
+                color: "#3B82F6",
+                trend: "+8%",
+                trendUp: true
+            },
+            {
+                title: "Présents",
+                value: totalScanned,
+                icon: "fas fa-user-check",
+                color: "#10B981",
+                trend: "+15%",
+                trendUp: true
+            },
+            {
+                title: "Taux de Scan",
+                value: `${scanRate.toFixed(1)}%`,
+                icon: "bi bi-qr-code",
+                color: "#8B5CF6",
+                trend: "+5%",
+                trendUp: true
+            },
+            {
+                title: "Présence Moy.",
+                value: `${avgAttendance.toFixed(1)}%`,
+                icon: "fas fa-chart-line",
+                color: "#EC4899",
+                trend: "+3%",
+                trendUp: true
+            },
+            {
+                title: "Invités/Événement",
+                value: avgGuestsPerEvent.toFixed(1),
+                icon: "fas fa-chart-bar",
+                color: "#F59E0B",
+                trend: "+7%",
+                trendUp: true
+            }
+        ];
+        
+        statsAdvanced.innerHTML = statsData.map(stat => `
+            <div class="stat-card-pro animate-fade-in" style="border-top-color: ${stat.color}; --primary-color: ${stat.color}; --accent-color: ${stat.color}AA;">
+                <div class="stat-icon-pro" style="background: linear-gradient(135deg, ${stat.color}, ${stat.color}AA);">
+                    <i class="${stat.icon}"></i>
+                </div>
+                <div class="stat-content-pro">
+                    <div class="stat-number-pro">${stat.value}</div>
+                    <div class="stat-label-pro">${stat.title}</div>
+                </div>
+                <div class="stat-trend ${stat.trendUp ? '' : 'down'}">
+                    <i class="fas fa-arrow-${stat.trendUp ? 'up' : 'down'}"></i>
+                    ${stat.trend}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Rendre la grille de performance
+    function renderPerformanceGrid(eventPerformance) {
+        const performanceGrid = document.getElementById('performanceGrid');
+        
+        // Top 5 événements par taux de présence
+        const topEvents = [...eventPerformance]
+            .sort((a, b) => b.rate - a.rate)
+            .slice(0, 6);
+        
+        performanceGrid.innerHTML = topEvents.map((event, index) => {
+            const colors = ['#D97706', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#F59E0B'];
+            const iconClasses = ['fa-trophy', 'fa-medal', 'fa-award', 'fa-star', 'fa-crown', 'fa-gem'];
+            
+            return `
+                <div class="performance-card animate-slide-in" style="animation-delay: ${index * 0.1}s;">
+                    <div class="performance-icon" style="background: linear-gradient(135deg, ${colors[index]}, ${colors[index]}AA);">
+                        <i class="fas ${iconClasses[index]}"></i>
+                    </div>
+                    <div class="performance-content">
+                        <div class="performance-title">${event.name}</div>
+                        <div class="performance-value">${event.rate.toFixed(1)}%</div>
+                        <div style="font-size: 0.85rem; color: var(--secura-text-gray);">
+                            ${event.scanned}/${event.guests} invités présents
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Initialiser les graphiques
+    function initCharts(typeDistribution, monthlyData, eventPerformance, attendanceRates) {
+        // Détruire les graphiques existants
+        Object.values(charts).forEach(chart => {
+            if (chart) chart.destroy();
+        });
+        charts = {};
+        
+        // 1. Répartition par type
+        const typesCtx = document.getElementById('typesChart').getContext('2d');
+        charts.typesChart = new Chart(typesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(typeDistribution).map(t => getTypeLabel(t)),
+                datasets: [{
+                    data: Object.values(typeDistribution),
+                    backgroundColor: Object.keys(typeDistribution).map(t => getTypeColor(t)),
+                    borderWidth: 2,
+                    borderColor: 'var(--secura-white)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--secura-black'),
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 2. Évolution mensuelle
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        const months = Object.keys(monthlyData).sort();
+        const monthNames = months.map(m => {
+            const [year, month] = m.split('-');
+            return `${getMonthName(parseInt(month))} ${year}`;
+        });
+        
+        charts.monthlyChart = new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: monthNames,
+                datasets: [{
+                    label: 'Événements créés',
+                    data: months.map(m => monthlyData[m]),
+                    borderColor: '#D97706',
+                    backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--secura-black')
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--secura-text-gray')
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--secura-text-gray')
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 3. Taux de présence
+        const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+        const attendanceLabels = ['0-20%', '21-40%', '41-60%', '61-80%', '81-100%'];
+        const attendanceCounts = [0, 0, 0, 0, 0];
+        
+        attendanceRates.forEach(rate => {
+            if (rate <= 20) attendanceCounts[0]++;
+            else if (rate <= 40) attendanceCounts[1]++;
+            else if (rate <= 60) attendanceCounts[2]++;
+            else if (rate <= 80) attendanceCounts[3]++;
+            else attendanceCounts[4]++;
+        });
+        
+        charts.attendanceChart = new Chart(attendanceCtx, {
+            type: 'bar',
+            data: {
+                labels: attendanceLabels,
+                datasets: [{
+                    label: 'Nombre d\'événements',
+                    data: attendanceCounts,
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(139, 92, 246, 0.7)'
+                    ],
+                    borderColor: [
+                        '#EF4444',
+                        '#F59E0B',
+                        '#3B82F6',
+                        '#10B981',
+                        '#8B5CF6'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--secura-text-gray')
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--secura-text-gray')
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 4. Top 5 événements
+        const topEventsCtx = document.getElementById('topEventsChart').getContext('2d');
+        const top5Events = [...eventPerformance]
+            .sort((a, b) => b.rate - a.rate)
+            .slice(0, 5);
+        
+        charts.topEventsChart = new Chart(topEventsCtx, {
+            type: 'bar',
+            data: {
+                labels: top5Events.map(e => e.name.length > 20 ? e.name.substring(0, 20) + '...' : e.name),
+                datasets: [{
+                    label: 'Taux de présence (%)',
+                    data: top5Events.map(e => e.rate),
+                    backgroundColor: 'rgba(217, 119, 6, 0.7)',
+                    borderColor: '#D97706',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--secura-text-gray')
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--secura-text-gray')
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Mettre à jour la pagination
+    function updatePagination() {
+        const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+        const pagination = document.getElementById('pagination');
+        
+        if (totalPages <= 1) {
+            pagination.style.display = 'none';
+            return;
+        }
+        
+        let paginationHTML = '';
+        
+        // Bouton précédent
+        paginationHTML += `
+            <button class="page-btn ${currentPage === 1 ? 'disabled' : ''}" 
+                    onclick="changePage(${currentPage - 1})" 
+                    ${currentPage === 1 ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        `;
+        
+        // Pages
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                paginationHTML += `
+                    <button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                            onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                paginationHTML += `<span class="page-btn" style="cursor: default;">...</span>`;
+            }
+        }
+        
+        // Bouton suivant
+        paginationHTML += `
+            <button class="page-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+                    onclick="changePage(${currentPage + 1})" 
+                    ${currentPage === totalPages ? 'disabled' : ''}>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        `;
+        
+        pagination.innerHTML = paginationHTML;
+    }
+
+    // Changer de page
+    function changePage(page) {
+        if (page < 1 || page > Math.ceil(filteredEvents.length / eventsPerPage)) return;
+        currentPage = page;
+        renderEvents();
+    }
+
+    // Initialiser les écouteurs d'événements
+    function initEventListeners() {
+        // Bouton création événement
+        document.getElementById('createEventBtn').addEventListener('click', () => {
+            window.location.href = 'event.html';
+        });
+        
+        document.getElementById('createFirstEvent').addEventListener('click', () => {
+            window.location.href = 'event.html';
+        });
+        
+        // Toggle filtres déroulants
+        document.getElementById('toggleFiltersBtn').addEventListener('click', function() {
+            const filtersSection = document.getElementById('filtersDropdown');
+            const isVisible = filtersSection.style.display === 'block';
+            filtersSection.style.display = isVisible ? 'none' : 'block';
+            this.innerHTML = isVisible ? 
+                '<i class="fas fa-sliders-h"></i> Filtres avancés <span class="badge bg-danger ms-2" id="activeFiltersCount" ></span>' : 
+                '<i class="fas fa-times"></i> Masquer filtres <span class="badge bg-danger ms-2" id="activeFiltersCount" ></span>';
+                updateFilterBadges();
+        });
+
+        document.getElementById('toggleFiltersBar').addEventListener('click', function() {
+            const filtersSection = document.getElementById('actions-bar');
+            const isVisible = filtersSection.style.display === 'block';
+            filtersSection.style.display = isVisible ? 'none' : 'block';
+            this.innerHTML = isVisible ? 
+                '<i class="fas fa-sliders-h"></i> Filtres<span class="badge bg-danger ms-2" id="activeFiltersCount" ></span>' : 
+                '<i class="fas fa-times"></i> Masquer filtres <span class="badge bg-danger ms-2" id="activeFiltersCount" ></span>';
+                updateFilterBadges();
+        });
+
+
+        
+        // Filtres rapides
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                currentFilters.quickFilter = this.dataset.filter;
+                applyFilters();
+                renderEvents();
+            });
+        });
+        
+        // Recherche
+        const searchInput = document.getElementById('searchEvents');
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentFilters.search = this.value.trim();
+                applyFilters();
+                renderEvents();
+            }, 300);
+        });
+        
+        // Changement de vue
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentView = this.dataset.view;
+                currentPage = 1;
+                applyFilters();
+                renderEvents();
+            });
+        });
+    }
+
+    // Fonctions utilitaires
+    function getEventImage(type) {
+        const images = {
+            marriage: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80',
+            anniversaire: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800&q=80',
+            conference: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+            corporate: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&q=80',
+            concert: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80',
+            gala: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&q=80',
+            football: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80',
+            autre: 'https://images.unsplash.com/photo-1501281668745-f7f579dff10e?w=800&q=80'
+        };
+        return images[type] || images.autre;
+    }
+
+    function getTypeColor(type) {
+        const colors = {
+            marriage: '#EC4899',
+            anniversaire: '#F59E0B',
+            conference: '#3B82F6',
+            corporate: '#6366F1',
+            concert: '#8B5CF6',
+            gala: '#D97706',
+            football: '#10B981',
+            autre: '#6B7280'
+        };
+        return colors[type] || colors.autre;
+    }
+
+    function getTypeLabel(type) {
+        const labels = {
+            marriage: 'Mariage',
+            anniversaire: 'Anniversaire',
+            conference: 'Conférence',
+            corporate: 'Corporate',
+            concert: 'Concert',
+            gala: 'Gala',
+            football: 'Football',
+            autre: 'Autre'
+        };
+        return labels[type] || 'Autre';
+    }
+
+    function getStatusLabel(status) {
+        const labels = {
+            active: 'Actif',
+            draft: 'Brouillon',
+            archived: 'Archivé',
+            cancelled: 'Annulé'
+        };
+        return labels[status] || status;
+    }
+
+    function getPeriodLabel(period) {
+        const labels = {
+            today: 'Aujourd\'hui',
+            week: 'Cette semaine',
+            month: 'Ce mois',
+            year: 'Cette année'
+        };
+        return labels[period] || period;
+    }
+
+    function getQuickFilterLabel(filter) {
+        const labels = {
+            all: 'Tous',
+            active: 'Actifs',
+            upcoming: 'À venir',
+            past: 'Passés'
+        };
+        return labels[filter] || filter;
+    }
+
+    function getMonthName(month) {
+        const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+        return months[month - 1] || '';
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function decodeHtml(text) {
+        const txt = document.createElement('textarea');
+        txt.innerHTML = text;
+        return txt.value;
+    }
+
+    // Télécharger un graphique
+    window.downloadChart = function(chartId) {
+        const chart = charts[chartId];
+        if (!chart) return;
+        
+        const link = document.createElement('a');
+        link.download = `graphique-${chartId}.png`;
+        link.href = chart.toBase64Image();
+        link.click();
+    };
+
+    // Actions sur les événements
+    window.viewEvent = function(eventId) {
+        window.location.href = `event-info?id=${eventId}`;
+    };
+
+    window.editEvent = function(eventId) {
+        window.location.href = `event?id=${eventId}`;
+    };
+
+    
+    window.viewEventStats = async function(eventId) {
+        const event = storage.getEventById(eventId);
+        if (!event) return;
+        
+        const stats = await storage.getEventStatistics(eventId);
+        
+        Swal.fire({
+            title: `📊 ${event.name}`,
+            html: `
+                <div class="event-stats-modal">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0;">
+                        <div style="text-align: center; padding: 15px; background: rgba(217, 119, 6, 0.1); border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #D97706;">${stats.totalGuests}</div>
+                            <div style="font-size: 0.9rem; color: var(--secura-text-gray);">Invités</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #10B981;">${stats.scannedGuests}</div>
+                            <div style="font-size: 0.9rem; color: var(--secura-text-gray);">Présents</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #3B82F6;">${stats.scanRate}%</div>
+                            <div style="font-size: 0.9rem; color: var(--secura-text-gray);">Taux</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--secura-light-gray);">
+                        <p><i class="fas fa-calendar-alt"></i> <strong>Date:</strong> ${new Date(event.date).toLocaleDateString('fr-FR')}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Lieu:</strong> ${event.location || 'Non spécifié'}</p>
+                        <p><i class="fas fa-users"></i> <strong>Capacité:</strong> ${event.capacity || 'Illimitée'}</p>
+                    </div>
+                </div>
+            `,
+            width: '600px',
+            confirmButtonText: 'Fermer',
+            confirmButtonColor: '#D97706'
+        });
+    };
+
+    window.deleteEvent = async function(eventId) {
+        const event = storage.getEventById(eventId);
+        if (!event) return;
+        
+        const result = await Swal.fire({
+            title: 'Supprimer l\'événement ?',
+            html: `
+                <div style="text-align: center; padding: 20px 0;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #EF4444; margin-bottom: 15px;"></i>
+                    <p>L'événement <strong>"${escapeHtml(event.name)}"</strong> sera définitivement supprimé.</p>
+                    <p style="color: var(--secura-text-gray); font-size: 0.9rem; margin-top: 10px;">
+                        Cette action supprimera également tous les invités et codes QR associés.
+                    </p>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler',
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#6B7280',
+            reverseButtons: true
+        });
+        
+        if (result.isConfirmed) {
+            try {
+                await storage.deleteEvent(eventId);
+                await loadEvents();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Supprimé !',
+                    text: 'L\'événement a été supprimé avec succès',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Impossible de supprimer l\'événement',
+                    confirmButtonColor: '#D97706'
+                });
+            }
+        }
+    };
+</script>
 
 </body>
 </html>

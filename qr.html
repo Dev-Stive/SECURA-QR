@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Studio Pro - Perfect Alignment</title>
+    <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.4.13/dist/easy.qrcode.min.js"></script>
+    <style>
+        :root { --primary: #1a73e8; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 2.5rem; border-radius: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); width: 100%; max-width: 400px; text-align: center; }
+        .form-group { margin-bottom: 1.2rem; text-align: left; }
+        label { display: bloin-bottom: 8px; font-size: 0.85rem; color: #5f6368; font-weight: 600; text-transform: uppercase; }
+        input[type="text"] { width: 100%; padding: 14px; border: 2px solid #f1f3f4; border-radius: 12px; box-sizing: border-box; }
+        button { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 1rem; }
+        #qrcode-container { margin-top: 2rem; display: inline-block; padding: 20px; background: #ffffff; border-radius: 24px; border: 1px solid #f1f3f4; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>QR Studio</h2>
+    <div class="form-group">
+        <label>URL de destination</label>
+        <input type="text" id="qr-text" value="https://google.com">
+    </div>
+    <div class="form-group">
+        <label>Logo Central</label>
+        <input type="file" id="qr-logo" accept="image/*">
+    </div>
+    <button onclick="generateQR()">Générer le QR Code</button>
+    <div id="qrcode-container"><div id="qrcode"></div></div>
+</div>
+
+<script>
+    function generateQR() {
+        const text = document.getElementById('qr-text').value;
+        const logoInput = document.getElementById('qr-logo');
+        const container = document.getElementById('qrcode');
+        container.innerHTML = "";
+
+        const options = {
+            text: text,
+            width: 280,
+            height: 280,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H,
+            dotScale: 0.8,
+            // --- FINDERS (coins) ---
+            PO: '#000000', PO_RT: 150, // Outer finder: noir, rond
+            PI: '#000000', PI_RT: 150, // Inner finder: noir, rond
+            // --- ALIGNEMENT (petit coin en bas à droite) ---
+            AO: '#ffffff', AO_RT: 0,   // invisible (blanc)
+            AI: '#ffffff', AI_RT: 0,   // invisible (blanc)
+            // --- LOGO ---
+            logoWidth: 100,
+            logoHeight: 100,
+            logoBackgroundColor: '#ffffff',
+            logoRadius: 100,
+            logoBackgroundTransparent: false,
+            // Zone blanche autour du logo
+            quietZone: 15,
+            quietZoneColor: '#ffffff',
+            drawer: 'canvas'
+        };
+
+        if (logoInput.files && logoInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                options.logo = e.target.result;
+                new QRCode(container, options);
+            };
+            reader.readAsDataURL(logoInput.files[0]);
+        } else {
+            new QRCode(container, options);
+        }
+    }
+    window.onload = generateQR;
+</script>
+</body>
+</html>

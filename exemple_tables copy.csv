@@ -1,0 +1,11 @@
+tableName,capacity,tableNumber,location,category,description
+Salon Premium,8,1,Étage 1 - Côté fenêtres,vip,Table VIP avec vue directe sur la scène
+Table Standard,6,2,Étage 1 - Centre,standard,Table standard
+Zone Cocktail,12,3,Hall d'entrée,general,Table haute pour réception
+Terrasse,10,4,Jardin - Côté ouest,premium,Tables en extérieur - Vue panoramique
+Table enfants,4,5,Étage 2 - Coin sud,special,Espace enfants avec animations
+Table PMR,6,6,Étage 1 - Entrée,standard,Accessibilité handicapés
+Table Présidium,10,7,Estrade,vip,Table présidium avec micro
+Table Buffet,8,8,Salle à manger,general,Table service buffet
+Table Pressé,6,9,Étage 1,standard,Table rapide
+Table Lounge,12,10,Salon bleu,premium,Table lounge avec canapés

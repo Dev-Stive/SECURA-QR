@@ -1,0 +1,11 @@
+Prénom,Nom,Email,Téléphone,Entreprise,Genre,Places,Type,Statut,Notes
+Jean,Dupont,jean.dupont@exemple.com,+33 6 12 34 56 78,Company SA,m,1,standard,pending,Invitation standard - À confirmer
+Marie,Martin,marie.martin@exemple.com,+33 6 98 76 54 32,Startup Inc.,f,1,vip,confirmed,VIP confirmée
+Pierre,Durand,pierre.durand@exemple.com,+33 6 11 22 33 44,Tech Corp,homme,2,standard,pending,Accompagné de son conjoint
+Sophie,Bernard,sophie.bernard@exemple.com,+33 6 55 66 77 88,Events Pro,couple,3,speaker,confirmed,Présentatrice avec accompagnants
+Marc,Lefebvre,marc.lefebvre@exemple.com,+33 6 99 88 77 66,Digital Solutions,maman,1,sponsor,confirmed,Sponsor - Parent accompagnateur
+Isabelle,Thomas,isabelle.thomas@exemple.com,+33 6 44 33 22 11,Fashion House,femme,1,vip,confirmed,Invitée VIP
+Charles,Robert,charles.robert@exemple.com,+33 6 77 88 99 00,Construction Ltd,m,1,standard,cancelled,Annulé
+Véronique,Petit,veronique.petit@exemple.com,+33 6 31 42 53 64,Consulting,f,1,standard,pending,À contacter
+Laurent,Dubois,laurent.dubois@exemple.com,+33 6 64 75 86 97,Finance Group,homme,2,standard,pending,
+Francine,Moreau,francine.moreau@exemple.com,+33 6 50 61 72 83,Travel Agency,autre,1,speaker,confirmed,Conférencière keynote

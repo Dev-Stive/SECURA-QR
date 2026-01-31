@@ -309,16 +309,16 @@ function createEventCardHTML(event) {
         day: 'numeric', month: 'long', year: 'numeric'
     });
 
-    // Images par type d'événement
+    // Images par type d'événement (étendu)
     const typeImages = {
         marriage: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80',
         anniversaire: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800&q=80',
         anniversary: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800&q=80',
         conference: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
-        football: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80',
         corporate: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&q=80',
         concert: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80',
         gala: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&q=80',
+        football: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80',
         graduation: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80',
         exhibition: 'https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=800&q=80',
         vip: 'https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?w=800&q=80',
@@ -326,15 +326,41 @@ function createEventCardHTML(event) {
     };
 
     const backgroundImage = typeImages[event.type] || typeImages.autre;
+    
+    // Couleur personnalisée de l'événement
+    const primaryColor = event.design?.primaryColor || '#D97706';
+    const statusColor = event.active ? '#10B981' : '#EF4444';
+    const statusText = event.active ? 'Actif' : 'Inactif';
+    
+    // Badge de type avec couleur
+    const typeColors = {
+        marriage: '#EC4899',
+        anniversaire: '#F59E0B',
+        conference: '#3B82F6',
+        corporate: '#6366F1',
+        concert: '#8B5CF6',
+        gala: '#D97706',
+        football: '#10B981',
+        autre: '#6B7280'
+    };
+    
+    const typeColor = typeColors[event.type] || '#6B7280';
+    const typeLabel = event.type.charAt(0).toUpperCase() + event.type.slice(1);
 
     return `
         <div class="col-12 col-md-6 col-lg-6 d-flex justify-content-center">
-            <div class="event-card-pro w-100" onclick="handleEventSelect('${event.id}')" style="background-image: url('${backgroundImage}');">
-                ${isUpcoming ? '<div class="upcoming-ribbon">À VENIR</div>' : ''}
+            <div class="event-card-pro w-100" onclick="handleEventSelect('${event.id}')" style="background-image: url('${backgroundImage}'); border-left: 4px solid ${primaryColor};">
+                ${isUpcoming ? '<div class="upcoming-ribbon" style="background: linear-gradient(45deg, #3B82F6, #8B5CF6);">À VENIR</div>' : ''}
+                
+                <!-- Badge de type -->
+                <div class="event-type-badge" style="background: ${typeColor};">
+                    ${typeLabel}
+                </div>
                 
                 <div class="event-content">
                     <h3 class="event-title">${event.name}</h3>
                     
+                    <!-- Métadonnées -->
                     <div class="event-meta">
                         <div class="meta-item">
                             <i class="fas fa-calendar-alt"></i>
@@ -350,50 +376,154 @@ function createEventCardHTML(event) {
                             <i class="fas fa-map-marker-alt"></i>
                             <span>${event.location}</span>
                         </div>` : ''}
+                        ${event.metadata?.category ? `
+                        <div class="meta-item">
+                            <i class="fas fa-tag"></i>
+                            <span>${event.metadata.category}</span>
+                        </div>` : ''}
                     </div>
 
+                    <!-- Statistiques améliorées -->
                     <div class="event-stats-circle">
                         <div class="stat-circle">
-                            <div class="circle">
+                            <div class="circle" style="border-color: ${primaryColor}20;">
                                 <span class="value">${guests.length}</span>
                                 <span class="label">Invités</span>
                             </div>
                         </div>
                         <div class="stat-circle">
-                            <div class="circle">
+                            <div class="circle" style="border-color: #10B98120;">
                                 <span class="value">${scannedGuests}</span>
                                 <span class="label">Présents</span>
                             </div>
                         </div>
+                        <div class="stat-circle">
+                            <div class="circle" style="border-color: #3B82F620;">
+                                <span class="value">${event.capacity || '∞'}</span>
+                                <span class="label">Capacité</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="event-status">
-                        <i class="fas ${event.active ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'}"></i>
-                        <span>${event.active ? 'Actif' : 'Inactif'}</span>
+                    <!-- État et actions -->
+                    <div class="event-footer">
+                        <div class="event-status" style="background: ${statusColor} !important;color: white">
+                            <i class="fas ${event.active ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            <span>${statusText}</span>
+                        </div>
+                        
+                        <div class="event-features">
+                            ${event.settings?.enablePhotoGallery ? '<i class="fas fa-camera text-blue-500" title="Galerie photos"></i>' : ''}
+                            ${event.settings?.enableGuestMessages ? '<i class="fas fa-comment text-green-500" title="Messages invités"></i>' : ''}
+                            ${event.settings?.enableTableQR ? '<i class="bi bi-qr-code text-purple-500" title="QR Tables"></i>' : ''}
+                        </div>
                     </div>
                 </div>
 
+                <!-- Actions -->
                 <div class="event-actions" onclick="event.stopPropagation()">
-                    <button class="action-btn" onclick="viewEvent('${event.id}')" title="Voir">
-                        <i class="fas fa-eye"></i>
+                    <button class="action-btn view" onclick="viewEvent('${event.id}')" title="Voir invités">
+                        <i class="fas fa-users"></i>
                     </button>
-                    <button class="action-btn" onclick="editEvent('${event.id}')" title="Modifier">
-                        <i class="fas fa-edit"></i>
+                    <button class="action-btn edit" onclick="editEvent('${event.id}')" title="Modifier">
+                        <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="action-btn" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
+                    <button class="action-btn duplicate" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
                         <i class="fas fa-copy"></i>
                     </button>
-                    <button class="action-btn" onclick="exportEvent('${event.id}')" title="Exporter">
-                        <i class="fas fa-download"></i>
+                    <button class="action-btn stats" onclick="viewEventStats('${event.id}')" title="Statistiques">
+                        <i class="fas fa-chart-bar"></i>
                     </button>
                     <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
-                        <i class="fas fa-trash"></i>
+                        <i class="bi bi-trash3"></i>
                     </button>
                 </div>
             </div>
         </div>
     `;
 }
+
+
+async function viewEventStats(eventId) {
+    const event = storage.getEventById(eventId);
+    if (!event) {
+        showError('Événement introuvable');
+        return;
+    }
+    
+    const stats = await storage.getEventStatistics(eventId);
+    
+    const html = `
+        <div class="event-stats-modal">
+            <h3>${event.name}</h3>
+            <p><i class="fas fa-calendar-alt"></i> ${new Date(event.date).toLocaleDateString('fr-FR')}</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">${stats.guests.total}</div>
+                    <div class="stat-label">Invités total</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value">${stats.guests.scanned}</div>
+                    <div class="stat-label">Présents</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value">${stats.guests.pending}</div>
+                    <div class="stat-label">En attente</div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-value">${stats.scanRate}%</div>
+                    <div class="stat-label">Taux scan</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.scans.total}</div>
+                    <div class="stat-label">Scans total</div>
+                </div>
+                ${event.capacity ? `
+                <div class="stat-card">
+                    <div class="stat-value">${Math.round((stats.guests.total / event.capacity) * 100)}%</div>
+                    <div class="stat-label">Remplissage</div>
+                </div>` : ''}
+            </div>
+            
+            <div class="stats-chart">
+                <canvas id="eventStatsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    `;
+    
+    await Swal.fire({
+        title: '📊 Statistiques',
+        html,
+        width: '600px',
+        confirmButtonText: 'Fermer',
+        didOpen: () => {
+            // Initialiser un graphique simple
+            const ctx = document.getElementById('eventStatsChart')?.getContext('2d');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Présents', 'En attente'],
+                        datasets: [{
+                            data: [stats.scannedGuests, stats.pendingGuests],
+                            backgroundColor: ['#10B981', '#F59E0B']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });
+}
+
 
 // ═══════════════════════════════════════════════════════════════
 // 🔄 MISE À JOUR GRANULAIRE DES CARTES
@@ -520,7 +650,10 @@ async function updateEventCardIfNeeded(event) {
         oldEvent.location !== event.location ||
         oldEvent.type !== event.type ||
         oldEvent.capacity !== event.capacity ||
-        oldEvent.active !== event.active;
+        oldEvent.active !== event.active ||
+        oldEvent.status !== event.status ||
+        JSON.stringify(oldEvent.design) !== JSON.stringify(event.design) ||
+        JSON.stringify(oldEvent.metadata) !== JSON.stringify(event.metadata);
 
     if (needsFullUpdate) {
         replaceEventCard(event);
@@ -528,6 +661,8 @@ async function updateEventCardIfNeeded(event) {
         updateEventStats(event.id);
     }
 }
+
+window.viewEventStats = viewEventStats;
 
 function replaceEventCard(event) {
     const card = eventCardCache.get(event.id);
@@ -759,9 +894,10 @@ function openEventModal(eventId = null) {
     document.getElementById('eventId').value = '';
     document.getElementById('eventActive').checked = true;
 
-    if (eventId) {
+  /*  if (eventId) {
         const event = storage.getEventById(eventId);
         if (event) {
+            // Remplir les champs de base
             document.getElementById('eventId').value = event.id || '';
             document.getElementById('eventName').value = event.name || '';
             document.getElementById('eventDate').value = event.date || '';
@@ -773,15 +909,43 @@ function openEventModal(eventId = null) {
             document.getElementById('eventWelcomeMessage').value = event.welcomeMessage || '';
             document.getElementById('eventActive').checked = event.active !== false;
             
-            title.innerHTML = '<i class="fas fa-edit"></i> Modifier l\'événement';
+            // Remplir les nouveaux champs (si disponibles)
+            if (event.settings) {
+               //document.getElementById('eventAllowRegistration')?.checked = event.settings.allowGuestRegistration !== false;
+               // document.getElementById('eventRequireApproval')?.checked = event.settings.requireApproval === true;
+               // document.getElementById('eventMaxGuestsPerUser')?.value = event.settings.maxGuestsPerUser || 5;
+            }
+            
+            if (event.design) {
+              //  document.getElementById('eventPrimaryColor')?.value = event.design.primaryColor || '#D97706';
+              //  document.getElementById('eventTheme')?.value = event.design.theme || 'modern';
+            }
+            
+            if (event.metadata) {
+             //   document.getElementById('eventCategory')?.value = event.metadata.category || 'general';
+               // document.getElementById('eventTags')?.value = event.metadata.tags?.join(', ') || '';
+               // document.getElementById('eventTimezone')?.value = event.metadata.timezone || 'Africa/Douala';
+            }
+            
+            title.innerHTML = '<i class="bi bi-pencil-square"></i> Modifier l\'événement';
         }
     } else {
+        // Valeurs par défaut pour un nouvel événement
+      //  document.getElementById('eventAllowRegistration')?.checked = true;
+       // document.getElementById('eventRequireApproval')?.checked = false;
+       // document.getElementById('eventMaxGuestsPerUser')?.value = 5;
+       // document.getElementById('eventPrimaryColor')?.value = '#D97706';
+       // document.getElementById('eventTheme')?.value = 'modern';
+       // document.getElementById('eventCategory')?.value = 'general';
+       // document.getElementById('eventTimezone')?.value = 'Africa/Douala';
+        
         title.innerHTML = '<i class="fas fa-calendar-plus"></i> Créer un événement';
-    }
+    }*/
 
     modal.classList.add('active');
     document.getElementById('eventName')?.focus();
 }
+
 
 function closeEventModal() {
     const modal = document.getElementById('eventModal');
@@ -794,14 +958,15 @@ function closeEventModal() {
 function validateEventForm(formData) {
     const errors = [];
 
+    // Validation du nom
     if (!formData.name || formData.name.trim().length < 3) {
         errors.push('Le nom de l\'événement doit contenir au moins 3 caractères.');
     }
-
     if (formData.name && formData.name.length > 100) {
         errors.push('Le nom de l\'événement ne peut pas dépasser 100 caractères.');
     }
 
+    // Validation de la date
     if (!formData.date) {
         errors.push('La date de l\'événement est obligatoire.');
     } else {
@@ -810,10 +975,13 @@ function validateEventForm(formData) {
         now.setHours(0, 0, 0, 0);
         
         if (eventDate < now) {
-            errors.push('La date de l\'événement ne peut pas être dans le passé.');
+            if (!formData.id) { 
+                errors.push('La date de l\'événement ne peut pas être dans le passé.');
+            }
         }
     }
 
+    // Validation de l'heure
     if (formData.time) {
         const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
         if (!timeRegex.test(formData.time)) {
@@ -824,15 +992,16 @@ function validateEventForm(formData) {
     if (!formData.location || formData.location.trim().length < 3) {
         errors.push('Le lieu de l\'événement doit contenir au moins 3 caractères.');
     }
-
     if (formData.location && formData.location.length > 200) {
         errors.push('Le lieu ne peut pas dépasser 200 caractères.');
     }
 
-    if (!formData.type || !['marriage', 'anniversaire', 'conference', 'autre'].includes(formData.type)) {
+    // Validation du type
+    if (!formData.type || !['marriage', 'anniversaire', 'conference', 'corporate', 'concert', 'gala', 'football', 'autre'].includes(formData.type)) {
         errors.push('Veuillez sélectionner un type d\'événement valide.');
     }
 
+    // Validation de la capacité
     if (formData.capacity) {
         const capacity = parseInt(formData.capacity);
         if (isNaN(capacity) || capacity < 1) {
@@ -842,16 +1011,33 @@ function validateEventForm(formData) {
         }
     }
 
+    // Validation de la description
     if (formData.description && formData.description.length > 1000) {
         errors.push('La description ne peut pas dépasser 1000 caractères.');
     }
 
+    // Validation du message de bienvenue
     if (formData.welcomeMessage && formData.welcomeMessage.length > 500) {
         errors.push('Le message de bienvenue ne peut pas dépasser 500 caractères.');
     }
 
+    // Validation des paramètres (si fournis)
+    if (formData.settings) {
+        if (formData.settings.maxGuestsPerUser && (formData.settings.maxGuestsPerUser < 1 || formData.settings.maxGuestsPerUser > 50)) {
+            errors.push('Le nombre maximum d\'invités par utilisateur doit être entre 1 et 50.');
+        }
+    }
+
+    // Validation du design (si fourni)
+    if (formData.design) {
+        if (formData.design.primaryColor && !/^#[0-9A-F]{6}$/i.test(formData.design.primaryColor)) {
+            errors.push('La couleur principale doit être au format hexadécimal (ex: #D97706).');
+        }
+    }
+
     return errors;
 }
+
 
 async function checkEventUniqueness(name, date, currentEventId = null) {
     const existing = storage.data.events.find(e => 
@@ -878,9 +1064,18 @@ async function handleEventSubmit(e) {
     const capacity = capacityRaw === '' ? null : parseInt(capacityRaw, 10);
     const location = (document.getElementById('eventLocation')?.value || '').trim();
     const description = (document.getElementById('eventDescription')?.value || '').trim();
-    // NOTE: dans events.html l'ID du textarea est "welcomeMessage"
-    const welcomeMessage = (document.getElementById('welcomeMessage')?.value || '').trim();
+    const welcomeMessage = (document.getElementById('eventWelcomeMessage')?.value || '').trim();
     const active = !!document.getElementById('eventActive')?.checked;
+
+    // Récupérer les nouveaux champs
+    const allowRegistration = document.getElementById('eventAllowRegistration')?.checked !== false;
+    const requireApproval = document.getElementById('eventRequireApproval')?.checked === true;
+    const maxGuestsPerUser = parseInt(document.getElementById('eventMaxGuestsPerUser')?.value) || 5;
+    const primaryColor = (document.getElementById('eventPrimaryColor')?.value || '#D97706').trim();
+    const theme = (document.getElementById('eventTheme')?.value || 'modern').trim();
+    const category = (document.getElementById('eventCategory')?.value || 'general').trim();
+    const tags = (document.getElementById('eventTags')?.value || '').split(',').map(tag => tag.trim()).filter(tag => tag);
+    const timezone = (document.getElementById('eventTimezone')?.value || 'Africa/Douala').trim();
 
     const eventData = {
         name,
@@ -891,7 +1086,35 @@ async function handleEventSubmit(e) {
         location,
         description,
         welcomeMessage,
-        active
+        active,
+        organizerId: storage.user?.id,
+        settings: {
+            allowGuestRegistration: allowRegistration,
+            requireApproval,
+            maxGuestsPerUser,
+            allowQRSharing: true,
+            autoGenerateQRCodes: false,
+            enablePhotoGallery: false,
+            enableGuestMessages: false,
+            enableTableQR: false
+        },
+        
+        design: {
+            primaryColor,
+            secondaryColor: '#3B82F6',
+            backgroundImage: null,
+            logo: null,
+            theme
+        },
+        
+        metadata: {
+            tags,
+            category,
+            visibility: 'private',
+            timezone,
+            createdBy: storage.user?.id || null,
+            createdBy: storage.user?.id
+        }
     };
 
     // Validation
@@ -906,6 +1129,7 @@ async function handleEventSubmit(e) {
         return;
     }
 
+    // Vérifier l'unicité (seulement pour les nouveaux événements)
     if (!eventId) {
         const isUnique = await checkEventUniqueness(eventData.name, eventData.date);
         if (!isUnique) {
@@ -929,6 +1153,8 @@ async function handleEventSubmit(e) {
                 ${eventData.time ? `<p><strong>Heure :</strong> ${escapeHtml(eventData.time)}</p>` : ''}
                 <p><strong>Lieu :</strong> ${escapeHtml(eventData.location || '-')}</p>
                 ${eventData.capacity ? `<p><strong>Capacité :</strong> ${eventData.capacity} personnes</p>` : ''}
+                ${eventData.type ? `<p><strong>Type :</strong> ${escapeHtml(eventData.type)}</p>` : ''}
+                <p><strong>Catégorie :</strong> ${escapeHtml(eventData.metadata.category)}</p>
             </div>
             <hr>
             <p>Voulez-vous vraiment ${eventId ? 'modifier' : 'créer'} cet événement ?</p>
@@ -1224,13 +1450,14 @@ async function deleteEvent(eventId) {
         `,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: '<i class="fas fa-trash"></i> Supprimer',
+        confirmButtonText: '<i class="bi bi-trash3"></i> Supprimer',
         cancelButtonText: 'Annuler',
         confirmButtonColor: '#EF4444',
         cancelButtonColor: '#6c757d',
         reverseButtons: true,
         input: 'checkbox',
         inputPlaceholder: 'Je comprends que cette action est irréversible',
+        inputBackground: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
         inputValidator: (result) => {
             return !result && 'Vous devez confirmer la suppression';
         }
@@ -1298,7 +1525,8 @@ function editEvent(eventId) {
         showError('Événement introuvable');
         return;
     }
-    openEventModal(eventId);
+    window.location.href = `event?id=${eventId}`;
+            
 }
 
 async function showError(message) {

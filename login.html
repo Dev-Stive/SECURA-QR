@@ -7,38 +7,73 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+
+    <link rel="preload" href="js/auth-check.js" as="script">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/dash.css">
+    <link rel="stylesheet" href="css/toastify.css">
+
+    <link rel="preload" href="js/auth-check.js" as="script">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        :root {
+        
+          :root {
             --primary: #D97706; --primary-dark: #B45309; --primary-light: #F59E0B;
             --dark: #0A0A0A; --dark-card: #121212; --dark-elevated: #1A1A1A;
             --gradient: linear-gradient(135deg, #B45309 0%, #D97706 50%, #F59E0B 100%);
             --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             --success: #10B981; --danger: #EF4444; --warning: #F59E0B;
-            --border-radius: 18px; --border-radius-sm: 12px;
-            --card-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            --border-radius: 16px; --border-radius-sm: 10px;
+            --card-shadow: 0 12px 40px rgba(0,0,0,0.4);
         }
 
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--dark);
-            color: #fff;
+            color: #fff !important;
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            flex-direction: column;
             background-image:
                 radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.15) 0%, transparent 30%),
-                radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.15) 0%, transparent 30%),
-                radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
-            overflow: hidden;
-            position: relative;
+                radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.15) 0%, transparent 30%);
+            overflow-x: hidden;
         }
+
+        .logo-section {
+            color: white !important;
+        }
+
+
+
+        
+
+
+        /* === PANEL DE PROGRESSION (GAUCHE) === */
+        .progress-panel {
+            flex: 0 0 300px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.08);
+        }
+
 
         /* === PARTICULES D'ARRIÈRE-PLAN === */
         #particles-js {
@@ -51,57 +86,25 @@
 
         /* === CONTENEUR PRINCIPAL === */
         .login-container {
-            position: relative;
             z-index: 1;
             max-width: 480px;
             width: 100%;
-            background: linear-gradient(145deg, var(--dark-elevated) 0%, var(--dark-card) 100%);
             border-radius: var(--border-radius);
-            padding: 50px 40px;
-            border: 1px solid rgba(255,255,255,0.1);
+        
             box-shadow: var(--card-shadow);
             backdrop-filter: blur(20px);
-            animation: fadeInUp 0.6s ease-out;
+            overflow: hidden;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
+        
         }
 
-        /* === LOGO ANIMÉ === */
-        .logo-container {
-            position: relative;
-            width: 110px; height: 110px;
-            margin: 0 auto 28px;
-        }
 
-        .logo-ring {
-            position: absolute; inset: 0;
-            border-radius: 50%;
-            background: var(--gradient);
-            animation: pulse 3s ease-in-out infinite;
-            box-shadow: 0 0 30px rgba(217, 119, 6, 0.4);
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.15); opacity: 0.8; }
-        }
-
-        .logo-icon {
-            position: relative;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3.2rem;
-            backdrop-filter: blur(12px);
-            border: 3px solid rgba(255,255,255,0.15);
-            color: white;
-        }
+      
 
         /* === TYPOGRAPHIE === */
         .login-title {
@@ -137,16 +140,21 @@
             z-index: 2;
         }
 
-        .form-control {
-            width: 100%; background: rgba(255,255,255,0.06);
-            border: 2px solid rgba(255,255,255,0.12); color: white;
-            padding: 17px 20px 17px 54px; border-radius: 16px;
-            font-size: 1.02rem; transition: var(--transition);
+
+        .form-controle {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1.5px solid rgba(255,255,255,0.12);
+            color: white;
+            padding: 12px 16px 12px 44px;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.95rem;
+            
             font-family: inherit;
         }
 
-        .form-control::placeholder { color: rgba(255,255,255,0.4); }
-        .form-control:focus {
+        .form-controle::placeholder { color: rgba(255,255,255,0.4); }
+        .form-controle:focus {
             outline: none; border-color: var(--primary);
             background: rgba(255,255,255,0.09);
             box-shadow: 0 0 0 5px rgba(217, 119, 6, 0.15);
@@ -155,7 +163,7 @@
         .password-toggle {
             position: absolute; right: 18px; top: 50%;
             transform: translateY(-50%); color: rgba(255,255,255,0.55);
-            font-size: 1.25rem; cursor: pointer; transition: var(--transition);
+            font-size: 1.25rem; cursor: pointer; 
             z-index: 2;
         }
 
@@ -166,7 +174,7 @@
             width: 100%; background: var(--gradient); border: none;
             color: white; padding: 19px; border-radius: 16px;
             font-weight: 700; font-size: 1.15rem; cursor: pointer;
-            transition: var(--transition); text-transform: uppercase;
+             text-transform: uppercase;
             letter-spacing: 1.2px; display: flex; align-items: center;
             justify-content: center; gap: 12px; margin-top: 12px;
             box-shadow: 0 12px 35px rgba(217, 119, 6, 0.45);
@@ -201,20 +209,35 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* === LIEN INSCRIPTION === */
-        .register-link {
-            text-align: center; margin-top: 32px; padding-top: 28px;
+        /* === LIENS === */
+        .links-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            padding-top: 25px;
             border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .link-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .link-item a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
             font-size: 0.95rem;
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .register-link a {
-            color: var(--primary-light); text-decoration: none; font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .register-link a:hover {
-            color: white; text-decoration: underline;
+        .link-item a:hover {
+            color: white;
+            text-decoration: underline;
         }
 
         /* === ACCESSIBILITÉ === */
@@ -228,25 +251,54 @@
         @media (max-width: 576px) {
             .login-container { padding: 40px 25px; border-radius: var(--border-radius-sm); }
             .login-title { font-size: 2.3rem; }
-            .logo-container { width: 90px; height: 90px; }
-            .logo-icon { font-size: 2.6rem; }
+            .logo-container { width: 90px; height: 90px; border: none; background: none;}
         }
     </style>
+    
+    
 </head>
-<body>
 
+<body class="light-theme">
     <!-- Particules -->
     <div id="particles-js"></div>
 
-    <div class="login-container" role="main" aria-labelledby="login-title">
-        <div class="text-center mb-4">
-            <div class="logo-container" aria-hidden="true">
-                <div class="logo-ring"></div>
+        
+    <!-- Top Bar -->
+       <header class="header">
+        <div class="header-content">
+
+            <a href="index.html" class="logo-section access-header-left" style="text-decoration: none;">
                 <div class="logo-icon">
-                    <i class="bi bi-shield-lock-fill"></i>
+                    <img src="assets/images/icon.png" alt="logo secura">
                 </div>
+                <div class="logo-text">
+                    <h1>SECURA</h1>
+                    <p>Connexion</p>
+                </div>
+            </a>
+
+            <div class="header-actions">
+
+                <a href="index.html" class="home-btn">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil</span>
+                </a>
+
+                
+
             </div>
-            <h1 id="login-title" class="login-title">SECURA</h1>
+                </div>
+    </header>
+
+
+    <div class="login-container" role="main" aria-labelledby="login-title">
+
+      
+
+    
+        <div class="text-center mb-4">
+            
+            <h1 id="login-title" class="login-title">Connexion</h1>
             <p class="login-subtitle">Accédez à votre gestion d'événements en toute sécurité</p>
         </div>
 
@@ -254,13 +306,13 @@
             <div class="form-group">
                 <label for="username" class="form-label">
                     <i class="bi bi-person-circle" aria-hidden="true"></i>
-                    <span class="">Adresse e-mail</span>
+                    <span>Adresse e-mail</span>
                 </label>
                 <div class="input-wrapper">
                     <input
                         type="email"
                         id="username"
-                        class="form-control"
+                        class="form-controle"
                         placeholder="votre@email.com"
                         required
                         autocomplete="username"
@@ -274,13 +326,13 @@
             <div class="form-group">
                 <label for="password" class="form-label">
                     <i class="bi bi-lock" aria-hidden="true"></i>
-                    <span class="">Mot de passe</span>
+                    <span>Mot de passe</span>
                 </label>
                 <div class="input-wrapper">
                     <input
                         type="password"
                         id="password"
-                        class="form-control"
+                        class="form-controle"
                         placeholder="••••••••"
                         required
                         autocomplete="current-password"
@@ -299,196 +351,173 @@
             </button>
         </form>
 
-        <div class="register-link">
-            <p>Pas encore de compte ? <a href="/register.html">Créer un compte</a></p>
+        <div class="links-container">
+            <div class="link-item">
+                <a href="/register.html">
+                    <i class="bi bi-person-plus"></i>
+                    Créer un compte
+                </a>
+            </div>
+            <div class="link-item">
+                <a href="/forgot-password.html">
+                    <i class="bi bi-key"></i>
+                    Mot de passe oublié ?
+                </a>
+            </div>
         </div>
     </div>
-
-    <!-- Scripts -->
-    <script src="js/particles-config.js"></script>
-   
-
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-
-    // === REDIRECTION SI DÉJÀ CONNECTÉ ===
-    (() => {
-        
-        const token =  localStorage.getItem('secura_token');
-        if (!token) return;
-
-        
-
-        const result =  apiRequest(ME_ENDPOINT);
-        if (result.success && result.user) {
-            window.location.href = '/index.html';
-        } else {
-            removeToken();
-        }
-    })();
-
-
-    // ═══════════════════════════════════════════════════════════════
-    // 🔐 SECURA LOGIN - SCRIPT AUTONOME (SANS storage.js)
-    // ═══════════════════════════════════════════════════════════════
- const API_URL = 'https://secura-qr.onrender.com/api';
-
-   //const API_URL = 'http://localhost:3000/api';
-    const LOGIN_ENDPOINT = '/auth/login';
-    const ME_ENDPOINT = '/auth/me';
-
-    // Éléments DOM
-    const form = document.getElementById('login-form');
-    const emailInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const toggleBtn = document.getElementById('togglePassword');
-    const submitBtn = document.getElementById('login-btn');
-    const btnText = document.getElementById('login-text');
-    const spinner = document.getElementById('login-spinner');
-
-    // État
-    let isSubmitting = false;
-
-    // === UTILS ===
-    const setLoading = (loading) => {
-        isSubmitting = loading;
-        submitBtn.disabled = loading;
-        btnText.style.display = loading ? 'none' : 'inline';
-        spinner.style.display = loading ? 'inline-block' : 'none';
-    };
-
-    const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-    const saveToken = (token) => localStorage.setItem('secura_token', token);
-    const getToken = () => localStorage.getItem('secura_token');
-    const removeToken = () => localStorage.removeItem('secura_token');
-
-    const apiRequest = async (endpoint, options = {}) => {
-        const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers
-        };
-
-        const token = getToken();
-        if (token && !endpoint.includes('/auth/')) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        try {
-            const res = await fetch(url, { ...options, headers });
-            const data = await res.json().catch(() => ({}));
-
-            if (!res.ok) {
-                throw new Error(data.message || data.error || `HTTP ${res.status}`);
-            }
-            return { success: true, ...data };
-        } catch (err) {
-            console.error('API Error:', err);
-            return { success: false, message: err.message };
-        }
-    };
-
     
 
-    // === TOGGLE PASSWORD ===
-    toggleBtn?.addEventListener('click', () => togglePasswordVisibility());
-    toggleBtn?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            togglePasswordVisibility();
-        }
-    });
+    <!-- Scripts -->
 
-    function togglePasswordVisibility() {
-        const isPassword = passwordInput.type === 'password';
-        passwordInput.type = isPassword ? 'text' : 'password';
-        toggleBtn.classList.replace(isPassword ? 'bi-eye' : 'bi-eye-slash', isPassword ? 'bi-eye-slash' : 'bi-eye');
-        toggleBtn.setAttribute('aria-label', isPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
-    }
-
-    // === FORM SUBMIT ===
-    form?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (isSubmitting) return;
-
-        const email = emailInput?.value.trim();
-        const password = passwordInput?.value;
-
-        // Validation
-        if (!email || !password) {
-            await Swal.fire({
-                icon: 'warning',
-                title: 'Champs requis',
-                text: 'Veuillez remplir l’e-mail et le mot de passe.',
-                confirmButtonColor: '#D97706'
-            });
-            return;
-        }
-
-        if (!isValidEmail(email)) {
-            await Swal.fire({
-                icon: 'error',
-                title: 'E-mail invalide',
-                text: 'Veuillez entrer une adresse e-mail correcte.',
-                confirmButtonColor: '#D97706'
-            });
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            const result = await apiRequest(LOGIN_ENDPOINT, {
-                method: 'POST',
-                body: JSON.stringify({ email, password })
-            });
-
-            if (result.success) {
-                saveToken(result.token);
-                const name = result.user?.firstName
-                    ? `${result.user.firstName} ${result.user.lastName || ''}`.trim()
-                    : email.split('@')[0];
-
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Connexion réussie !',
-                    text: `Bienvenue, ${name} !`,
-                    timer: 1800,
-                    timerProgressBar: true,
-                    showConfirmButton: false,
-                    willClose: () => {
-                        window.location.href = '/index.html';
+   
+    <script src="js/particles-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/auth-check.js"></script>
+    
+    <script>
+        // Vérifier si déjà connecté
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('secura_token');
+            if (token) {
+                // Vérifier le token
+                const valid = await authManager.verifyToken();
+                if (valid) {
+                    // Rediriger selon le rôle
+                    const user = JSON.parse(localStorage.getItem('secura_user'));
+                    if (user?.role === 'admin') {
+                        window.location.href = '/dashboard.html';
+                    } else {
+                        window.location.href = '/home.html';
                     }
-                });
-            } else {
-                const msg = result.message || 'E-mail ou mot de passe incorrect.';
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Échec de connexion',
-                    text: msg,
-                    confirmButtonText: 'Réessayer',
+                }
+            }
+            
+            // Focus sur le champ email
+            document.getElementById('username')?.focus();
+        });
+
+        // Éléments DOM
+        const form = document.getElementById('login-form');
+        const emailInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const toggleBtn = document.getElementById('togglePassword');
+        const submitBtn = document.getElementById('login-btn');
+        const btnText = document.getElementById('login-text');
+        const spinner = document.getElementById('login-spinner');
+
+        // État
+        let isSubmitting = false;
+
+        // === TOGGLE PASSWORD ===
+        toggleBtn?.addEventListener('click', () => togglePasswordVisibility());
+        toggleBtn?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                togglePasswordVisibility();
+            }
+        });
+
+        function togglePasswordVisibility() {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            toggleBtn.classList.replace(
+                isPassword ? 'bi-eye' : 'bi-eye-slash', 
+                isPassword ? 'bi-eye-slash' : 'bi-eye'
+            );
+            toggleBtn.setAttribute('aria-label', 
+                isPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+            );
+        }
+
+        // === FORM SUBMIT ===
+        form?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (isSubmitting) return;
+
+            const email = emailInput?.value.trim();
+            const password = passwordInput?.value;
+
+            // Validation
+            if (!email || !password) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Champs requis',
+                    text: 'Veuillez remplir l\'e-mail et le mot de passe.',
                     confirmButtonColor: '#D97706'
                 });
+                return;
             }
-        } catch (err) {
-            console.error('Login error:', err);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Erreur système',
-                text: 'Impossible de contacter le serveur. Vérifiez votre connexion.',
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#D97706'
-            });
-        } finally {
-            setLoading(false);
-        }
-    });
 
-    // === FOCUS AUTO SUR E-MAIL AU CHARGEMENT ===
-    document.addEventListener('DOMContentLoaded', () => {
-        emailInput?.focus();
-    });
-</script>
+            if (!authManager.isValidEmail(email)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'E-mail invalide',
+                    text: 'Veuillez entrer une adresse e-mail valide.',
+                    confirmButtonColor: '#D97706'
+                });
+                return;
+            }
+
+            // Désactiver le bouton
+            isSubmitting = true;
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'inline-block';
+
+            try {
+                const result = await authManager.login(email, password);
+                
+                if (result.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Connexion réussie !',
+                        text: `Bienvenue, ${result.user.firstName || email.split('@')[0]} !`,
+                        timer: 1800,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        willClose: () => {
+                            // Rediriger selon le rôle
+                            if (result.user.role === 'admin') {
+                                window.location.href = '/dashboard.html';
+                            } else {
+                                window.location.href = '/home.html';
+                            }
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Échec de connexion',
+                        text: result.message || 'Identifiants incorrects',
+                        confirmButtonText: 'Réessayer',
+                        confirmButtonColor: '#D97706'
+                    });
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur système',
+                    text: 'Impossible de contacter le serveur. Vérifiez votre connexion.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#D97706'
+                });
+            } finally {
+                // Réactiver le bouton
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                spinner.style.display = 'none';
+            }
+        });
+
+        // === FOCUS AUTO SUR E-MAIL AU CHARGEMENT ===
+        document.addEventListener('DOMContentLoaded', () => {
+            emailInput?.focus();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="js/toastify.js"></script>
 </body>
 </html>

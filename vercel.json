@@ -1,12 +1,55 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "./",
   "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/index", "destination": "/index.html" },
     { "source": "/login", "destination": "/login.html" },
     { "source": "/register", "destination": "/register.html" },
+    { "source": "/forgot-password", "destination": "/forgot-password.html" },
+    { "source": "/access", "destination": "/access.html" },
+    { "source": "/home", "destination": "/home.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/events", "destination": "/events.html" },
-    { "source": "/guests", "destination": "/guests.html" },
     { "source": "/events-list", "destination": "/events-list.html" },
+    { "source": "/event", "destination": "/event.html" },
+    { "source": "/event-info", "destination": "/event-info.html" },
+    { "source": "/guests", "destination": "/guests.html" },
+    { "source": "/tables", "destination": "/tables.html" },
+    { "source": "/table-info", "destination": "/table-info.html" },
     { "source": "/qr-generator", "destination": "/qr-generator.html" },
+    { "source": "/ticket-generator", "destination": "/ticket-generator.html" },
     { "source": "/scanner", "destination": "/scanner.html" },
-    { "source": "/", "destination": "/index.html" }
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/settings", "destination": "/settings.html" },
+    { "source": "/welcome", "destination": "/welcome/index.html" },
+    { "source": "/welcome/", "destination": "/welcome/index.html" },
+    { "source": "/welcome/dashboard", "destination": "/welcome/dashboard.html" },
+    { "source": "/welcome/scanner", "destination": "/welcome/scanner.html" },
+    { "source": "/welcome/guests", "destination": "/welcome/guests.html" },
+    { "source": "/welcome/tables", "destination": "/welcome/tables.html" },
+    { "source": "/welcome/info", "destination": "/welcome/info.html" },
+    { "source": "/404", "destination": "/404.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
   ]
 }

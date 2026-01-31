@@ -5,250 +5,2075 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="SECURA - Plateforme de gestion d'événements sécurisée avec QR Code">
     <title>SECURA - Gestion d'Événements Sécurisée</title>
+
+    
+    <!-- 🚀 Autres ressources essentielles -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/dash.css">
     
-<style>
+
+
+ <!-- Styles locaux -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/dash.css">
+    <link rel="stylesheet" href="css/toastify.css">
+    <link rel="stylesheet" href="css/index.css"/>
+
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary: #D97706;
+            --primary-dark: #B45309;
+            --primary-light: #F59E0B;
+            --secondary: #8B5CF6;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            
+            --dark: #0A0A0A;
+            --dark-card: #121212;
+            --dark-elevated: #1A1A1A;
+            --dark-border: #2A2A2A;
+            
+            --light: #FAFAFA;
+            --light-card: #FFFFFF;
+            --light-elevated: #F5F5F5;
+            --light-border: #E5E5E5;
+            
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            --radius-sm: 0.375rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ===== RESET & BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .light-theme {
+            background-color: var(--light);
+            color: var(--text-primary);
+        }
+
+        .dark-theme {
+            background-color: var(--dark);
+            color: white;
+        }
+
+        /* ===== HEADER PROFESSIONNEL ===== */
+        .guest-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            transition: var(--transition);
+        }
+
+        .dark-theme .guest-header {
+            background: rgba(26, 26, 26, 0.95);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .header-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(245, 158, 11, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(217, 119, 6, 0.3);
+        }
+
+        .header-logo img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title p {
+            font-size: 0.75rem;
+            margin: 2px 0 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-toggle-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--primary);
+            transform: rotate(15deg);
+            border-color: var(--primary);
+        }
+
+        .account-dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+        }
+
+        .dropdown-toggle::after {
+
+            content: none;
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+
+        .dropdown-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--light-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            min-width: 240px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 1001;
+            overflow: hidden;
+            border: 1px solid var(--light-border);
+        }
+
+        .dark-theme .dropdown-menu {
+            background: var(--dark-elevated);
+            border-color: var(--dark-border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: var(--transition);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+
+        .dark-theme .dropdown-item {
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(217, 119, 6, 0.1);
+            padding-left: 24px;
+        }
+
+        .dropdown-item.primary {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: rgba(0, 0, 0, 0.1);
+            margin: 8px 0;
+        }
+
+        .dark-theme .dropdown-divider {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== HERO SECTION ULTRA-PRO ===== */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 120px 20px 80px;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 26, 0.9) 100%),
+                url('https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            z-index: -1;
+        }
+
+        .dark-theme .hero-section::before {
+            background: 
+                linear-gradient(135deg, rgba(10, 10, 10, 0.98) 0%, rgba(26, 26, 26, 0.95) 100%),
+                url('https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+        }
+
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hero-content {
+            color: white;
+        }
+
+        .hero-content h1 {
+            font-size: 3.8rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-content p {
+            font-size: 1.25rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            max-width: 600px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .hero-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .hero-btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 15px 35px rgba(217, 119, 6, 0.3);
+        }
+
+        .hero-btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 45px rgba(217, 119, 6, 0.4);
+        }
+
+        .hero-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .hero-visual {
+            position: relative;
+            animation: fadeIn 0.8s ease-out 0.6s both;
+        }
+
+        .hero-image {
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .hero-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, 
+                rgba(217, 119, 6, 0.2) 0%,
+                transparent 50%,
+                rgba(139, 92, 246, 0.2) 100%);
+            z-index: 1;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .hero-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .qr-badge {
+            position: absolute;
+            bottom: -20px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            box-shadow: var(--shadow-xl);
+            animation: float 3s ease-in-out infinite;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark-theme .qr-badge {
+            background: rgba(26, 26, 26, 0.95);
+            color: white;
+        }
+
+        .qr-badge i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .qr-badge p {
+            font-weight: 600;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== FEATURES AUTO-SCROLL ===== */
+        .features-section {
+            padding: 100px 0;
+            background: var(--dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-theme .features-section {
+            background: var(--dark-card);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .dark-theme .section-header p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .features-track {
+            position: relative;
+            overflow-x: auto;
+            padding: 30px 0;
+            cursor: grab;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .features-track:active {
+    cursor: grabbing;
+}
+
+
+.features-track::-webkit-scrollbar {
+    display: none;
+}
 
 
 
+/* Ajouter des indicateurs de défilement */
+.features-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.features-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.features-indicator.active {
+    background: var(--primary);
+    transform: scale(1.2);
+}
+
+        .features-track::before,
+        .features-track::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 200px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .features-track::before {
+            left: 0;
+            background: linear-gradient(to right, var(--dark), transparent);
+        }
+
+        .features-track::after {
+            right: 0;
+            background: linear-gradient(to left, var(--dark), transparent);
+        }
+
+        .dark-theme .features-track::before {
+            background: linear-gradient(to right, var(--dark-card), transparent);
+        }
+
+        .dark-theme .features-track::after {
+            background: linear-gradient(to left, var(--dark-card), transparent);
+        }
+
+        .features-wrapper {
+            display: flex;
+            gap: 30px;
+            width: max-content;
+            animation: scrollAuto 40s linear infinite;
+        }
+
+        .features-wrapper:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollAuto {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .feature-item {
+            flex: 0 0 380px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(217, 119, 6, 0.2);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(245, 158, 11, 0.2));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .feature-icon i {
+            font-size: 2.2rem;
+            color: var(--primary);
+        }
+
+        .feature-item h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .feature-item p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+            margin: 0;
+        }
 
 
 
+    /* Animation seulement sur grand écran */
+    @media (min-width: 992px) {
+        .features-wrapper {
+            animation: scrollAuto 40s linear infinite;
+        }
+        
+        .features-wrapper:hover {
+            animation-play-state: paused;
+        }
+    }
+
+    /* Sur mobile : pas d'animation auto, défilement manuel */
+    @media (max-width: 991px) {
+        .features-wrapper {
+            animation: none;
+            padding: 0 20px;
+        }
+        
+        .features-track {
+            cursor: grab;
+        }
+        
+        .features-track::before,
+        .features-track::after {
+            width: 40px;
+        }
+    }
+
+        /* ===== TIMELINE SECTION ===== */
+        .timeline-section {
+            padding: 80px 0 60px 0;
+            background: var(--light);
+        }
+        .dark-theme .timeline-section {
+            background: var(--dark);
+        }
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 0 0 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 52%;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
+            transform: translateX(-50%);
+            border-radius: 3px;
+        }
+        .timeline-items-scroll {
+            display: flex;
+            flex-direction: row;
+            gap: 40px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 20px;
+        }
+        .timeline-item {
+            min-width: 350px;
+            max-width: 420px;
+            flex: 0 0 420px;
+            margin-bottom: 0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            scroll-snap-align: center;
+            background: none;
+        }
+        .timeline-content {
+            width: 100%;
+            background: var(--light-card);
+            border-radius: var(--radius-xl);
+            padding: 35px;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+            border: 1px solid var(--light-border);
+            margin-bottom: 20px;
+        }
+        .dark-theme .timeline-content {
+            background: var(--dark-elevated);
+            border-color: var(--dark-border);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        .timeline-content:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+        .timeline-marker {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border: 6px solid var(--light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            z-index: 1;
+            margin-bottom: 10px;
+            box-shadow: 0 0 0 8px rgba(217, 119, 6, 0.2);
+        }
+        .dark-theme .timeline-marker {
+            border-color: var(--dark);
+        }
+        .timeline-content h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .timeline-content p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .dark-theme .timeline-content p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .timeline-image {
+            width: 100%;
+            height: 180px;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .timeline-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .timeline-image:hover img {
+            transform: scale(1.05);
+        }
+        /* Responsive timeline: alternance sur grand écran, scroll horizontal sur mobile */
+        @media (min-width: 992px) {
+            .timeline-items-scroll {
+                flex-direction: column;
+                gap: 0;
+                overflow-x: unset;
+                scroll-snap-type: none;
+            }
+            .timeline-item {
+                flex-direction: row;
+                align-items: flex-start;
+                min-width: unset;
+                max-width: unset;
+                margin-bottom: 80px;
+                scroll-snap-align: unset;
+            }
+            .timeline-item:nth-child(odd) {
+                flex-direction: row;
+            }
+            .timeline-item:nth-child(even) {
+                flex-direction: row-reverse;
+            }
+            .timeline-content {
+                width: 45%;
+                margin-bottom: 0;
+            }
+            .timeline-marker {
+                margin: 0 30px;
+            }
+        }
+
+        /* Amélioration mobile et moyen écran : colonne unique, centrage, padding adapté */
+        @media (max-width: 991px) {
+            .timeline {
+                padding: 10px 0 0 0;
+            }
+            .timeline-items-scroll {
+                flex-direction: column;
+                gap: 32px;
+                overflow-x: unset;
+                scroll-snap-type: none;
+                align-items: center;
+            }
+            .timeline-item {
+                min-width: unset;
+                max-width: 500px;
+                width: 100%;
+                flex: 1 1 100%;
+                margin-bottom: 0;
+                flex-direction: column;
+                align-items: center;
+                scroll-snap-align: unset;
+                padding: 0 10px;
+            }
+            .timeline-content {
+                width: 100%;
+                margin-bottom: 10px;
+                padding: 24px 16px;
+            }
+            .timeline-marker {
+                margin-bottom: 10px;
+            }
+        }
+        @media (max-width: 576px) {
+            .timeline-section {
+                padding: 40px 0 30px 0;
+            }
+            .timeline-content {
+                padding: 16px 6px;
+                font-size: 0.98rem;
+            }
+            .timeline-marker {
+                width: 38px;
+                height: 38px;
+                font-size: 1rem;
+            }
+            .timeline-image {
+                height: 120px;
+            }
+        }
+        
+        /* Header colonne sur mobile */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: row;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        /* ===== EVENTS SECTION ===== */
+        .events-section {
+            padding: 100px 0;
+            background: var(--dark-card);
+        }
+
+        .dark-theme .events-section {
+            background: var(--dark-elevated);
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .event-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+
+        .event-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 25px 60px rgba(217, 119, 6, 0.2);
+        }
+
+        .event-image {
+            height: 250px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .event-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        }
+
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .event-card:hover .event-image img {
+            transform: scale(1.1);
+        }
+
+        .event-content {
+            padding: 30px;
+        }
+
+        .event-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .event-content h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .event-content p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .event-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .event-feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .event-feature i {
+            color: var(--primary);
+        }
+
+        /* ===== CTA SECTION ===== */
+        .cta-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-container h2 {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .cta-container p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 35px;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .cta-btn-primary {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-btn-primary:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--dark);
+            color: white;
+            padding-top: 80px;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        }
+
+        .footer-top {
+            padding-bottom: 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .footer-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(245, 158, 11, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(217, 119, 6, 0.3);
+        }
+
+        .footer-logo img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .footer-title h3 {
+            font-size: 1.8rem;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-title p {
+            font-size: 0.9rem;
+            margin: 5px 0 0;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .footer-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 25px;
+            max-width: 300px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .footer h4 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .newsletter-form {
+            margin-top: 20px;
+        }
+
+        .newsletter-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .newsletter-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .newsletter-btn {
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .newsletter-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .footer-bottom {
+            padding: 30px 0;
+        }
+
+        .copyright {
+            color: rgba(255, 255, 255, 0.5);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 25px;
+            justify-content: flex-end;
+        }
+
+        .footer-legal a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .footer-legal a:hover {
+            color: var(--primary);
+        }
+
+        /* ===== SCROLL TO TOP ===== */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 999;
+            box-shadow: 0 5px 20px rgba(217, 119, 6, 0.3);
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 8px 25px rgba(217, 119, 6, 0.4);
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 1200px) {
+            .hero-container {
+                gap: 60px;
+            }
+            
+            .hero-content h1 {
+                font-size: 3.2rem;
+            }
+            
+            .feature-item {
+                flex: 0 0 340px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 50px;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.8rem;
+            }
+            
+            .hero-content p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            .hero-actions {
+                justify-content: center;
+            }
+            
+             .timeline-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .timeline-item:nth-child(odd) {
+        flex-direction: row;
+    }
+    
+    .timeline-item:nth-child(even) {
+        flex-direction: row-reverse;
+    }
+    
+    .timeline-content {
+        width: 45%;
+        position: relative;
+    }
+    
+    .timeline-item:nth-child(odd) .timeline-content {
+        text-align: right;
+        padding-right: 40px;
+    }
+    
+    .timeline-item:nth-child(even) .timeline-content {
+        text-align: left;
+        padding-left: 40px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        margin: 0;
+    }
+    
+    /* Ajouter des flèches directionnelles */
+    .timeline-item:nth-child(odd) .timeline-content::after {
+        content: '';
+        position: absolute;
+        right: -10px;
+        top: 30px;
+        width: 0;
+        height: 0;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        border-left: 10px solid var(--light-card);
+    }
+    
+    .dark-theme .timeline-item:nth-child(odd) .timeline-content::after {
+        border-left-color: var(--dark-elevated);
+    }
+    
+    .timeline-item:nth-child(even) .timeline-content::before {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 30px;
+        width: 0;
+        height: 0;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        border-right: 10px solid var(--light-card);
+    }
+    
+    .dark-theme .timeline-item:nth-child(even) .timeline-content::before {
+        border-right-color: var(--dark-elevated);
+    }
+            
+            .features-track::before,
+            .features-track::after {
+                width: 100px;
+            }
+        }
 
 
-</style>
+
+/* Sur mobile : version colonne unique */
+@media (max-width: 991px) {
+    .timeline::before {
+        left: 100px;
+    }
+    
+    .timeline-item {
+        padding-left: 70px;
+    }
+    
+    .timeline-content {
+        width: 100%;
+        text-align: left;
+        padding: 25px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: 30px;
+        transform: translateX(-50%);
+        margin: 0;
+    }
+    
+    /* Cacher les contenus vides */
+    .timeline-content[style*="visibility: hidden"] {
+        display: none;
+    }
+}
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 100px 20px 60px;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.3rem;
+            }
+            
+            .hero-content p {
+                font-size: 1.1rem;
+            }
+            
+            .hero-btn {
+                padding: 14px 28px;
+                font-size: 1rem;
+            }
+            
+            .section-header h2 {
+                font-size: 2.5rem;
+            }
+            
+            .feature-item {
+                flex: 0 0 320px;
+                padding: 30px;
+            }
+            
+            .dropdown-toggle span {
+                display: none;
+            }
+            
+            .dropdown-toggle {
+                padding: 10px 15px;
+            }
+            
+            .cta-container h2 {
+                font-size: 2.3rem;
+            }
+            
+            .cta-btn {
+                padding: 16px 25px;
+                font-size: 1rem;
+            }
+            
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-legal {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+            
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .hero-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .section-header h2 {
+                font-size: 2rem;
+            }
+            
+            .feature-item {
+                flex: 0 0 280px;
+                padding: 25px;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .cta-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .footer {
+                padding-top: 60px;
+            }
+            
+            .footer-top > div {
+                margin-bottom: 30px;
+            }
+            
+            .newsletter-input-group {
+                flex-direction: column;
+            }
+            
+            .scroll-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-container {
+                padding: 0 15px;
+            }
+            
+            .header-logo {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .header-logo img {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .hero-content h1 {
+                font-size: 1.8rem;
+            }
+            
+            .hero-content p {
+                font-size: 1rem;
+            }
+            
+            .feature-item {
+                flex: 0 0 260px;
+                padding: 20px;
+            }
+            
+            .timeline-content {
+                padding: 25px;
+            }
+            
+            .timeline-marker {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        /* ===== LOADING STATES ===== */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
 </head>
+
 <body class="light-theme">
-    <!-- Particles Background -->
-    <div id="particles-js"></div>
 
+        <div id="particles-js"></div>
 
- <!-- Header Premium -->
-<header class="header">
-    <div class="header-content">
-        <div class="logo-section">
-            <div class="logo-icon">
-                <img src="assets/images/icon.png" alt="logo secura">
-            </div>
-            <div class="logo-text">
-                <h1>SECURA</h1>
-                <p>Tableau de Bord • Gestion Sécurisée</p>
-            </div>
-        </div>
-
-        <nav class="nav-menu" id="navMenu">
-            <a href="index.html" class="nav-link active">Accueil</a>
-            <a href="events.html" class="nav-link">Événements</a>
-            <a href="guests.html" class="nav-link">Invités</a>
-            <a href="qr-generator.html" class="nav-link">Générateur QR</a>
-            <a href="ticket-generator.html" class="nav-link">Billets</a>
-            <a href="scanner.html" class="nav-link">Scanner</a>
-        </nav>
-
-        <div class="header-actions">
-            <button class="theme-toggle" id="themeToggle" aria-label="Changer le thème">
-                <i class="fas fa-moon"></i>
-            </button>
-            <button class="fullscreen-toggle" id="fullscreenToggle" aria-label="Plein écran">
-                <i class="fas fa-expand"></i>
-            </button>
-            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-
-        <!-- BOUTON PROFIL DANS LE HEADER -->
-        <button class="profile-toggle header-profile-btn" id="profileToggle" aria-haspopup="true" aria-expanded="false">
-            <div class="profile-avatar">
-                <i class="bi bi-person-circle"></i>
-            </div>
-            <div class="profile-info">
-                <span class="profile-name" id="profileName">Chargement...</span>
-                <span class="profile-role" id="profileRole">Utilisateur</span>
-            </div>
-            <i class="bi bi-chevron-down profile-arrow"></i>
-        </button>
-    </div>
-</header>
-
-<!-- MENU PROFIL FLOTTANT (HORS HEADER) -->
-<div class="floating-profile-menu" id="floatingProfileMenu">
-    <div class="profile,-dropdown show" id="profileDropdown" role="menu">
-        <div class="profile-header">
-            <div class="profile-avatar large">
-                <i class="bi bi-person-circle"></i>
-            </div>
-            <div class="profile-details">
-                <strong id="dropdownName">Chargement...</strong>
-                <small id="dropdownEmail">email@exemple.com</small>
-                <span class="badge-role" id="dropdownRole">Utilisateur</span>
-            </div>
-        </div>
-
-        <div class="dropdown-actions">
-            <a href="profile.html" class="dropdown-item" role="menuitem">
-                <i class="bi bi-person"></i> Mon Profil
+    <!-- Header -->
+    <header class="guest-header">
+        <div class="header-container">
+            <a href="index.html" class="header-brand">
+                <div class="header-logo">
+                    <img src="assets/images/icon.png" alt="SECURA">
+                </div>
+                <div class="header-title">
+                    <h1>SECURA</h1>
+                    <p>Accès Événementiel</p>
+                </div>
             </a>
-            <a href="settings.html" class="dropdown-item" role="menuitem">
-                <i class="bi bi-gear"></i> Paramètres
-            </a>
-            <hr class="dropdown-divider">
-            <button class="dropdown-item text-danger" id="logout-btn" role="menuitem">
-                <i class="bi bi-box-arrow-right"></i> Déconnexion
-            </button>
-        </div>
-    </div>
-</div>
 
-    <!-- Hero Section -->
-  
+            <div class="header-actions">
 
-<!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content animate-fade-in">
-                <h1 class="hero-title">Bienvenue sur <span>SECURA</span></h1>
-                <p class="hero-subtitle">La plateforme complète pour gérer vos événements avec des QR Codes stylisés et sécurisés</p>
-                <div class="hero-features">
-                    <div class="feature-card">
-                        <i class="bi bi-calendar-event"></i>
-                        <h3>Créer des Événements</h3>
-                        <p>Mariages, anniversaires, conférences</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="bi bi-people"></i>
-                        <h3>Gérer les Invités</h3>
-                        <p>Import CSV, formulaire, export</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="bi bi-qr-code"></i>
-                        <h3>QR Codes Stylisés</h3>
-                        <p>Personnalisables et téléchargeables</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="bi bi-share"></i>
-                        <h3>Partage Facile</h3>
-                        <p>Email, SMS, téléchargement direct</p>
+                            <div class="theme-switch-footer">
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="themeSwitchFooter" aria-label="Basculer le thème">
+                                    <span class="theme-switch-slider">
+                                        <i class="fas fa-moon"></i>
+                                        <i class="fas fa-sun"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+
+                <div class="account-dropdown">
+                    <button class="dropdown-toggle" id="accountDropdown">
+                        <i class="fas fa-user"></i>
+                        <span>Mon Compte</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="login.html" class="dropdown-item">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Connexion
+                        </a>
+                        <a href="register.html" class="dropdown-item">
+                            <i class="fas fa-user-plus"></i>
+                            Inscription
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="access.html" class="dropdown-item primary">
+                            <i class="fas fa-ticket-alt"></i>
+                            Accéder à un événement
+                        </a>
                     </div>
                 </div>
-                <div class="hero-cta">
-                    <a href="events.html" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i>
-                        Créer un Événement
+            </div>
+        </div>
+    </header>
+<main class="main-content">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Vivez l'expérience événementielle ultime</h1>
+                <p>Accédez à vos événements en toute simplicité, gérez votre présence et profitez d'une expérience complète avec SECURA. Simple, sécurisé et intuitif.</p>
+                <div class="hero-actions">
+                    <a href="access.html" class="hero-btn hero-btn-primary">
+                        <i class="fas fa-qrcode"></i>
+                        Accéder à mon événement
                     </a>
-                    <a href="scanner.html" class="btn btn-secondary">
-                        <i class="bi bi-camera"></i>
-                        Scanner un QR Code
+                    <a href="#features" class="hero-btn hero-btn-secondary">
+                        <i class="fas fa-play-circle"></i>
+                        Découvrir SECURA
                     </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1545235617-9465d2a55698?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                         alt="Expérience événementielle SECURA">
+                    <div class="qr-badge">
+                        <i class="fas fa-qrcode"></i>
+                        <p>Scan QR Code</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-
-       <!-- STATS -->
-        <section class="stats-section">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-card animate-slide-up">
-                    <div class="stat-icon">
-                        <i class="bi bi-calendar-event"></i>
-                    </div>
-                    <div class="stat-value" id="totalEvents">0</div>
-                    <div class="stat-label">Événements</div>
-                </div>
-                <div class="stat-card animate-slide-up">
-                    <div class="stat-icon">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <div class="stat-value"  id="totalGuests">0</div>
-                    <div class="stat-label">Invités</div>
-                </div>
-                <div class="stat-card animate-slide-up">
-                    <div class="stat-icon">
-                        <i class="bi bi-qr-code"></i>
-                    </div>
-                    <div class="stat-value" id="totalQrCodes">0</div>
-                    <div class="stat-label">QR Codes</div>
-                </div>
-                <div class="stat-card animate-slide-up">
-                    <div class="stat-icon">
-                        <i class="bi bi-upc-scan"></i>
-                    </div>
-                    <div class="stat-value" id="scannedQrCodes">0</div>
-                    <div class="stat-label">Scans</div>
-                </div>
-            </div>
-            </div>
-            </section>
-
-        <!-- Charts Section -->
-<section class="charts-section">
-    <div class="container">
-        <h2 class="charts-title">
-            <i class="bi bi-bar-chart-line-fill"></i> Statistiques d’utilisation
-        </h2>
-        <p class="charts-subtitle">
-            Suivez en temps réel les scans de QR Codes et la répartition de vos événements
-        </p>
-
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="chart-container">
-                    <div class="chart-label">
-                        <i class="bi bi-check-circle-fill"></i> Taux de Scan
-                    </div>
-                    <canvas id="scanChart"></canvas>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="chart-container">
-                    <div class="chart-label">
-                        <i class="bi bi-pie-chart-fill"></i> Événements les plus populaires
-                    </div>
-                    <canvas id="eventTypeChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-            
-    <!-- Recent Events -->
-    <section class="recent-events">
+    <!-- Features Section -->
+    <section class="features-section" id="features">
         <div class="container">
             <div class="section-header">
-                <h2>Événements Récents</h2>
-                <a href="events.html" class="btn btn-outline">Voir Tout</a>
+                <h2>Fonctionnalités Premium</h2>
+                <p>Découvrez notre plateforme complète qui transforme votre expérience événementielle</p>
             </div>
-            <div class="row g-4 justify-content-center" id="recentEventsGrid">
-                <div class="empty-state">
-                    <i class="bi bi-calendar-plus"></i>
-                    <p>Aucun événement créé</p>
-                    <a href="events.html" class="btn btn-primary">Créer votre premier événement</a>
+
+            <div class="features-track">
+                <div class="features-wrapper">
+                    <!-- Feature 1 -->
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <h3>QR Codes Intelligents</h3>
+                        <p>Accès instantané via QR codes uniques et sécurisés. Plus besoin de billets papier, tout est digitalisé pour une expérience fluide.</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3>Application Mobile</h3>
+                        <p>Accédez à vos événements depuis n'importe quel appareil. Toutes les informations essentielles à portée de main, où que vous soyez.</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Sécurité Maximale</h3>
+                        <p>Protection avancée des données et authentification sécurisée. Vos informations sont en sécurité avec notre technologie de pointe.</p>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Analytics en Temps Réel</h3>
+                        <p>Suivez les performances de vos événements avec des statistiques détaillées et des rapports avancés pour une meilleure prise de décision.</p>
+                    </div>
+
+                    <!-- Feature 5 -->
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Gestion des Invités</h3>
+                        <p>Gérez facilement vos invités, leurs préférences et leurs accès en quelques clics. Une interface intuitive pour une gestion simplifiée.</p>
+                    </div>
+
+                    <!-- Feature 6 -->
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h3>Planification Intégrée</h3>
+                        <p>Planifiez vos événements, envoyez des invitations et gérez les confirmations en un seul endroit. Tout centralisé pour plus d'efficacité.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
-<!-- Footer -->
 
+    <!-- Timeline Section -->
+    <section class="timeline-section" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>Comment ça marche ?</h2>
+                <p>Un processus simple en 4 étapes pour accéder à vos événements</p>
+            </div>
+            <div class="timeline">
+                <div class="timeline-items-scroll">
+                    <!-- Étape 1 -->
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>1. Recevez votre code</h3>
+                            <p>Obtenez votre code d'accès unique envoyé par l'organisateur de l'événement via email ou SMS. Ce code est personnel et sécurisé.</p>
+                            <div class="timeline-image">
+                                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Code d'accès">
+                            </div>
+                        </div>
+                        <div class="timeline-marker">1</div>
+                    </div>
+                    <!-- Étape 2 -->
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>2. Entrez votre code</h3>
+                            <p>Rendez-vous sur la page d'accès et saisissez votre code personnel. Notre système vérifie instantanément votre accès.</p>
+                            <div class="timeline-image">
+                                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Saisie du code">
+                            </div>
+                        </div>
+                        <div class="timeline-marker">2</div>
+                    </div>
+                    <!-- Étape 3 -->
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>3. Accédez à l'événement</h3>
+                            <p>Découvrez tous les détails de l'événement : programme, votre table assignée, informations pratiques et contacts utiles.</p>
+                            <div class="timeline-image">
+                                <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Détails événement">
+                            </div>
+                        </div>
+                        <div class="timeline-marker">3</div>
+                    </div>
+                    <!-- Étape 4 -->
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>4. Profitez de l'expérience</h3>
+                            <p>Interagissez avec les autres invités, consultez le programme en temps réel et vivez une expérience événementielle complète et mémorable.</p>
+                            <div class="timeline-image">
+                                <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Expérience événement">
+                            </div>
+                        </div>
+                        <div class="timeline-marker">4</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section class="events-section" id="event-types">
+        <div class="container">
+            <div class="section-header">
+                <h2>Types d'Événements</h2>
+                <p>Nous gérons tous types d'événements avec des solutions sur mesure</p>
+            </div>
+
+            <div class="events-grid">
+                <!-- Mariage -->
+                <div class="event-card">
+                    <div class="event-image">
+                        <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Mariage">
+                    </div>
+                    <div class="event-content">
+                        <span class="event-badge">Mariage</span>
+                        <h3>Cérémonies de Mariage</h3>
+                        <p>Gestion complète des invités, placement aux tables, QR codes personnalisés et expérience digitale pour vos invités.</p>
+                        <div class="event-features">
+                            <div class="event-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Gestion des tables</span>
+                            </div>
+                            <div class="event-feature">
+                                <i class="fas fa-check"></i>
+                                <span>QR codes personnalisés</span>
+                            </div>
+                            <div class="event-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Galerie photos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conférences -->
+                <div class="event-card">
+                    <div class="event-image">
+                        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Conférence">
+                    </div>
+                    <div class="event-content">
+                        <span class="event-badge">Conférence</span>
+                        <h3>Événements Professionnels</h3>
+                        <p>Solutions complètes pour conférences, séminaires et événements d'entreprise avec badges digitaux et networking.</p>
+                        <div class="event-features">
+                            <div class="event-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Badges digitaux</span>
+                            </div>
+                            <div class="event-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Networking</span>
+                            </div>
+                            <div class="event-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Statistiques détaillées</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Événements sociaux -->
+                <div class="event-card">
+                    <div class="event-image">
+                        <img src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Événement social">
+                    </div>
+                    <div class="event-content">
+                        <span class="event-badge">Social</span>
+                        <h3>Événements Sociaux</h3>
+                        <p>Anniversaires, galas, soirées - gérez vos invités simplement et offrez une expérience digitale mémorable.</p>
+                        <div class="event-features">
+                            <div class="event-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Invitations digitales</span>
+                            </div>
+                            <div class="event-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Gestion des RSVP</span>
+                            </div>
+                            <div class="event-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Messagerie intégrée</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="cta">
+        <div class="cta-container">
+            <h2>Prêt à rejoindre l'expérience ?</h2>
+            <p>Accédez dès maintenant à votre événement ou créez un compte pour organiser vos propres événements avec nos solutions professionnelles.</p>
+            <div class="cta-buttons">
+                <a href="access.html" class="cta-btn cta-btn-primary">
+                    <i class="fas fa-ticket-alt"></i>
+                    Accéder à un événement
+                </a>
+                <a href="register.html" class="cta-btn cta-btn-secondary">
+                    <i class="fas fa-user-plus"></i>
+                    Créer un compte
+                </a>
+            </div>
+        </div>
+    </section>
+
+    </main>
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-shield-check" style="font-size:1.5rem;"></i>
-                    <span style="font-weight:600;">SECURA</span>
+            <div class="footer-top">
+                <div class="row">
+                    <div class="col-lg-4 mb-5 mb-lg-0">
+                        <div class="footer-brand">
+                            <div class="footer-logo">
+                                <img src="assets/images/icon.png" alt="SECURA Logo">
+                            </div>
+                            <div class="footer-title">
+                                <h3>SECURA</h3>
+                                <p>Plateforme d'accès événementiel</p>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            SECURA révolutionne l'accès aux événements avec des solutions innovantes, 
+                            sécurisées et intuitives pour organisateurs et participants.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Navigation</h4>
+                        <ul class="footer-links">
+                            <li><a href="index.html">Accueil</a></li>
+                            <li><a href="access.html">Accès événement</a></li>
+                            <li><a href="#features">Fonctionnalités</a></li>
+                            <li><a href="#how-it-works">Comment ça marche</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Compte</h4>
+                        <ul class="footer-links">
+                            <li><a href="login.html">Connexion</a></li>
+                            <li><a href="register.html">Inscription</a></li>
+                            <li><a href="forgot-password.html">Mot de passe oublié</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4">
+                        <h4>Newsletter</h4>
+                        <p class="mb-4">Inscrivez-vous pour recevoir nos actualités et offres exclusives.</p>
+                        <form class="newsletter-form" id="newsletterForm">
+                            <div class="newsletter-input-group">
+                                <input type="email" class="newsletter-input" placeholder="Votre email" required>
+                                <button type="submit" class="newsletter-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                    S'inscrire
+                                </button>
+                            </div>
+                        </form>
+
+                         <div class="footer-controls-inline">
+                            <!-- Theme Switch Button -->
+                            <div class="theme-switch-footer">
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="themeSwitchFooter" aria-label="Basculer le thème">
+                                    <span class="theme-switch-slider">
+                                        <i class="fas fa-moon"></i>
+                                        <i class="fas fa-sun"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Language Selector -->
+                            <div class="language-selector"></div>
+                        </div>
+                    </div>
                 </div>
-                <p class="mb-0">© 2025 SECURA. Tous droits réservés.</p>
-                <div class="d-flex gap-3">
-                    <a href="#" class="footer-link">Confidentialité</a>
-                    <a href="#" class="footer-link">Conditions</a>
-                    <a href="#" class="footer-link">Support</a>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright">© 2025 SECURA. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-legal">
+                            <a href="#">Mentions légales</a>
+                            <a href="#">Confidentialité</a>
+                            <a href="#">CGU</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -259,337 +2084,289 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- Scripts -->
+     <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SCRIPTS (Chargés après le rendu du DOM) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
 
-          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-
-<!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-
+    <!-- Librairies essentielles -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="js/particles-config.js"></script>
-    <script src="js/audio-utils.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/events.js"></script>
-    <script src="js/main.js"></script>
 
-    <script>
-   
+    <!-- Scripts locaux (dans l'ordre) -->
+    <script src="js/auth-check.js"></script>
+    <script defer src="js/particles-config.js"></script>
+    <script defer src="js/audio-utils.js"></script>
+    <script defer src="js/theme.js"></script>
+    <script defer src="js/storage.js"></script>
+    <script defer src="js/events.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/langue.js"></script>
+    <script src="js/auth.js"></script>
 
+    <!-- Scripts -->
+    <script defer>
+        document.addEventListener('DOMContentLoaded', function() {
+           
+           
 
-
-        // === LOGOUT ==
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            storage.logout();
-    });
-        
-
-    let scanChart, eventTypeChart;
-let popularEventsChart = null;
-
-// === STRING TO COLOR (pour couleurs dynamiques) ===
-function stringToColor(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-    return "#" + "00000".substring(0, 6 - c.length) + c;
-}
-        
-async function updateDashboard() {
-            try {
-                const stats = await storage.getStatistics();
-                const eventsResp = await storage.getAllEvents();
-
-                // Stats
-                document.getElementById('totalEvents').textContent = stats.totalEvents || 0;
-                document.getElementById('totalGuests').textContent = stats.totalGuests || 0;
-                document.getElementById('totalQrCodes').textContent = stats.totalQRCodes || 0;
-                document.getElementById('scannedQrCodes').textContent = stats.scannedGuests || 0;
-
-    Chart.register(ChartDataLabels);
-
-
-             // === CHARTS ===
-        updateScanChart(stats);
-        updatePopularEventsChart(eventsResp);
-
-
-            } catch (err) {
-                console.error("Dashboard update failed:", err);
-            }
-        }
-
-      function updateScanChart(stats) {
-    const ctx = document.getElementById('scanChart').getContext('2d');
-    if (scanChart) scanChart.destroy();
-    scanChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Scannés', 'En attente'],
-            datasets: [{
-                data: [
-                    stats.scannedGuests || 0,
-                    Math.max((stats.totalGuests || 0) - (stats.scannedGuests || 0), 0)
-                ],
-                backgroundColor: ['#10B981', '#EF4444'],
-                borderWidth: 0,
-                borderRadius: 8,
-                spacing: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        color: '#fff',
-                        font: { size: 13, family: 'Poppins', weight: '600' },
-                        padding: 20,
-                        usePointStyle: true,
-                        pointStyle: 'circle'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    titleFont: { family: 'Poppins' },
-                    bodyFont: { family: 'Poppins' }
-                }
-            },
-            cutout: '68%',
-            animation: {
-                animateRotate: true,
-                duration: 1800,
-                easing: 'easeOutQuart'
-            }
-        }
-    });
-}
-
-
-
-function updatePopularEventsChart(eventsResp) {
-     const events = eventsResp || [];
-
-
-    // -----------------------------------------------------------------
-    // 1. Aucun événement → message vide
-    // -----------------------------------------------------------------
-    const container = document.getElementById('eventTypeChart').parentElement;
-    if (events.length === 0) {
-        container.innerHTML = '<p class="text-gray-400 text-center py-8">Aucun événement</p>';
-        return;
-    }
-
-    // -----------------------------------------------------------------
-    // 2. Stats par événement (total + scannés)
-    // -----------------------------------------------------------------
-    const eventStats = events.map(ev => {
-        const allGuests   = storage.getGuestsByEventId(ev.id);             
-        const scanned     = allGuests.filter(g => g.scanned).length;
-        const total       = allGuests.length;
-
-        return {
-            id:       ev.id,
-            name:     ev.name,
-            date:     ev.date,
-            location: ev.location || 'Non spécifié',
-            total,
-            scanned,
-            color:    stringToColor(ev.name)               // couleur unique
-        };
-    });
-
-    // tri décroissant (total)
-    eventStats.sort((a, b) => b.total - a.total);
-    const top = eventStats.slice(0, 8);                    
-
-    const ctx = document.getElementById('eventTypeChart').getContext('2d');
-
-    // détruire l’ancien graphique
-    if (popularEventsChart) popularEventsChart.destroy();
-
-    // -----------------------------------------------------------------
-    // 3. Datasets
-    // -----------------------------------------------------------------
-    const datasets = [
-        {
-            label: 'Total invités',
-            data: top.map(e => e.total),
-            backgroundColor: top.map(e => e.color + '33'), 
-            borderColor: top.map(e => e.color),
-            borderWidth: 2,
-            borderRadius: 12,
-            barPercentage: 0.9,
-            categoryPercentage: 0.8
-        },
-        {
-            label: 'Scannés',
-            data: top.map(e => e.scanned),
-            backgroundColor: top.map(e => e.color),      
-            borderColor: top.map(e => e.color),
-            borderWidth: 0,
-            borderRadius: 12,
-            barPercentage: 0.9,
-            categoryPercentage: 0.8
-        }
-    ];
-
-    // -----------------------------------------------------------------
-    // 4. Chart
-    // -----------------------------------------------------------------
-    popularEventsChart = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: top.map(e => e.name), datasets },
-        options: {
-            indexAxis: 'x',                    
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: { duration: 1800, easing: 'easeOutQuart' },
-
-            plugins: {
-                legend: { display: false },
-
-                tooltip: {
-                    backgroundColor: '#1E293B',
-                    titleColor: '#F8FAFC',
-                    bodyColor: '#E2E8F0',
-                    cornerRadius: 10,
-                    padding: 12,
-                    displayColors: false,
-                    callbacks: {
-                        label: ctx => {
-                            const e = top[ctx.dataIndex];
-                            const set = ctx.datasetIndex === 0 ? 'total' : 'scanned';
-                            const val = set === 'total' ? e.total : e.scanned;
-                            return `${val} invité${val > 1 ? 's' : ''} ${set === 'scanned' ? '(scanné)' : ''}`;
-                        },
-                        afterLabel: ctx => {
-                            const e = top[ctx.dataIndex];
-                            return [
-                                `Date: ${new Date(e.date).toLocaleDateString('fr-FR')}`,
-                                `Lieu: ${e.location}`
-                            ];
-                        }
-                    }
-                },
-
-                // -------------------------------------------------
-                //  DATALABELS – affiché **sur la barre**
-                // -------------------------------------------------
-                datalabels: {
-                    anchor: 'end',
-                    align: 'end',               // à droite de la barre
-                    offset: 8,
-                    color: '#F8FAFC',
-                    font: { weight: '600', size: 13, family: 'Poppins' },
-                    formatter: (value, ctx) => {
-                        if (ctx.datasetIndex === 1) return `${value} scannés`;
-                        return `${value} total`;
-                    }
-                }
-            },
-
-            scales: {
-                x: {
-                    stacked: true,
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#94A3B8', font: { size: 12, family: 'Inter' } }
-                },
-                y: {
-                    stacked: true,
-                    grid: { display: false },
-                    ticks: {
-                        color: '#F8FAFC',
-                        font: { size: 13, weight: '600', family: 'Poppins' },
-                        padding: 12
-                    }
-                }
-            }
-        },
-
-        // -------------------------------------------------
-        //  PLUGIN : ombre douce (glow)
-        // -------------------------------------------------
-        plugins: [{
-            id: 'barGlow',
-            beforeDatasetsDraw(chart) {
-                const { ctx } = chart;
-                ctx.save();
-                chart.data.datasets.forEach((ds, i) => {
-                    const meta = chart.getDatasetMeta(i);
-                    meta.data.forEach((bar, idx) => {
-                        const col = top[idx].color;
-                        ctx.shadowColor = col + '44';
-                        ctx.shadowBlur = 12;
-                        ctx.fillStyle = ds.backgroundColor[idx];
-                        ctx.fillRect(bar.x - bar.width / 2, bar.y, bar.width, bar.height);
+            // ===== DROPDOWN MANAGEMENT =====
+            const dropdownToggle = document.getElementById('accountDropdown');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            if (dropdownToggle && dropdownMenu) {
+                // Toggle dropdown
+                dropdownToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('show');
+                });
+                
+                // Fermer en cliquant ailleurs
+                document.addEventListener('click', function() {
+                    dropdownMenu.classList.remove('show');
+                });
+                
+                // Empêcher la fermeture quand on clique dans le dropdown
+                dropdownMenu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                // Fermer dropdown en cliquant sur un lien
+                dropdownMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        dropdownMenu.classList.remove('show');
                     });
                 });
-                ctx.restore();
             }
-        }]
-    });
-}
 
+            // ===== AUTO-SCROLL FEATURES =====
+            const featuresWrapper = document.querySelector('.features-wrapper');
+            if (featuresWrapper) {
+                // Dupliquer le contenu pour un défilement infini fluide
+                const featuresContent = featuresWrapper.innerHTML;
+                featuresWrapper.innerHTML = featuresContent + featuresContent;
+                
+                // Pause au survol
+                featuresWrapper.addEventListener('mouseenter', () => {
+                    featuresWrapper.style.animationPlayState = 'paused';
+                });
+                
+                featuresWrapper.addEventListener('mouseleave', () => {
+                    featuresWrapper.style.animationPlayState = 'running';
+                });
+                
+                // Ajuster la vitesse sur mobile
+                if (window.innerWidth < 768) {
+                    featuresWrapper.style.animationDuration = '60s';
+                }
+            }
 
-        // === PARTICLES JS ===
-        function initParticles() {
-            particlesJS('particles-js', {
-                particles: {
-                    number: { value: 80, density: { enable: true, value_area: 800 } },
-                    color: { value: '#D97706' },
-                    shape: { type: 'circle' },
-                    opacity: { value: 0.3, random: true },
-                    size: { value: 3, random: true },
-                    line_linked: { enable: true, distance: 150, color: '#D97706', opacity: 0.2, width: 1 },
-                    move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
-                },
-                interactivity: {
-                    detect_on: 'canvas',
-                    events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
-                    modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
-                },
-                retina_detect: true
+            // ===== SMOOTH SCROLLING =====
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href === '#' || href === '#!') return;
+                    
+                    const targetElement = document.querySelector(href);
+                    if (targetElement) {
+                        e.preventDefault();
+                        
+                        const headerHeight = document.querySelector('.guest-header').offsetHeight;
+                        const targetPosition = targetElement.offsetTop - headerHeight - 20;
+                        
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                        
+                        // Fermer le dropdown si ouvert
+                        if (dropdownMenu) {
+                            dropdownMenu.classList.remove('show');
+                        }
+                    }
+                });
             });
-        }
 
-        
-
-        // === INIT ===
-        document.addEventListener('DOMContentLoaded', async () => {
-            initParticles();
-            await window.storageReady;
-            updateDashboard();
-
-            
-
-            // Real-time updates
-            window.addEventListener('secura:data-updated', updateDashboard);
-        });
-
-        // === AUDIO PRELOAD ===
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof SECURA_AUDIO !== 'undefined') {
-                SECURA_AUDIO.preload();
+            // ===== SCROLL TO TOP =====
+            const scrollTopBtn = document.getElementById('scrollTop');
+            if (scrollTopBtn) {
+                window.addEventListener('scroll', function() {
+                    if (window.scrollY > 300) {
+                        scrollTopBtn.classList.add('visible');
+                    } else {
+                        scrollTopBtn.classList.remove('visible');
+                    }
+                });
+                
+                scrollTopBtn.addEventListener('click', function() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
             }
+
+            // ===== NEWSLETTER FORM =====
+            const newsletterForm = document.getElementById('newsletterForm');
+            if (newsletterForm) {
+                newsletterForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const emailInput = this.querySelector('.newsletter-input');
+                    const submitBtn = this.querySelector('.newsletter-btn');
+                    const email = emailInput.value.trim();
+                    
+                    // Validation email
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        showNotification('Veuillez entrer une adresse email valide', 'error');
+                        return;
+                    }
+                    
+                    // État de chargement
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    submitBtn.disabled = true;
+                    
+                    try {
+                        // Simuler un délai d'envoi
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // Sauvegarder l'inscription
+                        let subscriptions = JSON.parse(localStorage.getItem('secura_newsletter_subscriptions')) || [];
+                        
+                        // Vérifier si déjà inscrit
+                        if (subscriptions.some(sub => sub.email === email)) {
+                            showNotification('Vous êtes déjà inscrit à notre newsletter !', 'info');
+                        } else {
+                            // Ajouter la nouvelle inscription
+                            subscriptions.push({
+                                email,
+                                subscribedAt: new Date().toISOString(),
+                                source: 'landing_page'
+                            });
+                            
+                            localStorage.setItem('secura_newsletter_subscriptions', JSON.stringify(subscriptions));
+                            
+                            showNotification('Merci pour votre inscription à notre newsletter !', 'success');
+                            emailInput.value = '';
+                        }
+                    } catch (error) {
+                        console.error('Newsletter error:', error);
+                        showNotification('Une erreur est survenue. Veuillez réessayer.', 'error');
+                    } finally {
+                        // Restaurer le bouton
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }
+                });
+            }
+
+            // ===== ANIMATIONS AU SCROLL =====
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '50px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                    }
+                });
+            }, observerOptions);
+            
+            // Observer les éléments à animer
+            document.querySelectorAll('.feature-item, .timeline-content, .event-card').forEach(el => {
+                observer.observe(el);
+            });
+
+            // ===== NOTIFICATION FUNCTION =====
+            function showNotification(message, type = 'info') {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: type,
+                        title: message,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        background: document.body.classList.contains('dark-theme') ? '#1a1a1a' : '#fff',
+                        color: document.body.classList.contains('dark-theme') ? '#fff' : '#333'
+                    });
+                } else {
+                    alert(message);
+                }
+            }
+
+            // ===== RESPONSIVE ADJUSTMENTS =====
+            function handleResize() {
+                // Ajuster l'animation des features sur mobile
+                if (featuresWrapper) {
+                    if (window.innerWidth < 768) {
+                        featuresWrapper.style.animationDuration = '60s';
+                    } else {
+                        featuresWrapper.style.animationDuration = '40s';
+                    }
+                }
+                
+                // Ajuster la timeline sur mobile
+                const timelineContents = document.querySelectorAll('.timeline-content');
+                if (window.innerWidth < 992) {
+                    timelineContents.forEach(content => {
+                        if (content.style.visibility === 'hidden') {
+                            content.style.display = 'none';
+                        }
+                    });
+                } else {
+                    timelineContents.forEach(content => {
+                        content.style.display = '';
+                    });
+                }
+            }
+            
+            // Écouter les changements de taille
+            window.addEventListener('resize', handleResize);
+            handleResize(); // Initial call
+            
+            // ===== LOADING STATES =====
+            document.querySelectorAll('a.hero-btn, a.cta-btn').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.getAttribute('href') === '#') return;
+                    
+                    // Ajouter un état de chargement
+                    this.classList.add('btn-loading');
+                    
+                    // Simuler un délai de chargement
+                    setTimeout(() => {
+                        this.classList.remove('btn-loading');
+                    }, 1500);
+                });
+            });
+            
+            console.log('✅ Page d\'accueil SECURA initialisée');
         });
 
-        </script>
+        // ===== PERFORMANCE OPTIMIZATION =====
+        // Charger les images en différé
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('img[data-src]');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.getAttribute('data-src');
+                        img.removeAttribute('data-src');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+            
+            images.forEach(img => imageObserver.observe(img));
+        });
+    </script>
 </body>
 </html>

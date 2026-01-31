@@ -1,0 +1,3373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURA | Détails de la Table</title>
+    <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
+    
+    <!-- Styles et Polices -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Styles locaux -->
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/dash.css">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- SweetAlert2 -->
+    <link rel="preload" href="js/auth-check.js" as="script">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- EasyQRCode pour génération QR codes -->
+    <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.4.13/dist/easy.qrcode.min.js"></script>
+    
+    <!-- JSZip pour créer des fichiers ZIP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <style>
+        /* ==========================================
+           VARIABLES GLOBALES POUR LES THÈMES
+           ========================================== */
+        :root {
+            /* Thème clair (par défaut) */
+            --primary: #D97706;
+            --primary-dark: #B45309;
+            --primary-light: #F59E0B;
+            --dark: #0A0A0A;
+            --dark-card: #121212;
+            --dark-elevated: #1A1A1A;
+            --gradient: linear-gradient(135deg, #B45309 0%, #D97706 50%, #F59E0B 100%);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --purple: #8B5CF6;
+            --border-radius: 0.5rem;
+            --border-radius-sm: 0.375rem;
+            --card-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            
+            /* Variables pour thème clair */
+            --body-bg: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f8f9fa;
+            --input-bg: #ffffff;
+            --input-border: #e0e0e0;
+            --input-text: #333333;
+            --placeholder-color: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --hover-bg: rgba(0, 0, 0, 0.05);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --progress-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Variables pour thème sombre */
+        .dark-theme {
+            --body-bg: #0A0A0A;
+            --text-color: #ffffff;
+            --card-bg: #121212;
+            --input-bg: rgba(255, 255, 255, 0.04);
+            --input-border: rgba(255, 255, 255, 0.12);
+            --input-text: #ffffff;
+            --placeholder-color: rgba(255, 255, 255, 0.4);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --hover-bg: rgba(255, 255, 255, 0.05);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --progress-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        /* ==========================================
+           STYLES DE BASE
+           ========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            
+        }
+
+        body {
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.15) 0%, transparent 30%);
+        }
+
+        .dark-theme body {
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.08) 0%, transparent 40%);
+        }
+
+        /* === CONTENEUR PRINCIPAL === */
+        .table-info-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            margin-top: 100px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        /* === EN-TÊTE DE PAGE === */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .event-name {
+            font-size: 1rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* === BOUTONS === */
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.25);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(217, 119, 6, 0.35);
+        }
+
+        .btn-secondary {
+            background: var(--hover-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--input-bg);
+            color: var(--text-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #0DA673;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #DC2626;
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-info:hover:not(:disabled) {
+            background: #2563EB;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: #D97706;
+            transform: translateY(-2px);
+        }
+
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+        .btn-purple:hover:not(:disabled) {
+            background: #7C3AED;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-xs {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            gap: 5px;
+        }
+
+        /* === CONTENU PRINCIPAL === */
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* === SECTION INFOS TABLE === */
+        .table-info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .table-card-large {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 8px 30px var(--shadow-color);
+        }
+
+        .table-header {
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .table-identity {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .table-badge {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            background: var(--gradient);
+            box-shadow: 0 8px 20px rgba(217, 119, 6, 0.3);
+        }
+
+        .table-details {
+            flex: 1;
+        }
+
+        .table-number-large {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .table-name-large {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .table-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: rgba(217, 119, 6, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(217, 119, 6, 0.3);
+        }
+
+        .table-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--hover-bg);
+            border-radius: var(--border-radius-sm);
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        /* === PROGRESS BAR === */
+        .capacity-progress {
+            margin-top: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--progress-bg);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        /* === TABLE BODY === */
+        .table-body {
+            padding: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: var(--hover-bg);
+            border-radius: var(--border-radius-sm);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .info-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-light);
+        }
+
+        .info-content {
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* === LISTE DES INVITÉS === */
+        .guests-section {
+            margin-top: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+
+        .guests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .guest-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            
+        }
+
+        .guest-card:hover {
+            transform: translateX(5px);
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+
+        .guest-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .guest-info {
+            flex: 1;
+        }
+
+        .guest-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .guest-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .guest-detail {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .guest-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* === SIDEBAR DROITE === */
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .quick-actions-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 30px var(--shadow-color);
+        }
+
+        .quick-actions-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary-light);
+        }
+
+        .quick-actions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-btn-small {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--border-radius-sm);
+            border: none;
+            background: var(--hover-bg);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .action-btn-small:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* === QR CODE SECTION === */
+        .qr-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 30px var(--shadow-color);
+        }
+
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .qr-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* === STATISTICS SECTION === */
+        .stats-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 30px var(--shadow-color);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-item-small {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            background: var(--hover-bg);
+            border-radius: var(--border-radius-sm);
+        }
+
+        .stat-value-small {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .stat-label-small {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        /* === MODAL ASSIGNATION === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            opacity: 0.5;
+            cursor: pointer;
+            font-size: 1.5rem;
+            
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+            background: var(--hover-bg);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* === FORMULAIRES === */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1.5px solid var(--input-border);
+            color: var(--input-text);
+            padding: 12px 16px;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.95rem;
+            
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--input-bg);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--placeholder-color);
+            font-size: 0.9rem;
+        }
+
+        /* === AVAILABLE GUESTS === */
+        .available-guests-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .guest-select-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 10px;
+            cursor: pointer;
+            
+            background: var(--hover-bg);
+        }
+
+        .guest-select-item:hover {
+            background: rgba(217, 119, 6, 0.1);
+        }
+
+        .guest-select-item.selected {
+            background: rgba(217, 119, 6, 0.2);
+            border: 1px solid var(--primary);
+        }
+
+        .guest-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid var(--input-border);
+            background: var(--input-bg);
+            cursor: pointer;
+            
+            flex-shrink: 0;
+        }
+
+        .guest-select-item.selected .guest-checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
+            position: relative;
+        }
+
+        .guest-select-item.selected .guest-checkbox::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* === EMPTY STATES === */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-color);
+            opacity: 0.5;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        /* === LOADER === */
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 50px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* === ANIMATIONS === */
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* === BADGES === */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-primary {
+            background: rgba(217, 119, 6, 0.2);
+            color: var(--primary);
+            border: 1px solid rgba(217, 119, 6, 0.3);
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--info);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .badge-purple {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--purple);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .table-info-main {
+                margin-top: 80px;
+                padding: 15px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .page-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 20px;
+            }
+
+            .table-identity {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .table-stats {
+                justify-content: center;
+            }
+
+            .content-wrapper {
+                gap: 20px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .guest-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .guest-details {
+                justify-content: center;
+            }
+
+            .guest-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .table-number-large {
+                font-size: 2rem;
+            }
+
+            .table-name-large {
+                font-size: 1.2rem;
+            }
+
+            .stat-item {
+                min-width: 100px;
+                padding: 12px 15px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .modal {
+                margin: 10px;
+            }
+
+            .modal-header, .modal-body, .modal-footer {
+                padding: 20px;
+            }
+        }
+
+        /* === TRANSITION GLOBALE === */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* === TAB NAVIGATION === */
+        .tab-navigation {
+            display: flex;
+            gap: 5px;
+            background: var(--hover-bg);
+            padding: 5px;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border-radius: var(--border-radius-sm);
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-color);
+            opacity: 0.7;
+            
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background: var(--hover-bg);
+            opacity: 1;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <img src="assets/images/icon.png" alt="logo secura">
+                </div>
+                <div class="sidebar-logo-text">
+                    <h1>SECURA</h1>
+                    <p>Gestion Sécurisée</p>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Fermer le menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <!-- Profile Section -->
+        <div class="sidebar-profile">
+            <div class="profile-avatar large">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="profile-details">
+                <strong id="sidebarProfileName">Chargement...</strong>
+                <small id="sidebarProfileEmail">email@exemple.com</small>
+                <span class="badge-role" id="sidebarProfileRole">Utilisateur</span>
+            </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="navMenu" class="sidebar-menu">
+            <a href="index.html" class="sidebar-link">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="events.html" class="sidebar-link">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Événements</span>
+            </a>
+            <a href="guests.html" class="sidebar-link">
+                <i class="fas fa-users"></i>
+                <span>Invités</span>
+            </a>
+            <a href="tables.html" class="sidebar-link active">
+                <i class="fas fa-chair"></i>
+                <span>Tables</span>
+            </a>
+            <a href="qr-generator.html" class="sidebar-link">
+                <i class="bi bi-qr-code"></i>
+                <span>Générateur QR</span>
+            </a>
+            <a href="ticket-generator.html" class="sidebar-link">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Billets</span>
+            </a>
+            <a href="scanner.html" class="sidebar-link">
+                <i class="fas fa-camera"></i>
+                <span>Scanner</span>
+            </a>
+            <hr class="sidebar-divider">
+            <a href="access.html" class="sidebar-link" id="accessEventLink">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Accès Événement</span>
+            </a>
+            <a href="profile.html" class="sidebar-link">
+                <i class="fas fa-user"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="settings.html" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+            </a>
+            <button class="sidebar-link text-danger" id="sidebarLogout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <!-- Footer toggles use only class to avoid duplicate ids when header also contains toggles -->
+            <button class="theme-toggle" aria-label="Changer le thème (pied)">
+                <i class="fas fa-moon"></i>
+                <span>Mode Sombre</span>
+            </button>
+            <button class="fullscreen-toggle" aria-label="Plein écran (pied)">
+                <i class="fas fa-expand"></i>
+                <span>Plein écran</span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Overlay pour fermer la sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Bouton flottant pour ouvrir la sidebar -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Top Bar -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <img src="assets/images/icon.png" alt="logo secura">
+                </div>
+                <div class="logo-text">
+                    <h1>SECURA</h1>
+                    <p class="form-title">Détails de la Table</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Changer le thème">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="fullscreen-toggle" id="fullscreenToggle" aria-label="Plein écran">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+            
+            <!-- Profile Button -->
+            <button class="profile-toggle header-profile-btn" id="profileToggle" aria-haspopup="true" aria-expanded="false">
+                <div class="profile-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-info">
+                    <span class="profile-name" id="profileName">Chargement...</span>
+                    <span class="profile-role" id="profileRole">Utilisateur</span>
+                </div>
+                <i class="bi bi-chevron-down profile-arrow"></i>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Profile Menu -->
+    <div class="floating-profile-menu" id="floatingProfileMenu">
+        <div class="profile-dropdown show" id="profileDropdown" role="menu">
+            <div class="profile-header">
+                <div class="profile-avatar large">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-details">
+                    <strong id="dropdownName">Chargement...</strong>
+                    <small id="dropdownEmail">email@exemple.com</small>
+                    <span class="badge-role" id="dropdownRole">Utilisateur</span>
+                </div>
+            </div>
+            <div class="dropdown-actions">
+                <a href="profile.html" class="dropdown-item" role="menuitem">
+                    <i class="bi bi-person"></i> Mon Profil
+                </a>
+                <a href="settings.html" class="dropdown-item" role="menuitem">
+                    <i class="bi bi-gear"></i> Paramètres
+                </a>
+                <hr class="dropdown-divider">
+                <button class="dropdown-item text-danger" id="logout-btn" role="menuitem">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="table-info-main">
+        <!-- En-tête de page -->
+        <div class="page-header animate-fade-in">
+            <div class="page-title">
+                <button class="btn btn-secondary btn-sm" onclick="goBackToTables()">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour
+                </button>
+                <div>
+                    <h1><i class="fas fa-chair"></i> Détails de la Table</h1>
+                    <div class="event-name" id="eventNameDisplay">Chargement de l'événement...</div>
+                </div>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-primary" id="editTableBtn">
+                    <i class="bi bi-pencil-square"></i>
+                    Modifier
+                </button>
+                <button class="btn btn-danger" id="deleteTableBtn">
+                    <i class="bi bi-trash3"></i>
+                    Supprimer
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation par onglets -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="overview">
+                <i class="fas fa-info-circle"></i>
+                Vue d'ensemble
+            </button>
+            <button class="tab-btn" data-tab="guests">
+                <i class="fas fa-users"></i>
+                Invités
+                <span class="badge badge-primary" id="guestCountBadge">0</span>
+            </button>
+            <button class="tab-btn" data-tab="qr">
+                <i class="bi bi-qr-code"></i>
+                QR Code
+            </button>
+            <button class="tab-btn" data-tab="stats">
+                <i class="fas fa-chart-bar"></i>
+                Statistiques
+            </button>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="content-wrapper">
+            <!-- Colonne gauche - Contenu principal -->
+            <div class="table-info-section">
+                <!-- Onglet Vue d'ensemble -->
+                <div class="tab-content" id="overviewTab">
+                    <!-- Carte principale de la table -->
+                    <div class="table-card-large animate-fade-in">
+                        <div class="table-header">
+                            <div class="table-identity">
+                                <div class="table-badge" id="tableBadge">
+                                    <!-- Le numéro sera injecté ici -->
+                                </div>
+                                <div class="table-details">
+                                    <div class="table-number-large" id="tableNumberLarge">#</div>
+                                    <div class="table-name-large" id="tableNameLarge">Chargement...</div>
+                                    <div class="table-category" id="tableCategoryBadge">
+                                        <i class="fas fa-tag"></i>
+                                        <span>Chargement...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="capacityValue">0</div>
+                                    <div class="stat-label">Capacité</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="guestsValue">0</div>
+                                    <div class="stat-label">Invités</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="seatsValue">0</div>
+                                    <div class="stat-label">Places</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="availableValue">0</div>
+                                    <div class="stat-label">Disponibles</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barre de progression capacité -->
+                        <div class="table-body">
+                            <div class="capacity-progress">
+                                <div class="progress-header">
+                                    <span>Taux d'occupation</span>
+                                    <span id="occupancyRate">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.9rem; color: var(--text-color); opacity: 0.7;">
+                                    <span>0 places</span>
+                                    <span id="totalSeatsDisplay">0 places</span>
+                                </div>
+                            </div>
+
+                            <!-- Grille d'informations -->
+                            <div class="info-grid">
+                                <div class="info-card">
+                                    <div class="info-title">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>Emplacement</span>
+                                    </div>
+                                    <div class="info-content" id="tableLocation">
+                                        <i style="opacity: 0.5;">Non spécifié</i>
+                                    </div>
+                                </div>
+
+                                <div class="info-card">
+                                    <div class="info-title">
+                                        <i class="fas fa-align-left"></i>
+                                        <span>Description</span>
+                                    </div>
+                                    <div class="info-content" id="tableDescription">
+                                        <i style="opacity: 0.5;">Aucune description</i>
+                                    </div>
+                                </div>
+
+                                <div class="info-card">
+                                    <div class="info-title">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span>Date de création</span>
+                                    </div>
+                                    <div class="info-content" id="createdAt">
+                                        Chargement...
+                                    </div>
+                                </div>
+
+                                <div class="info-card">
+                                    <div class="info-title">
+                                        <i class="fas fa-history"></i>
+                                        <span>Dernière mise à jour</span>
+                                    </div>
+                                    <div class="info-content" id="updatedAt">
+                                        Chargement...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Statut de la table -->
+                            <div class="info-card">
+                                <div class="info-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Statut de la table</span>
+                                </div>
+                                <div class="info-content">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div class="status-indicator" id="tableStatus">
+                                            <i class="fas fa-circle"></i>
+                                            <span>Chargement...</span>
+                                        </div>
+                                        <div class="badge" id="tableStatusBadge">
+                                            <i class="fas fa-info"></i>
+                                            <span>Statut</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px; font-size: 0.9rem; opacity: 0.7;" id="statusDescription">
+                                        <!-- Description du statut sera injectée ici -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet Invités -->
+                <div class="tab-content" id="guestsTab" style="display: none;">
+                    <div class="table-card-large animate-fade-in">
+                        <div class="table-body">
+                            <div class="section-header">
+                                <h3>
+                                    <i class="fas fa-users"></i>
+                                    Invités assignés
+                                    <span class="badge badge-primary" id="guestCountHeader">0</span>
+                                </h3>
+                                <button class="btn btn-primary btn-sm" id="assignGuestsBtn">
+                                    <i class="fas fa-user-plus"></i>
+                                    Assigner des invités
+                                </button>
+                            </div>
+
+                            <!-- Liste des invités -->
+                            <div class="guests-list" id="guestsList">
+                                <!-- Les invités seront injectés ici -->
+                            </div>
+
+                            <!-- État vide -->
+                            <div class="empty-state" id="emptyGuestsState" style="display: none;">
+                                <i class="fas fa-users-slash"></i>
+                                <h3>Aucun invité assigné</h3>
+                                <p>Cette table est actuellement vide</p>
+                                <button class="btn btn-primary" id="assignFirstGuestBtn">
+                                    <i class="fas fa-user-plus"></i>
+                                    Assigner un invité
+                                </button>
+                            </div>
+
+                            <!-- Loader -->
+                            <div class="loader" id="guestsLoader" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet QR Code -->
+                <div class="tab-content" id="qrTab" style="display: none;">
+                    <div class="table-card-large animate-fade-in">
+                        <div class="table-body">
+                            <div class="section-header">
+                                <h3>
+                                    <i class="bi bi-qr-code"></i>
+                                    QR Code de la Table
+                                </h3>
+                                <div>
+                                    <button class="btn btn-success btn-sm" id="generateQRBtn">
+                                        <i class="fas fa-sync-alt"></i>
+                                        Générer
+                                    </button>
+                                    <button class="btn btn-info btn-sm" id="downloadQRBtn">
+                                        <i class="fas fa-download"></i>
+                                        Télécharger
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; padding: 40px 20px;">
+                                <div class="qr-placeholder" id="qrPlaceholder">
+                                    <i class="bi bi-qr-code" style="font-size: 6rem; color: #333;"></i>
+                                </div>
+                                <div style="margin-top: 30px;">
+                                    <p style="color: var(--text-color); opacity: 0.7; margin-bottom: 20px;">
+                                        Scannez ce QR Code pour accéder aux informations de la table
+                                    </p>
+                                    <div class="qr-stats" style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+                                        <div class="stat-item-small">
+                                            <div class="stat-value-small" id="qrScansCount">0</div>
+                                            <div class="stat-label-small">Scans</div>
+                                        </div>
+                                        <div class="stat-item-small">
+                                            <div class="stat-value-small" id="lastScanDate">-</div>
+                                            <div class="stat-label-small">Dernier scan</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet Statistiques -->
+                <div class="tab-content" id="statsTab" style="display: none;">
+                    <div class="table-card-large animate-fade-in">
+                        <div class="table-body">
+                            <div class="section-header">
+                                <h3>
+                                    <i class="fas fa-chart-bar"></i>
+                                    Statistiques détaillées
+                                </h3>
+                                <button class="btn btn-secondary btn-sm" id="refreshStatsBtn">
+                                    <i class="fas fa-sync-alt"></i>
+                                    Actualiser
+                                </button>
+                            </div>
+
+                            <!-- Statistiques générales -->
+                            <div class="stats-grid" style="margin-bottom: 30px;">
+                                <div class="stat-item-small">
+                                    <div class="stat-value-small" id="statsCapacity">0</div>
+                                    <div class="stat-label-small">Capacité totale</div>
+                                </div>
+                                <div class="stat-item-small">
+                                    <div class="stat-value-small" id="statsAssigned">0</div>
+                                    <div class="stat-label-small">Places assignées</div>
+                                </div>
+                                <div class="stat-item-small">
+                                    <div class="stat-value-small" id="statsAvailable">0</div>
+                                    <div class="stat-label-small">Places disponibles</div>
+                                </div>
+                                <div class="stat-item-small">
+                                    <div class="stat-value-small" id="statsOccupancy">0%</div>
+                                    <div class="stat-label-small">Taux d'occupation</div>
+                                </div>
+                            </div>
+
+                            <!-- Répartition par catégorie d'invités -->
+                            <div class="info-card">
+                                <div class="info-title">
+                                    <i class="fas fa-chart-pie"></i>
+                                    <span>Répartition des invités</span>
+                                </div>
+                                <div class="info-content">
+                                    <div style="display: flex; flex-direction: column; gap: 15px;" id="guestDistribution">
+                                        <!-- La distribution sera injectée ici -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Historique des modifications -->
+                            <div class="info-card">
+                                <div class="info-title">
+                                    <i class="fas fa-history"></i>
+                                    <span>Activité récente</span>
+                                </div>
+                                <div class="info-content">
+                                    <div id="recentActivity">
+                                        <!-- L'activité sera injectée ici -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite - Sidebar -->
+            <div class="sidebar-section">
+                <!-- Actions rapides -->
+                <div class="quick-actions-card animate-slide-in">
+                    <div class="quick-actions-title">
+                        <i class="fas fa-bolt"></i>
+                        <span>Actions rapides</span>
+                    </div>
+                    <div class="quick-actions-list">
+                        <button class="action-btn-small" id="quickAssignBtn">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Assigner un invité</span>
+                        </button>
+                        <button class="action-btn-small" id="quickRemoveGuestBtn">
+                            <i class="fas fa-user-minus"></i>
+                            <span>Retirer un invité</span>
+                        </button>
+                        <button class="action-btn-small" id="quickAutoAssignBtn">
+                            <i class="fas fa-robot"></i>
+                            <span>Auto-assigner</span>
+                        </button>
+                        <button class="action-btn-small" id="quickViewQRBtn">
+                            <i class="bi bi-qr-code"></i>
+                            <span>Voir le QR Code</span>
+                        </button>
+                        <button class="action-btn-small" id="quickPrintBtn">
+                            <i class="fas fa-print"></i>
+                            <span>Imprimer les détails</span>
+                        </button>
+                        <button class="action-btn-small" id="quickShareBtn">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Partager la table</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- QR Code -->
+                <div class="qr-section animate-slide-in">
+                    <div class="quick-actions-title">
+                        <i class="bi bi-qr-code"></i>
+                        <span>QR Code rapide</span>
+                    </div>
+                    <div class="qr-container">
+                        <div class="qr-placeholder" style="width: 150px; height: 150px;" id="quickQR">
+                            <i class="bi bi-qr-code" style="font-size: 4rem; color: #333;"></i>
+                        </div>
+                        <div class="qr-actions">
+                            <button class="btn btn-success btn-xs" id="scanQRBtn">
+                                <i class="fas fa-camera"></i>
+                                Scanner
+                            </button>
+                            <button class="btn btn-info btn-xs" id="copyQRBtn">
+                                <i class="fas fa-copy"></i>
+                                Copier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informations événement -->
+                <div class="stats-section animate-slide-in">
+                    <div class="quick-actions-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Informations événement</span>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7; margin-bottom: 5px;">
+                                <i class="fas fa-calendar"></i> Date
+                            </div>
+                            <div style="font-weight: 600;" id="eventDate">-</div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7; margin-bottom: 5px;">
+                                <i class="fas fa-clock"></i> Heure
+                            </div>
+                            <div style="font-weight: 600;" id="eventTime">-</div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7; margin-bottom: 5px;">
+                                <i class="fas fa-map-marker-alt"></i> Lieu
+                            </div>
+                            <div style="font-weight: 600;" id="eventLocation">-</div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7; margin-bottom: 5px;">
+                                <i class="fas fa-chart-bar"></i> Tables totales
+                            </div>
+                            <div style="font-weight: 600;" id="totalEventTables">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="row">
+                    <div class="col-lg-4 mb-5 mb-lg-0">
+                        <div class="footer-brand">
+                            <div class="footer-logo">
+                                <img src="assets/images/icon.png" alt="SECURA Logo">
+                            </div>
+                            <div class="footer-title">
+                                <h3>SECURA</h3>
+                                <p>Plateforme d'accès événementiel</p>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            SECURA révolutionne l'accès aux événements avec des solutions innovantes, 
+                            sécurisées et intuitives pour organisateurs et participants.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Navigation</h4>
+                        <ul class="footer-links">
+                            <li><a href="index.html">Accueil</a></li>
+                            <li><a href="access.html">Accès événement</a></li>
+                            <li><a href="#features">Fonctionnalités</a></li>
+                            <li><a href="#how-it-works">Comment ça marche</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Compte</h4>
+                        <ul class="footer-links">
+                            <li><a href="login.html">Connexion</a></li>
+                            <li><a href="register.html">Inscription</a></li>
+                            <li><a href="forgot-password.html">Mot de passe oublié</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4">
+                        <h4>Newsletter</h4>
+                        <p class="mb-4">Inscrivez-vous pour recevoir nos actualités et offres exclusives.</p>
+                        <form class="newsletter-form" id="newsletterForm">
+                            <div class="newsletter-input-group">
+                                <input type="email" class="newsletter-input" placeholder="Votre email" required>
+                                <button type="submit" class="newsletter-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                   
+                                </button>
+                            </div>
+                        </form>
+                       
+                        <div class="footer-controls-inline">
+                            <!-- Theme Switch Button -->
+                            <div class="theme-switch-footer">
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="themeSwitchFooter" aria-label="Basculer le thème">
+                                    <span class="theme-switch-slider">
+                                        <i class="fas fa-moon"></i>
+                                        <i class="fas fa-sun"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Language Selector -->
+                            <div class="language-selector"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright">© 2025 SECURA. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-legal">
+                            <a href="#">Mentions légales</a>
+                            <a href="#">Confidentialité</a>
+                            <a href="#">CGU</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bouton retour en haut -->
+    <button class="scroll-top" id="scrollTop" aria-label="Retour en haut">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Modal Assignation d'Invités -->
+    <div class="modal-overlay" id="assignModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Assigner des invités à la table</h3>
+                <button class="modal-close" id="assignModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-search"></i>
+                        Rechercher des invités
+                    </label>
+                    <input type="text" id="searchAssignGuests" class="form-control" 
+                           placeholder="Rechercher par nom, email, entreprise...">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-filter"></i>
+                        Filtrer par catégorie
+                    </label>
+                    <select id="filterGuestCategory" class="form-control">
+                        <option value="all">Toutes catégories</option>
+                        <option value="standard">Standard</option>
+                        <option value="vip">VIP</option>
+                        <option value="speaker">Conférencier</option>
+                        <option value="organizer">Organisateur</option>
+                        <option value="staff">Staff</option>
+                        <option value="press">Presse</option>
+                    </select>
+                </div>
+                
+                <div class="available-guests-container" id="availableGuestsModal">
+                    <!-- Les invités disponibles seront injectés ici -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="assignModalCancel">
+                    <i class="fas fa-times"></i>
+                    Annuler
+                </button>
+                <button class="btn btn-primary" id="assignModalSave">
+                    <i class="fas fa-user-plus"></i>
+                    Assigner les invités sélectionnés
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Retirer un invité -->
+    <div class="modal-overlay" id="removeGuestModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Retirer un invité de la table</h3>
+                <button class="modal-close" id="removeModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-search"></i>
+                        Rechercher un invité à retirer
+                    </label>
+                    <input type="text" id="searchRemoveGuest" class="form-control" 
+                           placeholder="Rechercher par nom...">
+                </div>
+                
+                <div class="available-guests-container" id="assignedGuestsModal">
+                    <!-- Les invités assignés seront injectés ici -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="removeModalCancel">
+                    <i class="fas fa-times"></i>
+                    Annuler
+                </button>
+                <button class="btn btn-danger" id="removeModalConfirm">
+                    <i class="fas fa-user-minus"></i>
+                    Retirer les invités sélectionnés
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/audio-utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            SECURA_AUDIO.preload();
+        });
+    </script>
+    
+    <!-- Librairies -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    
+    <!-- Scripts locaux -->
+    <script src="js/auth-check.js"></script>
+    <script defer src="js/particles-config.js"></script>
+    <script defer src="js/theme.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/sidebar.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/tables.js"></script>
+    
+    <script>
+        // Variables globales
+        let currentTable = null;
+        let currentEvent = null;
+        let currentUser = null;
+        let tableGuests = [];
+        let availableGuests = [];
+        let assignedGuests = [];
+        let selectedGuestIds = new Set();
+        let tableStatistics = null;
+        let tableQRCode = null;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Vérifier l'authentification
+            const authCheck = await checkAuth();
+            if (!authCheck) return;
+            
+            // Récupérer les paramètres de l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableId = urlParams.get('tableId');
+            const eventId = urlParams.get('eventId');
+            
+            if (!tableId || !eventId) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Paramètres manquants',
+                    text: 'Les paramètres tableId et eventId sont requis',
+                    confirmButtonColor: '#D97706'
+                });
+                window.location.href = 'tables.html';
+                return;
+            }
+            
+            // Charger les données
+            await loadEvent(eventId);
+            await loadTable(tableId);
+            await loadTableGuests();
+            await loadAvailableGuests();
+            await loadTableStatistics();
+            await loadTableQRCode();
+            
+            // Initialiser les écouteurs
+            initEventListeners();
+            
+            // Mettre à jour l'interface
+            updateUI();
+        });
+
+        // Vérifier l'authentification
+        async function checkAuth() {
+            try {
+                currentUser = await authManager.getProfile();
+                if (!currentUser) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Erreur vérification auth:', error);
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // Charger l'événement
+        async function loadEvent(eventId) {
+            try {
+                currentEvent = storage.getEventById(eventId);
+                
+                if (!currentEvent) {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Événement introuvable',
+                        text: 'L\'événement spécifié n\'existe pas',
+                        confirmButtonColor: '#D97706'
+                    });
+                    window.location.href = 'tables.html';
+                    return;
+                }
+                
+                // Mettre à jour l'affichage
+                document.getElementById('eventNameDisplay').textContent = currentEvent.name;
+                document.getElementById('eventDate').textContent = currentEvent.date || '-';
+                document.getElementById('eventTime').textContent = currentEvent.time || '-';
+                document.getElementById('eventLocation').textContent = currentEvent.location || '-';
+                
+                // Charger le nombre total de tables de l'événement
+                const allTables = await storage.getAllTables(eventId);
+                document.getElementById('totalEventTables').textContent = allTables.data.length;
+                
+            } catch (error) {
+                console.error('Erreur chargement événement:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Impossible de charger l\'événement',
+                    confirmButtonColor: '#D97706'
+                });
+                window.location.href = 'tables.html';
+            }
+        }
+
+        // Charger la table
+        async function loadTable(tableId) {
+            try {
+                showLoader('table');
+                
+                currentTable = await storage.getTableById(tableId);
+                
+                if (!currentTable) {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Table introuvable',
+                        text: 'La table spécifiée n\'existe pas',
+                        confirmButtonColor: '#D97706'
+                    });
+                    window.location.href = 'tables.html?eventId=' + currentEvent.id;
+                    return;
+                }
+                
+                // Vérifier que la table appartient à l'événement courant
+                if (currentTable.eventId !== currentEvent.id) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Accès refusé',
+                        text: 'Cette table n\'appartient pas à l\'événement courant',
+                        confirmButtonColor: '#D97706'
+                    });
+                    window.location.href = 'tables.html?eventId=' + currentEvent.id;
+                    return;
+                }
+                
+                // Mettre à jour l'affichage
+                updateTableDisplay();
+                
+                hideLoader('table');
+                
+            } catch (error) {
+                console.error('Erreur chargement table:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Impossible de charger la table',
+                    confirmButtonColor: '#D97706'
+                });
+                window.location.href = 'tables.html?eventId=' + currentEvent.id;
+            }
+        }
+
+        // Mettre à jour l'affichage de la table
+        function updateTableDisplay() {
+            if (!currentTable) return;
+            
+            // Calculer les statistiques
+            const totalSeats = currentTable.assignedGuests?.reduce((sum, g) => sum + (g.seats || 1), 0) || 0;
+            const availableSeats = Math.max(0, currentTable.capacity - totalSeats);
+            const occupancyRate = currentTable.capacity > 0 ? 
+                Math.round((totalSeats / currentTable.capacity) * 100) : 0;
+            const isFull = totalSeats >= currentTable.capacity;
+            const isEmpty = totalSeats === 0;
+            
+            // Mettre à jour les éléments
+            document.getElementById('tableBadge').textContent = currentTable.tableNumber || '?';
+            document.getElementById('tableNumberLarge').textContent = `#${currentTable.tableNumber || ''}`;
+            document.getElementById('tableNameLarge').textContent = currentTable.tableName || 'Sans nom';
+            
+            // Catégorie
+            const categoryBadge = document.getElementById('tableCategoryBadge');
+            categoryBadge.innerHTML = `
+                <i class="fas ${getCategoryIcon(currentTable.category)}"></i>
+                <span>${getCategoryName(currentTable.category)}</span>
+            `;
+            categoryBadge.style.background = `rgba(${hexToRgb(getCategoryColor(currentTable.category))}, 0.15)`;
+            categoryBadge.style.color = getCategoryColor(currentTable.category);
+            categoryBadge.style.borderColor = `rgba(${hexToRgb(getCategoryColor(currentTable.category))}, 0.3)`;
+            
+            // Statistiques
+            document.getElementById('capacityValue').textContent = currentTable.capacity || 0;
+            document.getElementById('guestsValue').textContent = currentTable.assignedGuests?.length || 0;
+            document.getElementById('seatsValue').textContent = totalSeats;
+            document.getElementById('availableValue').textContent = availableSeats;
+            document.getElementById('occupancyRate').textContent = `${occupancyRate}%`;
+            document.getElementById('totalSeatsDisplay').textContent = `${currentTable.capacity} places`;
+            
+            // Barre de progression
+            document.getElementById('progressFill').style.width = `${Math.min(occupancyRate, 100)}%`;
+            
+            // Emplacement
+            // Emplacement: autoriser HTML de fallback
+            document.getElementById('tableLocation').innerHTML = currentTable.location ? escapeHtml(currentTable.location) : '<i style="opacity: 0.5;">Non spécifié</i>';
+
+            // Description: autoriser HTML de fallback
+            document.getElementById('tableDescription').innerHTML = currentTable.description ? escapeHtml(currentTable.description) : '<i style="opacity: 0.5;">Aucune description</i>';
+            
+            // Dates
+            const createdAt = currentTable.createdAt ? new Date(currentTable.createdAt) : new Date();
+            const updatedAt = currentTable.updatedAt ? new Date(currentTable.updatedAt) : new Date();
+            
+            document.getElementById('createdAt').textContent = formatDate(createdAt);
+            document.getElementById('updatedAt').textContent = formatDate(updatedAt);
+            
+            // Statut
+            updateTableStatus(isFull, isEmpty, occupancyRate);
+            
+            // Mettre à jour le badge du nombre d'invités
+            const guestCount = currentTable.assignedGuests?.length || 0;
+            document.getElementById('guestCountBadge').textContent = guestCount;
+            document.getElementById('guestCountHeader').textContent = guestCount;
+        }
+
+        // Mettre à jour le statut de la table
+        function updateTableStatus(isFull, isEmpty, occupancyRate) {
+            const statusIndicator = document.getElementById('tableStatus');
+            const statusBadge = document.getElementById('tableStatusBadge');
+            const statusDescription = document.getElementById('statusDescription');
+            
+            let statusText = '';
+            let statusColor = '';
+            let badgeColor = '';
+            let description = '';
+            
+            if (isFull) {
+                statusText = 'Complète';
+                statusColor = '#EF4444';
+                badgeColor = 'danger';
+                description = 'Cette table a atteint sa capacité maximale. Aucune place disponible.';
+            } else if (isEmpty) {
+                statusText = 'Vide';
+                statusColor = '#10B981';
+                badgeColor = 'success';
+                description = 'Cette table est entièrement disponible. Aucun invité assigné.';
+            } else {
+                statusText = 'Partiellement occupée';
+                statusColor = '#F59E0B';
+                badgeColor = 'warning';
+                description = `Cette table est occupée à ${occupancyRate}%. Il reste ${Math.max(0, currentTable.capacity - (currentTable.assignedGuests?.reduce((sum, g) => sum + (g.seats || 1), 0) || 0))} place(s) disponible(s).`;
+            }
+            
+            statusIndicator.innerHTML = `
+                <i class="fas fa-circle" style="color: ${statusColor}"></i>
+                <span>${statusText}</span>
+            `;
+            
+            statusBadge.className = `badge badge-${badgeColor}`;
+            statusBadge.innerHTML = `
+                <i class="fas fa-info"></i>
+                <span>${statusText}</span>
+            `;
+            
+            statusDescription.textContent = description;
+        }
+
+        // Charger les invités de la table
+        async function loadTableGuests() {
+            try {
+                showLoader('guests');
+                
+                const guests = await storage.getTableGuests(currentTable.id);
+                tableGuests = guests.map(item => ({
+                    ...item.guest,
+                    assignedSeats: item.seats,
+                    assignedAt: item.assignedAt
+                })).filter(g => g !== null);
+                
+                renderTableGuests();
+                
+                hideLoader('guests');
+                
+            } catch (error) {
+                console.error('Erreur chargement invités table:', error);
+                hideLoader('guests');
+                
+                // Afficher l'état vide
+                document.getElementById('emptyGuestsState').style.display = 'block';
+                document.getElementById('guestsList').innerHTML = '';
+            }
+        }
+
+        // Rendre les invités de la table
+        function renderTableGuests() {
+            const guestsList = document.getElementById('guestsList');
+            const emptyState = document.getElementById('emptyGuestsState');
+            
+            if (tableGuests.length === 0) {
+                guestsList.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            guestsList.innerHTML = '';
+            
+            tableGuests.forEach(guest => {
+                const guestCard = document.createElement('div');
+                guestCard.className = 'guest-card animate-fade-in';
+                
+                // Formater la date d'assignation
+                const assignedDate = guest.assignedAt ? 
+                    new Date(guest.assignedAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    }) : 'Non spécifiée';
+                
+                // Obtenir les initiales pour l'avatar
+                const initials = getInitials(`${guest.firstName || ''} ${guest.lastName || ''}`.trim() || guest.email);
+                
+                guestCard.innerHTML = `
+                    <div class="guest-avatar" style="background: ${getCategoryColor(guest.metadata?.category || 'standard')}">
+                        ${initials}
+                    </div>
+                    <div class="guest-info">
+                        <div class="guest-name">
+                            ${escapeHtml(`${guest.firstName || ''} ${guest.lastName || ''}`.trim() || guest.email)}
+                        </div>
+                        <div class="guest-details">
+                            <div class="guest-detail">
+                                <i class="fas fa-envelope"></i>
+                                <span>${escapeHtml(guest.email || '')}</span>
+                            </div>
+                            <div class="guest-detail">
+                                <i class="fas fa-chair"></i>
+                                <span>${guest.assignedSeats || guest.seats || 1} place(s)</span>
+                            </div>
+                            <div class="guest-detail">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Assigné le: ${assignedDate}</span>
+                            </div>
+                            ${guest.company ? `
+                            <div class="guest-detail">
+                                <i class="fas fa-building"></i>
+                                <span>${escapeHtml(guest.company)}</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                    <div class="guest-actions">
+                        <button class="btn btn-secondary btn-xs" onclick="viewGuestDetails('${guest.id}')" title="Voir détails">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-danger btn-xs" onclick="removeGuestFromTable('${guest.id}')" title="Retirer">
+                            <i class="fas fa-user-minus"></i>
+                        </button>
+                    </div>
+                `;
+                
+                guestsList.appendChild(guestCard);
+            });
+        }
+
+        // Charger les invités disponibles
+        async function loadAvailableGuests() {
+            try {
+                const guests = await storage.getAllGuests({ eventId: currentEvent.id });
+                
+                // Filtrer les invités non assignés ou assignés à cette table
+                availableGuests = guests.filter(guest => 
+                    !guest.tableId || guest.tableId === currentTable.id
+                );
+                
+            } catch (error) {
+                console.error('Erreur chargement invités disponibles:', error);
+                availableGuests = [];
+            }
+        }
+
+        // Charger les statistiques de la table
+        async function loadTableStatistics() {
+            try {
+                tableStatistics = await storage.getTableStatistics(currentTable.id);
+                
+                if (tableStatistics) {
+                    updateStatisticsDisplay();
+                }
+            } catch (error) {
+                console.error('Erreur chargement statistiques:', error);
+            }
+        }
+
+        // Mettre à jour l'affichage des statistiques
+        function updateStatisticsDisplay() {
+            if (!tableStatistics) return;
+            
+            const stats = tableStatistics.occupancy;
+            
+            document.getElementById('statsCapacity').textContent = stats.capacity || 0;
+            document.getElementById('statsAssigned').textContent = stats.totalSeats || 0;
+            document.getElementById('statsAvailable').textContent = stats.availableSeats || 0;
+            document.getElementById('statsOccupancy').textContent = `${stats.occupancyRate || 0}%`;
+            
+            // Mettre à jour la distribution des invités
+            updateGuestDistribution();
+            
+            // Mettre à jour l'activité récente
+            updateRecentActivity();
+        }
+
+        // Mettre à jour la distribution des invités
+        function updateGuestDistribution() {
+            const distributionContainer = document.getElementById('guestDistribution');
+            if (!distributionContainer) return;
+            
+            if (!tableGuests || tableGuests.length === 0) {
+                distributionContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-color); opacity: 0.5;">
+                        <i class="fas fa-chart-pie"></i>
+                        <p>Aucune donnée de distribution disponible</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Compter par catégorie
+            const categories = {};
+            tableGuests.forEach(guest => {
+                const category = guest.metadata?.category || 'standard';
+                categories[category] = (categories[category] || 0) + 1;
+            });
+            
+            // Créer les éléments de distribution
+            let distributionHTML = '';
+            Object.entries(categories).forEach(([category, count]) => {
+                const percentage = Math.round((count / tableGuests.length) * 100);
+                const color = getCategoryColor(category);
+                
+                distributionHTML += `
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background: ${color};"></div>
+                            <span style="font-size: 0.9rem;">${getCategoryName(category)}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-weight: 600;">${count}</span>
+                            <span style="font-size: 0.8rem; opacity: 0.7;">(${percentage}%)</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            distributionContainer.innerHTML = distributionHTML;
+        }
+
+        // Mettre à jour l'activité récente
+        function updateRecentActivity() {
+            const activityContainer = document.getElementById('recentActivity');
+            if (!activityContainer) return;
+            
+            // Créer un historique factice pour l'exemple
+            const activities = [
+                {
+                    action: 'Invité assigné',
+                    user: 'Admin',
+                    date: new Date(Date.now() - 3600000), // Il y a 1 heure
+                    details: 'Marie Dupont a été assignée à cette table'
+                },
+                {
+                    action: 'Table mise à jour',
+                    user: 'Organisateur',
+                    date: new Date(Date.now() - 86400000), // Il y a 1 jour
+                    details: 'Capacité augmentée de 8 à 10 places'
+                },
+                {
+                    action: 'QR Code généré',
+                    user: 'Système',
+                    date: new Date(Date.now() - 172800000), // Il y a 2 jours
+                    details: 'Nouveau QR Code généré pour cette table'
+                }
+            ];
+            
+            let activityHTML = '';
+            activities.forEach(activity => {
+                const timeAgo = getTimeAgo(activity.date);
+                
+                activityHTML += `
+                    <div style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.9rem;">${activity.action}</div>
+                                <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 2px;">${activity.details}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.8rem; font-weight: 600;">${activity.user}</div>
+                                <div style="font-size: 0.7rem; opacity: 0.7;">${timeAgo}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            activityContainer.innerHTML = activityHTML;
+        }
+
+        // Charger le QR Code de la table
+        async function loadTableQRCode() {
+            try {
+                // Vérifier si la table a un QR Code
+                if (currentTable.qrCode) {
+                    tableQRCode = currentTable.qrCode;
+                    updateQRCodeDisplay();
+                } else {
+                    // Générer un nouveau QR Code si nécessaire
+                    tableQRCode = await storage.generateTableQR(currentTable.id);
+                    updateQRCodeDisplay();
+                }
+            } catch (error) {
+                console.error('Erreur chargement QR Code:', error);
+            }
+        }
+
+        // Mettre à jour l'affichage du QR Code
+        function updateQRCodeDisplay() {
+            if (!tableQRCode) return;
+            
+            document.getElementById('qrScansCount').textContent = tableQRCode.scanCount || 0;
+            
+            if (tableQRCode.lastScan) {
+                const lastScanDate = new Date(tableQRCode.lastScan);
+                document.getElementById('lastScanDate').textContent = formatDate(lastScanDate, true);
+            }
+            
+            // Ici, vous implémenteriez l'affichage réel du QR Code
+            // Pour l'exemple, nous utilisons un placeholder
+        }
+
+        // Initialiser les écouteurs d'événements
+        function initEventListeners() {
+            // Bouton retour
+            window.goBackToTables = function() {
+                window.location.href = `tables.html?eventId=${currentEvent.id}`;
+            };
+            
+            // Navigation par onglets
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Mettre à jour les boutons actifs
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Afficher le contenu correspondant
+                    const tabId = this.dataset.tab;
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    document.getElementById(`${tabId}Tab`).style.display = 'block';
+                });
+            });
+            
+            // Bouton modifier
+            document.getElementById('editTableBtn').addEventListener('click', () => {
+                window.location.href = `tables.html?eventId=${currentEvent.id}&edit=${currentTable.id}`;
+            });
+            
+            // Bouton supprimer
+            document.getElementById('deleteTableBtn').addEventListener('click', deleteTable);
+            
+            // Bouton assigner des invités
+            document.getElementById('assignGuestsBtn').addEventListener('click', openAssignModal);
+            document.getElementById('assignFirstGuestBtn').addEventListener('click', openAssignModal);
+            document.getElementById('quickAssignBtn').addEventListener('click', openAssignModal);
+            
+            // Bouton auto-assigner
+            document.getElementById('quickAutoAssignBtn').addEventListener('click', autoAssignGuests);
+            
+            // Bouton retirer un invité
+            document.getElementById('quickRemoveGuestBtn').addEventListener('click', openRemoveModal);
+            
+            // Bouton QR Code
+            document.getElementById('quickViewQRBtn').addEventListener('click', () => {
+                document.querySelector('.tab-btn[data-tab="qr"]').click();
+            });
+            
+            document.getElementById('generateQRBtn').addEventListener('click', generateNewQRCode);
+            document.getElementById('downloadQRBtn').addEventListener('click', downloadQRCode);
+            document.getElementById('scanQRBtn').addEventListener('click', scanQRCode);
+            document.getElementById('copyQRBtn').addEventListener('click', copyQRCode);
+            
+            // Bouton statistiques
+            document.getElementById('refreshStatsBtn').addEventListener('click', async () => {
+                await loadTableStatistics();
+                Toastify({
+                    text: "Statistiques actualisées",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "var(--success)"
+                }).showToast();
+            });
+            
+            // Bouton partager
+            document.getElementById('quickShareBtn').addEventListener('click', shareTable);
+            
+            // Bouton imprimer
+            document.getElementById('quickPrintBtn').addEventListener('click', printTableDetails);
+            
+            // Modal d'assignation
+            document.getElementById('assignModalClose').addEventListener('click', closeAssignModal);
+            document.getElementById('assignModalCancel').addEventListener('click', closeAssignModal);
+            document.getElementById('assignModalSave').addEventListener('click', assignSelectedGuests);
+            
+            // Recherche dans le modal d'assignation
+            document.getElementById('searchAssignGuests')?.addEventListener('input', function() {
+                filterAvailableGuests(this.value);
+            });
+            
+            document.getElementById('filterGuestCategory')?.addEventListener('change', function() {
+                filterAvailableGuests(document.getElementById('searchAssignGuests').value);
+            });
+            
+            // Modal de retrait
+            document.getElementById('removeModalClose').addEventListener('click', closeRemoveModal);
+            document.getElementById('removeModalCancel').addEventListener('click', closeRemoveModal);
+            document.getElementById('removeModalConfirm').addEventListener('click', removeSelectedGuests);
+            
+            document.getElementById('searchRemoveGuest')?.addEventListener('input', function() {
+                filterAssignedGuests(this.value);
+            });
+        }
+
+        // Ouvrir le modal d'assignation
+        function openAssignModal() {
+            const modal = document.getElementById('assignModal');
+            selectedGuestIds.clear();
+            
+            // Charger les invités disponibles
+            renderAvailableGuests();
+            
+            modal.classList.add('active');
+            
+            // Focus sur la recherche
+            setTimeout(() => {
+                document.getElementById('searchAssignGuests')?.focus();
+            }, 100);
+        }
+
+        // Fermer le modal d'assignation
+        function closeAssignModal() {
+            const modal = document.getElementById('assignModal');
+            modal.classList.remove('active');
+            selectedGuestIds.clear();
+        }
+
+        // Rendre les invités disponibles
+        function renderAvailableGuests(searchTerm = '', category = 'all') {
+            const container = document.getElementById('availableGuestsModal');
+            
+            let filtered = availableGuests.filter(guest => 
+                !guest.tableId || guest.tableId === currentTable.id
+            );
+            
+            // Appliquer la recherche
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(guest =>
+                    guest.firstName?.toLowerCase().includes(term) ||
+                    guest.lastName?.toLowerCase().includes(term) ||
+                    guest.email?.toLowerCase().includes(term) ||
+                    guest.company?.toLowerCase().includes(term)
+                );
+            }
+            
+            // Appliquer le filtre de catégorie
+            if (category !== 'all') {
+                filtered = filtered.filter(guest => 
+                    guest.metadata?.category === category
+                );
+            }
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: var(--text-color); opacity: 0.5;">
+                        <i class="fas fa-users-slash"></i>
+                        <p>Aucun invité disponible</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">
+                            Tous les invités sont déjà assignés à des tables
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filtered.map(guest => {
+                const isSelected = selectedGuestIds.has(guest.id);
+                const isAlreadyAssigned = guest.tableId === currentTable.id;
+                const initials = getInitials(`${guest.firstName || ''} ${guest.lastName || ''}`.trim() || guest.email);
+                
+                return `
+                    <div class="guest-select-item ${isSelected ? 'selected' : ''} ${isAlreadyAssigned ? 'already-assigned' : ''}" 
+                         data-guest-id="${guest.id}"
+                         onclick="toggleGuestSelection('${guest.id}')">
+                        <div class="guest-checkbox"></div>
+                        <div class="guest-avatar" style="width: 40px; height: 40px; font-size: 1rem;">
+                            ${initials}
+                        </div>
+                        <div class="guest-info" style="flex: 1;">
+                            <div class="guest-name" style="font-weight: 600;">
+                                ${escapeHtml(`${guest.firstName || ''} ${guest.lastName || ''}`.trim() || guest.email)}
+                                ${isAlreadyAssigned ? '<span class="badge badge-warning" style="margin-left: 8px; font-size: 0.7rem;">Déjà assigné</span>' : ''}
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; opacity: 0.7;">
+                                <span>${guest.email || ''}</span>
+                                ${guest.company ? `<span><i class="fas fa-building"></i> ${escapeHtml(guest.company)}</span>` : ''}
+                                <span><i class="fas fa-chair"></i> ${guest.seats || 1} place(s)</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filtrer les invités disponibles
+        function filterAvailableGuests(searchTerm) {
+            const category = document.getElementById('filterGuestCategory').value;
+            renderAvailableGuests(searchTerm, category);
+        }
+
+        // Basculer la sélection d'un invité
+        window.toggleGuestSelection = function(guestId) {
+            if (selectedGuestIds.has(guestId)) {
+                selectedGuestIds.delete(guestId);
+            } else {
+                selectedGuestIds.add(guestId);
+            }
+            
+            // Mettre à jour l'affichage
+            const item = document.querySelector(`.guest-select-item[data-guest-id="${guestId}"]`);
+            if (item) {
+                item.classList.toggle('selected');
+            }
+        };
+
+        // Assigner les invités sélectionnés
+        async function assignSelectedGuests() {
+            if (selectedGuestIds.size === 0) {
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Aucun invité sélectionné',
+                    text: 'Veuillez sélectionner au moins un invité à assigner',
+                    confirmButtonColor: '#D97706'
+                });
+                return;
+            }
+            
+            try {
+                // Désactiver le bouton
+                const saveBtn = document.getElementById('assignModalSave');
+                const originalText = saveBtn.innerHTML;
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<div class="spinner"></div>';
+                
+                // Assigner chaque invité
+                const results = [];
+                const errors = [];
+                
+                for (const guestId of selectedGuestIds) {
+                    try {
+                        const guest = availableGuests.find(g => g.id === guestId);
+                        if (guest) {
+                            await storage.assignGuestToTable(
+                                currentTable.id, 
+                                guestId, 
+                                guest.seats || 1
+                            );
+                            results.push(guest);
+                        }
+                    } catch (error) {
+                        errors.push({ guestId, error: error.message });
+                    }
+                }
+                
+                // Fermer le modal
+                closeAssignModal();
+                
+                // Recharger les données
+                await loadTable(currentTable.id);
+                await loadTableGuests();
+                await loadAvailableGuests();
+                
+                // Afficher le résultat
+                if (errors.length === 0) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Invités assignés !',
+                        html: `
+                            <div style="text-align: center; padding: 20px 0;">
+                                <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success); margin-bottom: 15px;"></i>
+                                <p><strong>${results.length} invité(s)</strong> assigné(s) avec succès à la table #${currentTable.tableNumber}</p>
+                            </div>
+                        `,
+                        confirmButtonColor: '#D97706'
+                    });
+                } else {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Assignation partielle',
+                        html: `
+                            <div style="text-align: center; padding: 20px 0;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: var(--warning); margin-bottom: 15px;"></i>
+                                <p><strong>${results.length} invité(s)</strong> assigné(s) avec succès</p>
+                                <p style="color: var(--danger); font-size: 0.9rem; margin-top: 10px;">
+                                    ${errors.length} erreur(s) rencontrée(s)
+                                </p>
+                            </div>
+                        `,
+                        confirmButtonColor: '#D97706'
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Erreur assignation invités:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors de l\'assignation',
+                    confirmButtonColor: '#D97706'
+                });
+            } finally {
+                // Réactiver le bouton
+                const saveBtn = document.getElementById('assignModalSave');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+        }
+
+        // Ouvrir le modal de retrait
+        function openRemoveModal() {
+            const modal = document.getElementById('removeGuestModal');
+            selectedGuestIds.clear();
+            
+            // Charger les invités assignés
+            renderAssignedGuests();
+            
+            modal.classList.add('active');
+            
+            // Focus sur la recherche
+            setTimeout(() => {
+                document.getElementById('searchRemoveGuest')?.focus();
+            }, 100);
+        }
+
+        // Fermer le modal de retrait
+        function closeRemoveModal() {
+            const modal = document.getElementById('removeGuestModal');
+            modal.classList.remove('active');
+            selectedGuestIds.clear();
+        }
+
+        // Rendre les invités assignés
+        function renderAssignedGuests(searchTerm = '') {
+            const container = document.getElementById('assignedGuestsModal');
+            
+            let filtered = [...tableGuests];
+            
+            // Appliquer la recherche
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(guest =>
+                    guest.firstName?.toLowerCase().includes(term) ||
+                    guest.lastName?.toLowerCase().includes(term) ||
+                    guest.email?.toLowerCase().includes(term)
+                );
+            }
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: var(--text-color); opacity: 0.5;">
+                        <i class="fas fa-users-slash"></i>
+                        <p>Aucun invité assigné à cette table</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filtered.map(guest => {
+                const isSelected = selectedGuestIds.has(guest.id);
+                const initials = getInitials(`${guest.firstName || ''} ${guest.lastName || ''}`.trim() || guest.email);
+                
+                return `
+                    <div class="guest-select-item ${isSelected ? 'selected' : ''}" 
+                         data-guest-id="${guest.id}"
+                         onclick="toggleGuestSelection('${guest.id}')">
+                        <div class="guest-checkbox"></div>
+                        <div class="guest-avatar" style="width: 40px; height: 40px; font-size: 1rem;">
+                            ${initials}
+                        </div>
+                        <div class="guest-info" style="flex: 1;">
+                            <div class="guest-name" style="font-weight: 600;">
+                                ${escapeHtml(`${guest.firstName || ''} ${guest.lastName || ''}`.trim() || guest.email)}
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; opacity: 0.7;">
+                                <span>${guest.email || ''}</span>
+                                <span><i class="fas fa-chair"></i> ${guest.assignedSeats || guest.seats || 1} place(s)</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filtrer les invités assignés
+        function filterAssignedGuests(searchTerm) {
+            renderAssignedGuests(searchTerm);
+        }
+
+        // Retirer les invités sélectionnés
+        async function removeSelectedGuests() {
+            if (selectedGuestIds.size === 0) {
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Aucun invité sélectionné',
+                    text: 'Veuillez sélectionner au moins un invité à retirer',
+                    confirmButtonColor: '#D97706'
+                });
+                return;
+            }
+            
+            const result = await Swal.fire({
+                title: 'Retirer les invités ?',
+                html: `
+                    <div style="text-align: center; padding: 20px 0;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: var(--warning); margin-bottom: 15px;"></i>
+                        <p><strong>${selectedGuestIds.size} invité(s)</strong> seront retirés de la table #${currentTable.tableNumber}</p>
+                        <p style="color: var(--text-color); opacity: 0.7; font-size: 0.9rem; margin-top: 10px;">
+                            Les invités pourront être réassignés à d'autres tables
+                        </p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui, retirer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                reverseButtons: true
+            });
+            
+            if (!result.isConfirmed) return;
+            
+            try {
+                // Désactiver le bouton
+                const confirmBtn = document.getElementById('removeModalConfirm');
+                const originalText = confirmBtn.innerHTML;
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<div class="spinner"></div>';
+                
+                // Retirer chaque invité
+                const results = [];
+                const errors = [];
+                
+                for (const guestId of selectedGuestIds) {
+                    try {
+                        await storage.removeGuestFromTable(currentTable.id, guestId);
+                        const guest = tableGuests.find(g => g.id === guestId);
+                        if (guest) {
+                            results.push(guest);
+                        }
+                    } catch (error) {
+                        errors.push({ guestId, error: error.message });
+                    }
+                }
+                
+                // Fermer le modal
+                closeRemoveModal();
+                
+                // Recharger les données
+                await loadTable(currentTable.id);
+                await loadTableGuests();
+                await loadAvailableGuests();
+                
+                // Afficher le résultat
+                if (errors.length === 0) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Invités retirés !',
+                        html: `
+                            <div style="text-align: center; padding: 20px 0;">
+                                <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success); margin-bottom: 15px;"></i>
+                                <p><strong>${results.length} invité(s)</strong> retiré(s) avec succès de la table #${currentTable.tableNumber}</p>
+                            </div>
+                        `,
+                        confirmButtonColor: '#D97706'
+                    });
+                } else {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Retrait partiel',
+                        html: `
+                            <div style="text-align: center; padding: 20px 0;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: var(--warning); margin-bottom: 15px;"></i>
+                                <p><strong>${results.length} invité(s)</strong> retiré(s) avec succès</p>
+                                <p style="color: var(--danger); font-size: 0.9rem; margin-top: 10px;">
+                                    ${errors.length} erreur(s) rencontrée(s)
+                                </p>
+                            </div>
+                        `,
+                        confirmButtonColor: '#D97706'
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Erreur retrait invités:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors du retrait des invités',
+                    confirmButtonColor: '#D97706'
+                });
+            } finally {
+                // Réactiver le bouton
+                const confirmBtn = document.getElementById('removeModalConfirm');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalText;
+            }
+        }
+
+        // Auto-assigner des invités
+        async function autoAssignGuests() {
+            const result = await Swal.fire({
+                title: 'Auto-assigner des invités ?',
+                html: `
+                    <div style="text-align: center; padding: 20px 0;">
+                        <i class="fas fa-robot" style="font-size: 4rem; color: var(--primary); margin-bottom: 15px;"></i>
+                        <p>Cette fonctionnalité assignera automatiquement des invités non assignés à cette table.</p>
+                        <p style="color: var(--text-color); opacity: 0.7; font-size: 0.9rem; margin-top: 10px;">
+                            Stratégie: Priorité aux invités avec le plus de places nécessaires
+                        </p>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Auto-assigner',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#D97706',
+                cancelButtonColor: '#6B7280'
+            });
+            
+            if (!result.isConfirmed) return;
+            
+            try {
+                // Calculer la capacité disponible
+                const totalSeats = currentTable.assignedGuests?.reduce((sum, g) => sum + (g.seats || 1), 0) || 0;
+                const availableSeats = Math.max(0, currentTable.capacity - totalSeats);
+                
+                if (availableSeats === 0) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Table complète',
+                        text: 'Cette table a déjà atteint sa capacité maximale',
+                        confirmButtonColor: '#D97706'
+                    });
+                    return;
+                }
+                
+                // Obtenir les invités non assignés
+                const unassignedGuests = availableGuests.filter(guest => !guest.tableId);
+                
+                if (unassignedGuests.length === 0) {
+                    await Swal.fire({
+                        icon: 'info',
+                        title: 'Aucun invité disponible',
+                        text: 'Tous les invités sont déjà assignés à des tables',
+                        confirmButtonColor: '#D97706'
+                    });
+                    return;
+                }
+                
+                // Trier par nombre de places (descendant)
+                unassignedGuests.sort((a, b) => (b.seats || 1) - (a.seats || 1));
+                
+                // Assigner jusqu'à épuisement des places disponibles
+                const assigned = [];
+                let remainingSeats = availableSeats;
+                
+                for (const guest of unassignedGuests) {
+                    const guestSeats = guest.seats || 1;
+                    
+                    if (guestSeats <= remainingSeats) {
+                        try {
+                            await storage.assignGuestToTable(currentTable.id, guest.id, guestSeats);
+                            assigned.push(guest);
+                            remainingSeats -= guestSeats;
+                            
+                            if (remainingSeats === 0) break;
+                        } catch (error) {
+                            console.warn(`Impossible d'assigner ${guest.firstName}:`, error.message);
+                        }
+                    }
+                }
+                
+                // Recharger les données
+                await loadTable(currentTable.id);
+                await loadTableGuests();
+                await loadAvailableGuests();
+                
+                if (assigned.length > 0) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Auto-assignation réussie !',
+                        html: `
+                            <div style="text-align: center; padding: 20px 0;">
+                                <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success); margin-bottom: 15px;"></i>
+                                <p><strong>${assigned.length} invité(s)</strong> assigné(s) automatiquement</p>
+                                <p style="color: var(--text-color); opacity: 0.7; font-size: 0.9rem; margin-top: 10px;">
+                                    ${remainingSeats} place(s) encore disponible(s)
+                                </p>
+                            </div>
+                        `,
+                        confirmButtonColor: '#D97706'
+                    });
+                } else {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Aucun invité assigné',
+                        text: 'Aucun invité n\'a pu être auto-assigné à cette table',
+                        confirmButtonColor: '#D97706'
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Erreur auto-assignation:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors de l\'auto-assignation',
+                    confirmButtonColor: '#D97706'
+                });
+            }
+        }
+
+        // Supprimer la table
+        async function deleteTable() {
+            const result = await Swal.fire({
+                title: 'Supprimer cette table ?',
+                html: `
+                    <div style="text-align: center; padding: 20px 0;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #EF4444; margin-bottom: 15px;"></i>
+                        <p>La table <strong>#${currentTable.tableNumber}</strong> sera définitivement supprimée.</p>
+                        ${currentTable.assignedGuests && currentTable.assignedGuests.length > 0 ? `
+                            <p style="color: var(--warning); font-size: 0.9rem; margin-top: 10px;">
+                                <i class="fas fa-users"></i>
+                                ${currentTable.assignedGuests.length} invité(s) seront retiré(s) de cette table
+                            </p>
+                        ` : ''}
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui, supprimer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                reverseButtons: true
+            });
+            
+            if (!result.isConfirmed) return;
+            
+            try {
+                await storage.deleteTable(currentTable.id);
+                
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Supprimé !',
+                    text: 'La table a été supprimée avec succès',
+                    confirmButtonColor: '#D97706'
+                });
+                
+                // Retourner à la liste des tables
+                window.location.href = `tables.html?eventId=${currentEvent.id}`;
+                
+            } catch (error) {
+                console.error('Erreur suppression table:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Impossible de supprimer la table',
+                    confirmButtonColor: '#D97706'
+                });
+            }
+        }
+
+        // Générer un nouveau QR Code
+        async function generateNewQRCode() {
+            try {
+                tableQRCode = await storage.generateTableQR(currentTable.id);
+                updateQRCodeDisplay();
+                
+                Toastify({
+                    text: "QR Code régénéré avec succès",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "var(--success)"
+                }).showToast();
+                
+            } catch (error) {
+                console.error('Erreur génération QR Code:', error);
+                Toastify({
+                    text: "Erreur lors de la génération du QR Code",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "var(--danger)"
+                }).showToast();
+            }
+        }
+
+        // Télécharger le QR Code
+        async function downloadQRCode() {
+            // Ici, vous implémenteriez le téléchargement du QR Code
+            Toastify({
+                text: "Fonctionnalité de téléchargement à implémenter",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "var(--info)"
+            }).showToast();
+        }
+
+        // Scanner le QR Code
+        async function scanQRCode() {
+            // Ici, vous implémenteriez le scan du QR Code
+            Toastify({
+                text: "Fonctionnalité de scan à implémenter",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "var(--info)"
+            }).showToast();
+        }
+
+        // Copier le QR Code
+        async function copyQRCode() {
+            // Ici, vous implémenteriez la copie du QR Code
+            Toastify({
+                text: "Fonctionnalité de copie à implémenter",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "var(--info)"
+            }).showToast();
+        }
+
+      
+
+        // Imprimer les détails
+        async function printTableDetails() {
+            // Ici, vous implémenteriez l'impression
+            Toastify({
+                text: "Fonctionnalité d'impression à implémenter",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "var(--info)"
+            }).showToast();
+        }
+
+        // Voir les détails d'un invité
+        window.viewGuestDetails = function(guestId) {
+            window.open(`guest-details.html?guestId=${guestId}&eventId=${currentEvent.id}`, '_blank');
+        };
+
+        // Retirer un invité spécifique
+        window.removeGuestFromTable = async function(guestId) {
+            const guest = tableGuests.find(g => g.id === guestId);
+            if (!guest) return;
+            
+            const result = await Swal.fire({
+                title: 'Retirer cet invité ?',
+                html: `
+                    <div style="text-align: center; padding: 20px 0;">
+                        <i class="fas fa-user-minus" style="font-size: 4rem; color: var(--warning); margin-bottom: 15px;"></i>
+                        <p><strong>${escapeHtml(`${guest.firstName || ''} ${guest.lastName || ''}`.trim() || guest.email)}</strong> sera retiré de la table #${currentTable.tableNumber}</p>
+                        <p style="color: var(--text-color); opacity: 0.7; font-size: 0.9rem; margin-top: 10px;">
+                            L'invité pourra être réassigné à une autre table
+                        </p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui, retirer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                reverseButtons: true
+            });
+            
+            if (!result.isConfirmed) return;
+            
+            try {
+                await storage.removeGuestFromTable(currentTable.id, guestId);
+                
+                // Recharger les données
+                await loadTable(currentTable.id);
+                await loadTableGuests();
+                await loadAvailableGuests();
+                
+                Toastify({
+                    text: "Invité retiré avec succès",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "var(--success)"
+                }).showToast();
+                
+            } catch (error) {
+                console.error('Erreur retrait invité:', error);
+                Toastify({
+                    text: "Erreur lors du retrait de l'invité",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "var(--danger)"
+                }).showToast();
+            }
+        };
+
+        // Mettre à jour l'interface
+        function updateUI() {
+            // Mettre à jour le titre de la page
+            const tableName = currentTable?.tableName || currentTable?.tableNumber || 'Table';
+            document.title = `SECURA | Table #${tableName} - ${currentEvent?.name || 'Événement'}`;
+        }
+
+        // Afficher le loader
+        function showLoader(type) {
+            const loaders = {
+                table: 'tableLoader',
+                guests: 'guestsLoader'
+            };
+            
+            if (loaders[type]) {
+                const loader = document.getElementById(loaders[type]);
+                if (loader) loader.style.display = 'block';
+            }
+        }
+
+        // Cacher le loader
+        function hideLoader(type) {
+            const loaders = {
+                table: 'tableLoader',
+                guests: 'guestsLoader'
+            };
+            
+            if (loaders[type]) {
+                const loader = document.getElementById(loaders[type]);
+                if (loader) loader.style.display = 'none';
+            }
+        }
+
+        // Fonctions utilitaires
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            return name
+                .split(' ')
+                .map(word => word[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2);
+        }
+
+        function formatDate(date, includeTime = false) {
+            if (!(date instanceof Date) || isNaN(date)) return '-';
+            
+            const options = { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            };
+            
+            if (includeTime) {
+                options.hour = '2-digit';
+                options.minute = '2-digit';
+            }
+            
+            return date.toLocaleDateString('fr-FR', options);
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diff = now - date;
+            
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 60) {
+                return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
+            } else if (hours < 24) {
+                return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
+            } else {
+                return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+            }
+        }
+
+        function getCategoryColor(category) {
+            const colors = {
+                'standard': '#D97706',
+                'vip': '#8B5CF6',
+                'family': '#3B82F6',
+                'speaker': '#10B981',
+                'organizer': '#EC4899',
+                'staff': '#6B7280',
+                'press': '#F59E0B',
+                'sponsor': '#6366F1',
+                'other': '#78716C'
+            };
+            
+            return colors[category] || colors.standard;
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'standard': 'fa-chair',
+                'vip': 'fa-crown',
+                'family': 'fa-home',
+                'speaker': 'fa-microphone',
+                'organizer': 'fa-user-tie',
+                'staff': 'fa-user-shield',
+                'press': 'fa-camera',
+                'sponsor': 'fa-handshake',
+                'other': 'fa-star'
+            };
+            
+            return icons[category] || icons.standard;
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'standard': 'Standard',
+                'vip': 'VIP',
+                'family': 'Familiale',
+                'speaker': 'Conférencier',
+                'organizer': 'Organisateur',
+                'staff': 'Staff',
+                'press': 'Presse',
+                'sponsor': 'Sponsor',
+                'other': 'Autre'
+            };
+            
+            return names[category] || category;
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? 
+                `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+                '217, 119, 6';
+        }
+
+        // Gestion de la fermeture de page
+        window.addEventListener('beforeunload', (e) => {
+            if (selectedGuestIds.size > 0) {
+                e.preventDefault();
+                e.returnValue = 'Vous avez des sélections non sauvegardées. Voulez-vous vraiment quitter ?';
+                return e.returnValue;
+            }
+        });
+    </script>
+</body>
+</html>

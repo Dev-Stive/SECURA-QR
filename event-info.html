@@ -1,0 +1,2755 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURA | Détails de l'événement</title>
+    <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/dash.css">
+    
+    <style>
+        
+
+        /* Header de l'événement */
+        .event-header-container {
+            position: relative;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-lg);
+            min-height: 300px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .event-header-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4));
+            z-index: 1;
+        }
+
+        .event-header-content {
+            position: relative;
+            z-index: 2;
+            padding: 50px 40px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .event-title-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .event-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .event-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .event-stats-section {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .event-stat {
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Badges */
+        .event-badges {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 3;
+        }
+
+        .event-badge {
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-type {
+            background: var(--secura-red);
+            color: white;
+        }
+
+        .badge-status {
+            background: var(--secura-success);
+            color: white;
+        }
+
+        /* Navigation latérale */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+        }
+
+        .dashboard-sidebar {
+            background: var(--secura-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 25px 0;
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .dark-theme .dashboard-sidebar {
+            background: var(--secura-light-gray);
+        }
+
+      
+
+       
+        /* Contenu principal */
+        .dashboard-content {
+            min-height: 600px;
+        }
+
+        .content-section {
+            background: var(--secura-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 30px;
+            margin-bottom: 30px;
+            animation: slideUp 0.3s ease;
+        }
+
+        .dark-theme .content-section {
+            background: var(--secura-light-gray);
+        }
+
+        
+
+        /* Statistiques */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--secura-light-bg);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            transition: all 0.3s ease;
+            border-top: 4px solid transparent;
+        }
+
+        .dark-theme .stat-card {
+            background: var(--secura-brown);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card.total {
+            border-top-color: var(--secura-red);
+        }
+
+        .stat-card.present {
+            border-top-color: var(--secura-success);
+        }
+
+        .stat-card.pending {
+            border-top-color: var(--secura-warning);
+        }
+
+        .stat-card.rate {
+            border-top-color: var(--secura-info);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(217, 119, 6, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .stat-card.total .stat-icon {
+            background: rgba(217, 119, 6, 0.1);
+        }
+
+        .stat-card.present .stat-icon {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .stat-card.pending .stat-icon {
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .stat-card.rate .stat-icon {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .stat-icon i {
+            font-size: 1.5rem;
+        }
+
+        .stat-card.total .stat-icon i {
+            color: var(--secura-red);
+        }
+
+        .stat-card.present .stat-icon i {
+            color: var(--secura-success);
+        }
+
+        .stat-card.pending .stat-icon i {
+            color: var(--secura-warning);
+        }
+
+        .stat-card.rate .stat-icon i {
+            color: var(--secura-info);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-card.total .stat-number {
+            color: var(--secura-red);
+        }
+
+        .stat-card.present .stat-number {
+            color: var(--secura-success);
+        }
+
+        .stat-card.pending .stat-number {
+            color: var(--secura-warning);
+        }
+
+        .stat-card.rate .stat-number {
+            color: var(--secura-info);
+        }
+
+        .stat-label {
+            color: var(--secura-text-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Graphiques */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .chart-card {
+            background: var(--secura-light-bg);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+        }
+
+        .dark-theme .chart-card {
+            background: var(--secura-brown);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-header h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--secura-black);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dark-theme .chart-header h4 {
+            color: var(--secura-white);
+        }
+
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+
+        /* Invités */
+        .guests-table-container {
+            overflow-x: auto;
+        }
+
+        .guests-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .guests-table th {
+            background: var(--secura-light-gray);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--secura-black);
+            border-bottom: 2px solid var(--secura-medium-gray);
+            white-space: nowrap;
+        }
+
+        .dark-theme .guests-table th {
+            background: var(--secura-brown);
+            color: var(--secura-white);
+        }
+
+        .guests-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--secura-light-gray);
+            vertical-align: middle;
+        }
+
+        .dark-theme .guests-table td {
+            border-bottom-color: var(--secura-brown);
+        }
+
+        .guests-table tbody tr:hover {
+            background: rgba(217, 119, 6, 0.05);
+        }
+
+        .guest-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .guest-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secura-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .guest-name {
+            font-weight: 500;
+        }
+
+        .guest-email {
+            font-size: 0.9rem;
+            color: var(--secura-text-gray);
+            margin-top: 2px;
+        }
+
+        /* Actions rapides */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .action-card {
+            background: var(--secura-light-bg);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dark-theme .action-card {
+            background: var(--secura-brown);
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--secura-red);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--secura-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .action-card:nth-child(2) .action-icon {
+            background: var(--secura-success);
+        }
+
+        .action-card:nth-child(3) .action-icon {
+            background: var(--secura-info);
+        }
+
+        .action-card:nth-child(4) .action-icon {
+            background: var(--secura-accent);
+        }
+
+        .action-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--secura-black);
+        }
+
+        .dark-theme .action-title {
+            color: var(--secura-white);
+        }
+
+        .action-description {
+            color: var(--secura-text-gray);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Bouton retour */
+        .back-button {
+            position: fixed;
+            top: 120px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        .back-button .btn {
+            padding: 12px 20px;
+            background: var(--secura-red);
+            color: white;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .back-button .btn:hover {
+            transform: translateX(-5px);
+            background: var(--secura-dark-red);
+        }
+
+        /* État vide */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--secura-text-gray);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--secura-black);
+        }
+
+        .dark-theme .empty-state h3 {
+            color: var(--secura-white);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-sidebar {
+                position: static;
+                margin-bottom: 30px;
+            }
+            
+            .back-button {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .event-dashboard {
+                margin-top: 80px;
+                padding: 0 15px;
+            }
+            
+            .event-header-content {
+                padding: 30px 20px;
+                flex-direction: column;
+            }
+            
+            .event-title {
+                font-size: 2rem;
+            }
+            
+            .event-stats-section {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .event-stat {
+                min-width: 80px;
+            }
+            
+            .stat-value {
+                font-size: 1.8rem;
+            }
+            
+            .event-badges {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 20px;
+                justify-content: flex-start;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .section-actions {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .event-title {
+                font-size: 1.6rem;
+            }
+            
+            .event-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card {
+                padding: 20px;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+            
+            .back-button {
+                position: fixed;
+                bottom: 20px;
+                top: auto;
+                left: 20px;
+                right: 20px;
+            }
+            
+            .back-button .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+
+    <style>
+        .main-content {
+            padding-top: 120px;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .actions-bar {
+            background: var(--secura-white);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .dark-theme .actions-bar {
+            background: var(--secura-light-gray);
+        }
+
+        .actions-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .actions-left {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .actions-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* Section filtres déroulante - Version compacte */
+    .filters-dropdown-section {
+        display: none;
+        background: var(--secura-light-gray);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        margin-top: 15px;
+        animation: slideDown 0.3s ease;
+    }
+
+    .dark-theme .filters-dropdown-section {
+        background: var(--secura-brown);
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .filter-section {
+        background: var(--secura-white);
+        border-radius: var(--radius-md);
+        padding: 15px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .dark-theme .filter-section {
+        background: var(--secura-light-gray);
+    }
+
+    .filter-section-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: var(--secura-red);
+        font-size: 0.9rem;
+    }
+
+    .filter-section-header i {
+        font-size: 0.8rem;
+    }
+
+    /* Groupes de chips */
+    .filter-chips-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .filter-chips-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .filter-chips-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Chips de filtre - Version petite */
+    .filter-chip-small,
+    .filter-chip-type,
+    .filter-chip-status {
+        padding: 6px 12px;
+        background: var(--secura-light-gray);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        flex: 1;
+        min-width: fit-content;
+    }
+
+    .dark-theme .filter-chip-small,
+    .dark-theme .filter-chip-type,
+    .dark-theme .filter-chip-status {
+        background: var(--secura-brown);
+    }
+
+    .filter-chip-small:hover,
+    .filter-chip-type:hover,
+    .filter-chip-status:hover {
+        background: var(--secura-red-light);
+        transform: translateY(-1px);
+    }
+
+    .filter-chip-small.active,
+    .filter-chip-type.active,
+    .filter-chip-status.active {
+        background: var(--secura-red);
+        color: white;
+        border-color: var(--secura-red-dark);
+    }
+
+    .filter-chip-small i,
+    .filter-chip-type i,
+    .filter-chip-status i {
+        font-size: 0.75rem;
+    }
+
+    /* Dates */
+    .filter-dates-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .date-input-group {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--secura-light-gray);
+        padding: 6px 10px;
+        border-radius: var(--radius-md);
+    }
+
+    .dark-theme .date-input-group {
+        background: var(--secura-brown);
+    }
+
+    .date-label {
+        font-size: 0.8rem;
+        color: var(--secura-text-gray);
+        white-space: nowrap;
+    }
+
+    .date-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        color: var(--secura-black);
+        font-size: 0.8rem;
+        padding: 2px;
+        min-width: 0;
+    }
+
+    .dark-theme .date-input {
+        color: var(--secura-white);
+    }
+
+    .date-input:focus {
+        outline: none;
+    }
+
+    /* Slider capacité */
+    .capacity-slider-container {
+        padding: 10px 0;
+    }
+
+    .capacity-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.75rem;
+        color: var(--secura-text-gray);
+    }
+
+    .capacity-slider {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--secura-light-gray);
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .dark-theme .capacity-slider {
+        background: var(--secura-brown);
+    }
+
+    .capacity-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--secura-red);
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .capacity-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--secura-red);
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .capacity-hint {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 0.75rem;
+        color: var(--secura-text-gray);
+    }
+
+    .capacity-hint i {
+        font-size: 0.7rem;
+    }
+
+    /* Actions des filtres */
+    .filters-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 15px;
+        border-top: 1px solid var(--secura-medium-gray);
+    }
+
+    .filters-actions .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-chips-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .filter-dates-row {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .filter-chips-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filters-actions {
+            flex-direction: column;
+        }
+
+        .filters-actions .btn {
+            width: 100%;
+        }
+    }
+
+        /* Filtres Rapides */
+        .quick-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: var(--secura-light-gray);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .dark-theme .filter-chip {
+            background: var(--secura-brown);
+        }
+
+        .btn-filter{
+            padding: 8px 16px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            background: var(--secura-red);
+            color: white;
+
+        }
+
+        .filter-chip:hover, .btn-filter:hover {
+            background: var(--secura-red);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .filter-chip.active {
+            background: var(--secura-red);
+            color: white;
+            border: 1px solid white;
+        }
+
+        /* Barre de recherche */
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                width: 100%;
+            }
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secura-text-gray);
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 2px solid var(--secura-light-gray);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            background: var(--secura-white);
+            transition: all 0.3s ease;
+        }
+
+        .dark-theme .search-container input {
+            background: var(--secura-light-gray);
+            border-color: var(--secura-brown);
+            color: var(--secura-white);
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--secura-red);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+
+        /* Statistiques avancées */
+        .stats-advanced {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .stat-card-pro {
+            background: var(--secura-white);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            transition: all 0.3s ease;
+            border-top: 4px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-theme .stat-card-pro {
+            background: var(--secura-light-gray);
+        }
+
+        .stat-card-pro:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card-pro::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+
+        .stat-icon-pro {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-content-pro {
+            margin-bottom: 15px;
+        }
+
+        .stat-number-pro {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label-pro {
+            color: var(--secura-text-gray);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .stat-trend.down {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+
+        /* Graphiques */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .chart-card {
+            background: var(--secura-white);
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .dark-theme .chart-card {
+            background: var(--secura-light-gray);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .chart-header h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--secura-red);
+            font-size: 1.2rem;
+        }
+
+        .chart-canvas {
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Performance grid */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .performance-card {
+            background: var(--secura-white);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .dark-theme .performance-card {
+            background: var(--secura-light-gray);
+        }
+
+        .performance-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .performance-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .performance-content {
+            flex: 1;
+        }
+
+        .performance-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--secura-black);
+        }
+
+        .dark-theme .performance-title {
+            color: var(--secura-white);
+        }
+
+        .performance-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--secura-red);
+        }
+
+        /* Grille d'événements */
+        .events-grid-container {
+            background: var(--secura-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .dark-theme .events-grid-container {
+            background: var(--secura-light-gray);
+        }
+
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--secura-light-gray);
+        }
+
+        .dark-theme .grid-header {
+            border-bottom-color: var(--secura-brown);
+        }
+
+        .grid-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            color: var(--secura-black);
+        }
+
+        .dark-theme .grid-header h3 {
+            color: var(--secura-white);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+            background: var(--secura-light-gray);
+            padding: 5px;
+            border-radius: var(--radius-md);
+        }
+
+        .dark-theme .view-toggle {
+            background: var(--secura-brown);
+        }
+
+        .view-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-lg);
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--secura-text-gray);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .view-btn:hover {
+            background: var(--secura-red);
+            color: white;
+        }
+
+        .view-btn.active {
+            background: var(--secura-red);
+            color: white;
+        }
+
+      
+
+        /* Mode Table */
+        .events-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .events-table th {
+            background: var(--secura-light-gray);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--secura-black);
+            border-bottom: 2px solid var(--secura-medium-gray);
+        }
+
+        .dark-theme .events-table th {
+            background: var(--secura-brown);
+            color: var(--secura-white);
+        }
+
+        .events-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--secura-light-gray);
+        }
+
+        .dark-theme .events-table td {
+            border-bottom-color: var(--secura-brown);
+        }
+
+        .events-table tbody tr:hover {
+            background: rgba(217, 119, 6, 0.05);
+        }
+
+        /* État vide */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--secura-text-gray);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--secura-light-gray);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--secura-black);
+        }
+
+        .dark-theme .empty-state h3 {
+            color: var(--secura-white);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--secura-light-gray);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dark-theme .page-btn {
+            background: var(--secura-brown);
+        }
+
+        .page-btn:hover {
+            background: var(--secura-red);
+            color: white;
+        }
+
+        .page-btn.active {
+            background: var(--secura-red);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .events-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 100px;
+            }
+            
+            .actions-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .actions-left, .actions-right {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card-pro {
+                padding: 20px;
+            }
+            
+            .stat-number-pro {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .view-toggle {
+                justify-content: center;
+            }
+            
+            .view-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .stat-icon-pro {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+        }
+
+       
+
+        .animate-slide-in {
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <img src="assets/images/icon.png" alt="logo secura">
+                </div>
+                <div class="sidebar-logo-text">
+                    <h1>SECURA</h1>
+                    <p>Gestion Sécurisée</p>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Fermer le menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <!-- Profile Section -->
+        <div class="sidebar-profile">
+            <div class="profile-avatar large">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="profile-details">
+                <strong id="sidebarProfileName">Chargement...</strong>
+                <small id="sidebarProfileEmail">email@exemple.com</small>
+                <span class="badge-role" id="sidebarProfileRole">Utilisateur</span>
+            </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="navMenu" class="sidebar-menu">
+            <a href="index.html" class="sidebar-link active">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="events.html" class="sidebar-link">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Événements</span>
+            </a>
+            <a href="guests.html" class="sidebar-link">
+                <i class="fas fa-users"></i>
+                <span>Invités</span>
+            </a>
+<a href="tables.html" class="sidebar-link">
+                <i class="fas fa-chair"></i>
+                <span>Tables</span>
+            </a>
+            <a href="qr-generator.html" class="sidebar-link">
+                <i class="bi bi-qr-code"></i>
+                <span>Générateur QR</span>
+            </a>
+            <a href="ticket-generator.html" class="sidebar-link">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Billets</span>
+            </a>
+            <a href="scanner.html" class="sidebar-link">
+                <i class="fas fa-camera"></i>
+                <span>Scanner</span>
+            </a>
+            <hr class="sidebar-divider">
+            <a href="access.html" class="sidebar-link" id="accessEventLink">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Accès Événement</span>
+            </a>
+            <a href="profile.html" class="sidebar-link">
+                <i class="fas fa-user"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="settings.html" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+            </a>
+            <button class="sidebar-link text-danger" id="sidebarLogout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+                <span>Mode Sombre</span>
+            </button>
+            <button class="fullscreen-toggle" id="fullscreenToggle">
+                <i class="fas fa-expand"></i>
+                <span>Plein écran</span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Overlay pour fermer la sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Bouton flottant pour ouvrir la sidebar -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Top Bar -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <img src="assets/images/icon.png" alt="logo secura">
+                </div>
+                <div class="logo-text">
+                    <h1>SECURA</h1>
+                    <p>Tableau de Bord </p>
+                </div>
+            </div>
+            
+            
+            <!-- Profile Button -->
+            <button class="profile-toggle header-profile-btn" id="profileToggle" aria-haspopup="true" aria-expanded="false">
+                <div class="profile-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-info">
+                    <span class="profile-name" id="profileName">Chargement...</span>
+                    <span class="profile-role" id="profileRole">Utilisateur</span>
+                </div>
+                <i class="bi bi-chevron-down profile-arrow"></i>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Profile Menu -->
+    <div class="floating-profile-menu" id="floatingProfileMenu">
+        <div class="profile-dropdown show" id="profileDropdown" role="menu">
+            <div class="profile-header">
+                <div class="profile-avatar large">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-details">
+                    <strong id="dropdownName">Chargement...</strong>
+                    <small id="dropdownEmail">email@exemple.com</small>
+                    <span class="badge-role" id="dropdownRole">Utilisateur</span>
+                </div>
+            </div>
+            <div class="dropdown-actions">
+                <a href="profile.html" class="dropdown-item" role="menuitem">
+                    <i class="bi bi-person"></i> Mon Profil
+                </a>
+                <a href="settings.html" class="dropdown-item" role="menuitem">
+                    <i class="bi bi-gear"></i> Paramètres
+                </a>
+                <hr class="dropdown-divider">
+                <button class="dropdown-item text-danger" id="logout-btn" role="menuitem">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content" >
+    
+         <div class="container">
+
+            <div id="dynamicHeader" class="secura-header animate-fade-in">
+    <div class="header-top">
+        <div class="header-title">
+            <h1><i class="fas fa-users"></i> Gestion des Invités</h1>
+            <p class="header-subtitle">Sélectionnez un événement pour afficher ses invités</p>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn btn-secondary" id="importCsvBtn" style="display: none;">
+                <i class="fas fa-file-csv"></i>
+                <span>Importer CSV</span>
+            </button>
+            <button class="btn btn-primary" id="addGuestBtn" style="display: none;">
+                <i class="fas fa-user-plus"></i>
+                <span>Ajouter un Invité</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Bloc inférieur : infos sur l’événement -->
+    <div id="dynamicHeaderEvent" class="animate-fade-in"></div>
+</div>
+
+
+        <div class="event-header-container" id="eventHeader">
+            <div class="event-header-overlay"></div>
+            
+            <div class="event-badges">
+                <div class="event-badge badge-type" id="eventTypeBadge">
+                    <i class="fas fa-tag"></i>
+                    <span id="eventTypeText">Type</span>
+                </div>
+                <div class="event-badge badge-status" id="eventStatusBadge">
+                    <i class="fas fa-circle"></i>
+                    <span id="eventStatusText">Statut</span>
+                </div>
+            </div>
+            
+            <div class="event-header-content">
+                <div class="event-title-section">
+                    <h1 class="event-title" id="eventTitle">
+                        <i class="fas fa-calendar-star"></i>
+                        <span id="eventName">Nom de l'événement</span>
+                    </h1>
+                    
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span id="eventDate">Date non définie</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span id="eventTime">Heure non définie</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="eventLocation">Lieu non défini</span>
+                        </div>
+                    </div>
+                    
+                    <p id="eventDescription" style="opacity: 0.9; max-width: 600px; line-height: 1.5;">
+                        Description de l'événement
+                    </p>
+                </div>
+                
+                <div class="event-stats-section">
+                    <div class="event-stat">
+                        <div class="stat-value" id="totalGuests">0</div>
+                        <div class="stat-label">Invités</div>
+                    </div>
+                    <div class="event-stat">
+                        <div class="stat-value" id="presentGuests">0</div>
+                        <div class="stat-label">Présents</div>
+                    </div>
+                    <div class="event-stat">
+                        <div class="stat-value" id="scanRate">0%</div>
+                        <div class="stat-label">Taux</div>
+                    </div>
+                    <div class="event-stat">
+                        <div class="stat-value" id="occupancyRate">0%</div>
+                        <div class="stat-label">Remplissage</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard-container">
+            <!-- Sidebar de navigation -->
+            <div class="dashboard-sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-bars"></i> Navigation</h3>
+                </div>
+                
+                <nav class="sidebar-nav">
+                    <a href="#overview" class="sidebar-link active" data-section="overview">
+                        <i class="fas fa-chart-line"></i>
+                        Vue d'ensemble
+                    </a>
+                    <a href="#guests" class="sidebar-link" data-section="guests">
+                        <i class="fas fa-users"></i>
+                        Invités
+                    </a>
+                    <a href="#qrcodes" class="sidebar-link" data-section="qrcodes">
+                        <i class="bi bi-qr-code"></i>
+                        Codes QR
+                    </a>
+                    <a href="#gallery" class="sidebar-link" data-section="gallery">
+                        <i class="fas fa-images"></i>
+                        Galerie
+                    </a>
+                    <a href="#messages" class="sidebar-link" data-section="messages">
+                        <i class="fas fa-comments"></i>
+                        Messages
+                    </a>
+                    <a href="#tables" class="sidebar-link" data-section="tables">
+                        <i class="fas fa-chair"></i>
+                        Tables
+                    </a>
+                    
+                    <div class="sidebar-divider"></div>
+                    
+                    <a href="#settings" class="sidebar-link" data-section="settings">
+                        <i class="fas fa-cog"></i>
+                        Paramètres
+                    </a>
+                    <a href="#analytics" class="sidebar-link" data-section="analytics">
+                        <i class="fas fa-chart-bar"></i>
+                        Analytics
+                    </a>
+                    <a href="#reports" class="sidebar-link" data-section="reports">
+                        <i class="fas fa-file-alt"></i>
+                        Rapports
+                    </a>
+                </nav>
+                
+                <div class="sidebar-footer">
+                    <button class="btn btn-primary" style="width: 100%;" id="editEventBtn">
+                        <i class="bi bi-pencil-square"></i>
+                        Modifier l'événement
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="dashboard-content">
+                <!-- Section: Vue d'ensemble -->
+                <div class="content-section active" id="overviewSection">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-line"></i> Vue d'ensemble</h2>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" id="refreshStats">
+                                <i class="fas fa-sync-alt"></i> Actualiser
+                            </button>
+                            <button class="btn btn-primary" id="shareEvent">
+                                <i class="fas fa-share-alt"></i> Partager
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistiques principales -->
+                    <div class="stats-grid">
+                        <div class="stat-card total">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-number" id="overviewTotalGuests">0</div>
+                            <div class="stat-label">Invitations totales</div>
+                        </div>
+                        
+                        <div class="stat-card present">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-number" id="overviewPresentGuests">0</div>
+                            <div class="stat-label">Invités présents</div>
+                        </div>
+                        
+                        <div class="stat-card pending">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-number" id="overviewPendingGuests">0</div>
+                            <div class="stat-label">En attente</div>
+                        </div>
+                        
+                        <div class="stat-card rate">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="stat-number" id="overviewScanRate">0%</div>
+                            <div class="stat-label">Taux de présence</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Graphiques -->
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fas fa-chart-bar"></i> Présences par heure</h4>
+                                <select class="form-control" style="width: auto; padding: 5px 10px;">
+                                    <option>Aujourd'hui</option>
+                                    <option>Cette semaine</option>
+                                    <option>Ce mois</option>
+                                </select>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="attendanceChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fas fa-chart-pie"></i> Répartition des invités</h4>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions rapides -->
+                    <div class="section-header" style="margin-top: 40px;">
+                        <h2><i class="fas fa-bolt"></i> Actions rapides</h2>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <div class="action-card" onclick="addGuest()">
+                            <div class="action-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="action-title">Ajouter un invité</div>
+                            <div class="action-description">Ajoutez manuellement un invité à votre événement</div>
+                        </div>
+                        
+                        <div class="action-card" onclick="generateQRCodes()">
+                            <div class="action-icon">
+                                <i class="bi bi-qr-code"></i>
+                            </div>
+                            <div class="action-title">Générer QR codes</div>
+                            <div class="action-description">Générez les codes QR pour tous les invités</div>
+                        </div>
+                        
+                        <div class="action-card" onclick="sendInvitations()">
+                            <div class="action-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="action-title">Envoyer invitations</div>
+                            <div class="action-description">Envoyez les invitations par email</div>
+                        </div>
+                        
+                        <div class="action-card" onclick="exportData()">
+                            <div class="action-icon">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="action-title">Exporter données</div>
+                            <div class="action-description">Exportez la liste des invités en Excel</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Invités -->
+                <div class="content-section" id="guestsSection" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-users"></i> Gestion des invités</h2>
+                        <div class="section-actions">
+                            <div class="search-container" style="width: 300px;">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchGuests" placeholder="Rechercher un invité...">
+                            </div>
+                            <button class="btn btn-primary" onclick="addGuest()">
+                                <i class="fas fa-user-plus"></i> Ajouter
+                            </button>
+                            <button class="btn btn-secondary" onclick="importGuests()">
+                                <i class="fas fa-file-import"></i> Importer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        
+
+
+                            <table class="data-table" id="guestsTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAllGuests"></th>
+                        <th>Invité</th>
+                        <th>Email</th>
+                        <th>Téléphone</th>
+                        <th>Statut</th>
+                        <th>Notes</th>
+                        <th>QR</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                            <tbody id="guestsTableBody">
+                                <!-- Les invités seront injectés ici -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="empty-state" id="noGuestsState" style="display: none;">
+                        <i class="fas fa-users-slash"></i>
+                        <h3>Aucun invité</h3>
+                        <p>Commencez par ajouter des invités à votre événement</p>
+                        <button class="btn btn-primary" onclick="addGuest()" style="margin-top: 20px;">
+                            <i class="fas fa-user-plus"></i> Ajouter un invité
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Autres sections seront ajoutées dynamiquement -->
+                <div id="otherSections" style="display: none;"></div>
+            </div>
+        </div>
+         </div>
+    </main>
+
+    <!-- Scripts -->
+    <link rel="preload" href="js/auth-check.js" as="script">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Librairies essentielles -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <!-- Scripts locaux -->
+    <script src="js/auth-check.js"></script>
+    <script defer src="js/particles-config.js"></script>
+    <script defer src="js/theme.js"></script>
+    <script defer src="js/events.js"></script>
+    <script defer src="js/guests.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/sidebar.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/storage.js"></script>
+    
+    <script>
+        // Variables globales
+        let currentEvent = null;
+        let currentSection = 'overview';
+        let attendanceChart = null;
+        let distributionChart = null;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async function() {
+        
+            
+            // Récupérer l'ID de l'événement
+            const urlParams = new URLSearchParams(window.location.search);
+            currentEventId = urlParams.get('id');
+            
+            if (!currentEventId) {
+                window.location.href = 'events.html';
+                return;
+            }
+            
+            // Charger l'événement
+            await loadEvent();
+            
+            // Initialiser les écouteurs
+            initEventListeners();
+            
+            // Initialiser les graphiques
+            initCharts();
+            
+            // Charger les données initiales
+            updateEventStats();
+            loadGuests();
+        });
+
+        // Charger l'événement
+        async function loadEvent() {
+            try {
+                currentEvent = await storage.getEventById(currentEventId);
+                
+                if (!currentEvent) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Événement introuvable',
+                        text: 'L\'événement demandé n\'existe pas',
+                        confirmButtonColor: '#D97706'
+                    }).then(() => {
+                        window.location.href = 'events.html';
+                    });
+                    return;
+                }
+                
+                // Mettre à jour l'interface
+                updateEventUI();
+                
+            } catch (error) {
+                console.error('Erreur chargement événement:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Impossible de charger l\'événement',
+                    confirmButtonColor: '#D97706'
+                }).then(() => {
+                    window.location.href = 'events.html';
+                });
+            }
+        }
+
+        // Mettre à jour l'interface de l'événement
+        function updateEventUI() {
+            // Mettre à jour le titre
+            document.getElementById('eventName').textContent = currentEvent.name;
+            document.title = `SECURA | ${currentEvent.name}`;
+            
+            // Mettre à jour les métadonnées
+            document.getElementById('eventDate').textContent = currentEvent.date ? 
+                new Date(currentEvent.date).toLocaleDateString('fr-FR') : 'Date non définie';
+            
+            document.getElementById('eventTime').textContent = currentEvent.time || 'Heure non définie';
+            document.getElementById('eventLocation').textContent = currentEvent.location || 'Lieu non défini';
+            document.getElementById('eventDescription').textContent = currentEvent.description || 'Aucune description';
+            
+            // Mettre à jour les badges
+            document.getElementById('eventTypeText').textContent = getTypeLabel(currentEvent.type);
+            document.getElementById('eventStatusText').textContent = currentEvent.active ? 'Actif' : 'Inactif';
+            
+            // Mettre à jour le statut du badge
+            const statusBadge = document.getElementById('eventStatusBadge');
+            statusBadge.style.background = currentEvent.active ? 
+                'var(--secura-success)' : 'var(--secura-error)';
+            
+            // Mettre à jour l'image de fond si disponible
+            if (currentEvent.design?.backgroundImage) {
+                document.getElementById('eventHeader').style.backgroundImage = 
+                    `url('${currentEvent.design.backgroundImage}')`;
+            }
+            
+            // Mettre à jour la couleur principale
+            const primaryColor = currentEvent.design?.primaryColor || '#D97706';
+            document.getElementById('eventTypeBadge').style.background = primaryColor;
+        }
+
+        // Initialiser les écouteurs d'événements
+        function initEventListeners() {
+            // Navigation sidebar
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const section = this.dataset.section;
+                    switchSection(section);
+                    
+                    // Mettre à jour les liens actifs
+                    document.querySelectorAll('.sidebar-link').forEach(l => 
+                        l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Bouton d'édition
+            document.getElementById('editEventBtn').addEventListener('click', () => {
+                window.location.href = `event.html?id=${currentEventId}`;
+            });
+            
+            // Bouton actualiser
+            document.getElementById('refreshStats').addEventListener('click', updateEventStats);
+            
+            // Bouton partager
+            document.getElementById('shareEvent').addEventListener('click', shareEvent);
+            
+            // Recherche d'invités
+            const searchInput = document.getElementById('searchGuests');
+            let searchTimeout;
+            searchInput?.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    filterGuests(this.value);
+                }, 300);
+            });
+            
+            // Toggle theme
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', toggleTheme);
+            }
+        }
+
+        // Changer de section
+        function switchSection(section) {
+            // Cacher toutes les sections
+            document.querySelectorAll('.content-section').forEach(s => {
+                s.style.display = 'none';
+                s.classList.remove('active');
+            });
+            
+            // Afficher la section demandée
+            const targetSection = document.getElementById(`${section}Section`);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+                targetSection.classList.add('active');
+                currentSection = section;
+                
+                // Charger les données spécifiques à la section
+                switch(section) {
+                    case 'guests':
+                        loadGuests();
+                        break;
+                    case 'qrcodes':
+                        loadQRCodes();
+                        break;
+                    case 'overview':
+                        updateEventStats();
+                        break;
+                }
+            }
+        }
+
+        // Mettre à jour les statistiques
+        async function updateEventStats() {
+            try {
+                const guests = await storage.getGuestsByEventId(currentEventId);
+                const scans = await storage.getScansByEventId(currentEventId);
+                
+                const totalGuests = guests.length;
+                const presentGuests = guests.filter(g => g.scanned).length;
+                const pendingGuests = guests.filter(g => !g.scanned && g.status === 'confirmed').length;
+                const scanRate = totalGuests > 0 ? Math.round((presentGuests / totalGuests) * 100) : 0;
+                const occupancyRate = currentEvent.capacity > 0 ? 
+                    Math.round((totalGuests / currentEvent.capacity) * 100) : 0;
+                
+                // Mettre à jour les stats dans le header
+                document.getElementById('totalGuests').textContent = totalGuests;
+                document.getElementById('presentGuests').textContent = presentGuests;
+                document.getElementById('scanRate').textContent = `${scanRate}%`;
+                document.getElementById('occupancyRate').textContent = `${occupancyRate}%`;
+                
+                // Mettre à jour les stats dans l'overview
+                document.getElementById('overviewTotalGuests').textContent = totalGuests;
+                document.getElementById('overviewPresentGuests').textContent = presentGuests;
+                document.getElementById('overviewPendingGuests').textContent = pendingGuests;
+                document.getElementById('overviewScanRate').textContent = `${scanRate}%`;
+                
+                // Mettre à jour les graphiques
+                updateCharts(guests, scans);
+                
+            } catch (error) {
+                console.error('Erreur mise à jour stats:', error);
+            }
+        }
+
+        // Initialiser les graphiques
+        function initCharts() {
+            const attendanceCtx = document.getElementById('attendanceChart')?.getContext('2d');
+            const distributionCtx = document.getElementById('distributionChart')?.getContext('2d');
+            
+            if (attendanceCtx) {
+                attendanceChart = new Chart(attendanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Présences',
+                            data: [],
+                            borderColor: 'var(--secura-red)',
+                            backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            if (distributionCtx) {
+                distributionChart = new Chart(distributionCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Présents', 'En attente', 'Non confirmés'],
+                        datasets: [{
+                            data: [0, 0, 0],
+                            backgroundColor: [
+                                'var(--secura-success)',
+                                'var(--secura-warning)',
+                                'var(--secura-error)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Mettre à jour les graphiques
+        function updateCharts(guests, scans) {
+            if (!attendanceChart || !distributionChart) return;
+            
+            // Mettre à jour le graphique de distribution
+            const presentGuests = guests.filter(g => g.scanned).length;
+            const pendingGuests = guests.filter(g => !g.scanned && g.status === 'confirmed').length;
+            const unconfirmedGuests = guests.filter(g => g.status !== 'confirmed').length;
+            
+            distributionChart.data.datasets[0].data = [
+                presentGuests, pendingGuests, unconfirmedGuests
+            ];
+            distributionChart.update();
+            
+            // Mettre à jour le graphique d'attendance par heure
+            const today = new Date();
+            const hours = [];
+            const counts = [];
+            
+            for (let i = 8; i <= 22; i++) {
+                hours.push(`${i}h`);
+                const hourStart = new Date(today);
+                hourStart.setHours(i, 0, 0, 0);
+                const hourEnd = new Date(hourStart);
+                hourEnd.setHours(i + 1, 0, 0, 0);
+                
+                const hourScans = scans.filter(s => {
+                    const scanTime = new Date(s.scannedAt);
+                    return scanTime >= hourStart && scanTime < hourEnd;
+                }).length;
+                
+                counts.push(hourScans);
+            }
+            
+            attendanceChart.data.labels = hours;
+            attendanceChart.data.datasets[0].data = counts;
+            attendanceChart.update();
+        }
+
+        // Charger les invités
+        async function loadGuests() {
+            try {
+                const guests = await storage.getGuestsByEventId(currentEventId);
+                renderGuestsTable(guests);
+                
+            } catch (error) {
+                console.error('Erreur chargement invités:', error);
+            }
+        }
+
+        // Rendre la table des invités
+        function renderGuestsTable(guests) {
+            const tableBody = document.getElementById('guestsTableBody');
+            const emptyState = document.getElementById('noGuestsState');
+            
+            if (guests.length === 0) {
+                tableBody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tableBody.innerHTML = '';
+            
+            guests.forEach(guest => {
+                const row = document.createElement('tr');
+                
+                // Initiales pour l'avatar
+                const initials = guest.name ? 
+                    guest.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 
+                    '??';
+                
+                // Statut
+                let statusBadge = '';
+                let statusText = '';
+                let statusColor = '';
+                
+                if (guest.scanned) {
+                    statusBadge = '<i class="fas fa-check-circle"></i>';
+                    statusText = 'Présent';
+                    statusColor = 'success';
+                } else if (guest.status === 'confirmed') {
+                    statusBadge = '<i class="fas fa-clock"></i>';
+                    statusText = 'En attente';
+                    statusColor = 'warning';
+                } else {
+                    statusBadge = '<i class="fas fa-times-circle"></i>';
+                    statusText = 'Non confirmé';
+                    statusColor = 'error';
+                }
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="guest-info">
+                            <div class="guest-avatar" style="background: ${currentEvent.design?.primaryColor || '#D97706'}">
+                                ${initials}
+                            </div>
+                            <div>
+                                <div class="guest-name">${escapeHtml(guest.name || 'Invité sans nom')}</div>
+                                ${guest.company ? `<div class="guest-email">${escapeHtml(guest.company)}</div>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>${escapeHtml(guest.email || '-')}</td>
+                    <td>${escapeHtml(guest.phone || '-')}</td>
+                    <td>
+                        <span class="status-badge ${statusColor}">
+                            ${statusBadge} ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        ${guest.scanned ? 
+                            `<span style="color: var(--secura-success);">
+                                <i class="fas fa-check"></i> ${new Date(guest.scannedAt).toLocaleTimeString('fr-FR')}
+                            </span>` : 
+                            '<span style="color: var(--secura-text-gray);">Non scanné</span>'}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="icon-btn" onclick="editGuest('${guest.id}')" title="Modifier">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            ${!guest.scanned ? `
+                            <button class="icon-btn" onclick="markAsPresent('${guest.id}')" title="Marquer présent">
+                                <i class="fas fa-check"></i>
+                            </button>` : ''}
+                            <button class="icon-btn" onclick="deleteGuest('${guest.id}')" title="Supprimer">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Filtrer les invités
+        function filterGuests(searchTerm) {
+            const rows = document.querySelectorAll('#guestsTableBody tr');
+            const searchLower = searchTerm.toLowerCase();
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchLower) ? '' : 'none';
+            });
+        }
+
+        // Actions sur les invités
+        window.addGuest = function() {
+            // Ouvrir un modal d'ajout d'invité
+            Swal.fire({
+                title: 'Ajouter un invité',
+                html: `
+                    <div style="text-align: left;">
+                        <div class="form-group">
+                            <label>Nom complet *</label>
+                            <input type="text" id="guestName" class="form-control" placeholder="Jean Dupont">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="guestEmail" class="form-control" placeholder="jean@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Téléphone</label>
+                            <input type="tel" id="guestPhone" class="form-control" placeholder="+237 672 03 73 00">
+                        </div>
+                        <div class="form-group">
+                            <label>Entreprise</label>
+                            <input type="text" id="guestCompany" class="form-control" placeholder="Nom de l'entreprise">
+                        </div>
+                        <div class="form-group">
+                            <label>Statut</label>
+                            <select id="guestStatus" class="form-control">
+                                <option value="confirmed">Confirmé</option>
+                                <option value="pending">En attente</option>
+                            </select>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Ajouter',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#D97706',
+                preConfirm: () => {
+                    const name = document.getElementById('guestName').value.trim();
+                    const email = document.getElementById('guestEmail').value.trim();
+                    
+                    if (!name) {
+                        Swal.showValidationMessage('Le nom est obligatoire');
+                        return false;
+                    }
+                    
+                    return {
+                        name,
+                        email,
+                        phone: document.getElementById('guestPhone').value.trim(),
+                        company: document.getElementById('guestCompany').value.trim(),
+                        status: document.getElementById('guestStatus').value
+                    };
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const guestData = {
+                            ...result.value,
+                            eventId: currentEventId,
+                            invitedAt: new Date().toISOString()
+                        };
+                        
+                        await storage.createGuest(guestData);
+                        await updateEventStats();
+                        loadGuests();
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Invité ajouté !',
+                            text: 'L\'invité a été ajouté avec succès',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: 'Impossible d\'ajouter l\'invité',
+                            confirmButtonColor: '#D97706'
+                        });
+                    }
+                }
+            });
+        };
+
+        window.editGuest = function(guestId) {
+            // À implémenter
+            Swal.fire({
+                icon: 'info',
+                title: 'Fonctionnalité en développement',
+                text: 'L\'édition des invités sera disponible prochainement',
+                confirmButtonColor: '#D97706'
+            });
+        };
+
+        window.markAsPresent = async function(guestId) {
+            try {
+                await storage.markGuestAsScanned(guestId);
+                await updateEventStats();
+                loadGuests();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Présence enregistrée !',
+                    text: 'L\'invité a été marqué comme présent',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Impossible de marquer la présence',
+                    confirmButtonColor: '#D97706'
+                });
+            }
+        };
+
+        window.deleteGuest = async function(guestId) {
+            const result = await Swal.fire({
+                title: 'Supprimer l\'invité ?',
+                text: 'Cette action est irréversible',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Supprimer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280'
+            });
+            
+            if (result.isConfirmed) {
+                try {
+                    await storage.deleteGuest(guestId);
+                    await updateEventStats();
+                    loadGuests();
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Supprimé !',
+                        text: 'L\'invité a été supprimé',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: 'Impossible de supprimer l\'invité',
+                        confirmButtonColor: '#D97706'
+                    });
+                }
+            }
+        };
+
+        // Autres actions
+        window.generateQRCodes = function() {
+            Swal.fire({
+                title: 'Générer les codes QR',
+                html: `
+                    <div style="text-align: center; padding: 20px 0;">
+                        <i class="bi bi-qr-code" style="font-size: 4rem; color: var(--secura-red); margin-bottom: 15px;"></i>
+                        <p>Générer les codes QR pour tous les invités ?</p>
+                        <p style="color: var(--secura-text-gray); font-size: 0.9rem; margin-top: 10px;">
+                            Cette opération peut prendre quelques instants
+                        </p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Générer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#D97706'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // À implémenter avec la logique de génération de QR
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Codes QR générés !',
+                        text: 'Les codes QR ont été générés avec succès',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        };
+
+        window.sendInvitations = function() {
+            Swal.fire({
+                title: 'Envoyer les invitations',
+                html: `
+                    <div style="text-align: left;">
+                        <div class="form-group">
+                            <label>Méthode d'envoi</label>
+                            <select id="sendMethod" class="form-control">
+                                <option value="email">Email uniquement</option>
+                                <option value="sms">SMS uniquement</option>
+                                <option value="both">Email et SMS</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Message personnalisé</label>
+                            <textarea id="invitationMessage" class="form-control" rows="4" placeholder="Message optionnel..."></textarea>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Envoyer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#D97706'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // À implémenter avec l'envoi d'invitations
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Invitations envoyées !',
+                        text: 'Les invitations ont été envoyées avec succès',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        };
+
+        window.exportData = function() {
+            // À implémenter avec l'export Excel
+            Swal.fire({
+                icon: 'success',
+                title: 'Données exportées !',
+                text: 'Le fichier Excel a été généré et téléchargé',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        };
+
+        window.importGuests = function() {
+            // À implémenter avec l'import CSV/Excel
+            Swal.fire({
+                icon: 'info',
+                title: 'Fonctionnalité en développement',
+                text: 'L\'import d\'invités sera disponible prochainement',
+                confirmButtonColor: '#D97706'
+            });
+        };
+
+        // Partager l'événement
+        async function shareEvent() {
+            const shareUrl = `${window.location.origin}/event-share.html?id=${currentEventId}`;
+            
+            Swal.fire({
+                title: 'Partager l\'événement',
+                html: `
+                    <div style="text-align: center; padding: 20px 0;">
+                        <div style="margin-bottom: 20px;">
+                            <input type="text" value="${shareUrl}" id="shareUrl" 
+                                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 0.9rem;" readonly>
+                        </div>
+                        <div class="share-buttons" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                            <button class="btn" style="background: #25D366; color: white;" onclick="shareViaWhatsApp('${shareUrl}')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button class="btn" style="background: #0088cc; color: white;" onclick="shareViaTelegram('${shareUrl}')">
+                                <i class="fab fa-telegram"></i> Telegram
+                            </button>
+                            <button class="btn" style="background: #1877F2; color: white;" onclick="shareViaFacebook('${shareUrl}')">
+                                <i class="fab fa-facebook"></i> Facebook
+                            </button>
+                            <button class="btn" style="background: #1DA1F2; color: white;" onclick="shareViaTwitter('${shareUrl}')">
+                                <i class="fab fa-twitter"></i> Twitter
+                            </button>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true
+            });
+        }
+
+        // Fonctions de partage
+        window.shareViaWhatsApp = function(url) {
+            window.open(`https://wa.me/?text=${encodeURIComponent(`Rejoignez mon événement: ${url}`)}`, '_blank');
+        };
+
+        window.shareViaTelegram = function(url) {
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}`, '_blank');
+        };
+
+        window.shareViaFacebook = function(url) {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        };
+
+        window.shareViaTwitter = function(url) {
+            window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}`, '_blank');
+        };
+
+        // Fonctions utilitaires
+        function getTypeLabel(type) {
+            const labels = {
+                marriage: 'Mariage',
+                anniversaire: 'Anniversaire',
+                conference: 'Conférence',
+                corporate: 'Corporate',
+                concert: 'Concert',
+                gala: 'Gala',
+                football: 'Football',
+                autre: 'Autre'
+            };
+            return labels[type] || 'Autre';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Gestion du thème
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.classList.contains('dark-theme');
+            
+            if (isDark) {
+                body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Charger le thème sauvegardé
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+</body>
+</html>

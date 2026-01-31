@@ -17,15 +17,31 @@ class ThemeManager {
         
         this.applyTheme(theme);
         this.setupListeners();
+        this.setupFooterSwitch();
+    }
+
+
+      setupFooterSwitch() {
+        const themeSwitchFooter = document.getElementById('themeSwitchFooter');
+        if (themeSwitchFooter) {
+            const currentTheme = this.getCurrentTheme();
+            themeSwitchFooter.checked = currentTheme === 'dark';
+            
+            themeSwitchFooter.addEventListener('change', () => this.toggleTheme());
+            
+            document.addEventListener('themeChanged', () => {
+                const theme = this.getCurrentTheme();
+                themeSwitchFooter.checked = theme === 'dark';
+            });
+        }
     }
 
     setupListeners() {
-        const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => this.toggleTheme());
-        }
+        const themeToggles = document.querySelectorAll('.theme-toggle');
+        themeToggles.forEach(btn => {
+            btn.addEventListener('click', () => this.toggleTheme());
+        });
 
-        // Écouter les changements de préférence système
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
             if (!localStorage.getItem(this.themeKey)) {
                 this.applyTheme(e.matches ? 'dark' : 'light');
@@ -45,13 +61,12 @@ class ThemeManager {
         document.body.classList.add(`${theme}-theme`);
         
         // Mettre à jour l'icône du bouton
-        const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle) {
-            const icon = themeToggle.querySelector('i');
-            if (icon) {
-                icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-            }
-        }
+        // Mettre à jour l'icône sur tous les boutons de toggle
+        const themeToggles = document.querySelectorAll('.theme-toggle');
+        themeToggles.forEach(btn => {
+            const icon = btn.querySelector('i');
+            if (icon) icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        });
 
         // Mettre à jour la meta theme-color
         let metaTheme = document.querySelector('meta[name="theme-color"]');
