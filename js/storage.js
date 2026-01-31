@@ -610,12 +610,19 @@ startAutoSync() {
                 this.token = result.token;
                 this.user = result.user;
 
+                // Sauvegarder TOUS les éléments d'auth dans localStorage
                 localStorage.setItem('secura_token', this.token);
-                await this.updateProfileInfo();
+                localStorage.setItem('secura_user', JSON.stringify(this.user));
+                
+                this.isAuthenticated = true;
+                
+                // 🎯 NE PAS appeler updateProfileInfo() ici
+                // Laisser auth-check.js vérifier le token en premier
+                // puis storage.js.init() téléchargera les données
 
                 this.emitStatsUpdate();
 
-                console.log('Connexion réussie', this.user);
+                console.log('✅ Connexion réussie - Token et User sauvegardés', this.user);
 
                 return {
                     success: true,
@@ -4417,16 +4424,26 @@ async checkTokenIfNeeded() {
 }
 
     handleInvalidToken() {
-        console.error('❌ Token invalide - Nettoyage et redirection');
+        console.error('❌ Token invalide - Nettoyage');
+        
+        // Sauvegarder l'état avant suppression
+        const wasAuthenticated = !!this.token;
+        
         this.token = null;
         this.user = null;
+        this.isAuthenticated = false;
+        
         localStorage.removeItem('secura_token');
         localStorage.removeItem('secura_user');
         localStorage.removeItem('secura_data');
         this.stopAutoSync();
         
-        if (!window.location.pathname.includes('login.html')) {
-            window.location.replace('/login.html');
+        // Émettre un événement plutôt que de rediriger directement
+        // Laisser auth-check.js gérer la redirection
+        if (wasAuthenticated) {
+            window.dispatchEvent(new CustomEvent('storage:auth-invalid', {
+                detail: { reason: 'token_expired_or_invalid' }
+            }));
         }
     }
 

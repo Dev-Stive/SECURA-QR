@@ -168,6 +168,30 @@
         const path = window.location.pathname.toLowerCase();
         const pageType = getPageType(path);
         
+        // ⚠️ ATTENTION: Vérifier que storage.js est chargé avant de faire les requêtes
+        const waitForStorage = () => {
+            return new Promise((resolve) => {
+                if (window.storage) {
+                    resolve();
+                } else {
+                    const check = setInterval(() => {
+                        if (window.storage) {
+                            clearInterval(check);
+                            resolve();
+                        }
+                    }, 50);
+                    // Timeout après 3 secondes
+                    setTimeout(() => {
+                        clearInterval(check);
+                        console.warn('⚠️ storage.js n\'a pas été chargé à temps');
+                        resolve();
+                    }, 3000);
+                }
+            });
+        };
+        
+        await waitForStorage();
+        
         setTimeout(() => updateProgressStep(1), 500);
         
         // PAGES ÉVÉNEMENT : Vérifier session événement

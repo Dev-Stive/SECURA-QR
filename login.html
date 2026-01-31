@@ -372,6 +372,7 @@
 
    
     <script src="js/particles-config.js"></script>
+    <script src="js/storage.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/auth-check.js"></script>
     
@@ -466,9 +467,14 @@
             spinner.style.display = 'inline-block';
 
             try {
-                const result = await authManager.login(email, password);
+                // Utiliser storage.js pour gérer la connexion (plus complet)
+                const result = await window.storage.login(email, password);
                 
                 if (result.success) {
+                    // Vérifier que le token est bien sauvegardé
+                    const savedToken = localStorage.getItem('secura_token');
+                    console.log('✅ Connexion complète - Token sauvegardé:', !!savedToken);
+                    
                     await Swal.fire({
                         icon: 'success',
                         title: 'Connexion réussie !',
