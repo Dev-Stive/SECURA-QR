@@ -13723,29 +13723,7 @@
     }
   ],
   "sessions": [],
-  "eventSessions": [
-    {
-      "id": "evsess_1769823451718_faca09foy",
-      "guestId": null,
-      "tableId": "tbl_1769575120002_ye6gudla8",
-      "eventId": "evt_1769537993483_82t3xcgsi",
-      "accessMethod": "table",
-      "status": "active",
-      "createdAt": "2026-01-31T01:37:31.718Z",
-      "updatedAt": "2026-01-31T01:37:31.718Z",
-      "expiresAt": "2026-01-31T09:37:31.719Z",
-      "ip": "::1",
-      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
-      "metadata": {
-        "guestData": null,
-        "guestName": null,
-        "guestEmail": null,
-        "tableNumber": "BU-63",
-        "tableName": "Buffet",
-        "eventName": "MARIAGE DE CHANELLE ET JOSÉ"
-      }
-    }
-  ],
+  "eventSessions": [],
   "tempUsers": [],
   "passwordResets": [],
   "settings": {
@@ -13753,7 +13731,7 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2026-01-31T01:37:31.727Z",
+    "updatedAt": "2026-01-31T10:00:00.223Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }
