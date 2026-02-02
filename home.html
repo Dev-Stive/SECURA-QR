@@ -7,7 +7,7 @@
     
 
     <!-- 🚀 Autres ressources essentielles -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     
@@ -25,13 +25,19 @@
     <link rel="stylesheet" href="css/toastify.css">
     <link rel="stylesheet" href="css/index.css"/>
 
+    
     <!-- Lottie (async) -->
     <script async src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
-    <!-- SweetAlert2 -->
-    <link rel="preload" href="js/auth-check.js" as="script">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<style>
+    .section-header {
+            text-align: center;
+            flex-direction: row;
+            margin-bottom: 70px;
+        }
+</style>
 </head>
 
 <body class="light-theme">
@@ -195,6 +201,9 @@
             </div>
         </div>
     </div>
+
+
+    <main class="main-content">
 
        <!-- Hero Carousel -->
 <section class="hero-carousel">
@@ -617,6 +626,8 @@
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
     <!-- Scripts locaux (dans l'ordre) -->
+
+    <script src="js/storage.js"></script>
     <script src="js/auth-check.js"></script>
     <script src="js/session-manager.js"></script>
     <script defer src="js/particles-config.js"></script>

@@ -1974,6 +1974,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <!-- Scripts locaux -->
+
+    <script src="js/storage.js"></script>
     <script src="js/auth-check.js"></script>
     <script defer src="js/particles-config.js"></script>
     <script defer src="js/theme.js"></script>
@@ -1982,7 +1984,6 @@
     <script defer src="js/main.js"></script>
     <script defer src="js/sidebar.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/storage.js"></script>
     
     <script>
         // Variables globales
@@ -2731,25 +2732,7 @@
             return div.innerHTML;
         }
 
-        // Gestion du thème
-        function toggleTheme() {
-            const body = document.body;
-            const isDark = body.classList.contains('dark-theme');
-            
-            if (isDark) {
-                body.classList.remove('dark-theme');
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.classList.add('dark-theme');
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-
-        // Charger le thème sauvegardé
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark-theme');
-        }
+        
     </script>
 </body>
 </html>

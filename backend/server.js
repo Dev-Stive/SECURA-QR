@@ -912,7 +912,7 @@ app.get('/api/auth/me', jwtAuth, (req, res) => {
     const user = data.users?.find(u => u.id === req.user.id);
     if (!user) return res.status(404).json({ success: false, error: 'Utilisateur introuvable' });
 
-    res.json({
+    res.status(200).json({
         success: true,
         user: { 
             id: user.id, 
@@ -6338,288 +6338,30 @@ app.get('/api/tables/number/:number', (req, res) => {
 
 
 
+// server.js - Endpoints simplifiés (JWT décrypté côté serveur uniquement)
 
-// ═══════════════════════════════════════════════════════════════
-// 🎪 GESTION DES SESSIONS ÉVÉNEMENTS
-// ═══════════════════════════════════════════════════════════════
-
-// CRÉER UNE SESSION ÉVÉNEMENT (guestId optionnel)
+// 1. CRÉER UNE SESSION (retourne JWT seulement)
 app.post('/api/event-sessions', (req, res) => {
     try {
-        const { guestId, tableId, accessMethod, guestData } = req.body;
+        const { guestId, tableId } = req.body;
         
-        console.log('📱 POST /api/event-sessions - Données reçues:', {
-            guestId,
-            tableId,
-            accessMethod,
-            hasGuestData: !!guestData
-        });
+        console.log('📱 POST /api/event-sessions - Données:', { guestId, tableId });
         
-        // Validation des paramètres
-        if (!tableId) {
+        // Validation
+        if (!tableId && !guestId) {
             return res.status(400).json({ 
                 success: false, 
-                error: 'tableId requis',
-                code: 'MISSING_TABLE_ID'
+                error: 'tableId ou guestId requis',
+                code: 'MISSING_REQUIRED_FIELD'
             });
         }
         
         const data = loadData();
+        let eventId = null;
         
-        // Vérifier la table
-        const table = data.tables.find(t => t.id === tableId);
-        if (!table) {
-            console.error('❌ Table introuvable:', tableId);
-            return res.status(404).json({ 
-                success: false, 
-                error: 'Table introuvable',
-                code: 'TABLE_NOT_FOUND'
-            });
-        }
-        
-        console.log('✅ Table trouvée:', table.tableName);
-        
-        // Récupérer l'événement
-        const event = data.events.find(e => e.id === table.eventId);
-        if (!event) {
-            return res.status(404).json({
-                success: false,
-                error: 'Événement introuvable',
-                code: 'EVENT_NOT_FOUND'
-            });
-        }
-        
-        let guest = null;
-        
-        // Si un guestId est fourni, on vérifie qu'il existe
-        if (guestId) {
-            guest = data.guests.find(g => g.id === guestId);
-            if (!guest) {
-                return res.status(404).json({
-                    success: false,
-                    error: 'Invité introuvable',
-                    code: 'GUEST_NOT_FOUND'
-                });
-            }
-            
-            // Vérifier que l'invité est bien sur cette table
-            const isAssigned = table.assignedGuests?.some(g => g.guestId === guestId);
-            if (!isAssigned) {
-                return res.status(403).json({ 
-                    success: false, 
-                    error: 'Invité non assigné à cette table',
-                    code: 'GUEST_NOT_ASSIGNED'
-                });
-            }
-            
-            console.log('✅ Invité trouvé:', `${guest.firstName} ${guest.lastName}`);
-        } 
-        // Si des données guest sont fournies (pour session anonyme), on peut les sauvegarder
-        else if (guestData) {
-            console.log('📝 Données invité fournies pour session anonyme');
-            guest = {
-                id: null,
-                firstName: guestData.firstName || '',
-                lastName: guestData.lastName || '',
-                email: guestData.email || '',
-                phone: guestData.phone || '',
-                company: guestData.company || ''
-            };
-        }
-        
-        // Créer la session
-        const now = new Date().toISOString();
-        const sessionId = generateId('evsess');
-        const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(); // 8 heures
-        
-        const session = {
-            id: sessionId,
-            guestId: guestId || null,
-            tableId,
-            eventId: table.eventId,
-            accessMethod: guestId ? 'guest' : (guestData ? 'anonymous' : 'table'),
-            status: 'active',
-            createdAt: now,
-            updatedAt: now,
-            expiresAt,
-            ip: req.ip,
-            userAgent: req.get('User-Agent'),
-            metadata: {
-                guestData: guestData || null,
-                guestName: guest ? `${guest.firstName || ''} ${guest.lastName || ''}`.trim() : null,
-                guestEmail: guest?.email || null,
-                tableNumber: table.tableNumber,
-                tableName: table.tableName,
-                eventName: event.name
-            }
-        };
-        
-        // Initialiser eventSessions si nécessaire
-        if (!data.eventSessions) data.eventSessions = [];
-        
-        // Vérifier si une session existe déjà pour ce guest/table
-        const existingSessionIndex = data.eventSessions.findIndex(s => 
-            s.guestId === guestId && 
-            s.tableId === tableId && 
-            new Date(s.expiresAt) > new Date()
-        );
-        
-        if (existingSessionIndex !== -1) {
-            // Mettre à jour la session existante
-            data.eventSessions[existingSessionIndex] = {
-                ...data.eventSessions[existingSessionIndex],
-                ...session,
-                id: data.eventSessions[existingSessionIndex].id // Garder le même ID
-            };
-            session.id = data.eventSessions[existingSessionIndex].id;
-            console.log('🔄 Session existante mise à jour:', session.id);
-        } else {
-            // Créer une nouvelle session
-            data.eventSessions.push(session);
-            console.log('🆕 Nouvelle session créée:', sessionId);
-        }
-        
-        saveData(data);
-        
-        // Construire la réponse
-        const responseData = {
-            sessionId: session.id,
-            guest: guestId ? {
-                id: guest.id,
-                name: `${guest.firstName} ${guest.lastName}`,
-                email: guest.email,
-                phone: guest.phone,
-                company: guest.company
-            } : guestData ? {
-                name: `${guestData.firstName || ''} ${guestData.lastName || ''}`.trim(),
-                email: guestData.email,
-                phone: guestData.phone,
-                company: guestData.company,
-                isTemporary: true
-            } : null,
-            table: {
-                id: table.id,
-                number: table.tableNumber,
-                name: table.tableName,
-                capacity: table.capacity,
-                location: table.location,
-                category: table.category
-            },
-            event: {
-                id: event.id,
-                name: event.name,
-                date: event.date,
-                location: event.location,
-                description: event.description
-            },
-            accessMethod: session.accessMethod,
-            isAnonymous: !guestId,
-            isAnonymousWithData: !!guestData,
-            createdAt: session.createdAt,
-            expiresAt: session.expiresAt,
-            sessionTtl: 8 * 60 * 60 * 1000, // 8 heures en millisecondes
-            metadata: {
-                guestCount: table.assignedGuests?.length || 0,
-                tableStatus: table.status || 'active',
-                eventStatus: event.status || 'active'
-            }
-        };
-        
-        console.log('✅ Session créée avec succès:', {
-            sessionId: session.id,
-            guestName: guest ? `${guest.firstName} ${guest.lastName}` : 'Anonyme',
-            tableNumber: table.tableNumber,
-            accessMethod: session.accessMethod
-        });
-        
-        log.crud('CREATE', 'event session', {
-            sessionId: session.id,
-            guest: guest ? `${guest.firstName} ${guest.lastName}` : 'Anonyme',
-            table: table.tableName,
-            mode: session.accessMethod
-        });
-        
-        res.status(201).json({
-            success: true,
-            data: responseData,
-            message: guestId 
-                ? `Session créée pour ${guest.firstName} ${guest.lastName}` 
-                : guestData 
-                    ? `Session anonyme créée avec données temporaires`
-                    : `Session table créée pour ${table.tableName}`
-        });
-        
-    } catch (err) {
-        console.error('❌ Erreur création session:', err);
-        log.error('POST /api/event-sessions', err.message);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Erreur interne du serveur',
-            details: err.message,
-            code: 'SERVER_ERROR'
-        });
-    }
-});
-
-// METTRE À JOUR UNE SESSION (pour ajouter guestId après coup)
-app.patch('/api/event-sessions/:sessionId', (req, res) => {
-    try {
-        const { sessionId } = req.params;
-        const { guestId, guestData } = req.body;
-        
-        console.log('📱 PATCH /api/event-sessions/:sessionId - Données reçues:', {
-            sessionId,
-            guestId,
-            hasGuestData: !!guestData
-        });
-        
-        if (!guestId && !guestData) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'guestId ou guestData requis',
-                code: 'MISSING_GUEST_DATA'
-            });
-        }
-        
-        const data = loadData();
-        
-        // Trouver la session
-        const sessionIndex = data.eventSessions?.findIndex(s => s.id === sessionId);
-        if (sessionIndex === -1) {
-            return res.status(404).json({ 
-                success: false, 
-                error: 'Session introuvable',
-                code: 'SESSION_NOT_FOUND'
-            });
-        }
-        
-        const session = data.eventSessions[sessionIndex];
-        
-        // Vérifier l'expiration
-        if (new Date(session.expiresAt) <= new Date()) {
-            return res.status(401).json({ 
-                success: false, 
-                error: 'Session expirée',
-                code: 'SESSION_EXPIRED'
-            });
-        }
-        
-        let guest = null;
-        
-        // Si un guestId est fourni
-        if (guestId) {
-            // Vérifier l'invité
-            guest = data.guests.find(g => g.id === guestId);
-            if (!guest) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Invité introuvable',
-                    code: 'GUEST_NOT_FOUND'
-                });
-            }
-            
-            // Vérifier la table de la session
-            const table = data.tables.find(t => t.id === session.tableId);
+        // Vérifier les références
+        if (tableId) {
+            const table = data.tables.find(t => t.id === tableId);
             if (!table) {
                 return res.status(404).json({ 
                     success: false, 
@@ -6627,619 +6369,207 @@ app.patch('/api/event-sessions/:sessionId', (req, res) => {
                     code: 'TABLE_NOT_FOUND'
                 });
             }
-            
-            // Vérifier que l'invité est bien sur cette table
-            const isAssigned = table.assignedGuests?.some(g => g.guestId === guestId);
-            if (!isAssigned) {
-                return res.status(403).json({ 
+            eventId = table.eventId;
+        }
+        
+        if (guestId) {
+            const guest = data.guests.find(g => g.id === guestId);
+            if (!guest) {
+                return res.status(404).json({ 
                     success: false, 
-                    error: 'Invité non assigné à cette table',
-                    code: 'GUEST_NOT_ASSIGNED'
+                    error: 'Invité introuvable',
+                    code: 'GUEST_NOT_FOUND'
                 });
             }
-            
-            // Mettre à jour la session
-            session.guestId = guestId;
-            session.accessMethod = 'guest';
-            session.updatedAt = new Date().toISOString();
-            
-            // Mettre à jour les métadonnées
-            if (!session.metadata) session.metadata = {};
-            session.metadata.guestName = `${guest.firstName} ${guest.lastName}`;
-            session.metadata.guestEmail = guest.email;
-            session.metadata.guestPhone = guest.phone;
-            session.metadata.guestCompany = guest.company;
-            session.metadata.guestData = null; // Nettoyer les données temporaires
-            
-            console.log('✅ Session mise à jour avec invité:', `${guest.firstName} ${guest.lastName}`);
-            
-        } 
-        // Si des données guest sont fournies (pour anonyme)
-        else if (guestData) {
-            // Mettre à jour les métadonnées avec les données temporaires
-            if (!session.metadata) session.metadata = {};
-            session.metadata.guestData = guestData;
-            session.metadata.guestName = `${guestData.firstName || ''} ${guestData.lastName || ''}`.trim();
-            session.metadata.guestEmail = guestData.email;
-            session.metadata.guestPhone = guestData.phone;
-            session.metadata.guestCompany = guestData.company;
-            session.accessMethod = 'anonymous';
-            session.updatedAt = new Date().toISOString();
-            
-            guest = {
-                id: null,
-                firstName: guestData.firstName || '',
-                lastName: guestData.lastName || '',
-                email: guestData.email || '',
-                phone: guestData.phone || '',
-                company: guestData.company || '',
-                isTemporary: true
-            };
-            
-            console.log('✅ Session anonyme mise à jour avec données temporaires');
+            if (!eventId) eventId = guest.eventId;
         }
         
-        // Sauvegarder les modifications
-        data.eventSessions[sessionIndex] = session;
-        saveData(data);
+        // Générer session ID
+        const sessionId = generateId('sess');
+        const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
         
-        // Récupérer les données associées pour la réponse
-        const table = data.tables.find(t => t.id === session.tableId);
-        const event = data.events.find(e => e.id === session.eventId);
-        
-        const responseData = {
-            sessionId: session.id,
-            guest: guest ? {
-                id: guest.id || null,
-                name: `${guest.firstName} ${guest.lastName}`,
-                email: guest.email,
-                phone: guest.phone,
-                company: guest.company,
-                isTemporary: guest.isTemporary || false
-            } : null,
-            table: table ? {
-                id: table.id,
-                number: table.tableNumber,
-                name: table.tableName,
-                capacity: table.capacity,
-                location: table.location
-            } : null,
-            event: event ? {
-                id: event.id,
-                name: event.name,
-                date: event.date,
-                location: event.location
-            } : null,
-            isAnonymous: !guestId,
-            isAnonymousWithData: !!guestData,
-            updatedAt: session.updatedAt,
-            expiresAt: session.expiresAt
-        };
-        
-        console.log('✅ Session mise à jour avec succès:', sessionId);
-        
-        log.crud('UPDATE', 'event session', {
-            sessionId: session.id,
-            action: guestId ? 'added guest to session' : 'added anonymous data to session',
-            guest: guest ? `${guest.firstName} ${guest.lastName}` : 'Données temporaires'
-        });
-        
-        res.json({
-            success: true,
-            data: responseData,
-            message: guestId 
-                ? `Session mise à jour avec invité ${guest.firstName} ${guest.lastName}`
-                : `Session anonyme mise à jour avec données temporaires`
-        });
-        
-    } catch (err) {
-        console.error('❌ Erreur mise à jour session:', err);
-        log.error('PATCH /api/event-sessions/:sessionId', err.message);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Erreur interne du serveur',
-            details: err.message,
-            code: 'SERVER_ERROR'
-        });
-    }
-});
-
-// VÉRIFIER UNE SESSION ÉVÉNEMENT
-app.get('/api/event-sessions/:sessionId', (req, res) => {
-    try {
-        const { sessionId } = req.params;
-        
-        console.log('📱 GET /api/event-sessions/:sessionId - Session ID:', sessionId);
-        
-        const data = loadData();
-        const session = data.eventSessions?.find(s => s.id === sessionId);
-        
-        if (!session) {
-            console.error('❌ Session introuvable:', sessionId);
-            return res.status(404).json({ 
-                success: false, 
-                error: 'Session introuvable',
-                code: 'SESSION_NOT_FOUND'
-            });
-        }
-        
-        // Vérifier l'expiration
-        const isExpired = new Date(session.expiresAt) <= new Date();
-        if (isExpired) {
-            console.warn('⚠️ Session expirée:', sessionId);
-            return res.status(401).json({ 
-                success: false, 
-                error: 'Session expirée',
-                code: 'SESSION_EXPIRED',
-                data: {
-                    sessionId: session.id,
-                    expiredAt: session.expiresAt,
-                    isExpired: true
-                }
-            });
-        }
-        
-        // Récupérer les données associées
-        const guest = session.guestId ? data.guests.find(g => g.id === session.guestId) : null;
-        const table = data.tables.find(t => t.id === session.tableId);
-        const event = data.events.find(e => e.id === session.eventId);
-        
-        // Vérifier que la table et l'événement existent toujours
-        if (!table || !event) {
-            console.error('❌ Table ou événement introuvable pour la session:', sessionId);
-            return res.status(404).json({
-                success: false,
-                error: 'Données associées introuvables',
-                code: 'ASSOCIATED_DATA_NOT_FOUND'
-            });
-        }
-        
-        // Construire la réponse
-        const responseData = {
-            session: {
-                id: session.id,
-                status: session.status,
-                accessMethod: session.accessMethod,
-                createdAt: session.createdAt,
-                updatedAt: session.updatedAt,
-                expiresAt: session.expiresAt,
-                isExpired: false,
-                ttlRemaining: Math.max(0, new Date(session.expiresAt).getTime() - Date.now()),
-                metadata: session.metadata || {}
+        // Créer JWT (NE PAS envoyer les données complètes dans le payload)
+        const token = jwt.sign(
+            {
+                sessionId: sessionId,
+                guestId: guestId || null,
+                tableId: tableId || null,
+                eventId: eventId,
+                accessMethod: guestId ? 'guest' : 'table',
+                iat: Math.floor(Date.now() / 1000),
+                exp: Math.floor(expiresAt.getTime() / 1000)
             },
-            guest: guest ? {
-                id: guest.id,
-                firstName: guest.firstName,
-                lastName: guest.lastName,
-                email: guest.email,
-                phone: guest.phone,
-                company: guest.company,
-                status: guest.status,
-                scanned: guest.scanned,
-                scannedAt: guest.scannedAt,
-                tableId: guest.tableId,
-                tableNumber: guest.tableNumber,
-                accessCode: guest.accessCode ? '***' : null
-            } : session.metadata?.guestData ? {
-                id: null,
-                firstName: session.metadata.guestData.firstName || '',
-                lastName: session.metadata.guestData.lastName || '',
-                email: session.metadata.guestData.email || '',
-                phone: session.metadata.guestData.phone || '',
-                company: session.metadata.guestData.company || '',
-                isTemporary: true
-            } : null,
-            table: {
-                id: table.id,
-                tableNumber: table.tableNumber,
-                tableName: table.tableName,
-                capacity: table.capacity,
-                location: table.location,
-                category: table.category,
-                status: table.status,
-                guestCount: table.assignedGuests?.length || 0,
-                occupiedSeats: table.assignedGuests?.reduce((sum, g) => sum + (g.seats || 1), 0) || 0,
-                availableSeats: Math.max(0, table.capacity - (table.assignedGuests?.reduce((sum, g) => sum + (g.seats || 1), 0) || 0))
-            },
-            event: {
-                id: event.id,
-                name: event.name,
-                date: event.date,
-                time: event.time,
-                location: event.location,
-                description: event.description,
-                status: event.status,
-                active: event.active !== false
-            },
-            isAnonymous: !session.guestId,
-            isAnonymousWithData: !!session.metadata?.guestData
-        };
-        
-        console.log('✅ Session vérifiée avec succès:', {
-            sessionId: session.id,
-            guestName: guest ? `${guest.firstName} ${guest.lastName}` : session.metadata?.guestName || 'Anonyme',
-            tableNumber: table.tableNumber,
-            isExpired: false
-        });
-        
-        res.json({
-            success: true,
-            data: responseData,
-            message: 'Session valide et active'
-        });
-        
-    } catch (err) {
-        console.error('❌ Erreur vérification session:', err);
-        log.error('GET /api/event-sessions/:sessionId', err.message);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Erreur interne du serveur',
-            details: err.message,
-            code: 'SERVER_ERROR'
-        });
-    }
-});
-
-// PROLONGER UNE SESSION
-app.patch('/api/event-sessions/:sessionId/extend', (req, res) => {
-    try {
-        const { sessionId } = req.params;
-        const { hours = 8 } = req.body;
-        
-        console.log('📱 PATCH /api/event-sessions/:sessionId/extend - Session ID:', sessionId);
-        
-        const data = loadData();
-        const sessionIndex = data.eventSessions?.findIndex(s => s.id === sessionId);
-        
-        if (sessionIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                error: 'Session introuvable',
-                code: 'SESSION_NOT_FOUND'
-            });
-        }
-        
-        const session = data.eventSessions[sessionIndex];
-        
-        // Prolonger la session
-        const newExpiresAt = new Date(Date.now() + (parseInt(hours) * 60 * 60 * 1000));
-        session.expiresAt = newExpiresAt.toISOString();
-        session.updatedAt = new Date().toISOString();
-        
-        // Sauvegarder
-        data.eventSessions[sessionIndex] = session;
-        saveData(data);
-        
-        console.log('✅ Session prolongée:', {
-            sessionId: session.id,
-            newExpiresAt: session.expiresAt,
-            extendedByHours: hours
-        });
-        
-        log.crud('EXTEND', 'event session', {
-            sessionId: session.id,
-            newExpiresAt: session.expiresAt,
-            extendedBy: `${hours} heures`
-        });
-        
-        res.json({
-            success: true,
-            data: {
-                sessionId: session.id,
-                expiresAt: session.expiresAt,
-                ttlRemaining: Math.max(0, new Date(session.expiresAt).getTime() - Date.now()),
-                extendedByHours: hours
-            },
-            message: `Session prolongée jusqu'à ${new Date(session.expiresAt).toLocaleString()}`
-        });
-        
-    } catch (err) {
-        console.error('❌ Erreur prolongation session:', err);
-        log.error('PATCH /api/event-sessions/:sessionId/extend', err.message);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Erreur interne du serveur',
-            details: err.message,
-            code: 'SERVER_ERROR'
-        });
-    }
-});
-
-// SUPPRIMER UNE SESSION
-app.delete('/api/event-sessions/:sessionId', jwtAuth, (req, res) => {
-    try {
-        const { sessionId } = req.params;
-        
-        console.log('📱 DELETE /api/event-sessions/:sessionId - Session ID:', sessionId);
-        
-        const data = loadData();
-        const sessionIndex = data.eventSessions?.findIndex(s => s.id === sessionId);
-        
-        if (sessionIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                error: 'Session introuvable',
-                code: 'SESSION_NOT_FOUND'
-            });
-        }
-        
-        const deletedSession = data.eventSessions.splice(sessionIndex, 1)[0];
-        saveData(data);
-        
-        console.log('🗑️ Session supprimée:', {
-            sessionId: deletedSession.id,
-            guestName: deletedSession.metadata?.guestName || 'Anonyme',
-            tableNumber: deletedSession.metadata?.tableNumber
-        });
-        
-        log.crud('DELETE', 'event session', { 
-            sessionId: deletedSession.id,
-            guest: deletedSession.metadata?.guestName || 'Anonyme'
-        });
-        
-        res.json({
-            success: true,
-            message: 'Session supprimée',
-            data: {
-                sessionId: deletedSession.id,
-                deletedAt: new Date().toISOString()
-            }
-        });
-        
-    } catch (err) {
-        console.error('❌ Erreur suppression session:', err);
-        log.error('DELETE /api/event-sessions/:sessionId', err.message);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Erreur interne du serveur',
-            details: err.message,
-            code: 'SERVER_ERROR'
-        });
-    }
-});
-
-// RÉCUPÉRER TOUTES LES SESSIONS (admin seulement)
-app.get('/api/event-sessions', jwtAuth, (req, res) => {
-    try {
-        const { eventId, tableId, status, limit = 100 } = req.query;
-        
-        console.log('📱 GET /api/event-sessions - Filtres:', {
-            eventId,
-            tableId,
-            status,
-            limit
-        });
-        
-        const data = loadData();
-        let sessions = data.eventSessions || [];
-        
-        // Appliquer les filtres
-        if (eventId) {
-            sessions = sessions.filter(s => s.eventId === eventId);
-        }
-        
-        if (tableId) {
-            sessions = sessions.filter(s => s.tableId === tableId);
-        }
-        
-        if (status) {
-            sessions = sessions.filter(s => s.status === status);
-        }
-        
-        // Tri par date de création (plus récent d'abord)
-        sessions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        // Limiter les résultats
-        sessions = sessions.slice(0, parseInt(limit));
-        
-        // Enrichir avec les données des invités et tables
-        const enrichedSessions = sessions.map(session => {
-            const guest = session.guestId ? data.guests.find(g => g.id === session.guestId) : null;
-            const table = data.tables.find(t => t.id === session.tableId);
-            const event = data.events.find(e => e.id === session.eventId);
-            const isExpired = new Date(session.expiresAt) <= new Date();
-            
-            return {
-                ...session,
-                guest: guest ? {
-                    id: guest.id,
-                    name: `${guest.firstName} ${guest.lastName}`,
-                    email: guest.email
-                } : session.metadata?.guestData ? {
-                    name: session.metadata.guestName,
-                    email: session.metadata.guestEmail,
-                    isTemporary: true
-                } : null,
-                table: table ? {
-                    id: table.id,
-                    tableNumber: table.tableNumber,
-                    tableName: table.tableName
-                } : null,
-                event: event ? {
-                    id: event.id,
-                    name: event.name
-                } : null,
-                isExpired,
-                ttlRemaining: isExpired ? 0 : Math.max(0, new Date(session.expiresAt).getTime() - Date.now())
-            };
-        });
-        
-        console.log('✅ Sessions récupérées:', enrichedSessions.length);
-        
-        res.json({
-            success: true,
-            data: enrichedSessions,
-            count: sessions.length,
-            stats: {
-                total: enrichedSessions.length,
-                active: enrichedSessions.filter(s => !s.isExpired).length,
-                expired: enrichedSessions.filter(s => s.isExpired).length,
-                withGuest: enrichedSessions.filter(s => s.guestId).length,
-                anonymous: enrichedSessions.filter(s => !s.guestId).length
-            }
-        });
-        
-    } catch (err) {
-        console.error('❌ Erreur récupération sessions:', err);
-        log.error('GET /api/event-sessions', err.message);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Erreur interne du serveur',
-            details: err.message,
-            code: 'SERVER_ERROR'
-        });
-    }
-});
-
-// STATISTIQUES DES SESSIONS PAR ÉVÉNEMENT
-app.get('/api/event-sessions/stats/event/:eventId', (req, res) => {
-    try {
-        const { eventId } = req.params;
-        
-        console.log('📊 GET /api/event-sessions/stats/event/:eventId - Event ID:', eventId);
-        
-        const data = loadData();
-        const sessions = data.eventSessions?.filter(s => s.eventId === eventId) || [];
-        const now = new Date();
-        
-        const stats = {
-            total: sessions.length,
-            active: sessions.filter(s => new Date(s.expiresAt) > now).length,
-            expired: sessions.filter(s => new Date(s.expiresAt) <= now).length,
-            withGuest: sessions.filter(s => s.guestId).length,
-            anonymous: sessions.filter(s => !s.guestId).length,
-            byTable: {},
-            byAccessMethod: {
-                guest: sessions.filter(s => s.accessMethod === 'guest').length,
-                anonymous: sessions.filter(s => s.accessMethod === 'anonymous').length,
-                table: sessions.filter(s => s.accessMethod === 'table').length
-            },
-            recentActivity: {
-                last24h: sessions.filter(s => 
-                    new Date(s.createdAt) > new Date(Date.now() - 24 * 60 * 60 * 1000)
-                ).length,
-                last7days: sessions.filter(s => 
-                    new Date(s.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                ).length
-            }
-        };
-        
-        // Statistiques par table
-        sessions.forEach(session => {
-            const table = data.tables.find(t => t.id === session.tableId);
-            if (table) {
-                const tableNumber = table.tableNumber;
-                stats.byTable[tableNumber] = {
-                    count: (stats.byTable[tableNumber]?.count || 0) + 1,
-                    active: (stats.byTable[tableNumber]?.active || 0) + 
-                           (new Date(session.expiresAt) > now ? 1 : 0)
-                };
-            }
-        });
-        
-        // Données temporelles
-        const hourlyDistribution = Array(24).fill(0);
-        sessions.forEach(session => {
-            const hour = new Date(session.createdAt).getHours();
-            hourlyDistribution[hour]++;
-        });
-        
-        stats.hourlyDistribution = hourlyDistribution.map((count, hour) => ({
-            hour: `${hour}h`,
-            sessions: count
-        }));
-        
-        console.log('📊 Statistiques générées pour l\'événement:', eventId);
-        
-        res.json({
-            success: true,
-            data: stats,
-            eventId
-        });
-        
-    } catch (err) {
-        console.error('❌ Erreur statistiques sessions:', err);
-        log.error('GET /api/event-sessions/stats/event/:eventId', err.message);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Erreur interne du serveur',
-            details: err.message,
-            code: 'SERVER_ERROR'
-        });
-    }
-});
-
-// NOUVELLE ROUTE : RÉCUPÉRER LA SESSION ACTIVE D'UN INVITÉ
-app.get('/api/guests/:guestId/active-session', (req, res) => {
-    try {
-        const { guestId } = req.params;
-        
-        console.log('📱 GET /api/guests/:guestId/active-session - Guest ID:', guestId);
-        
-        const data = loadData();
-        const now = new Date();
-        
-        // Trouver la session active de l'invité (non expirée)
-        const activeSession = data.eventSessions?.find(s => 
-            s.guestId === guestId && 
-            new Date(s.expiresAt) > now
+            process.env.JWT_SECRET
         );
         
-        if (!activeSession) {
-            return res.json({
-                success: true,
-                hasActiveSession: false,
-                data: null,
-                message: 'Aucune session active trouvée pour cet invité'
-            });
-        }
+        // Enregistrer la session dans la base (optionnel pour tracking)
+        if (!data.eventSessions) data.eventSessions = [];
+        data.eventSessions.push({
+            id: sessionId,
+            guestId,
+            tableId,
+            eventId,
+            createdAt: new Date().toISOString(),
+            expiresAt: expiresAt.toISOString()
+        });
+        saveData(data);
         
-        // Récupérer les données associées
-        const guest = data.guests.find(g => g.id === guestId);
-        const table = data.tables.find(t => t.id === activeSession.tableId);
-        const event = data.events.find(e => e.id === activeSession.eventId);
-        
-        const responseData = {
-            hasActiveSession: true,
-            session: {
-                id: activeSession.id,
-                expiresAt: activeSession.expiresAt,
-                ttlRemaining: Math.max(0, new Date(activeSession.expiresAt).getTime() - Date.now()),
-                accessMethod: activeSession.accessMethod
-            },
-            guest: guest ? {
-                id: guest.id,
-                name: `${guest.firstName} ${guest.lastName}`
-            } : null,
-            table: table ? {
-                id: table.id,
-                tableNumber: table.tableNumber,
-                tableName: table.tableName
-            } : null,
-            event: event ? {
-                id: event.id,
-                name: event.name
-            } : null
-        };
-        
-        console.log('✅ Session active trouvée pour l\'invité:', guestId);
+        console.log('✅ Session créée:', { sessionId, guestId, tableId, eventId });
         
         res.json({
             success: true,
-            ...responseData
+            data: { 
+                token: token,  // SEULEMENT le token
+                expiresAt: expiresAt.toISOString()
+            },
+            message: 'Session créée avec succès'
         });
         
     } catch (err) {
-        console.error('❌ Erreur récupération session active:', err);
-        log.error('GET /api/guests/:guestId/active-session', err.message);
+        console.error('❌ Erreur création session:', err);
         res.status(500).json({ 
             success: false, 
             error: 'Erreur interne du serveur',
-            details: err.message,
             code: 'SERVER_ERROR'
         });
     }
 });
+
+// 2. VÉRIFIER UN TOKEN DE SESSION (retourne IDs seulement)
+app.post('/api/event-sessions/verify-token', (req, res) => {
+    try {
+        const { token } = req.body;
+        
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                error: 'Token manquant',
+                code: 'MISSING_TOKEN'
+            });
+        }
+        
+        // Décrypter JWT côté serveur uniquement
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // Retourner SEULEMENT les IDs
+        res.json({
+            success: true,
+            data: {
+                sessionId: decoded.sessionId,
+                guestId: decoded.guestId,
+                tableId: decoded.tableId,
+                eventId: decoded.eventId,
+                accessMethod: decoded.accessMethod,
+                expiresAt: new Date(decoded.exp * 1000).toISOString()
+            }
+        });
+        
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ 
+                success: false, 
+                error: 'Token expiré',
+                code: 'TOKEN_EXPIRED',
+                expiredAt: new Date(err.expiredAt).toISOString()
+            });
+        }
+        if (err.name === 'JsonWebTokenError') {
+            return res.status(401).json({ 
+                success: false, 
+                error: 'Token invalide',
+                code: 'INVALID_TOKEN'
+            });
+        }
+        res.status(500).json({ 
+            success: false, 
+            error: 'Erreur serveur',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
+// 3. RÉCUPÉRER LES DONNÉES COMPLÈTES D'UNE SESSION (pour le frontend)
+app.get('/api/event-sessions/details', (req, res) => {
+    try {
+        // Récupérer le token du header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({
+                success: false,
+                error: 'Token manquant',
+                code: 'MISSING_TOKEN'
+            });
+        }
+        
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        const data = loadData();
+        let guest = null;
+        let table = null;
+        let event = null;
+        
+        // Récupérer les données via leurs IDs
+        if (decoded.guestId) {
+            guest = data.guests.find(g => g.id === decoded.guestId);
+        }
+        
+        if (decoded.tableId) {
+            table = data.tables.find(t => t.id === decoded.tableId);
+        }
+        
+        if (decoded.eventId) {
+            event = data.events.find(e => e.id === decoded.eventId);
+        }
+        
+        // Retourner les données COMPLÈTES (pour le frontend après authentification)
+        res.json({
+            success: true,
+            data: {
+                sessionId: decoded.sessionId,
+                guest: guest,
+                table: table,
+                event: event,
+                accessMethod: decoded.accessMethod,
+                expiresAt: new Date(decoded.exp * 1000).toISOString(),
+                isAnonymous: !decoded.guestId
+            }
+        });
+        
+    } catch (err) {
+        if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                success: false,
+                error: 'Session invalide ou expirée',
+                code: 'INVALID_SESSION'
+            });
+        }
+        res.status(500).json({
+            success: false,
+            error: 'Erreur serveur',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
+// 4. SUPPRIMER UNE SESSION (logout)
+app.delete('/api/event-sessions/logout', (req, res) => {
+    try {
+        // Avec JWT, on ne fait que supprimer côté client
+        // Optionnel: invalider le token côté serveur si nécessaire
+        res.json({
+            success: true,
+            message: 'Session terminée'
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: 'Erreur serveur'
+        });
+    }
+});
+
+
 
 // GET GUEST TABLE INFO
 app.get('/api/guests/:id/table', (req, res) => {

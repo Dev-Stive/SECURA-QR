@@ -6,157 +6,40 @@
     <meta name="description" content="SECURA - Paramètres">
     <title>SECURA - Paramètres</title>
 
-    <!-- ⚡ SCRIPT INLINE ULTRA-RAPIDE (identique au profile) -->
-    <script>
-        (function() {
-            const CONFIG = {
-                publicPages: ['/login', '/login.html', '/register', '/register.html', 
-                             '/ticket-generator', '/ticket-generator.html', '/404', '/404.html'],
-                verifyTimeout: 3000,
-                overlayDuration: 200
-            };
-
-            document.documentElement.style.cssText = `
-                visibility: hidden !important;
-                opacity: 0 !important;
-                overflow: hidden !important;
-            `;
-
-            function initSecuraLoader() {
-                if (!document.body) {
-                    setTimeout(initSecuraLoader, 10);
-                    return;
-                }
-
-                const overlay = document.createElement('div');
-                overlay.id = 'secura-settings-loading';
-                overlay.innerHTML = `
-                    <div class="secura-overlay-content">
-                        <div class="spinner-ring"></div>
-                        <p class="loading-text">Chargement des paramètres...</p>
-                    </div>
-                `;
-
-                const style = document.createElement('style');
-                style.textContent = `
-                    #secura-settings-loading {
-                        position: fixed;
-                        top: 0; left: 0;
-                        width: 100%; height: 100%;
-                        background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        z-index: 99999;
-                        transition: opacity 0.3s ease;
-                    }
-
-                    .spinner-ring {
-                        width: 60px; height: 60px;
-                        border: 4px solid rgba(217,119,6,0.2);
-                        border-top-color: #F59E0B;
-                        border-radius: 50%;
-                        animation: spin 0.8s linear infinite;
-                        margin: 0 auto 20px;
-                    }
-
-                    @keyframes spin { to { transform: rotate(360deg); } }
-
-                    .loading-text {
-                        font-family: 'Poppins', sans-serif;
-                        font-size: 1rem;
-                        color: #F59E0B;
-                        font-weight: 500;
-                    }
-                `;
-
-                document.head.appendChild(style);
-                document.body.insertAdjacentElement('afterbegin', overlay);
-
-                verifyAccess();
-            }
-
-            function verifyAccess() {
-                const token = localStorage.getItem('secura_token');
-                const path = window.location.pathname;
-                const isPublic = CONFIG.publicPages.some(p => path.endsWith(p));
-
-                if (isPublic || (token && isValidToken(token))) {
-                    setTimeout(() => {
-                        const overlay = document.getElementById('secura-settings-loading');
-                        if (overlay) {
-                            overlay.style.opacity = '0';
-                            setTimeout(() => overlay.remove(), 300);
-                        }
-                        
-                        document.documentElement.style.cssText = `
-                            visibility: visible !important;
-                            opacity: 1 !important;
-                            transition: opacity 0.3s ease !important;
-                        `;
-                        
-                        window.dispatchEvent(new CustomEvent('secura:settings-ready'));
-                    }, CONFIG.overlayDuration);
-                } else {
-                    localStorage.removeItem('secura_token');
-                    window.location.replace('/login.html');
-                }
-            }
-
-            function isValidToken(token) {
-                try {
-                    const parts = token.split('.');
-                    if (parts.length !== 3) return false;
-                    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-                    return !payload.exp || payload.exp * 1000 > Date.now();
-                } catch { return false; }
-            }
-
-            setTimeout(() => {
-                if (document.getElementById('secura-settings-loading')) {
-                    document.documentElement.style.cssText = `
-                        visibility: visible !important;
-                        opacity: 1 !important;
-                    `;
-                    document.getElementById('secura-settings-loading')?.remove();
-                }
-            }, CONFIG.verifyTimeout);
-
-            initSecuraLoader();
-        })();
-    </script>
-
+   
     <!-- RESSOURCES -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="css/loading.css">
-<link rel="stylesheet" href="css/dash.css">
-    <link rel="stylesheet" href="css/toastify.css">    <style>
-        /* === SETTINGS STYLES === */
-        :root {
-            --primary: #D97706;
-            --primary-dark: #B45309;
-            --primary-light: #F59E0B;
-            --dark: #0A0A0A;
-            --dark-card: #121212;
-            --dark-elevated: #1A1A1A;
-            --success: #10B981;
-            --danger: #EF4444;
-            --warning: #F59E0B;
-            --info: #3B82F6;
-            --purple: #8B5CF6;
-        }
 
-        body {
-            background: var(--dark);
-            color: #fff;
-            min-height: 100vh;
-        }
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Styles -->
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/dash.css">
+    <link rel="stylesheet" href="css/toastify.css">
+    <link rel="stylesheet" href="css/index.css"/>
+    
+    <!-- Particles -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+      <style>
+       
 
         /* LAYOUT */
         .settings-layout {
@@ -586,10 +469,110 @@
 </head>
 
 <body class="light-theme">
+
+            <!-- Particles Background -->
     <div id="particles-js"></div>
 
-    <!-- Header -->
-    <header class="header">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <img src="assets/images/icon.png" alt="logo secura">
+                </div>
+                <div class="sidebar-logo-text">
+                    <h1>SECURA</h1>
+                    <p>Tableau de Bord Administrateur</p>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Fermer le menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="sidebar-profile">
+            <div class="profile-avatar large">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="profile-details">
+                <strong id="sidebarProfileName">Chargement...</strong>
+                <small id="sidebarProfileEmail">email@exemple.com</small>
+                <span class="badge-role" id="sidebarProfileRole">Utilisateur</span>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <div id="navMenu" class="sidebar-menu">
+            <a href="index.html" class="sidebar-link active">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="events.html" class="sidebar-link">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Événements</span>
+            </a>
+            <a href="guests.html" class="sidebar-link">
+                <i class="fas fa-users"></i>
+                <span>Invités</span>
+            </a>
+            <a href="tables.html" class="sidebar-link">
+                <i class="fas fa-chair"></i>
+                <span>Tables</span>
+            </a>
+            <a href="qr-generator.html" class="sidebar-link">
+                <i class="bi bi-qr-code"></i>
+                <span>Générateur QR</span>
+            </a>
+            <a href="ticket-generator.html" class="sidebar-link">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Billets</span>
+            </a>
+            <a href="scanner.html" class="sidebar-link">
+                <i class="fas fa-camera"></i>
+                <span>Scanner</span>
+            </a>
+            <hr class="sidebar-divider">
+            <a href="profile.html" class="sidebar-link">
+                <i class="fas fa-user"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="settings.html" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+            </a>
+            <button class="sidebar-link text-danger" id="sidebarLogout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+                <span>Mode Sombre</span>
+            </button>
+            <button class="fullscreen-toggle" id="fullscreenToggle">
+                <i class="fas fa-expand"></i>
+                <span>Plein écran</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Overlay pour fermer la sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Bouton flottant pour ouvrir la sidebar -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        
+    <!-- Top Bar -->
+         <header class="header">
         <div class="header-content">
             <div class="logo-section">
                 <div class="logo-icon">
@@ -597,32 +580,60 @@
                 </div>
                 <div class="logo-text">
                     <h1>SECURA</h1>
-                    <p>Paramètres</p>
+                    <p>Tableau de Bord Administrateur</p>
                 </div>
             </div>
 
-            <nav class="nav-menu" id="navMenu">
-                <a href="index.html" class="nav-link">Accueil</a>
-                <a href="profile.html" class="nav-link">Profil</a>
-                <a href="events.html" class="nav-link">Événements</a>
-                <a href="scanner.html" class="nav-link">Scanner</a>
-            </nav>
+            
+            
 
-            <div class="header-actions">
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button class="profile-toggle header-profile-btn" id="profileToggle">
-                    <div class="profile-avatar">
-                        <i class="bi bi-person-circle"></i>
-                    </div>
-                </button>
-            </div>
+            <!-- Profile Button -->
+            <button class="profile-toggle header-profile-btn" id="profileToggle" aria-haspopup="true" aria-expanded="false">
+                <div class="profile-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-info">
+                    <span class="profile-name" id="profileName">Chargement...</span>
+                    <span class="profile-role" id="profileRole">Utilisateur</span>
+                </div>
+                <i class="bi bi-chevron-down profile-arrow"></i>
+            </button>
         </div>
     </header>
 
+    
+    <!-- Profile Menu -->
+    <div class="floating-profile-menu" id="floatingProfileMenu">
+        <div class="profile-dropdown show" id="profileDropdown" role="menu">
+            <div class="profile-header">
+                <div class="profile-avatar large">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-details">
+                    <strong id="dropdownName">Chargement...</strong>
+                    <small id="dropdownEmail">email@exemple.com</small>
+                    <span class="badge-role" id="dropdownRole">Utilisateur</span>
+                </div>
+            </div>
+
+            <div class="dropdown-actions">
+                <a href="profile.html" class="dropdown-item" role="menuitem">
+                    <i class="bi bi-person"></i> Mon Profil
+                </a>
+                <a href="settings.html" class="dropdown-item" role="menuitem">
+                    <i class="bi bi-gear"></i> Paramètres
+                </a>
+                <hr class="dropdown-divider">
+                <button class="dropdown-item text-danger" id="logout-btn" role="menuitem">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main class="container">
+
         <div class="settings-layout">
             <!-- Menu -->
             <div class="settings-menu">
@@ -1136,29 +1147,145 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer mt-4">
+     <!-- Footer -->
+         <!-- Footer -->
+    <footer class="footer">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-shield-check" style="font-size:1.5rem;"></i>
-                    <span style="font-weight:600;">SECURA</span>
+            <div class="footer-top">
+                <div class="row">
+                    <div class="col-lg-4 mb-5 mb-lg-0">
+                        <div class="footer-brand">
+                            <div class="footer-logo">
+                                <img src="assets/images/icon.png" alt="SECURA Logo">
+                            </div>
+                            <div class="footer-title">
+                                <h3>SECURA</h3>
+                                <p>Plateforme d'accès événementiel</p>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            SECURA révolutionne l'accès aux événements avec des solutions innovantes, 
+                            sécurisées et intuitives pour organisateurs et participants.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Navigation</h4>
+                        <ul class="footer-links">
+                            <li><a href="index.html">Accueil</a></li>
+                            <li><a href="access.html">Accès événement</a></li>
+                            <li><a href="#features">Fonctionnalités</a></li>
+                            <li><a href="#how-it-works">Comment ça marche</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Compte</h4>
+                        <ul class="footer-links">
+                            <li><a href="login.html">Connexion</a></li>
+                            <li><a href="register.html">Inscription</a></li>
+                            <li><a href="forgot-password.html">Mot de passe oublié</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4">
+                        <h4>Newsletter</h4>
+                        <p class="mb-4">Inscrivez-vous pour recevoir nos actualités et offres exclusives.</p>
+                        <form class="newsletter-form" id="newsletterForm">
+                            <div class="newsletter-input-group">
+                                <input type="email" class="newsletter-input" placeholder="Votre email" required>
+                                <button type="submit" class="newsletter-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                   
+                                </button>
+                            </div>
+                        </form>
+                       
+                        <div class="footer-controls-inline">
+                            <!-- Theme Switch Button -->
+                            <div class="theme-switch-footer">
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="themeSwitchFooter" aria-label="Basculer le thème">
+                                    <span class="theme-switch-slider">
+                                        <i class="fas fa-moon"></i>
+                                        <i class="fas fa-sun"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Language Selector -->
+                            <div class="language-selector"></div>
+                        </div>
+                    </div>
                 </div>
-                <p class="mb-0">© 2025 SECURA. Tous droits réservés.</p>
-                <div class="d-flex gap-3">
-                    <a href="#" class="footer-link">Confidentialité</a>
-                    <a href="#" class="footer-link">Conditions</a>
-                    <a href="#" class="footer-link">Support</a>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright">© 2025 SECURA. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-legal">
+                            <a href="#">Mentions légales</a>
+                            <a href="#">Confidentialité</a>
+                            <a href="#">CGU</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
+    
+    <!-- Scroll to Top -->
+    <button class="scroll-top" id="scrollTop" aria-label="Retour en haut">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
-    <!-- Scripts -->
-    <link rel="preload" href="js/auth-check.js" as="script">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SCRIPTS (Chargés après le rendu du DOM) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Librairies essentielles -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+    <!-- Scripts locaux (dans l'ordre) -->
+
     <script src="js/storage.js"></script>
-    <script src="js/theme.js"></script>
+    <script src="js/auth-check.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script defer src="js/particles-config.js"></script>
+    <script defer src="js/audio-utils.js"></script>
+    <script defer src="js/theme.js"></script>
+    <script defer src="js/storage.js"></script>
+    <script defer src="js/events.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/sidebar.js"></script>
+    <script src="js/auth.js"></script>
+    <script defer src="js/toastify.js"></script>
+    <script defer src="js/langue.js"></script>
+    
 
     <script>
         // === GLOBAL CONFIG ===

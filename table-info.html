@@ -1958,7 +1958,7 @@
         // Vérifier l'authentification
         async function checkAuth() {
             try {
-                currentUser = await authManager.getProfile();
+                currentUser = await storage.getProfile();
                 if (!currentUser) {
                     window.location.href = 'login.html';
                     return false;

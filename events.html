@@ -7,7 +7,7 @@
     <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
 
     <!-- 🚀 Autres ressources essentielles -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     
@@ -23,9 +23,6 @@
     <link rel="stylesheet" href="css/toastify.css">
     <link rel="stylesheet" href="css/index.css">
 
-    <link rel="preload" href="js/auth-check.js" as="script">
-    <script src="js/auth-check.js"></script>
-    <link rel="preload" href="js/auth-check.js" as="script">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
@@ -1503,14 +1500,15 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <!-- Scripts locaux -->
+
+    <script src="js/storage.js"></script>
+    <script src="js/auth-check.js"></script>
     <script defer src="js/particles-config.js"></script>
     <script defer src="js/theme.js"></script>
-    <script defer src="js/events.js"></script>
     <script defer src="js/main.js"></script>
     <script defer src="js/sidebar.js"></script>
     <script defer src="js/langue.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/storage.js"></script>
     <script>
     // Variables globales
     let currentUser = null;
@@ -1556,7 +1554,7 @@
     async function loadEvents() {
         try {
             const events = await storage.getAllEvents();
-            currentUser = await authManager.getProfile();
+            currentUser = await storage.getProfile();
             
             if (currentUser.role === 'admin') {
                 allEvents = events;

@@ -28,7 +28,7 @@ class SidebarManager {
         this.updateActiveLink();
         this.setupResizeListener();
         this.setupTouchGestures();
-        this.updateAuthVisibility();
+        //this.updateAuthVisibility();
         
         console.log('✅ Sidebar Manager initialisé');
     }

@@ -745,9 +745,8 @@ forceLogout() {
     
     console.warn('🔒 Déconnexion forcée');
     
-    if (!window.location.pathname.includes('login.html')) {
-        window.location.href = '/login.html';
-    }
+    window.location.href = '/index.html';
+    
 }
 
 
@@ -1371,6 +1370,25 @@ forceLogout() {
             }
         }
         return this.data.guests.filter(g => g.eventId === eventId);
+    }
+
+    /**
+     * Get table information for a guest by their tableId
+     * Handles both direct API and local storage
+     */
+    async getGuestTable(guestId) {
+        try {
+            const guest = this.getGuestById(guestId);
+            if (!guest || !guest.tableId) {
+                console.warn(`⚠️ Guest ${guestId} not found or has no tableId`);
+                return null;
+            }
+            
+            return this.getTableById(guest.tableId);
+        } catch (error) {
+            console.error('❌ Error getting guest table:', error);
+            return null;
+        }
     }
 
     async createGuest(guest) {
@@ -3655,149 +3673,209 @@ async scanQRCode(qrData) {
         };
     }
 
-    /**
-     * Créer une session événement
-     */
-    async createEventSession({ guestId, tableId, accessMethod }) {
-        if (this.USE_API_DIRECT && this.isOnline) {
-            try {
-                const response = this.apiRequest(`/event-sessions`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(this.token && { 'Authorization': `Bearer ${this.token}` })
-                    },
-                    body: JSON.stringify({ guestId, tableId, accessMethod })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (err) {
-                console.warn('⚠️ API createEventSession échec:', err.message);
-                // Fallback local
-                return this.createEventSessionLocal({ guestId, tableId, accessMethod });
-            }
-        }
-        return this.createEventSessionLocal({ guestId, tableId, accessMethod });
-    }
+ 
+// ═══════════════════════════════════════════════════════════════
+// 🎪 GESTION DES SESSIONS ÉVÉNEMENT (JWT Only)
+// ═══════════════════════════════════════════════════════════════
 
-
-        async updateEventSession(sessionId, guestId) {
-            try {
-                const response = await fetch(`${this.baseURL}/api/event-sessions/${sessionId}`, {
-                    method: 'PATCH',
-                    headers: this.getHeaders(),
-                    body: JSON.stringify({ guestId })
-                });
-                return await response.json();
-            } catch (error) {
-                console.error('Erreur mise à jour session:', error);
-                throw error;
-            }
-        };
-
-        saveAccessProgress(step, data) {
-            const progress = {
-                step: step,
-                data: data,
-                timestamp: new Date().toISOString()
-            };
-            localStorage.setItem('secura_access_progress', JSON.stringify(progress));
-        }
-
-        getAccessProgress() {
-            const progress = localStorage.getItem('secura_access_progress');
-            return progress ? JSON.parse(progress) : null;
-        }
-
-        clearAccessProgress() {
-            localStorage.removeItem('secura_access_progress');
-        }
-
-   
-createEventSessionLocal({ guestId, tableId, accessMethod }) {
-    const table = this.data.tables.find(t => t.id === tableId);
-    
-    if (!table) {
-        return {
-            success: false,
-            error: 'Table introuvable'
-        };
-    }
-    
-    let guest = null;
-    if (guestId) {
-        guest = this.data.guests.find(g => g.id === guestId);
-        
-        // Vérifier que l'invité est bien sur cette table
-        const isAssigned = table.assignedGuests?.some(g => g.guestId === guestId);
-        if (!isAssigned) {
+/**
+ * 1. Créer une session événement (retourne JWT seulement)
+ */
+async createEventSession({ guestId = null, tableId = null }) {
+    try {
+        if (!tableId && !guestId) {
             return {
                 success: false,
-                error: 'Invité non assigné à cette table'
+                error: 'tableId ou guestId requis',
+                code: 'MISSING_REQUIRED_FIELD'
             };
         }
-    }
-    
-    const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    return {
-        success: true,
-        data: {
-            sessionId,
-            guest: guest ? {
-                id: guest.id,
-                name: `${guest.firstName} ${guest.lastName}`,
-                email: guest.email
-            } : null,
-            table: {
-                id: table.id,
-                number: table.tableNumber,
-                name: table.tableName
-            },
-            isAnonymous: !guestId,
-            expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString()
-        }
-    };
-}
 
-    /**
-     * Vérifier une session événement
-     */
-    async getEventSession(sessionId) {
-        if (this.USE_API_DIRECT && this.isOnline) {
-            try {
-                const response = this.apiRequest(`/event-sessions/${sessionId}`, {
-                    headers: {
-                        ...(this.token && { 'Authorization': `Bearer ${this.token}` })
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+        const result = await this.apiRequest('/event-sessions', {
+            method: 'POST',
+            body: JSON.stringify({ guestId, tableId })
+        });
+
+        if (result.success && result.data?.token) {
+            // Sauvegarder UNIQUEMENT le token
+            localStorage.setItem('secura_event_session_token', result.data.token);
+            
+            console.log('✅ Token de session sauvegardé');
+            return {
+                success: true,
+                data: {
+                    token: result.data.token,
+                    expiresAt: result.data.expiresAt
                 }
-                
-                return await response.json();
-            } catch (err) {
-                console.warn('⚠️ API getEventSession échec:', err.message);
-                // Fallback local
-                return this.getEventSessionLocal(sessionId);
-            }
+            };
         }
-        return this.getEventSessionLocal(sessionId);
-    }
 
-    getEventSessionLocal(sessionId) {
-        // Cette méthode nécessite que les sessions soient stockées localement
-        // Pour l'instant, retourner une erreur car nous ne stockons pas les sessions
+        throw new Error(result.error || 'Échec création session');
+
+    } catch (err) {
+        console.error('❌ Erreur création session:', err);
         return {
             success: false,
-            error: 'Session introuvable'
+            error: err.message,
+            code: 'SESSION_CREATE_ERROR'
         };
     }
+}
+
+/**
+ * 2. Vérifier un token de session (appel API pour vérification)
+ */
+async verifyEventSessionToken(token) {
+    try {
+        const result = await this.apiRequest('/event-sessions/verify-token', {
+            method: 'POST',
+            body: JSON.stringify({ token })
+        });
+
+        if (result.success) {
+            return {
+                success: true,
+                data: result.data
+            };
+        }
+
+        // Si token invalide, nettoyer
+        if (result.code === 'TOKEN_EXPIRED' || result.code === 'INVALID_TOKEN') {
+            this.clearEventSession();
+        }
+
+        return {
+            success: false,
+            error: result.error || 'Token invalide',
+            code: result.code
+        };
+
+    } catch (err) {
+        console.error('❌ Erreur vérification token:', err);
+        return {
+            success: false,
+            error: err.message,
+            code: 'TOKEN_VERIFY_ERROR'
+        };
+    }
+}
+
+/**
+ * 3. Obtenir les données complètes de la session actuelle
+ */
+async getCurrentSessionDetails() {
+    try {
+        const token = localStorage.getItem('secura_event_session_token');
+        if (!token) return null;
+
+        // Vérifier d'abord la validité du token
+        const verification = await this.verifyEventSessionToken(token);
+        if (!verification.success) return null;
+
+        // Récupérer les données complètes via API
+        const result = await this.apiRequest('/event-sessions/details', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (result.success) {
+            return {
+                success: true,
+                data: result.data,
+                token: token
+            };
+        }
+
+        return null;
+
+    } catch (err) {
+        console.error('❌ Erreur récupération session:', err);
+        return null;
+    }
+}
+
+/**
+ * 4. Vérifier si une session est active (utilitaire rapide)
+ */
+isEventSessionActive() {
+    const token = localStorage.getItem('secura_event_session_token');
+    return !!token;
+}
+
+/**
+ * 5. Effacer la session événement (logout)
+ */
+clearEventSession() {
+    localStorage.removeItem('secura_event_session_token');
+    console.log('✅ Session événement effacée');
+}
+
+/**
+ * 6. Mettre à jour une session (créer nouvelle session avec guest)
+ */
+async updateEventSessionWithGuest(tableId, guestId) {
+    try {
+        const result = await this.createEventSession({
+            guestId: guestId,
+            tableId: tableId
+        });
+
+        if (result.success) {
+            return {
+                success: true,
+                data: result.data
+            };
+        }
+
+        throw new Error(result.error || 'Échec mise à jour session');
+
+    } catch (err) {
+        console.error('❌ Erreur mise à jour session:', err);
+        return {
+            success: false,
+            error: err.message,
+            code: 'SESSION_UPDATE_ERROR'
+        };
+    }
+}
+
+/**
+ * 7. Obtenir le token brut (pour authentification API)
+ */
+getEventSessionToken() {
+    return localStorage.getItem('secura_event_session_token') || null;
+}
+
+
+/**
+ * Charger toutes les données pour une session (méthode complète pour frontend)
+ */
+async loadSessionData() {
+    try {
+        const sessionDetails = await this.getCurrentSessionDetails();
+        if (!sessionDetails || !sessionDetails.success) return null;
+
+        const data = sessionDetails.data;
+        
+        if (data.guest && data.guest.tableId) {
+            data.guest.table = await this.getTableById(data.guest.tableId);
+        }
+        
+        if (data.table && data.table.eventId) {
+            data.table.event = await this.getEventById(data.table.eventId);
+        }
+
+        return data;
+
+    } catch (err) {
+        console.error('❌ Erreur chargement données session:', err);
+        return null;
+    }
+}
+
+
 
     /**
      * Demander l'aide du protocole
@@ -5278,7 +5356,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('logout-btn')?.addEventListener('click', () => {
         storage.logout();
         authManager.logout();
-        window.location.href = '/login.html';
+        window.location.href = '/index.html';
     });
 
     storage.updateProfileInfo();

@@ -52,7 +52,6 @@ let tablesDistributionChart = null;
 // Variables pour les modals
 let currentModal = null;
 
-// 🎨 LABELS ET TRADUCTIONS
 const genderLabels = {
     '': '-- Sélectionner --',
     'm': 'Homme',
@@ -87,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     
     eventsList = await storage.getAllEvents();
-    currentUser = await authManager.getProfile();
+    currentUser = await storage.getProfile();
 
     if (eventId) {
         
@@ -387,7 +386,7 @@ async function showInvalidEventError(eventId) {
         async function loadEventsList() {
             try {
                 eventsList = await storage.getAllEvents();
-                currentUser = await authManager.getProfile();
+                currentUser = await storage.getProfile();
                 
                 if (currentUser.role !== 'admin') {
                     eventsList = eventsList.filter(event => 
@@ -428,110 +427,108 @@ function renderEventsList() {
 
         // Rendre la vue grille
         async function renderEventsGrid() {
+            
             const grid = document.getElementById('eventsGridView');
             grid.innerHTML = '';
             grid.style.display = 'grid';
             document.getElementById('eventsTableView').style.display = 'none';
 
-            // Render events efficiently without blocking
-            const fragment = document.createDocumentFragment();
+            console.log(eventsList.length);
 
-            for (const event of eventsList) {
+             for (const event of eventsList) {
                 const tables = await storage.getAllTables(event.id);
+                 
+                    const guests = storage.getGuestsByEventId(event.id);
+                    const scannedGuests = guests.filter(g => g.scanned).length;
+                    const eventDate = new Date(event.date);
+                    const isUpcoming = eventDate >= new Date();
                     
-                const guests = storage.getGuestsByEventId(event.id);
-                const scannedGuests = guests.filter(g => g.scanned).length;
-                const eventDate = new Date(event.date);
-                const isUpcoming = eventDate >= new Date();
-
-                const eventCard = document.createElement('div');
-                eventCard.className = 'event-card-pro';
-                eventCard.style.backgroundImage = `url('${getEventImage(event.type)}')`;
-                eventCard.style.borderLeft = `4px solid ${event.design?.primaryColor || '#D97706'}`;
-                
-                eventCard.onclick = () => selectEvent(event.id);
+                    const eventCard = document.createElement('div');
+                    eventCard.className = 'event-card-pro';
+                    eventCard.style.backgroundImage = `url('${getEventImage(event.type)}')`;
+                    eventCard.style.borderLeft = `4px solid ${event.design?.primaryColor || '#D97706'}`;
+                    eventCard.onclick = () => selectEvent(event.id);
                     
-                eventCard.innerHTML = `
-                    ${isUpcoming ? '<div class="upcoming-ribbon" style="background: linear-gradient(45deg, #3B82F6, #8B5CF6);">À VENIR</div>' : ''}
-                    
-                    <div class="event-type-badge" style="background: ${getTypeColor(event.type)}">
-                        ${getTypeLabel(event.type)}
-                    </div>
-                    
-                    <div class="event-content">
-                        <h3 class="event-title">${escapeHtml(event.name)}</h3>
+                    eventCard.innerHTML = `
+                        ${isUpcoming ? '<div class="upcoming-ribbon" style="background: linear-gradient(45deg, #3B82F6, #8B5CF6);">À VENIR</div>' : ''}
                         
-                        <div class="event-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span>${eventDate.toLocaleDateString('fr-FR')}</span>
-                            </div>
-                            ${event.time ? `
-                            <div class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                <span>${event.time}</span>
-                            </div>` : ''}
-                            ${event.location ? `
-                            <div class="meta-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>${event.location}</span>
-                            </div>` : ''}
+                        <div class="event-type-badge" style="background: ${getTypeColor(event.type)}">
+                            ${getTypeLabel(event.type)}
                         </div>
+                        
+                        <div class="event-content">
+                            <h3 class="event-title">${escapeHtml(event.name)}</h3>
+                            
+                            <div class="event-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>${eventDate.toLocaleDateString('fr-FR')}</span>
+                                </div>
+                                ${event.time ? `
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${event.time}</span>
+                                </div>` : ''}
+                                ${event.location ? `
+                                <div class="meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${event.location}</span>
+                                </div>` : ''}
+                            </div>
 
-                        <div class="event-stats-circle">
-                            <div class="stat-circle">
-                                <div class="circle" style="border-color: ${event.design?.primaryColor || '#D97706'}20;">
-                                    <span class="value">${guests.length}</span>
-                                    <span class="label">Invités</span>
+                            <div class="event-stats-circle">
+                                <div class="stat-circle">
+                                    <div class="circle" style="border-color: ${event.design?.primaryColor || '#D97706'}20;">
+                                        <span class="value">${guests.length}</span>
+                                        <span class="label">Invités</span>
+                                    </div>
+                                </div>
+                                <div class="stat-circle">
+                                    <div class="circle" style="border-color: #10B98120;">
+                                        <span class="value">${tables.count}</span>
+                                        <span class="label">Tables</span>
+                                    </div>
+                                </div>
+                                 
+                                <div class="stat-circle">
+                                    <div class="circle" style="border-color: #3B82F620;">
+                                        <span class="value">${event.capacity || '∞'}</span>
+                                        <span class="label">Capacité</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="stat-circle">
-                                <div class="circle" style="border-color: #10B98120;">
-                                    <span class="value">${tables.count}</span>
-                                    <span class="label">Tables</span>
-                                </div>
-                            </div>
-                             
-                            <div class="stat-circle">
-                                <div class="circle" style="border-color: #3B82F620;">
-                                    <span class="value">${event.capacity || '∞'}</span>
-                                    <span class="label">Capacité</span>
+
+                            <div class="event-footer">
+                                <div class="event-status" style="background: ${event.active ? '#10B981' : '#EF4444'} !important; color: white">
+                                    <i class="fas ${event.active ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                                    <span>${event.active ? 'Actif' : 'Inactif'}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="event-footer">
-                            <div class="event-status" style="background: ${event.active ? '#10B981' : '#EF4444'} !important; color: white">
-                                <i class="fas ${event.active ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                                <span>${event.active ? 'Actif' : 'Inactif'}</span>
-                            </div>
+                        <div class="event-actions" onclick="event.stopPropagation()">
+                            <button class="action-btn view" onclick="viewEvent('${event.id}')" title="Voir invités">
+                                <i class="fas fa-users"></i>
+                            </button>
+                            <button class="action-btn edit" onclick="editEvent('${event.id}')" title="Modifier">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="action-btn duplicate" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="action-btn stats" onclick="viewEventStats('${event.id}')" title="Statistiques">
+                                <i class="fas fa-chart-bar"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
+                                <i class="bi bi-trash3"></i>
+                            </button>
                         </div>
-                    </div>
-
-                    <div class="event-actions" onclick="event.stopPropagation()">
-                        <button class="action-btn view" onclick="viewEvent('${event.id}')" title="Voir invités">
-                            <i class="fas fa-users"></i>
-                        </button>
-                        <button class="action-btn edit" onclick="editEvent('${event.id}')" title="Modifier">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="action-btn duplicate" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                        <button class="action-btn stats" onclick="viewEventStats('${event.id}')" title="Statistiques">
-                            <i class="fas fa-chart-bar"></i>
-                        </button>
-                        <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
-                            <i class="bi bi-trash3"></i>
-                        </button>
-                    </div>
-                `;
-                
-                fragment.appendChild(eventCard);
-            };
-            
-            grid.appendChild(fragment);
+                    `;
+                    
+                    grid.appendChild(eventCard);
+                };
         }
+
         
 
 

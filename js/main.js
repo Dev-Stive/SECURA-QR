@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const success = await storage.logout();
                         
                         setTimeout(() => {
-                            window.location.href = '/login.html';
+                            window.location.href = '/';
                         }, 500);
                     }, 500);
                 }

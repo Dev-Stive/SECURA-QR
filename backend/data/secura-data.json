@@ -1268,6 +1268,7 @@
       "email": "",
       "phone": "680583048",
       "company": "-",
+      "accessCode": "3038",
       "notes": "Table Amour",
       "eventId": "sec_1762209757419_exl3pjlf0",
       "id": "gst_1763195952735_m0zp2vfdm",
@@ -10908,12 +10909,12 @@
       "id": "usr_1762606689312_tg4o61hz2",
       "email": "admin@secura.com",
       "password": "$2b$10$yNy9fhXZbNE9OnO1EAv43ee4jGNJ11GXZIpOjEQmO435O9v/gIAR6",
-      "firstName": "Administrateur",
+      "firstName": "Admin",
       "lastName": "",
       "role": "admin",
       "createdAt": "2025-11-08T12:58:09.499Z",
-      "updatedAt": "2026-01-28T16:23:51.220Z",
-      "accessCode": "4659"
+      "updatedAt": "2026-01-31T15:35:33.559Z",
+      "accessCode": "6583"
     },
     {
       "id": "usr_1762608473263_a6kf6gcg3",
@@ -11614,18 +11615,18 @@
       "description": "Table créée automatiquement",
       "eventId": "sec_1762209757419_exl3pjlf0",
       "qrCode": {
-        "id": "qr_tbl_1769805008928_1d1ij5dkp",
+        "id": "qr_tbl_1769991252267_rqzqywcuk",
         "qrData": {
           "t": "TBL",
           "e": "sec_1762209757419_exl3pjlf0",
           "tb": "tbl_1768651477699_p2z47uzcn",
           "tn": "AM-70",
-          "d": "2026-01-30T20:30:08.928Z"
+          "d": "2026-02-02T00:14:12.267Z"
         },
         "qrUrl": "http://localhost:3000/table/tbl_1768651477699_p2z47uzcn/info",
         "scanCount": 0,
         "lastScan": null,
-        "createdAt": "2026-01-30T20:30:08.928Z"
+        "createdAt": "2026-02-02T00:14:12.267Z"
       },
       "assignedGuests": [
         {
@@ -11696,7 +11697,7 @@
       "status": "active",
       "isActive": true,
       "createdAt": "2026-01-17T12:04:37.699Z",
-      "updatedAt": "2026-01-30T20:30:08.928Z"
+      "updatedAt": "2026-02-02T00:14:12.267Z"
     },
     {
       "id": "tbl_1768651481928_qr1l4khgb",
@@ -13694,18 +13695,18 @@
       "description": "Table pour Photographes et équipe média de l'événement",
       "eventId": "evt_1769537993483_82t3xcgsi",
       "qrCode": {
-        "id": "qr_tbl_1769653647835_ye5qawgsa",
+        "id": "qr_tbl_1769990906373_ilu2dkhxa",
         "qrData": {
           "t": "TBL",
           "e": "evt_1769537993483_82t3xcgsi",
           "tb": "tbl_1769575125813_g981kwp7t",
           "tn": "CA-93",
-          "d": "2026-01-29T02:27:27.835Z"
+          "d": "2026-02-02T00:08:26.373Z"
         },
         "qrUrl": "http://localhost:3000/table/tbl_1769575125813_g981kwp7t/info",
         "scanCount": 0,
         "lastScan": null,
-        "createdAt": "2026-01-29T02:27:27.835Z"
+        "createdAt": "2026-02-02T00:08:26.373Z"
       },
       "assignedGuests": [],
       "guestCount": 0,
@@ -13719,11 +13720,20 @@
       "status": "active",
       "isActive": true,
       "createdAt": "2026-01-28T04:38:45.813Z",
-      "updatedAt": "2026-01-29T02:27:27.835Z"
+      "updatedAt": "2026-02-02T00:08:26.373Z"
     }
   ],
   "sessions": [],
-  "eventSessions": [],
+  "eventSessions": [
+    {
+      "id": "sess_1770023331438_7tiy9i9ka",
+      "guestId": null,
+      "tableId": "tbl_1769575118452_odch1tnsd",
+      "eventId": "evt_1769537993483_82t3xcgsi",
+      "createdAt": "2026-02-02T09:08:51.439Z",
+      "expiresAt": "2026-02-02T17:08:51.438Z"
+    }
+  ],
   "tempUsers": [],
   "passwordResets": [],
   "settings": {
@@ -13731,7 +13741,7 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2026-01-31T10:00:00.223Z",
+    "updatedAt": "2026-02-02T11:00:01.007Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }

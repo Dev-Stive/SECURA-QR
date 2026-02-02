@@ -8,7 +8,7 @@
 
     
     <!-- 🚀 Autres ressources essentielles -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     
@@ -158,7 +158,7 @@
         }
 
         .header-title p {
-            font-size: 0.75rem;
+            font-size: 0.5rem;
             margin: 2px 0 0;
             color: rgba(255, 255, 255, 0.7);
             font-weight: 500;
@@ -1571,7 +1571,7 @@
             }
             
             .newsletter-input-group {
-                flex-direction: column;
+                flex-direction: row;
             }
             
             .scroll-top {
@@ -1671,15 +1671,17 @@
 
             <div class="header-actions">
 
+                           
+
                             <div class="theme-switch-footer">
-                                <label class="theme-switch">
-                                    <input type="checkbox" id="themeSwitchFooter" aria-label="Basculer le thème">
-                                    <span class="theme-switch-slider">
-                                        <i class="fas fa-moon"></i>
-                                        <i class="fas fa-sun"></i>
-                                    </span>
-                                </label>
-                            </div>
+                    <label class="theme-switch">
+                        <input type="checkbox" class="theme-toggle" aria-label="Basculer le thème">
+                        <span class="theme-switch-slider">
+                            <i class="fas fa-moon"></i>
+                            <i class="fas fa-sun"></i>
+                        </span>
+                    </label>
+                </div>
 
 
                 <div class="account-dropdown">
@@ -2035,10 +2037,10 @@
                         <p class="mb-4">Inscrivez-vous pour recevoir nos actualités et offres exclusives.</p>
                         <form class="newsletter-form" id="newsletterForm">
                             <div class="newsletter-input-group">
-                                <input type="email" class="newsletter-input" placeholder="Votre email" required>
+                                <input type="email" class="newsletter-input" name="newsletter-input" placeholder="Votre email" required>
                                 <button type="submit" class="newsletter-btn">
                                     <i class="fas fa-paper-plane"></i>
-                                    S'inscrire
+                               
                                 </button>
                             </div>
                         </form>
@@ -2096,11 +2098,12 @@
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
     <!-- Scripts locaux (dans l'ordre) -->
+
+    <script src="js/storage.js"></script>
     <script src="js/auth-check.js"></script>
     <script defer src="js/particles-config.js"></script>
     <script defer src="js/audio-utils.js"></script>
     <script defer src="js/theme.js"></script>
-    <script defer src="js/storage.js"></script>
     <script defer src="js/main.js"></script>
     <script defer src="js/langue.js"></script>
     <script src="js/auth.js"></script>

@@ -2191,6 +2191,8 @@ body:not(.dark-theme) .summary-item {
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     
     <!-- Scripts locaux -->
+
+    <script src="js/storage.js"></script>
     <script src="js/auth-check.js"></script>
     <script defer src="js/particles-config.js"></script>
     <script defer src="js/theme.js"></script>
@@ -2198,7 +2200,6 @@ body:not(.dark-theme) .summary-item {
     <script defer src="js/sidebar.js"></script>
     <script defer src="js/langue.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/storage.js"></script>
     
     <script>
         // Variables globales
@@ -2270,7 +2271,7 @@ body:not(.dark-theme) .summary-item {
         // Initialisation
         document.addEventListener('DOMContentLoaded', async function() {
            
-            currentUser = await authManager.getProfile();
+            currentUser = await storage.getProfile();
             eventData.metadata.createdBy = currentUser.id;
 
             if (!isEditing) {

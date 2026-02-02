@@ -1,47 +1,77 @@
 /**
- * ╔═══════════════════════════════════════════════════════════════╗
- * ║        🛡️  SECURA ROLE-BASED ACCESS CONTROL V2.0  🛡️         ║
- * ║                    Avec sessions événement                    ║
- * ╚═══════════════════════════════════════════════════════════════╝
+ * ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+ * ║  🛡️  SECURA ROLE-BASED ACCESS CONTROL v4.0 - PRIORITÉ SESSIONS ÉVÉNEMENT  🛡️            ║
+ * ║                                                                                           ║
+ * ║  ✅ Priorité ABSOLUE aux sessions événement                                               ║
+ * ║  ✅ Vérification complète des tokens JWT                                                  ║
+ * ║  ✅ Système de rôles robuste                                                              ║
+ * ║  ✅ Redirection vers page d'accueil (/index.html) en cas de refus                         ║
+ * ║  ✅ Gestion d'erreurs améliorée                                                           ║
+ * ║  ✅ Compatibilité avec storage.js                                                         ║
+ * ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
  */
 
-(function initSecuraRoleCheck() {
+(function initSecuraAccessControl() {
+    // ═══════════════════════════════════════════════════════════════
+    // ⚙️  CONFIGURATION CENTRALISÉE
+    // ═══════════════════════════════════════════════════════════════
     const CONFIG = {
-        publicPages: [
-            '/', '/index.html',  
-            '/login', '/login.html',
-            '/register', '/register.html',
-            '/forgot-password', '/forgot-password.html',
-            '/access', '/access.html',
-            '/404', '/404.html'
-        ],
-        protectedPages: [
-            '/home', '/home.html'
-        ],
-        eventPages: [
+
+        apiUrl: window.location.hostname === 'localhost'
+            ? 'http://localhost:3000/api'
+            : 'https://secura-qr.onrender.com/api',
+        
+
+        pageTypes: {
+            public: [
+                '/', '/index.html',
+                '/login', '/login.html',
+                '/register', '/register.html',
+                '/forgot-password', '/forgot-password.html',
+                '/access', '/access.html',
+                '/404', '/404.html'
+            ],
+            protected: [
+                '/home', '/home.html',
+                '/dashboard', '/dashboard.html'
+            ],
+            event: [
             '/welcome', '/welcome/',
             '/welcome/index.html',
             '/event-chat', '/event-chat.html',
             '/event-schedule', '/event-schedule.html',
             '/event-map', '/event-map.html',
             '/event-guests', '/event-guests.html'
-        ],
+            ],
+            admin: [] // Tous les chemins non couverts = admin
+        },
+        
+        // Clés localStorage
+        storageKeys: {
+            userToken: 'secura_token',
+            userData: 'secura_user',
+        },
+        
+        // Timeouts
+        apiTimeout: 5000,
         verifyTimeout: 5000,
         overlayDuration: 400,
-        apiUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api',
-        checkMode: 'role_or_event',
-        sessionKeys: {
-            event: 'secura_event_session',
-            guest: 'secura_guest_info',
-            user: 'secura_token'
-        }
+        redirectDelay: 300,
+        
+        debug: window.location.hostname === 'localhost'
     };
 
-    // Injecter le style de masquage initial
-    const hideStyle = document.createElement('style');
-    hideStyle.id = 'secura-initial-hide';
-    hideStyle.textContent = `
-        body *:not(#secura-loading-overlay):not(#secura-loading-overlay *) {
+    // ═══════════════════════════════════════════════════════════════
+    // 🎨 INJECTION DES STYLES D'INITIALISATION
+    // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// 🎨 INJECTION DES STYLES D'INITIALISATION
+// ═══════════════════════════════════════════════════════════════
+function injectInitialStyles() {
+    const style = document.createElement('style');
+    style.id = 'secura-initial-styles';
+    style.textContent = `
+       body *:not(#secura-loading-overlay):not(#secura-loading-overlay *) {
             visibility: hidden !important;
             opacity: 0 !important;
             transition: opacity 0.4s ease !important;
@@ -56,10 +86,24 @@
             z-index: 99999 !important;
         }
     `;
-    document.head.insertAdjacentElement('afterbegin', hideStyle);
+    document.head.insertAdjacentElement('afterbegin', style);
+}
 
-    // 2️⃣ INJECTER OVERLAY
-    function injectOverlay() {
+/*   <!-- Player simple -->
+                <lottie-player 
+                    src="assets/lottie/loading.json"
+                    background="transparent" 
+                    speed="1" 
+                    style="width: 100px; height: 100px;" 
+                    loop 
+                    autoplay>
+                </lottie-player>*/
+
+// ═══════════════════════════════════════════════════════════════
+// 🎪 INJECTION DU LOADING OVERLAY
+// ═══════════════════════════════════════════════════════════════
+ // 2️⃣ INJECTER OVERLAY
+    function injectLoadingOverlay() {
         if (document.getElementById('secura-loading-overlay')) return;
         
         const overlay = document.createElement('div');
@@ -74,6 +118,7 @@
                         <div class="orbit orbit-2"></div>
                         <div class="orbit orbit-3"></div>
                     </div>
+                   
                 </div>
                 <div class="loading-details">
                     <p class="loading-text">Chargement...</p>
@@ -94,186 +139,378 @@
         setTimeout(() => updateProgressStep(3), 1400);
     }
 
-    function updateProgressStep(step) {
-        const steps = document.querySelectorAll('.progress-steps .step');
-        steps.forEach((s, i) => {
-            s.classList.toggle('active', i < step);
-        });
-        
-        const progressBar = document.querySelector('.progress-bar');
-        if (progressBar) {
-            progressBar.style.width = `${(step / 3) * 100}%`;
+function updateProgressStep(step) {
+    const steps = document.querySelectorAll('.progress-steps .step');
+    steps.forEach((s, i) => {
+        s.classList.toggle('active', i < step);
+        // Ajouter une animation aux étapes
+        if (i < step) {
+            s.style.transform = 'translateY(-2px)';
+            setTimeout(() => {
+                s.style.transform = 'translateY(0)';
+            }, 300);
         }
+    });
+    
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+        progressBar.style.width = `${(step / 3) * 100}%`;
+        
+        // Animation de la barre de progression
+        progressBar.animate([
+            { width: progressBar.style.width },
+            { width: `${(step / 3) * 100}%` }
+        ], {
+            duration: 500,
+            easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        });
     }
+}
+    // ═══════════════════════════════════════════════════════════════
+    // 🔐 UTILITAIRES DE SÉCURITÉ
+    // ═══════════════════════════════════════════════════════════════
 
-    // Vérification rapide du token
-    function isTokenValidQuick(token) {
+    /**
+     * Vérifier rapidement si un JWT token est valide (structurellement)
+     */
+    function isTokenValidStructurally(token) {
         if (!token || typeof token !== 'string') return false;
+        
         try {
             const parts = token.split('.');
             if (parts.length !== 3) return false;
-            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-            if (payload.exp && payload.exp * 1000 < Date.now()) return false;
-            if (!payload.id || !payload.email) return false;
-            return true;
-        } catch (err) {
-            return false;
-        }
-    }
-
-    // Vérifier si une session événement est active et valide
-    function isEventSessionValid() {
-        try {
-            const sessionData = localStorage.getItem(CONFIG.sessionKeys.event);
-            if (!sessionData) return false;
             
-            const session = JSON.parse(sessionData);
+            // Décoder et valider le payload
+            const payload = JSON.parse(
+                atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+            );
             
             // Vérifier l'expiration
-            if (session.expiresAt && new Date(session.expiresAt) <= new Date()) {
-                localStorage.removeItem(CONFIG.sessionKeys.event);
-                localStorage.removeItem(CONFIG.sessionKeys.guest);
+            if (payload.exp && payload.exp * 1000 < Date.now()) {
+                if (CONFIG.debug) console.warn('⚠️ Token expiré');
+                return false;
+            }
+            
+            // Vérifier les claims obligatoires
+            if (!payload.id || !payload.email) {
+                if (CONFIG.debug) console.warn('⚠️ Token claims invalides');
                 return false;
             }
             
             return true;
         } catch (err) {
+            if (CONFIG.debug) console.error('❌ Erreur validation token:', err);
             return false;
         }
     }
 
-    // Obtenir le type de page actuelle
-    function getPageType(path) {
-        path = path.toLowerCase();
+    /**
+ * Vérifier si une session événement est active
+ */
+async function getActiveEventSession() {
+    try {
+        const sessionToken = localStorage.getItem('secura_event_session_token');
+        if (!sessionToken) return null;
+
+        const response = await fetch(`${CONFIG.apiUrl}/event-sessions/verify-token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token: sessionToken })
+        });
+
+        if (!response.ok) {
+            console.warn('⚠️ Session événement invalide');
+            clearEventSession();
+            return null;
+        }
+
+        const result = await response.json();
         
-        if (CONFIG.publicPages.some(p => path.endsWith(p.toLowerCase()))) {
+        if (result.success) {
+            return {
+                token: sessionToken,
+                sessionId: result.data.sessionId,
+                eventId: result.data.eventId,
+                guestId: result.data.guestId,
+                tableId: result.data.tableId,
+                accessMethod: result.data.accessMethod,
+                isValid: true
+            };
+        } else {
+            clearEventSession();
+            return null;
+        }
+
+    } catch (err) {
+        console.error('❌ Erreur vérification session:', err);
+        return null;
+    }
+}
+
+/**
+ * Effacer la session événement
+ */
+function clearEventSession() {
+    localStorage.removeItem('secura_event_session_token');
+    console.log('✅ Session événement effacée');
+}
+
+    // ═══════════════════════════════════════════════════════════════
+    // 📍 CLASSIFICATION DE PAGES
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Déterminer le type de la page actuelle
+     */
+    function getPageType(path = window.location.pathname) {
+        const normalizedPath = path.toLowerCase();
+        
+        if (CONFIG.pageTypes.public.some(p => {
+            const pNorm = p.toLowerCase();
+            // Correspondance exacte OU avec slash trailing
+            return normalizedPath === pNorm || normalizedPath === pNorm + '/';
+        })) {
             return 'public';
         }
         
-        if (CONFIG.protectedPages.some(p => path.endsWith(p.toLowerCase()))) {
+        if (CONFIG.pageTypes.protected.some(p => {
+            const pNorm = p.toLowerCase();
+            return normalizedPath === pNorm || normalizedPath === pNorm + '/';
+        })) {
             return 'protected';
         }
         
-        if (CONFIG.eventPages.some(p => path.includes(p.toLowerCase()))) {
+        if (CONFIG.pageTypes.event.some(p => {
+            const pNorm = p.toLowerCase();
+            return normalizedPath === pNorm || normalizedPath === pNorm + '/';
+        })) {
             return 'event';
         }
         
         return 'admin';
     }
 
-    // Vérifier l'accès principal
-    async function verifyAccess() {
-        const token = localStorage.getItem(CONFIG.sessionKeys.user);
-        const eventSession = isEventSessionValid();
-        const path = window.location.pathname.toLowerCase();
-        const pageType = getPageType(path);
+    /**
+     * Vérifier si l'utilisateur a accès à une page basée sur son rôle
+     */
+    function isPageAllowedForRole(userRole, currentPath) {
+        const normalizedPath = currentPath.toLowerCase();
         
-        // ⚠️ ATTENTION: Vérifier que storage.js est chargé avant de faire les requêtes
-        const waitForStorage = () => {
-            return new Promise((resolve) => {
-                if (window.storage) {
-                    resolve();
-                } else {
-                    const check = setInterval(() => {
-                        if (window.storage) {
-                            clearInterval(check);
-                            resolve();
-                        }
-                    }, 50);
-                    // Timeout après 3 secondes
-                    setTimeout(() => {
-                        clearInterval(check);
-                        console.warn('⚠️ storage.js n\'a pas été chargé à temps');
-                        resolve();
-                    }, 3000);
-                }
-            });
+        // Définir les pages autorisées par rôle
+        const rolePages = {
+            'admin': [
+                '/dashboard', '/dashboard.html',
+                '/home', '/home.html',
+                '/events', '/events.html',
+                '/event', '/event.html',
+                '/event-info', '/event-info.html',
+                '/guests', '/guests.html',
+                '/tables', '/tables.html',
+                '/table-info', '/table-info.html',
+                '/access', '/access.html',
+                '/qr-generator', '/qr-generator.html',
+                '/ticket-generator', '/ticket-generator.html',
+                '/scanner', '/scanner.html',
+                '/profile', '/profile.html',
+                '/settings', '/settings.html'
+            ],
+            'user': [
+                '/home', '/home.html',
+                '/events', '/events.html',
+                '/event', '/event.html',
+                '/event-info', '/event-info.html',
+                '/guests', '/guests.html',
+                '/tables', '/tables.html',
+                '/table-info', '/table-info.html',
+                '/access', '/access.html',
+                '/qr-generator', '/qr-generator.html',
+                '/ticket-generator', '/ticket-generator.html',
+                '/scanner', '/scanner.html',
+                '/profile', '/profile.html',
+                '/settings', '/settings.html'
+            ]
         };
         
-        await waitForStorage();
+        const allowedPages = rolePages[userRole] || [];
+        return allowedPages.some(p => normalizedPath.endsWith(p.toLowerCase()));
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🔄 VÉRIFICATION COMPLÈTE D'ACCÈS
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * ⚡ VÉRIFICATION PRIORITAIRE D'ACCÈS
+     * HIÉRARCHIE :
+     * 1. Session événement active -> PRIORITÉ ABSOLUE
+     * 2. Pages événement -> vérifier session obligatoire
+     * 3. Pages publiques -> accès direct (sauf si déjà connecté)
+     * 4. Pages protégées/admin -> vérifier token + rôle
+     */
+    async function performAccessVerification() {
+        const userToken = localStorage.getItem(CONFIG.storageKeys.userToken);
+        const eventSession = await getActiveEventSession();
+        const currentPageType = getPageType();
+        const currentPath = window.location.pathname.toLowerCase();
         
-        setTimeout(() => updateProgressStep(1), 500);
-        
-        // PAGES ÉVÉNEMENT : Vérifier session événement
-        if (pageType === 'event') {
-            if (!eventSession) {
-                denyAccess('No event session', '/access.html');
-                return;
-            }
-            grantAccess('event');
-            return;
+        if (CONFIG.debug) {
+            console.log('🔍 Vérification d\'accès:', {
+                pageType: currentPageType,
+                hasUserToken: !!userToken,
+                hasEventSession: !!eventSession,
+                path: currentPath
+            });
         }
         
-        // PAGES PUBLIQUES (index, login, register, access, etc.) : Accès direct sans redirection
-        if (pageType === 'public') {
-            if ((path === '/' || path === '/index.html') && token) {
-                denyAccess('User already logged in', '/home.html');
+        updateProgressStep(1);
+        
+        // ═══════════════════════════════════════════════════════════
+        // 1️⃣  PRIORITÉ ABSOLUE: Session événement active
+        // ═══════════════════════════════════════════════════════════
+        if (eventSession && eventSession.isValid) {
+            if (CONFIG.debug) console.log('✅ Session événement détectée et valide');
+            
+            // Si déjà sur une page événement, accorder l'accès
+            if (currentPageType === 'event') {
+                grantAccess('event-session');
                 return;
             }
             
-            // Redirection RAPIDE si session événement active et pas sur /access
-            if (eventSession && !path.includes('/access')) {
-                console.log('🚀 Session événement détectée → Redirection rapide vers /welcome/');
-                // Redirection immédiate sans overlay
+            // Si sur /access ou /index -> redirection vers welcome/ (session déjà active)
+            if (currentPageType === 'public') {
+                if (CONFIG.debug) console.log('🚀 Session déjà active -> redirection vers /welcome/');
                 window.location.replace('/welcome/');
                 return;
             }
+            
+            // Si sur page protégée/admin ET avec session événement -> redirection vers welcome/
+            // Car une session événement prend TOUJOURS la priorité
+            if (currentPageType === 'protected' || currentPageType === 'admin') {
+                if (CONFIG.debug) console.log('🚀 Session événement prioritaire -> /welcome/');
+                window.location.replace('/welcome/');
+                return;
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // 2️⃣  Pages événement SANS session -> ACCÈS REFUSÉ
+        // ═══════════════════════════════════════════════════════════
+        if (currentPageType === 'event') {
+            if (CONFIG.debug) console.log('❌ Page événement sans session active');
+            denyAccess('No event session', '/index.html');
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // 3️⃣  Pages publiques -> accès direct avec restrictions
+        // ═══════════════════════════════════════════════════════════
+        if (currentPageType === 'public') {
+            // Si sur page d'accueil et déjà connecté -> redirection vers home
+            if ((currentPath === '/' || currentPath === '/index.html') && 
+                userToken && isTokenValidStructurally(userToken)) {
+                if (CONFIG.debug) console.log('ℹ️ Utilisateur connecté -> /home.html');
+                window.location.replace('/home.html');
+                return;
+            }
+            
+            // Si sur login/register et déjà connecté -> redirection vers home
+            if ((currentPath.includes('/login') || currentPath.includes('/register')) && 
+                userToken && isTokenValidStructurally(userToken)) {
+                if (CONFIG.debug) console.log('ℹ️ Utilisateur déjà connecté -> /home.html');
+                window.location.replace('/home.html');
+                return;
+            }
+            
+            if (CONFIG.debug) console.log('✅ Accès page publique accordé');
             grantAccess('public');
             return;
         }
         
-        // PAGES PROTÉGÉES (home, dashboard, etc.) : Vérification utilisateur OBLIGATOIRE
-        if (pageType === 'protected') {
-            if (!token) {
+        // ═══════════════════════════════════════════════════════════
+        // 4️⃣  Pages protégées -> vérification token OBLIGATOIRE
+        // ═══════════════════════════════════════════════════════════
+        if (currentPageType === 'protected') {
+            if (!userToken) {
+                if (CONFIG.debug) console.log('❌ Page protégée sans token');
                 denyAccess('No token', '/index.html');
                 return;
             }
             
-            if (!isTokenValidQuick(token)) {
+            if (!isTokenValidStructurally(userToken)) {
+                if (CONFIG.debug) console.log('❌ Page protégée, token invalide');
                 denyAccess('Invalid token', '/index.html');
                 return;
             }
             
-            // Token valide : accorder l'accès
-            grantAccess('protected');
+            // Vérifier le rôle pour les pages protégées
+            updateProgressStep(2);
+            await verifyRoleAndAuthorize(userToken, currentPath);
             return;
         }
         
-        // PAGES ADMIN : Vérification utilisateur obligatoire
-        if (!token) {
-            denyAccess('No token', '/index.html');
+        // ═══════════════════════════════════════════════════════════
+        // 5️⃣  Pages admin -> vérification complète via API
+        // ═══════════════════════════════════════════════════════════
+        if (currentPageType === 'admin') {
+            if (!userToken) {
+                if (CONFIG.debug) console.log('❌ Page admin sans token');
+                denyAccess('No token', '/index.html');
+                return;
+            }
+            
+            if (!isTokenValidStructurally(userToken)) {
+                if (CONFIG.debug) console.log('❌ Page admin, token invalide');
+                denyAccess('Invalid token', '/index.html');
+                return;
+            }
+            
+            updateProgressStep(2);
+            await verifyRoleAndAuthorize(userToken, currentPath);
             return;
         }
-        
-        if (!isTokenValidQuick(token)) {
-            denyAccess('Invalid token', '/index.html');
-            return;
-        }
-        
-        setTimeout(() => updateProgressStep(2), 1000);
-        await redirectBasedOnRole(token);
     }
 
-    // Redirection basée sur le rôle
-    async function redirectBasedOnRole(token) {
+    // ═══════════════════════════════════════════════════════════════
+    // 👤 VÉRIFICATION DES RÔLES VIA API
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Vérifier le rôle de l'utilisateur et ses autorisations
+     */
+    async function verifyRoleAndAuthorize(token, currentPath) {
         try {
-            // Construire l'URL API sans dépendre de storage.js
-            const apiUrl = window.location.hostname === 'localhost' 
-                ? 'http://localhost:3000/api'
-                : 'https://secura-qr.onrender.com/api';
+            // Attendre que storage.js soit disponible si nécessaire
+            if (typeof window.storage === 'undefined') {
+                await new Promise(resolve => {
+                    const checkStorage = setInterval(() => {
+                        if (typeof window.storage !== 'undefined') {
+                            clearInterval(checkStorage);
+                            resolve();
+                        }
+                    }, 50);
+                    
+                    setTimeout(() => {
+                        clearInterval(checkStorage);
+                        resolve();
+                    }, 1000);
+                });
+            }
             
-            const response = await fetch(`${apiUrl}/auth/me`, {
+            const response = await fetch(`${CONFIG.apiUrl}/auth/me`, {
+                method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 },
-                signal: AbortSignal.timeout(5000)
+                signal: AbortSignal.timeout(CONFIG.apiTimeout)
             });
             
             if (!response.ok) {
-                // 401 = Token expiré/invalide
                 if (response.status === 401) {
                     console.error('❌ API 401 - Token expiré/invalide');
-                    denyAccess('Token invalid', '/login.html');
+                    denyAccess('Token invalid', '/index.html');
                     return;
                 }
                 throw new Error(`HTTP ${response.status}`);
@@ -281,169 +518,230 @@
             
             const result = await response.json();
             
-            if (result.success) {
-                const user = result.user;
-                const path = window.location.pathname.toLowerCase();
-                
-                // Mettre à jour le localStorage (utilisé par storage.js et auth.js)
-                localStorage.setItem('secura_user', JSON.stringify(user));
-                localStorage.setItem('secura_token', token);
-                
-                // Mettre à jour l'objet storage si disponible
-                if (window.storage) {
-                    window.storage.user = user;
-                    window.storage.token = token;
-                }
-                
-                // Définir les pages autorisées par rôle
-                const rolePages = {
-                    'admin': [
-                        '/dashboard', '/dashboard.html',
-                        '/home', '/home.html',
-                        '/events', '/events.html',
-                        '/profile', '/profile.html',
-                        '/tables', '/tables.html',
-                        '/table-info', '/table-info.html',
-
-                        '/event', '/event.html',
-                        '/event-info', '/event-info.html',
-                        '/guests', '/guests.html',
-                        '/access', '/access.html',
-                        '/qr-generator', '/qr-generator.html',
-                        '/ticket-generator', '/ticket-generator.html',
-                        '/scanner', '/scanner.html',
-                        '/profile', '/profile.html',
-                        '/settings', '/settings.html'
-                    ],
-                    'user': [
-                        '/home', '/home.html',
-                        '/events', '/events.html',
-                        '/profile', '/profile.html',
-                        '/tables', '/tables.html',
-                        '/table-info', '/table-info.html',
-                        '/event', '/event.html',
-                        '/event-info', '/event-info.html',
-                        '/guests', '/guests.html',
-                        '/access', '/access.html',
-                        '/qr-generator', '/qr-generator.html',
-                        '/ticket-generator', '/ticket-generator.html',
-                        '/scanner', '/scanner.html',
-                        '/profile', '/profile.html',
-                        '/settings', '/settings.html'
-                    ]
-                };
-
-                 const allowedPages = rolePages[user.role] || [];
-                const isAllowed = allowedPages.some(p => path.endsWith(p.toLowerCase()));
-                
-                setTimeout(() => updateProgressStep(3), 1500);
-                
-                if (!isAllowed) {
-                    // Rediriger vers la page appropriée
-                    const targetPage = user.role === 'admin' ? '/dashboard.html' : '/home.html';
-                    if (!path.endsWith(targetPage)) {
-                        console.log(`🎯 Redirection ${user.role} → ${targetPage}`);
-                        window.location.href = targetPage;
-                        return;
-                    }
-                }
-                
-                updateUIWithUserInfo(user);
-                grantAccess('admin');
-            } else {
-                denyAccess('Invalid user data', '/login.html');
+            if (!result.success || !result.user) {
+                console.error('❌ Données utilisateur invalides');
+                denyAccess('Invalid user data', '/index.html');
+                return;
             }
+            
+            const user = result.user;
+            
+            // Mettre à jour les données utilisateur
+            localStorage.setItem(CONFIG.storageKeys.userData, JSON.stringify(user));
+            localStorage.setItem(CONFIG.storageKeys.userToken, token);
+            
+            // Notifier storage.js si disponible
+            if (window.storage && typeof window.storage.syncAuthFromStorage === 'function') {
+                window.storage.syncAuthFromStorage();
+            }
+            
+            // Vérifier si la page est autorisée pour ce rôle
+            const isAllowed = isPageAllowedForRole(user.role, currentPath);
+            
+            updateProgressStep(3);
+            
+            if (!isAllowed) {
+                // Rediriger vers la page appropriée selon le rôle
+                const targetPage = user.role === 'admin' ? '/dashboard.html' : '/home.html';
+                if (!currentPath.endsWith(targetPage)) {
+                    if (CONFIG.debug) console.log(`🎯 Redirection ${user.role} → ${targetPage}`);
+                    window.location.href = targetPage;
+                    return;
+                }
+            }
+            
+            // Mettre à jour l'UI
+            updateUIWithUserInfo(user);
+            
+            if (CONFIG.debug) console.log('✅ Utilisateur autorisé:', user.email);
+            grantAccess(user.role);
+            
         } catch (err) {
             console.error('❌ Erreur vérification rôle:', err);
-            denyAccess('Network error', '/login.html');
+            
+            // Mode hors ligne : vérifier les données en cache
+            const cachedUser = localStorage.getItem(CONFIG.storageKeys.userData);
+            if (cachedUser) {
+                try {
+                    const user = JSON.parse(cachedUser);
+                    const isAllowed = isPageAllowedForRole(user.role, currentPath);
+                    
+                    if (isAllowed) {
+                        console.warn('⚠️ Mode hors ligne - utilisant données en cache');
+                        updateUIWithUserInfo(user);
+                        grantAccess('offline');
+                        return;
+                    }
+                } catch (cacheErr) {
+                    // Continuer vers le refus d'accès
+                }
+            }
+            
+            denyAccess('Network error', '/index.html');
         }
     }
 
-    // Mettre à jour l'interface avec les infos utilisateur
+    // ═══════════════════════════════════════════════════════════════
+    // 🎨 MISE À JOUR DE L'INTERFACE
+    // ═══════════════════════════════════════════════════════════════
+
     function updateUIWithUserInfo(user) {
-        // Mettre à jour la sidebar si présente
+        const displayName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+        const displayRole = user.role === 'admin' ? 'Administrateur' : 'Utilisateur';
+        
+        // Sidebar
         const sidebarName = document.getElementById('sidebarProfileName');
         const sidebarEmail = document.getElementById('sidebarProfileEmail');
         const sidebarRole = document.getElementById('sidebarProfileRole');
         
-        if (sidebarName) sidebarName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+        if (sidebarName) sidebarName.textContent = displayName;
         if (sidebarEmail) sidebarEmail.textContent = user.email;
-        if (sidebarRole) sidebarRole.textContent = user.role === 'admin' ? 'Administrateur' : 'Utilisateur';
+        if (sidebarRole) sidebarRole.textContent = displayRole;
         
-        // Mettre à jour le header si présent
+        // Header
         const headerName = document.getElementById('headerUserName');
         const headerRole = document.getElementById('headerUserRole');
         
-        if (headerName) headerName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+        if (headerName) headerName.textContent = displayName;
         if (headerRole) headerRole.textContent = user.role === 'admin' ? 'Admin' : 'User';
     }
 
-    // Accès accordé
-    function grantAccess(type = 'public') {
-        // Signal to storage.js that auth verification is complete
+    // ═══════════════════════════════════════════════════════════════
+    // ✅ ACCÈS ACCORDÉ
+    // ═══════════════════════════════════════════════════════════════
+
+    function grantAccess(accessType = 'public') {
         document.body.classList.add('auth-verified');
         
         setTimeout(() => {
             const overlay = document.getElementById('secura-loading-overlay');
-            if (overlay) {
-                overlay.classList.add('hidden');
-            }
-        }, 400); // Réduit pour éviter les blocages
+            if (overlay) overlay.classList.add('hidden');
+        }, CONFIG.overlayDuration);
         
         setTimeout(() => {
-            const hideStyle = document.getElementById('secura-initial-hide');
+            const hideStyle = document.getElementById('secura-initial-styles');
             if (hideStyle) hideStyle.remove();
             
             // Émettre l'événement
-            window.dispatchEvent(new CustomEvent('secura:access-granted', { detail: { type } }));
+            window.dispatchEvent(new CustomEvent('secura:access-granted', { 
+                detail: { 
+                    type: accessType,
+                    timestamp: new Date().toISOString()
+                } 
+            }));
             
             // Démarrer les animations
             document.querySelectorAll('.animate-fade-in').forEach(el => {
                 el.style.animationPlayState = 'running';
             });
-        }, 600); // Réduit aussi ici
+        }, CONFIG.overlayDuration * 1.5);
+        
+        if (CONFIG.debug) console.log(`✅ Accès accordé (${accessType})`);
     }
 
-    // Accès refusé
+    // ═══════════════════════════════════════════════════════════════
+    // ❌ ACCÈS REFUSÉ
+    // ═══════════════════════════════════════════════════════════════
+
     function denyAccess(reason, redirectTo = '/index.html') {
-        // Signal to storage.js that auth verification is complete (denied)
         document.body.classList.add('auth-denied');
-        
         console.warn(`❌ Accès refusé: ${reason}`);
         
-        // Nettoyer le token invalide
+        // Nettoyer les données invalides
         if (reason.includes('token') || reason.includes('Invalid')) {
-            localStorage.removeItem('secura_token');
-            localStorage.removeItem('secura_user');
-            redirectTo = '/login.html';
-            console.log('🧹 Token nettoyé');
+            localStorage.removeItem(CONFIG.storageKeys.userToken);
+            localStorage.removeItem(CONFIG.storageKeys.userData);
+            console.log('🧹 Données d\'authentification nettoyées');
         }
         
+        // Redirection avec délai minimal
         setTimeout(() => {
-            if (!window.location.pathname.includes(redirectTo)) {
-                console.log(`🚀 Redirection rapide vers ${redirectTo}`);
+            const currentPath = window.location.pathname.toLowerCase();
+            const targetPath = redirectTo.toLowerCase();
+            
+            if (!currentPath.includes(targetPath)) {
+                if (CONFIG.debug) console.log(`🚀 Redirection vers ${redirectTo}`);
                 window.location.replace(redirectTo);
             }
-        }, 300); // Réduit de 500 à 300ms
+        }, CONFIG.redirectDelay);
     }
 
-    // Initialisation
-    if (document.body) {
-        injectOverlay();
+    // ═══════════════════════════════════════════════════════════════
+    // 🚀 INITIALISATION
+    // ═══════════════════════════════════════════════════════════════
+
+    function initialize() {
+        injectInitialStyles();
+        
+        if (document.body) {
+            injectLoadingOverlay();
+        } else {
+            document.addEventListener('DOMContentLoaded', injectLoadingOverlay, { once: true });
+        }
+        
+        // Lancer la vérification
+        let verificationComplete = false;
+        
+        setTimeout(async () => {
+            try {
+                await performAccessVerification();
+                verificationComplete = true;
+            } catch (err) {
+                console.error('❌ Erreur critique vérification accès:', err);
+                
+                // SÉCURITÉ : En cas d'erreur, refuser l'accès aux pages sécurisées
+                const currentPageType = getPageType();
+                
+                if (currentPageType === 'event' || currentPageType === 'protected' || currentPageType === 'admin') {
+                    console.error('🔒 Erreur sur page sécurisée - accès REFUSÉ');
+                    denyAccess('Verification error', '/index.html');
+                } else {
+                    // Pour les pages publiques, accorder l'accès en fallback
+                    console.warn('⚠️ Fallback pour page publique');
+                    grantAccess('error-fallback');
+                }
+                
+                verificationComplete = true;
+            }
+        }, 100);
+        
+        // Timeout de sécurité
+        setTimeout(() => {
+            if (!verificationComplete) {
+                const overlay = document.getElementById('secura-loading-overlay');
+                if (overlay && !overlay.classList.contains('hidden')) {
+                    console.warn('⚠️ Timeout vérification');
+                    
+                    const currentPageType = getPageType();
+                    
+                    // Refuser les pages sécurisées en timeout
+                    if (currentPageType === 'event' || currentPageType === 'protected' || currentPageType === 'admin') {
+                        console.error('🔒 Timeout sur page sécurisée - accès REFUSÉ');
+                        denyAccess('Verification timeout', '/index.html');
+                    } else {
+                        console.warn('⏱️ Timeout sur page publique - accès accordé');
+                        grantAccess('timeout-fallback');
+                    }
+                }
+            }
+        }, CONFIG.verifyTimeout);
+    }
+
+    // Démarrer l'initialisation
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initialize, { once: true });
     } else {
-        document.addEventListener('DOMContentLoaded', injectOverlay, { once: true });
+        initialize();
     }
     
-    verifyAccess();
+    // Exposer les utilitaires pour le debugging
+    window.securaAccessControl = {
+        config: CONFIG,
+        getActiveEventSession,
+        clearEventSession,
+        getPageType,
+        isTokenValidStructurally
+    };
     
-    // Timeout de sécurité - force l'accès après 3s si pas de réponse
-    setTimeout(() => {
-        const overlay = document.getElementById('secura-loading-overlay');
-        if (overlay && !overlay.classList.contains('hidden')) {
-            console.warn('⚠️ Timeout - Forcing access');
-            grantAccess('timeout');
-        }
-    }, CONFIG.verifyTimeout);
-    
-    window.securaRoleConfig = CONFIG;
+    console.log('🛡️ SECURA Access Control v4.0 initialisé - Priorité sessions événement');
 })();

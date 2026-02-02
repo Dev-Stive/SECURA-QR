@@ -14,7 +14,7 @@
 
 
     <!-- 🚀 Autres ressources essentielles -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     
@@ -1722,7 +1722,7 @@
                 showLoading();
 
                 
-                currentUser = await authManager.getProfile();
+                currentUser = await storage.getProfile();
                 displayProfile();
 
                 // Charger les statistiques

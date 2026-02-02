@@ -9,7 +9,13 @@ class SecuraAuthManager {
     constructor() {
 
         //this.API_URL = 'http://localhost:3000/api';
-         this.API_URL = 'https://secura-qr.onrender.com/api';
+
+         if (window.location.hostname === 'localhost') {
+            this.API_URL = 'http://localhost:3000/api';
+        } else {
+            this.API_URL = 'https://secura-qr.onrender.com/api';
+        }
+
         
         this.token = localStorage.getItem('secura_token') || null;
         this.user = null;
@@ -17,14 +23,12 @@ class SecuraAuthManager {
         
         this._authListeners = [];
         
-        // Initialisation
         this.init();
     }
     
     init() {
         console.log('🔐 Secura Auth Manager initialisé');
         
-        // Vérifier le token au démarrage
         if (this.token) {
             this.verifyToken().then(valid => {
                 if (!valid) {
