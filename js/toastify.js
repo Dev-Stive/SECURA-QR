@@ -10,7 +10,7 @@ function showToast(message, type = 'success', options = {}) {
     };
     
     const defaultOptions = {
-        duration: 3000,
+        duration: 1500,
         gravity: "top",
         position: "right",
         stopOnFocus: true,

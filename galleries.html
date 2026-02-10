@@ -1,0 +1,7378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURA | Galeries Photos</title>
+    <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Local Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/dash.css">
+    <link rel="stylesheet" href="css/toastify.css">
+    <link rel="stylesheet" href="css/index.css">
+    
+    <!-- Librairies pour Galleries -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/viewerjs@1.11.6/dist/viewer.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/viewerjs@1.11.6/dist/viewer.min.css">
+    
+    <!-- SweetAlert2 -->
+    <link rel="preload" href="js/auth-check.js" as="script">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* ============================================================================
+   GALERIES - CSS ULTRA-COMPLET ET FUSIONNÉ
+   Gestion complète: cartes, modales, statistiques, filtres, pagination
+   Basé sur l'architecture des tables avec toutes les interactions JS
+   ============================================================================ */
+
+/* ==========================================
+   VARIABLES GLOBALES POUR LES THÈMES
+   ========================================== */
+:root {
+    /* Couleurs primaires */
+    --primary: #D97706;
+    --primary-dark: #B45309;
+    --primary-light: #F59E0B;
+    --dark: #0A0A0A;
+    --dark-card: #121212;
+    --dark-elevated: #1A1A1A;
+    --gradient: linear-gradient(135deg, #B45309 0%, #D97706 50%, #F59E0B 100%);
+    
+    /* Couleurs sémantiques */
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    --info: #3B82F6;
+    
+    /* Espacements et formes */
+    --border-radius: 0.5rem;
+    --border-radius-sm: 0.375rem;
+    --border-radius-lg: 0.75rem;
+    --card-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    
+    /* Thème clair (par défaut) */
+    --body-bg: #ffffff;
+    --text-color: #333333;
+    --card-bg: #f8f9fa;
+    --input-bg: #ffffff;
+    --input-border: #e0e0e0;
+    --input-text: #333333;
+    --placeholder-color: #666666;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --hover-bg: rgba(0, 0, 0, 0.05);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --progress-bg: rgba(0, 0, 0, 0.05);
+}
+
+/* Thème sombre */
+.dark-theme {
+    --body-bg: #0A0A0A;
+    --text-color: #ffffff;
+    --card-bg: #121212;
+    --input-bg: rgba(255, 255, 255, 0.04);
+    --input-border: rgba(255, 255, 255, 0.12);
+    --input-text: #ffffff;
+    --placeholder-color: rgba(255, 255, 255, 0.4);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --hover-bg: rgba(255, 255, 255, 0.05);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --progress-bg: rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================================
+   RESET ET STYLES DE BASE
+   ========================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--body-bg);
+    color: var(--text-color);
+    min-height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.15) 0%, transparent 30%),
+        radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.15) 0%, transparent 30%);
+}
+
+.dark-theme body {
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.08) 0%, transparent 40%);
+}
+
+.event-title {
+            color: white !important;
+        }
+
+/* ==========================================
+   CONTENEUR PRINCIPAL
+   ========================================== */
+.galleries-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            margin-top: 100px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+}
+
+.events-home-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    margin-top: 100px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* ==========================================
+   EN-TÊTES DE PAGE
+   ========================================== */
+.page-header, .galleries-header, .photos-header, .stats-view-header, .moderation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.page-title, .photos-header-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.page-title h1, .galleries-header h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: var(--gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.galleries-header h3 {
+    font-size: 1.4rem;
+}
+
+.page-title .event-name {
+    font-size: 1rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.back-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    background: var(--hover-bg);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateX(-3px);
+}
+
+.back-icon-link {
+    width: 32px;
+    height: 32px;
+}
+
+.page-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* ==========================================
+   BOUTONS
+   ========================================== */
+.btn {
+    padding: 12px;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-secondary {
+    background: var(--hover-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--input-bg);
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: #0DA673;
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #DC2626;
+    transform: translateY(-2px);
+}
+
+.btn-info {
+    background: var(--info);
+    color: white;
+}
+
+.btn-info:hover:not(:disabled) {
+    background: #2563EB;
+    transform: translateY(-2px);
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+.btn-xs {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    gap: 5px;
+}
+
+/* ==========================================
+   BARRES D'ACTIONS ET FILTRES
+   ========================================== */
+.actions-bar {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 30px var(--shadow-color);
+}
+
+.actions-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.actions-left, .actions-right {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Filtres rapides */
+.quick-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    padding: 8px 16px;
+    background: var(--hover-bg);
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.filter-chip:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.filter-chip.active {
+    background: var(--primary);
+    color: white;
+    border-color: white;
+}
+
+/* Barre de recherche */
+.search-container {
+    position: relative;
+    width: 300px;
+}
+
+.search-container i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--placeholder-color);
+}
+
+.search-container input {
+    width: 100%;
+    padding: 12px 20px 12px 45px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    background: var(--input-bg);
+    color: var(--input-text);
+    transition: all 0.3s ease;
+}
+
+.search-container input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+}
+
+/* ==========================================
+   TOGGLE DE VUE
+   ========================================== */
+.view-toggle, .view-mode-toggle {
+    display: flex;
+    gap: 5px;
+    background: var(--hover-bg);
+    padding: 5px;
+    border-radius: var(--border-radius-sm);
+}
+
+.view-mode-toggle {
+    margin: 0 auto 30px;
+    width: fit-content;
+}
+
+.view-btn, .view-mode-btn {
+    padding: 10px 20px;
+    border-radius: var(--border-radius-sm);
+    background: transparent;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-color);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.view-btn:hover, .view-mode-btn:hover {
+    background: var(--hover-bg);
+    opacity: 1;
+}
+
+.view-btn.active, .view-mode-btn.active {
+    background: var(--primary);
+    color: white;
+    opacity: 1;
+}
+
+.view-btn.create {
+    background: var(--text-color);
+    color: white;
+}
+
+.dark-theme .view-btn.create {
+    background: var(--primary);
+    color: white;
+}
+
+.view-btn.create:hover {
+    background: var(--primary);
+}
+
+/* ==========================================
+   GALERIES - VUE CONTENEUR
+   ========================================== */
+.galleries-view-container {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 30px var(--shadow-color);
+    min-height: 500px;
+}
+
+/* ==========================================
+   CARTES GALERIES - ULTRA-PERFORMANT DESIGN
+   ========================================== */
+
+/* Container du grille responsive */
+.galleries-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    width: 100%;
+    animation: fadeIn 0.3s ease;
+}
+
+@media (min-width: 1200px) {
+    .galleries-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .galleries-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+}
+
+@media (max-width: 767px) {
+    .galleries-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .galleries-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+/* CARTE GALERIE - DESIGN PREMIUM ULTRA-PERFORMANT */
+.gallery-card {
+    position: relative;
+    height: 360px;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    contain: layout style paint;
+    will-change: transform, box-shadow;
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+/* ÉTAT ACTIF - Carte développée AU CLIC SEULEMENT */
+.gallery-card:hover {
+    border-color: var(--primary);
+}
+
+ .gallery-card:not(.expanded):hover .gallery-card-title {
+    display: none;
+    
+}
+
+.gallery-card:hover .gallery-badges-top{
+    opacity: 0;
+}
+
+/* EXPAND SEULEMENT AU CLIC - PAS AU SURVOL */
+.gallery-card.expanded {
+    height: auto !important;
+    min-height: 520px !important;
+    box-shadow: 0 25px 70px var(--shadow-color) !important;
+    z-index: 100 !important;
+    position: relative !important;
+}
+
+.gallery-card.expanded .gallery-card-content,
+.gallery-card.expanded .gallery-card-footer {
+    opacity: 1 !important;
+    max-height: none !important;
+    transform: translateY(0) !important;
+    display: flex !important;
+}
+
+.gallery-card.expanded .gallery-badges-top,
+.gallery-card.expanded .gallery-card-title {
+
+    opacity: 0;
+}
+    /* IMAGE DE FOND - Photo de couverture */
+.gallery-card-image {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+    transition: transform 0.4s ease, filter 0.3s ease;
+}
+
+.gallery-card:hover .gallery-card-image {
+    transform: scale(1.08);
+    filter: brightness(0.75);
+}
+
+.gallery-card.expanded:hover .gallery-card-image {
+    filter: brightness(0.75);
+}
+
+
+/* Overlay dégradé premium - TOUJOURS SOMBRE */
+.gallery-card-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0.8) 100%
+    );
+    z-index: 1;
+    transition: background 0.3s ease;
+}
+
+
+
+/* EN-TÊTE - Badges et titre */
+.gallery-card-header {
+    position: relative;
+    z-index: 2;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.gallery-badges-top {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* BOUTON EXPAND */
+.expand-btn {
+    padding: 8px 8px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    backdrop-filter: blur(10px);
+}
+
+.expand-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.gallery-card.expanded .expand-btn {
+    transform: rotate(180deg);
+    color: var(--primary);
+}
+
+.badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.25s ease;
+}
+
+.badge-pill:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+.badge-public {
+    background: rgba(16, 185, 129, 0.25) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+.badge-private {
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+}
+
+/* TITRE DE CARTE - Affiché par défaut */
+.gallery-card-title {
+    position: relative;
+    z-index: 3;
+    padding: 12px 16px;
+}
+
+.gallery-card-title h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+/* TITRE - En overlay */
+.gallery-title-overlay {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 3;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+
+
+.gallery-title-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    line-height: 1.3;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* STATS RAPIDES - En bas */
+.gallery-quick-stats {
+    display: flex;
+    gap: 12px;
+    z-index: 3;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+
+
+    position: relative;
+    z-index: 2;
+    padding: 16px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-shrink: 0;
+    cursor: pointer;
+
+}
+
+.gallery-card.expanded .gallery-quick-stats {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.quick-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.quick-stat i {
+    font-size: 13px;
+}
+
+/* CONTENU - Initialement masqué, révélé au survol/clic */
+.gallery-card-content {
+    position: relative;
+    z-index: 1;
+    padding: 12px;
+    flex: 1;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.gallery-card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.gallery-card-content::-webkit-scrollbar-track {
+    background: var(--hover-bg);
+    border-radius: 3px;
+}
+
+.gallery-card-content::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+.gallery-card-content::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+.gallery-description {
+    font-size: 12px;
+    color: white;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.gallery-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
+    background: var(--hover-bg);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    font-size: 13px;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.stat i {
+    font-size: 14px;
+    color: var(--primary);
+}
+
+.gallery-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--placeholder-color);
+    padding: 8px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.meta-item i {
+    font-size: 11px;
+    color: var(--primary);
+}
+
+/* PIED DE PAGE */
+.gallery-card-footer {
+    position: relative;
+    z-index: 1;
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.gallery-card.expanded .gallery-card-footer {
+    display: flex;
+}
+
+/* OVERLAY AVEC ENGAGEMENT BADGE */
+.gallery-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 35px;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.8) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.gallery-card:hover .gallery-overlay,
+.gallery-card.expanded .gallery-overlay {
+    opacity: 1;
+}
+
+/* CONTENU OVERLAY - Titre et infos */
+.gallery-overlay-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.gallery-overlay-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.gallery-overlay-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.gallery-overlay-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.gallery-overlay-meta-item i {
+    width: 14px;
+    text-align: center;
+    color: #F59E0B;
+}
+
+.engagement-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.95);
+    color: white;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: fit-content;
+    align-self: flex-end;
+}
+
+.engagement-badge i {
+    font-size: 14px;
+    animation: flame-pulse 2s ease-in-out infinite;
+}
+
+@keyframes flame-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* TAGS */
+.gallery-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+    background: var(--hover-bg);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.tag-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.tag-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+}
+
+/* STATS DÉTAILLÉES */
+.gallery-stats-detailed {
+
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    z-index: 3;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+
+
+    position: relative;
+    z-index: 2;
+    padding: 16px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+ 
+.gallery-stats-detailed .quick-stat {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-color);
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+
+
+}
+
+
+/* CRÉATEUR */
+.gallery-creator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--primary)15, var(--primary-light)05);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.creator-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+}
+
+.creator-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.creator-label {
+    font-size: 10px;
+    color: var(--placeholder-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.creator-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gallery-actions {
+    display: flex;
+    gap: 8px;
+}
+
+
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 0.5rem;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    position: relative;
+    font-size: 1rem;
+}
+
+.action-btn:hover {
+    transform: translateY(-3px) scale(1.15);
+}
+
+.action-btn:active {
+    transform: translateY(-1px) scale(1.1);
+}
+
+/* Bouton Edit */
+.action-btn.edit {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--info);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.action-btn.edit:hover {
+    background: var(--info);
+    color: white;
+    border-color: var(--info);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.action-btn.edit:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton QR */
+.action-btn.qr {
+    background: rgba(168, 85, 247, 0.15);
+    color: #A855F7;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.action-btn.qr:hover {
+    background: #A855F7;
+    color: white;
+    border-color: #A855F7;
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
+}
+
+.action-btn.qr:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton Delete */
+.action-btn.delete {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.action-btn.delete:hover {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
+.action-btn.delete:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton Eye (View) */
+.action-btn.eye {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--info);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.action-btn.eye:hover {
+    background: var(--info);
+    color: white;
+    border-color: var(--info);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.action-btn.eye:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton Share */
+.action-btn.share {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.action-btn.share:hover {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.action-btn.share:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton Check */
+.action-btn.check {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.action-btn.check:hover {
+    background: var(--warning);
+    color: white;
+    border-color: var(--warning);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.action-btn.check:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton Like */
+.action-btn.like {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.action-btn.like:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
+.action-btn.like:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn.like.active {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+/* Bouton Comment */
+.action-btn.comment {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.action-btn.comment:hover {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.action-btn.comment:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton Download */
+.action-btn.download {
+    background: rgba(168, 85, 247, 0.15);
+    color: #a855f7;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.action-btn.download:hover {
+    background: #a855f7;
+    color: white;
+    border-color: #a855f7;
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
+}
+
+.action-btn.download:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* État désactivé */
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.action-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Animation de pulse au survol */
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 currentColor;
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(217, 119, 6, 0.1);
+    }
+}
+
+.action-btn:hover::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 0.5rem;
+    background: transparent;
+}
+
+    
+
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(217, 119, 6, 0.3);
+}
+
+
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile - Toujours afficher le contenu */
+@media (max-width: 768px) {
+    .gallery-card {
+        height: auto;
+        min-height: auto;
+    }
+    
+    .gallery-card-content,
+    .gallery-card-footer {
+        opacity: 1 !important;
+        max-height: none !important;
+        transform: translateY(0) !important;
+        display: flex !important;
+    }
+    
+    .gallery-quick-stats {
+        position: relative;
+        bottom: auto;
+        right: auto;
+        margin-top: 8px;
+    }
+}
+
+/* RESPONSIVE - Tablette */
+@media (max-width: 1024px) {
+    .gallery-card {
+        height: 340px;
+    }
+    
+    .gallery-title-text {
+        font-size: 16px;
+    }
+    
+    .quick-stat {
+        font-size: 11px;
+        padding: 5px 8px;
+    }
+}
+
+/* RESPONSIVE - Mobile */
+@media (max-width: 640px) {
+    .gallery-card {
+        height: 320px;
+    }
+    
+    .gallery-card-header {
+        padding: 12px;
+    }
+    
+    .gallery-title-overlay {
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+    }
+    
+    .gallery-quick-stats {
+        bottom: 12px;
+        right: 12px;
+        gap: 8px;
+    }
+    
+    .gallery-title-text {
+        font-size: 15px;
+    }
+    
+    .quick-stat {
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+}
+
+/* RESPONSIVE - Petit mobile */
+@media (max-width: 480px) {
+    .gallery-card {
+        height: 220px;
+    }
+    
+    .gallery-title-text {
+        font-size: 14px;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+    }
+    
+    .gallery-quick-stats {
+        gap: 6px;
+    }
+    
+    .quick-stat {
+        font-size: 9px;
+        padding: 3px 5px;
+    }
+    
+    .badge-pill {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+}
+
+/* ==========================================
+   ÉLÉMENTS DE CARTE - NUMÉRO, NOM, INFOS
+   ========================================== */
+.gallery-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.gallery-number::before {
+    content: '#';
+    font-size: 1.5rem;
+    opacity: 0.7;
+}
+
+.gallery-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: white;
+    margin: 5px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 2;
+}
+
+.gallery-meta {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+}
+
+.gallery-category,
+.gallery-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gallery-status.public {
+    background: rgba(16, 185, 129, 0.3);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.gallery-status.private {
+    background: rgba(245, 158, 11, 0.3);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+}
+
+/* ==========================================
+   INFORMATIONS DÉTAILLÉES DE GALERIE
+   ========================================== */
+.gallery-info-item {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.2rem;
+    border-left: 3px solid var(--primary);
+    margin-bottom: 10px;
+}
+
+.gallery-info-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gallery-info-value {
+    font-weight: 600;
+    color: white;
+    font-size: 1rem;
+    word-break: break-word;
+}
+
+.gallery-info-value.highlight {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+/* ==========================================
+   INDICATEURS STATISTIQUES - GRILLE VISUELLE
+   ========================================== */
+.gallery-stats-indicator {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Grille visuelle de carrés pour les photos */
+.stats-visual-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+.photo-square {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.photo-square.uploaded {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+}
+
+.photo-square.pending {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.photo-square.rejected {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.stats-numbers {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ==========================================
+   LOCALISATION ET ACTIONS
+   ========================================== */
+.gallery-location {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gallery-actions {
+    display: flex;
+    gap: 8px;
+}
+.action-btn.edit {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--info);
+}
+
+.action-btn.edit:hover {
+    background: var(--info);
+}
+
+.action-btn.delete {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+}
+
+.action-btn.delete:hover {
+    background: var(--danger);
+}
+
+.action-btn.view {
+    background: rgba(16, 185, 129, 0.2);
+    color: white;
+}
+
+
+
+.action-btn.details {
+    background: var(--hover-bg);
+    color: white;
+}
+
+/* ==========================================
+   VUE PHOTOS D'UNE GALERIE
+   ========================================== */
+.photos-view-container {
+    display: none;
+}
+
+.photos-view-container.active {
+    display: block;
+}
+
+/* ==========================================
+   GRILLE DE PHOTOS
+   ========================================== */
+.photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+/* ==========================================
+   CARTES PHOTOS - IDENTIQUE AUX GALERIES
+   ========================================== */
+.photo-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--card-shadow);
+    height: 25rem;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.photo-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px var(--shadow-color);
+    border-color: var(--primary);
+}
+
+.photo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(0, 0, 0, 0.7) 0%, 
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0.3) 100%);
+    z-index: 1;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.photo-card:hover::before {
+    opacity: 0.6;
+}
+
+.photo-card-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    z-index: 2;
+    min-height: 180px;
+    overflow: hidden;
+}
+
+.photo-card-header::before {
+    content: '';
+    background: linear-gradient(135deg, 
+        rgba(0, 0, 0, 0.7) 0%, 
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0.3) 100%);
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+
+.photo-card-content {
+    padding: 20px;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    
+    backdrop-filter: blur(1px);
+    overflow-y: auto;
+    justify-content: space-between;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.photo-card-footer {
+    padding: 15px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(180deg, 
+        transparent 0%, 
+        rgba(0, 0, 0, 0.8) 100%);
+    position: relative;
+    z-index: 2;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.photo-card.active {
+    height: auto !important;
+    min-height: 420px !important;
+    box-shadow: 0 20px 60px var(--shadow-color) !important;
+    z-index: 100 !important;
+    position: relative !important;
+    grid-row: span 3 !important;
+    grid-column: span 1 !important;
+}
+
+.photo-card.active .photo-card-content,
+.photo-card.active .photo-card-footer {
+    opacity: 1 !important;
+    max-height: none !important;
+    transform: translateY(0) !important;
+}
+
+@media (max-width: 768px) {
+    .photo-card {
+        height: auto !important;
+    }
+    
+    .photo-card.active {
+        grid-row: auto !important;
+        grid-column: auto !important;
+    }
+}
+
+.photo-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.photo-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: white;
+    margin: 5px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 2;
+}
+
+.photo-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.photo-status.approved {
+    background: rgba(16, 185, 129, 0.3);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.photo-status.pending {
+    background: rgba(245, 158, 11, 0.3);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+}
+
+.photo-status.rejected {
+    background: rgba(239, 68, 68, 0.3);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+
+.photo-card-title-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    padding: var(--spacing-md);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4), transparent);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+
+
+.photo-creator-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+    opacity: 0.95;
+    line-height: 1.2;
+}
+
+.photo-creator,
+.photo-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.photo-creator i,
+.photo-date i {
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   VUE STATISTIQUES
+   ========================================== */
+.stats-view-container {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 30px var(--shadow-color);
+    min-height: 500px;
+    display: none;
+}
+
+.stats-view-container.active {
+    display: block;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.stat-card-advanced-advanced {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 30px var(--shadow-color);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.stat-card-advanced-advanced:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px var(--shadow-color);
+}
+
+.stat-card-advanced-advanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient);
+}
+
+.stat-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-details {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+/* ==========================================
+   GRAPHIQUES
+   ========================================== */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.advanced-charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.chart-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 30px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px var(--shadow-color);
+    border-color: var(--primary);
+}
+
+.chart-card canvas {
+    max-height: 300px;
+    width: 100% !important;
+    background-color: white;
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chart-title i {
+    color: var(--primary);
+}
+
+.chart-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-left: 10px;
+    font-weight: 400;
+}
+
+.chart-placeholder {
+    width: 100%;
+    height: 300px;
+    background: var(--hover-bg);
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    opacity: 0.5;
+}
+
+.chart-placeholder.advanced {
+    min-height: 350px;
+    position: relative;
+}
+
+/* ==========================================
+   KPI CARDS
+   ========================================== */
+.kpi-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.kpi-card {
+    background: linear-gradient(135deg, var(--card-bg), rgba(255,255,255,0.05));
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+.kpi-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.kpi-card.trending .kpi-icon {
+    background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+}
+
+.kpi-card.efficiency .kpi-icon {
+    background: linear-gradient(135deg, #10B981, #3B82F6);
+}
+
+.kpi-card.diversity .kpi-icon {
+    background: linear-gradient(135deg, #F59E0B, #EC4899);
+}
+
+.kpi-card.prediction .kpi-icon {
+    background: linear-gradient(135deg, #8B5CF6, #EC4899);
+}
+
+.kpi-content {
+    flex: 1;
+}
+
+.kpi-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.kpi-label {
+    font-size: 0.95rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+.kpi-trend {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.kpi-trend.positive {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+
+.kpi-trend.stable {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--info);
+}
+
+/* ==========================================
+   MODAL CRÉATION GALERIE
+   ========================================== */
+.gallery-creation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    overflow-y: auto;
+}
+
+.gallery-creation-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.gallery-creation-wrapper {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    height: 85vh;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--hover-bg);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    z-index: 100;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+    background: var(--danger);
+    color: white;
+    transform: rotate(90deg);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(60px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Panel de progression */
+.creation-progress-panel {
+    flex: 0 0 300px;
+    background: var(--progress-bg);
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    position: relative;
+}
+
+.progress-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--gradient);
+    border-radius: 10px;
+    width: 20%;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vertical-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: auto;
+    position: relative;
+}
+
+.vertical-steps::before {
+    content: '';
+    position: absolute;
+    left: 1px;
+    top: 30px;
+    bottom: 33px;
+    width: 5px;
+    background: var(--hover-bg);
+    z-index: 1;
+}
+
+.dark-theme .vertical-steps::before {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.vertical-step {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.vertical-step::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 41%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 26%;
+    background: var(--text-color);
+    border: 3px solid var(--border-color);
+    z-index: 3;
+    transition: all 0.3s ease;
+}
+
+.vertical-step.active::before {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15);
+}
+
+.vertical-step.completed::before {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+.vertical-step-info {
+    flex: 1;
+    opacity: 0.5;
+    transform: translateX(30px);
+    transition: all 0.3s ease;
+}
+
+.vertical-step.active .vertical-step-info {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.vertical-step.completed .vertical-step-info {
+    opacity: 0.8;
+}
+
+.vertical-step-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vertical-step.active .vertical-step-label {
+    color: var(--primary-light);
+}
+
+.vertical-step-description {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-color);
+    opacity: 0.5;
+    line-height: 1.3;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.vertical-step:hover .vertical-step-description,
+.vertical-step.active .vertical-step-description {
+    max-height: 100px;
+    opacity: 0.7;
+}
+
+.creation-progress-info {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.creation-progress-text {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.5;
+    margin-bottom: 8px;
+}
+
+.creation-progress-percentage {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Panel de formulaire */
+.creation-form-panel {
+    flex: 1;
+    padding: 40px;
+    overflow: auto;
+    position: relative;
+}
+
+.creation-header {
+    margin-bottom: 40px;
+}
+
+.creation-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.creation-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-color);
+    opacity: 0.6;
+    line-height: 1.5;
+}
+
+.creation-step-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 40px;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    overflow-y: auto;
+}
+
+.creation-step-content.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+}
+
+.creation-step-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.creation-step-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.dark-theme .creation-step-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.creation-step-content::-webkit-scrollbar-thumb {
+    background: var(--gradient);
+    border-radius: 3px;
+}
+
+/* ==========================================
+   FORMULAIRES
+   ========================================== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-light);
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    color: var(--input-text);
+    padding: 12px 16px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--placeholder-color);
+    font-size: 0.9rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-help {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.5;
+}
+
+.required {
+    color: var(--danger);
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* Upload de photos */
+.photo-upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.photo-upload-area:hover {
+    border-color: var(--primary);
+    background: var(--hover-bg);
+}
+
+.photo-upload-area.dragover {
+    border-color: var(--primary);
+    background: rgba(217, 119, 6, 0.1);
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 15px;
+    opacity: 0.7;
+}
+
+.upload-instructions {
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 10px;
+}
+
+.upload-formats {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.5;
+}
+
+/* Photo Card Styling */
+.photo-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    cursor: crosshair;
+}
+
+.photo-card:hover {
+    transform: scale(1.02);
+    border-color: var(--primary);
+}
+
+.photo-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.photo-card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 8px;
+    opacity: 0;
+    z-index: 100;
+    transition: opacity 0.3s ease;
+}
+
+.photo-card:hover .photo-card-overlay {
+    opacity: 1;
+}
+
+.photo-card-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    color: #1f2937;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.photo-card-action:hover {
+    transform: scale(1.15);
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.photo-card-action.delete {
+    color: #ef4444;
+}
+
+/* Photo View Controls */
+.photos-view-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.grid-size-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.grid-size-control label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+#photoSizeSlider {
+    width: 150px;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--primary), var(--info));
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+#photoSizeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+#photoSizeSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+#photoSizeSlider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+#photoSizeSlider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+#photoSizeValue {
+    font-weight: 600;
+    color: var(--primary);
+    min-width: 45px;
+}
+
+/* Photos List View */
+.photos-list-view {
+    padding: 15px 0;
+}
+
+.photos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.photo-list-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.photo-list-item:hover {
+    border-color: var(--primary);
+    background: var(--hover-bg);
+    transform: translateX(4px);
+}
+
+.photo-list-thumbnail {
+    width: 70px;
+    height: 70px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--border-color);
+    cursor: crosshair;
+}
+
+.photo-list-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.photo-list-name {
+    font-weight: 600;
+    color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.photo-list-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.photo-list-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Photo Grid Responsive avec Slider */
+#photosGrid {
+    display: grid;
+    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    transition: grid-template-columns 0.3s ease;
+}
+
+/* Status Badge List */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.rejected {
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Image de fond */
+.photo-card-image {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+    transition: transform 0.4s ease, filter 0.3s ease;
+}
+
+.photo-card-grid:hover .photo-card-image {
+    transform: scale(1.08);
+    filter: brightness(0.75);
+}
+
+/* Status badge */
+.photo-status-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.photo-status-badge.pending {
+    background: rgba(245, 158, 11, 0.25);
+    color: #FCD34D;
+}
+
+.photo-status-badge.rejected {
+    background: rgba(239, 68, 68, 0.25);
+    color: #FCA5A5;
+}
+.photo-status-badge.approved {
+    background: rgba(16, 185, 129, 0.25);
+    color: #6EE7B7;
+}
+
+/* Actions Overlay */
+.photo-card-actions-overlay {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    padding: 8px;
+    border-radius: var(--border-radius);
+    backdrop-filter: blur(4px);
+}
+
+.photo-card-actions-overlay .action-btn{
+
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.109);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+
+.photo-card:hover .photo-card-actions-overlay {
+    opacity: 1;
+}
+
+/* Titre et stats */
+.photo-card-title-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    padding: 12px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
+}
+
+.photo-card-title-overlay .photo-title {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+}
+
+.photo-quick-stats {
+    display: flex;
+    gap: 10px;
+    font-size: 0.75rem;
+}
+
+.photo-stat {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #FFF;
+    border-radius: 4px;
+    backdrop-filter: blur(10px);
+    white-space: nowrap;
+}
+
+/* Boutons modération */
+.photo-card-moderation {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 4;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    z-index: 10000;
+    transition: opacity 0.3s ease;
+}
+
+.photo-card:hover .photo-card-moderation {
+    opacity: 1;
+}
+
+/* Responsive Grid Layout */
+#photosGridContainer {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+/* Mobile extra petit (< 375px) */
+@media (max-width: 374px) {
+    #photosGridContainer {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+}
+
+/* Mobile petit (375px - 480px) */
+@media (min-width: 375px) and (max-width: 480px) {
+    #photosGridContainer {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+}
+
+/* Mobile moyen (481px - 640px) */
+@media (min-width: 481px) and (max-width: 640px) {
+    #photosGridContainer {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+}
+
+/* Mobile grand / Tablette petit (641px - 768px) */
+@media (min-width: 641px) and (max-width: 768px) {
+    #photosGridContainer {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+    }
+}
+
+/* Tablette (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #photosGridContainer {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+    }
+}
+
+/* Desktop petit (1025px - 1440px) */
+@media (min-width: 1025px) and (max-width: 1440px) {
+    #photosGridContainer {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 15px;
+    }
+}
+
+/* Desktop grand (> 1440px) */
+@media (min-width: 1441px) {
+    #photosGridContainer {
+        grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+        gap: 15px;
+    }
+}
+
+/* Upload Card Placeholder */
+.photo-upload-placeholder {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border: 2px dashed var(--border-color);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+
+    border-radius: var(--border-radius);
+
+
+
+
+    flex-direction: column;
+    height: 24rem;
+}
+.photo-upload-placeholder:hover {
+    border-color: var(--primary);
+    background: var(--hover-bg);
+}
+
+.photo-upload-placeholder-icon {
+    font-size: 2rem;
+    color: var(--primary);
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.photo-upload-placeholder:hover .photo-upload-placeholder-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* ==========================================
+   SETTINGS CARDS & TOGGLE SWITCHES
+   ========================================== */
+
+.settings-cards-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.settings-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.settings-card:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.dark-theme .settings-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.settings-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+}
+
+.settings-card-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-size: 1.2rem;
+}
+
+.settings-card-info {
+    flex: 1;
+}
+
+.settings-card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 4px;
+    color: var(--text-color);
+}
+
+.settings-card-description {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.9;
+}
+
+.settings-card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.settings-option:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary-light);
+}
+
+.dark-theme .settings-option {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .settings-option:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary-light);
+}
+
+.settings-option-text {
+    flex: 1;
+}
+
+.settings-option-title {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    margin-bottom: 2px;
+}
+
+.settings-option-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-color);
+    opacity: 0.6;
+}
+
+/* Toggle Switch Component */
+.toggle-switch {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.toggle-input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 50px;
+    height: 28px;
+    background: #ccc;
+    border-radius: 14px;
+    display: inline-block;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-input:checked + .toggle-slider {
+    background: var(--success);
+}
+
+.toggle-input:checked + .toggle-slider::after {
+    transform: translateX(22px);
+}
+
+.toggle-input:focus + .toggle-slider {
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(var(--primary-rgb, 52, 152, 219), 0.1);
+    outline: none;
+}
+
+.dark-theme .toggle-slider {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.dark-theme .toggle-input:checked + .toggle-slider {
+    background: var(--success);
+}
+
+/* Mini Card pour les options uniques */
+.settings-mini-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.settings-mini-card:hover {
+    border-color: var(--primary-light);
+    background: var(--bg-hover);
+}
+
+.dark-theme .settings-mini-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Navigation du modal */
+.creation-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ==========================================
+   MODAL PHOTO (GALLERY VIEW)
+   ========================================== */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    animation: fadeIn 0.3s ease;
+    overflow: hidden;
+}
+
+.modal.active {
+    display: flex;
+}
+
+
+.modal-content.modal-lg.photo-modal-content {
+    position: relative;
+    
+    max-width: 500px;
+    max-height: 85vh;
+    border-radius: 12px;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat;
+}
+
+
+.photo-card.photo-modal-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.photo-modal-card .photo-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 50%, rgba(0,0,0,0.3) 100%);
+    pointer-events: none;
+}
+
+/* Title section - top left */
+.photo-modal-title-section {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 9;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 70%;
+}
+
+.photo-modal-title-event {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.photo-modal-title-gallery {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Actions buttons - top right */
+.photo-modal-actions {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+}
+
+.photo-modal-actions .action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.photo-modal-actions .action-btn:hover {
+    background: rgba(255,255,255,0.4);
+    border-color: rgba(255,255,255,0.5);
+    transform: scale(1.05);
+}
+
+.photo-modal-actions .action-btn.like.active {
+    background: rgba(239, 68, 68, 0.6);
+    color: #fff;
+}
+
+/* Info section - bottom */
+.photo-modal-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.95) 100%);
+    padding: 30px 20px 20px;
+    color: white;
+    z-index: 5;
+    max-height: 35%;
+    overflow-y: auto;
+}
+
+.photo-modal-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.photo-modal-creator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.photo-modal-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.8);
+    object-fit: cover;
+}
+
+.photo-modal-creator div {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.photo-modal-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: white;
+}
+
+.photo-modal-date {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+}
+
+.photo-modal-stats {
+    display: flex;
+    gap: 14px;
+    margin-top: 8px;
+    font-size: 0.9rem;
+}
+
+.photo-modal-stats span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255,255,255,0.85);
+}
+
+.photo-modal-desc {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: rgba(255,255,255,0.8);
+    margin-top: 10px;
+}
+
+/* Dots navigation - bottom center */
+.photo-modal-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 8;
+}
+
+.photo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.photo-dot:hover {
+    background: rgba(255,255,255,0.5);
+}
+
+.photo-dot.active {
+    width: 24px;
+    border-radius: 4px;
+    background: white;
+}
+
+/* Close button */
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.modal-close:hover {
+    border-color: rgba(255,255,255,0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-content.modal-lg.photo-modal-content {
+        width: 95vw;
+        height: 85vh;
+        max-width: none;
+    }
+
+    .photo-modal-title {
+        font-size: 1.1rem;
+    }
+
+    .photo-modal-info {
+        padding: 20px 16px 16px;
+    }
+
+    .photo-modal-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .photo-modal-title-section {
+        max-width: 60%;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content.modal-lg.photo-modal-content {
+        width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .photo-modal-card {
+        border-radius: 0;
+    }
+
+    .photo-modal-title {
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .photo-modal-info {
+        padding: 16px 12px 12px;
+        max-height: 40%;
+    }
+
+    .photo-modal-actions {
+        top: 10px;
+        right: 10px;
+        gap: 6px;
+    }
+
+    .photo-modal-actions .action-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+
+    .modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+    
+    .photo-modal-title-section {
+        top: 10px;
+        left: 10px;
+        max-width: 50%;
+    }
+    
+    .photo-modal-title-event {
+        font-size: 0.9rem;
+    }
+    
+    .photo-modal-title-gallery {
+        font-size: 0.8rem;
+    }
+    
+    .photo-modal-dots {
+        bottom: 8px;
+        gap: 4px;
+    }
+    
+    .photo-dot {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .photo-dot.active {
+        width: 20px;
+    }
+}
+
+/* ==========================================
+   MODAL MODÉRATION
+   ========================================== */
+/* ==========================================
+   MODAL MODÉRATION - STYLE PROFESSIONNEL
+   ========================================== */
+.moderation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 10001;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.moderation-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.moderation-wrapper {
+    width: 95%;
+    max-width: 1600px;
+    height: 85vh;
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.moderation-header {
+    padding: 25px 30px;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(135deg, var(--dark-card) 0%, rgba(59, 130, 246, 0.05) 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.moderation-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.moderation-header p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(var(--text-color-rgb), 0.7);
+}
+
+.moderation-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.moderation-sidebar {
+    width: 320px;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    background: var(--hover-bg);
+    padding: 25px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.moderation-main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Photo Container */
+.moderation-photo-container {
+    text-align: center;
+    background: var(--hover-bg);
+    border-radius: 12px;
+    padding: 30px;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.moderation-photo {
+    max-width: 100%;
+    max-height: 500px;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    object-fit: contain;
+}
+
+/* Photo Info */
+.moderation-photo-info {
+    background: var(--hover-bg);
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+}
+
+.moderation-photo-details h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0 0 15px 0;
+}
+
+.moderation-photo-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.moderation-photo-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: rgba(var(--text-color-rgb), 0.75);
+}
+
+.moderation-photo-meta-item i {
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.moderation-photo-description,
+.moderation-photo-tags {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.moderation-photo-description h5,
+.moderation-photo-tags h5 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 10px 0;
+}
+
+.moderation-photo-description p {
+    margin: 0;
+    color: rgba(var(--text-color-rgb), 0.8);
+    line-height: 1.5;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Actions */
+.moderation-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.moderation-actions .btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: white;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+}
+
+.btn-secondary {
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color);
+    transform: translateY(-2px);
+}
+
+/* Completion Message */
+.moderation-complete {
+    text-align: center;
+    padding: 60px 30px;
+}
+
+.moderation-complete i {
+    font-size: 5rem;
+    color: #10B981;
+    margin-bottom: 20px;
+}
+
+.moderation-complete h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+
+.moderation-complete p {
+    color: rgba(var(--text-color-rgb), 0.7);
+    font-size: 1rem;
+}
+
+/* ==========================================
+   MODÉRATION LIST - SIDEBAR ITEMS
+   ========================================== */
+.moderation-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.moderation-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--card-bg);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.moderation-list-item:hover {
+    background: var(--hover-bg);
+    border-color: var(--primary);
+    transform: translateX(4px);
+}
+
+.moderation-list-item.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    border-color: var(--primary);
+    color: white;
+}
+
+.moderation-list-item.active .moderation-list-name,
+.moderation-list-item.active .moderation-list-meta {
+    color: white;
+}
+
+.moderation-list-item.active .moderation-list-meta i {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.moderation-list-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moderation-list-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.moderation-list-item:hover .moderation-list-thumb img {
+    transform: scale(1.05);
+}
+
+.moderation-list-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.moderation-list-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.3s ease;
+}
+
+.moderation-list-meta {
+    font-size: 0.8rem;
+    color: rgba(var(--text-color-rgb), 0.6);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.3s ease;
+}
+
+.moderation-list-meta i {
+    font-size: 0.75rem;
+    transition: color 0.3s ease;
+}
+
+/* Scrollbar Styling */
+.moderation-sidebar::-webkit-scrollbar,
+.moderation-main::-webkit-scrollbar,
+.moderation-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.moderation-sidebar::-webkit-scrollbar-track,
+.moderation-main::-webkit-scrollbar-track,
+.moderation-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.moderation-sidebar::-webkit-scrollbar-thumb,
+.moderation-main::-webkit-scrollbar-thumb,
+.moderation-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.moderation-sidebar::-webkit-scrollbar-thumb:hover,
+.moderation-main::-webkit-scrollbar-thumb:hover,
+.moderation-list::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Close Button */
+#closeModerationBtn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+#closeModerationBtn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: scale(1.1);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .moderation-wrapper {
+        max-width: 95vw;
+    }
+
+    .moderation-main {
+        padding: 25px;
+    }
+
+    .moderation-photo-container {
+        min-height: 350px;
+    }
+
+    .moderation-photo {
+        max-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .moderation-modal {
+        padding: 10px;
+    }
+
+    .moderation-wrapper {
+        height: 90vh;
+    }
+
+    .moderation-content {
+        flex-direction: column;
+    }
+
+    .moderation-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        max-height: 150px;
+        flex-direction: row;
+        gap: 15px;
+        padding: 15px;
+        overflow-x: auto;
+    }
+
+    .moderation-list {
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .moderation-list-item {
+        flex-direction: column;
+        width: 80px;
+        padding: 10px;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .moderation-list-thumb {
+        width: 100%;
+        height: 60px;
+    }
+
+    .moderation-list-info {
+        display: none;
+    }
+
+    .moderation-main {
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .moderation-header {
+        flex-direction: column;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .moderation-photo-container {
+        min-height: 300px;
+    }
+
+    .moderation-photo {
+        max-height: 300px;
+    }
+
+    .moderation-actions {
+        flex-direction: column;
+    }
+
+    .moderation-actions .btn {
+        width: 100%;
+        min-width: unset;
+    }
+}
+
+
+
+/* ==========================================
+   LOADER
+   ========================================== */
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 50px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================
+   PAGINATION
+   ========================================== */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.page-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--hover-bg);
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.page-btn:hover:not(.disabled) {
+    background: var(--primary);
+    color: white;
+}
+
+.page-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.page-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-btn.disabled:hover {
+    background: var(--hover-bg);
+    color: var(--text-color);
+}
+
+/* ==========================================
+   MINI ÉVÉNEMENTS
+   ========================================== */
+.events-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 10px;
+    margin-bottom: 40px;
+}
+
+.event-mini-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    height: 180px;
+    transition: all 0.3s ease;
+}
+
+.event-mini-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px var(--shadow-color);
+    border-color: var(--primary);
+}
+
+.event-mini-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(217, 119, 6, 0.05);
+    height: 60px;
+    overflow: hidden;
+}
+
+.event-mini-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.event-content {
+    background: rgb(0 0 0 / 75%);
+    backdrop-filter: blur(2px);
+}
+
+.event-mini-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.event-mini-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.event-mini-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.event-mini-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.event-mini-stat-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.event-mini-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+/* ==========================================
+   TABLEAU MINI ÉVÉNEMENTS
+   ========================================== */
+.events-mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 8px 30px var(--shadow-color);
+}
+
+.events-mini-table th {
+    background: var(--hover-bg);
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.events-mini-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.events-mini-table tbody tr:hover {
+    background: rgba(217, 119, 6, 0.05);
+}
+
+.event-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.event-cell-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.event-cell-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.event-cell-name {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.event-cell-location {
+    font-size: 0.8rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.event-cell-date {
+    white-space: nowrap;
+    font-size: 0.85rem;
+}
+
+.event-cell-type {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    background: var(--primary);
+    display: inline-block;
+}
+
+.event-cell-stats {
+    display: flex;
+    gap: 15px;
+}
+
+.event-cell-stat {
+    text-align: center;
+    min-width: 50px;
+}
+
+.event-cell-stat-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: block;
+}
+
+.event-cell-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+/* ==========================================
+   ACCUEIL DES ÉVÉNEMENTS
+   ========================================== */
+.events-home-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.events-home-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.events-home-header p {
+    color: var(--text-color);
+    opacity: 0.7;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.home-message {
+    text-align: center;
+    padding: 60px 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.home-message i {
+    font-size: 4rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.home-message h2 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.home-message p {
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   BADGES ET STATUTS
+   ========================================== */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-inactive {
+    background: rgba(107, 114, 128, 0.2);
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.status-draft {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background: rgba(217, 119, 6, 0.2);
+    color: var(--primary);
+    border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 500px;
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.animate-slide-in {
+    animation: slideIn 0.4s ease;
+}
+
+/* ==========================================
+   RESPONSIVE - TABLETTES
+   ========================================== */
+@media (max-width: 1200px) {
+    .galleries-grid,
+    .photos-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .advanced-charts-container,
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .gallery-card-header,
+    .photo-card-header {
+        min-height: 150px;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE - MOBILES
+   ========================================== */
+@media (max-width: 768px) {
+    .galleries-main,
+    .events-home-container {
+        margin-top: 80px;
+        padding: 15px;
+    }
+
+    .page-header, .galleries-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .page-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .search-container {
+        width: 100%;
+    }
+
+    .moderation-content {
+        flex-direction: column;
+    }
+
+    .moderation-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        max-height: 300px;
+    }
+
+    .gallery-card-header,
+    .photo-card-header {
+        min-height: 120px;
+    }
+
+    .gallery-card,
+    .photo-card {
+        height: auto !important;
+    }
+
+    .gallery-card.active,
+    .photo-card.active {
+        grid-row: auto !important;
+        grid-column: auto !important;
+    }
+
+    .chart-card,
+    .chart-card.advanced {
+        padding: 20px;
+    }
+
+    .chart-placeholder,
+    .chart-placeholder.advanced {
+        min-height: 300px;
+    }
+
+    .kpi-grid-container {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .creation-progress-panel {
+        flex: 0 0 250px;
+    }
+
+    .creation-form-panel {
+        padding: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title h1 {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .gallery-number,
+    .photo-number {
+        font-size: 2rem;
+    }
+
+    .gallery-name,
+    .photo-title {
+        font-size: 1.1rem;
+    }
+
+    .gallery-card-header,
+    .photo-card-header {
+        min-height: 100px;
+    }
+
+    .creation-progress-panel {
+        flex: 0 0 220px;
+        padding: 30px 20px;
+    }
+
+    .vertical-step {
+        padding: 15px;
+    }
+
+    .vertical-step-label {
+        font-size: 0.85rem;
+    }
+}
+
+/* ==========================================
+   SCROLLBAR PERSONNALISÉE
+   ========================================== */
+.galleries-main::-webkit-scrollbar,
+.creation-step-content::-webkit-scrollbar,
+.moderation-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.galleries-main::-webkit-scrollbar-track,
+.creation-step-content::-webkit-scrollbar-track,
+.moderation-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.dark-theme .galleries-main::-webkit-scrollbar-track,
+.dark-theme .creation-step-content::-webkit-scrollbar-track,
+.dark-theme .moderation-sidebar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.galleries-main::-webkit-scrollbar-thumb,
+.creation-step-content::-webkit-scrollbar-thumb,
+.moderation-sidebar::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+.galleries-main::-webkit-scrollbar-thumb:hover,
+.creation-step-content::-webkit-scrollbar-thumb:hover,
+.moderation-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* ==========================================
+   UTILITAIRES
+   ========================================== */
+.event-title {
+    color: white !important;
+}
+
+.actions-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.grid-header.in-specific-view h3 {
+    margin-right: auto;
+}
+
+/* ==========================================
+   STEP 4 - GALLERY PREVIEW PROFESSIONNEL
+   ========================================== */
+
+.step4-title {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.step4-title h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+}
+
+.step4-title h3 i {
+    color: var(--primary);
+    font-size: 1.8rem;
+}
+
+.step4-title p {
+    font-size: 0.95rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin: 0;
+}
+
+/* Conteneur principal du preview */
+.gallery-preview-container {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: 0 10px 35px var(--shadow-color);
+    margin-bottom: 30px;
+}
+
+/* En-tête avec cover image */
+.gallery-preview-header {
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-cover {
+    width: 100%;
+    height: 280px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 30px;
+}
+
+.preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 100%);
+}
+
+.gallery-preview-info {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    right: 30px;
+    color: white;
+    z-index: 10;
+}
+
+.preview-gallery-name {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.preview-gallery-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+}
+
+.preview-badge i {
+    font-size: 0.9rem;
+}
+
+.preview-badge.visibility {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.preview-badge.category {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.preview-badge.moderation {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.preview-gallery-desc {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.95;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    max-height: 60px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Barre de statistiques */
+.preview-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--border-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.preview-stat {
+    transition: all 0.3s ease;
+
+
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+}
+
+.preview-stat:hover {
+    background: var(--hover-bg);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(245, 158, 11, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-color);
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.6;
+    font-weight: 500;
+}
+
+/* Détails de configuration */
+.preview-config-details {
+    padding: 30px;
+    background: var(--body-bg);
+    border-top: 1px solid var(--border-color);
+}
+
+.config-section h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.config-item {
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.config-item:hover {
+    background: var(--hover-bg);
+    border-color: var(--primary);
+}
+
+.config-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.config-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--primary);
+    padding: 4px 10px;
+    background: rgba(217, 119, 6, 0.1);
+    border-radius: 6px;
+}
+
+/* Grille de galerie vide */
+.preview-gallery-grid {
+    padding: 40px 30px;
+    border-top: 1px solid var(--border-color);
+    background: var(--card-bg);
+}
+
+.preview-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-color);
+    opacity: 0.6;
+}
+
+.preview-empty-state i {
+    font-size: 4rem;
+    color: var(--primary);
+    opacity: 0.3;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.preview-empty-state p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.preview-empty-state span {
+    font-size: 0.9rem;
+    opacity: 0.5;
+}
+
+/* Responsive pour Step 4 */
+@media (max-width: 768px) {
+    .preview-cover {
+        height: 200px;
+        padding: 20px;
+    }
+
+    .gallery-preview-info {
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+    }
+
+    .preview-gallery-name {
+        font-size: 1.4rem;
+    }
+
+    .preview-gallery-desc {
+        font-size: 0.85rem;
+    }
+
+    .preview-stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .preview-stat {
+        padding: 15px;
+    }
+
+    .stat-value {
+        font-size: 1.3rem;
+    }
+
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .preview-config-details {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .preview-cover {
+        height: 150px;
+        padding: 15px;
+    }
+
+    .gallery-preview-info {
+        bottom: 15px;
+        left: 15px;
+        right: 15px;
+    }
+
+    .preview-gallery-name {
+        font-size: 1.2rem;
+    }
+
+    .preview-gallery-badges {
+        gap: 6px;
+    }
+
+    .preview-badge {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+
+    .preview-stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .preview-stat {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+}
+
+/* ==========================================
+   LISTE EXPANDABLE - NOUVEAU LAYOUT
+   ========================================== */
+.galleries-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.gallery-list-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.gallery-list-item:hover {
+    border-color: var(--primary);
+}
+
+.gallery-list-item.expanded .gallery-list-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.gallery-list-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.gallery-list-header:hover {
+    background: rgba(var(--primary), 0.03);
+}
+
+.expand-toggle {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.gallery-list-cover {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.cover-thumb {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.6rem;
+}
+
+.gallery-list-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.gallery-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+
+.gallery-title strong {
+    font-size: 1rem;
+    color: var(--text-color);
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.category-badge {
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.gallery-subtitle {
+    font-size: 0.8rem;
+    color: rgba(var(--text-color), 0.65);
+    margin-bottom: 3px;
+    word-break: break-word;
+}
+
+.gallery-location {
+    font-size: 0.75rem;
+    color: rgba(var(--text-color), 0.6);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Quick stats - compact */
+.gallery-quick-stats {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    min-width: fit-content;
+}
+
+
+/* Visibility badge */
+.gallery-visibility {
+    min-width: fit-content;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--success);
+}
+
+.badge-secondary {
+    background: rgba(107, 114, 128, 0.15);
+    color: rgba(var(--text-color), 0.7);
+}
+
+/* Actions inline */
+.gallery-inline-actions {
+    display: none;
+    gap: 6px;
+    align-items: center;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: none;
+    font-size: 0.95rem;
+}
+
+.action-btn.edit {
+    color: var(--info);
+}
+
+.action-btn.delete {
+    color: var(--danger);
+}
+
+.action-btn.view {
+    color: var(--success);
+}
+
+/* Contenu expandable */
+.gallery-list-expand {
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+    background: rgba(var(--primary), 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.expand-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Stats grid */
+.expand-content .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: rgba(var(--primary), 0.02);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    text-align: center;
+}
+
+.stat-item i {
+    color: var(--text-color);
+    font-size: 1.3rem;
+}
+
+.stat-item span {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stat-item small {
+    font-size: 0.7rem;
+    color: rgba(var(--text-color), 0.6);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.stat-item.alert {
+    border-color: var(--warning);
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.stat-item.alert i {
+    color: var(--warning);
+}
+
+.stat-item.alert span {
+    color: var(--warning);
+}
+
+/* Info grid - Volet */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 5px;
+    background: rgba(var(--primary), 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(var(--primary), 0.1);
+}
+
+.info-item i {
+    color: var(--primary);
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.info-item > div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.info-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(var(--text-color), 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.info-value {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+/* Actions bottom */
+.expand-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.expand-actions .action-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+}
+
+@media (max-width: 1200px) {
+    .gallery-list-header {
+        padding: 12px;
+        gap: 14px;
+    }
+
+    .gallery-list-cover {
+        width: 64px;
+        height: 64px;
+    }
+
+    .gallery-title strong {
+        font-size: 0.95rem;
+    }
+
+    .gallery-quick-stats {
+        gap: 12px;
+    }
+
+    .expand-content {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .expand-actions {
+        justify-content: center;
+    }
+}
+
+/* ========================================== 
+   RESPONSIVE - MOBILE
+   ========================================== */
+@media (max-width: 768px) {
+    .gallery-list-header {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .gallery-list-cover {
+        width: 56px;
+        height: 56px;
+    }
+
+    .gallery-title strong {
+        font-size: 0.9rem;
+    }
+
+    .category-badge {
+        font-size: 0.65rem;
+    }
+
+    .gallery-quick-stats {
+        gap: 10px;
+    }
+
+    .quick-stat-value {
+        font-size: 0.75rem;
+    }
+
+    .quick-stat-label {
+        font-size: 0.7rem;
+    }
+
+    .action-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+
+    .gallery-list-expand {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .expand-content {
+        gap: 12px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .stat-item {
+        padding: 10px 8px;
+    }
+
+    .stat-item i {
+        font-size: 1rem;
+    }
+
+    .stat-item span {
+        font-size: 0.9rem;
+    }
+
+    .stat-item small {
+        font-size: 0.65rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .info-item {
+        padding: 8px 0;
+    }
+
+    .info-item i {
+        font-size: 0.95rem;
+    }
+
+    .info-label {
+        font-size: 0.6rem;
+    }
+
+    .info-value {
+        font-size: 0.8rem;
+    }
+
+    .expand-actions {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .expand-actions .action-btn {
+        width: 34px;
+        height: 34px;
+    }
+}
+
+/* ============================================
+   STYLES DES COMMENTAIRES
+   ============================================ */
+
+/* Conteneur de la liste des commentaires vide */
+.no-comments {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--placeholder-color);
+}
+
+.no-comments i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.no-comments p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Élément commentaire */
+.comment-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+.comment-item:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.1);
+}
+
+/* En-tête du commentaire */
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+/* Auteur du commentaire */
+.comment-author {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+}
+
+
+  
+                
+                .comment-author img {
+                    
+                    object-fit: cover;
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2.2rem;
+                    font-weight: 800;
+                    color: white;
+                    flex-shrink: 0;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                    border: 2px solid rgba(255, 255, 255, 0.1);
+                    overflow: hidden;
+                }
+
+.comment-author i {
+    font-size: 32px;
+    color: var(--primary);
+    opacity: 0.7;
+}
+
+.comment-author strong {
+    display: block;
+    font-size: 14px;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+/* Date du commentaire */
+.comment-date {
+    display: block;
+    font-size: 12px;
+    color: var(--placeholder-color);
+    margin-top: 4px;
+}
+
+/* Actions du commentaire */
+.comment-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.comment-actions .action-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+/* Contenu du commentaire */
+.comment-content {
+    color: var(--text-color);
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    word-break: break-word;
+}
+
+/* Pied de page du commentaire */
+.comment-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Bouton Like pour commentaire */
+.like-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.like-btn:hover {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.like-btn.liked {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+    </style>
+</head>
+
+<body class="dark-theme">
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <img src="assets/images/icon.png" alt="logo secura">
+                </div>
+                <div class="sidebar-logo-text">
+                    <h1>SECURA</h1>
+                    <p>Gestion Sécurisée</p>
+                </div>
+            </div>
+            <button class="sidebar-close action-btn" id="sidebarClose" aria-label="Fermer le menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <!-- Profile Section -->
+        <div class="sidebar-profile">
+            <div class="profile-avatar large">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="profile-details">
+                <strong id="sidebarProfileName">Chargement...</strong>
+                <small id="sidebarProfileEmail">email@exemple.com</small>
+                <span class="badge-role" id="sidebarProfileRole">Utilisateur</span>
+            </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="navMenu" class="sidebar-menu">
+            <a href="index.html" class="sidebar-link">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="events.html" class="sidebar-link">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Événements</span>
+            </a>
+            <a href="guests.html" class="sidebar-link">
+                <i class="fas fa-users"></i>
+                <span>Invités</span>
+            </a>
+            <a href="tables.html" class="sidebar-link">
+                <i class="fas fa-chair"></i>
+                <span>Tables</span>
+            </a>
+            <a href="galleries.html" class="sidebar-link active">
+                <i class="fas fa-images"></i>
+                <span>Galeries</span>
+            </a>
+            <a href="qr-generator.html" class="sidebar-link">
+                <i class="bi bi-qr-code"></i>
+                <span>Générateur QR</span>
+            </a>
+            <a href="ticket-generator.html" class="sidebar-link">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Billets</span>
+            </a>
+            <a href="scanner.html" class="sidebar-link">
+                <i class="fas fa-camera"></i>
+                <span>Scanner</span>
+            </a>
+            <hr class="sidebar-divider">
+            <a href="access.html" class="sidebar-link" id="accessEventLink">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Accès Événement</span>
+            </a>
+            <a href="profile.html" class="sidebar-link">
+                <i class="fas fa-user"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="settings.html" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+            </a>
+            <button class="sidebar-link text-danger" id="sidebarLogout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+                <span>Mode Sombre</span>
+            </button>
+            <button class="fullscreen-toggle" id="fullscreenToggle">
+                <i class="fas fa-expand"></i>
+                <span>Plein écran</span>
+            </button>
+        </div>
+    </nav>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Bouton flottant pour ouvrir la sidebar -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Top Bar -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <img src="assets/images/icon.png" alt="logo secura">
+                </div>
+                <div class="logo-text">
+                    <h1>SECURA</h1>
+                    <p class="form-title">Galeries Photos</p>
+                </div>
+            </div>
+           
+            <!-- Profile Button -->
+            <button class="profile-toggle header-profile-btn" id="profileToggle" aria-haspopup="true" aria-expanded="false">
+                <div class="profile-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-info">
+                    <span class="profile-name" id="profileName">Chargement...</span>
+                    <span class="profile-role" id="profileRole">Utilisateur</span>
+                </div>
+                <i class="bi bi-chevron-down profile-arrow"></i>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Profile Menu -->
+    <div class="floating-profile-menu" id="floatingProfileMenu">
+        <div class="profile-dropdown show" id="profileDropdown" role="menu">
+            <div class="profile-header">
+                <div class="profile-avatar large">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-details">
+                    <strong id="dropdownName">Chargement...</strong>
+                    <small id="dropdownEmail">email@exemple.com</small>
+                    <span class="badge-role" id="dropdownRole">Utilisateur</span>
+                </div>
+            </div>
+            <div class="dropdown-actions">
+                <a href="profile.html" class="dropdown-item" role="menuitem">
+                    <i class="bi bi-person"></i> Mon Profil
+                </a>
+                <a href="settings.html" class="dropdown-item" role="menuitem">
+                    <i class="bi bi-gear"></i> Paramètres
+                </a>
+                <hr class="dropdown-divider">
+                <button class="dropdown-item text-danger" id="logout-btn" role="menuitem">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+    </div>
+
+<!-- MAIN CONTENT AREA - GALERIES PHOTOS -->
+<main id="mainContent" class="main-content">
+    
+    <!-- ============================================
+         VUE ACCUEIL (SÉLECTION D'ÉVÉNEMENT)
+         ============================================ -->
+    <div id="eventsHomeView" class="events-home-container">
+        <div class="events-home-header">
+            <h1><i class="fas fa-images"></i> Galeries Photos</h1>
+            <p>Sélectionnez un événement pour gérer ses galeries photos</p>
+        </div>
+        
+        <!-- Toggle Vue Grille/Tableau -->
+        <div class="view-mode-toggle">
+            <button class="view-mode-btn active" data-mode="grid">
+                <i class="fas fa-th-large"></i>
+                <span>Grille</span>
+            </button>
+            <button class="view-mode-btn" data-mode="table">
+                <i class="fas fa-table"></i>
+                <span>Tableau</span>
+            </button>
+        </div>
+        
+        <!-- Vue Grille d'Événements -->
+        <div id="eventsGridView" class="events-mini-grid">
+            <!-- Les mini cartes d'événements seront injectées ici -->
+        </div>
+        
+        <!-- Vue Tableau d'Événements -->
+        <div id="eventsTableView" class="events-table-container" style="display: none;">
+            <table class="events-mini-table">
+                <thead>
+                    <tr>
+                        <th>Événement</th>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Galeries</th>
+                        <th>Photos</th>
+                        <th>Likes</th>
+                        <th>Commentaires</th>
+                    </tr>
+                </thead>
+                <tbody id="eventsTableBody">
+                    <!-- Les lignes seront injectées ici -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- État Vide -->
+        <div id="emptyEventsState" class="home-message" style="display: none;">
+            <i class="fas fa-calendar-times"></i>
+            <h2>Aucun événement disponible</h2>
+            <p>Créez d'abord un événement pour gérer ses galeries photos.</p>
+            <a href="events.html" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i>
+                Créer un événement
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================================
+         VUE PRINCIPALE GALERIES
+         ============================================ -->
+    <div id="galleriesView" class="galleries-main" style="display: none;">
+        
+        <!-- En-tête de Page -->
+        <div class="page-header">
+            <div class="page-title">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <a class="back-link" id="backToEventsBtn">
+                        <svg class="back-icon-link" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1><i class="fas fa-images"></i> Galeries Photos</h1>
+                        <div class="event-name" id="eventNameDisplay">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Chargement de l'événement...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="page-actions">
+                <button class="btn btn-secondary" id="importGalleryBtn" title="Importer des galeries">
+                    <i class="fas fa-file-import"></i>
+                    <span>Importer</span>
+                </button>
+                <button class="btn btn-secondary" id="exportGalleryBtn" title="Exporter les galeries">
+                    <i class="fas fa-file-export"></i>
+                    <span>Exporter</span>
+                </button>
+                <button class="btn btn-primary" id="createGalleryBtn" title="Créer une nouvelle galerie">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nouvelle Galerie</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Barre d'Actions et Filtres -->
+        <div class="actions-bar">
+            <div class="actions-top">
+                <div class="actions-left">
+                    <div class="quick-filters">
+                        <div class="filter-chip active" data-filter="all">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Toutes</span>
+                        </div>
+                        <div class="filter-chip" data-filter="public">
+                            <i class="fas fa-globe"></i>
+                            <span>Publiques</span>
+                        </div>
+                        <div class="filter-chip" data-filter="private">
+                            <i class="fas fa-lock"></i>
+                            <span>Privées</span>
+                        </div>
+                        <div class="filter-chip" data-filter="moderation">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>En modération</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="actions-right">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchGalleries" placeholder="Rechercher une galerie..." autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Pagination En Haut -->
+            <div class="mini-pagination-bar" id="miniPaginationBar" style="display: none;">
+                <div style="color: var(--text-color); font-weight: 500;">
+                    <span id="miniPaginationInfo">Page 1 sur 1</span>
+                </div>
+                <div class="mini-pagination-controls" id="miniPaginationControls">
+                    <!-- Générée dynamiquement -->
+                </div>
+            </div>
+        </div>
+
+        
+
+        <!-- VUE GRILLE DES GALERIES -->
+        <div class="galleries-view-container active" id="galleriesGridView">
+            <div class="galleries-header">
+                <h3><i class="fas fa-images"></i> Galeries (<span id="galleriesCount">0</span>)</h3>
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="grid">
+                        <i class="fas fa-th-large"></i>
+                        <span>Grille</span>
+                    </button>
+                    <button class="view-btn" data-view="list">
+                        <i class="fas fa-list"></i>
+                        <span>Liste</span>
+                    </button>
+                    <button class="view-btn" data-view="stats">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Statistiques</span>
+                    </button>
+                    <button class="view-btn create" id="createGalleryActionBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Nouvelle
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Grille de Galeries -->
+            <div class="galleries-grid" id="galleriesGrid">
+                <!-- Les cartes seront injectées ici -->
+            </div>
+            
+            <!-- État Vide -->
+            <div class="empty-state" id="emptyStateGalleries" style="display: none;">
+                <i class="fas fa-images"></i>
+                <h3>Aucune galerie trouvée</h3>
+                <p>Créez votre première galerie pour commencer</p>
+                <button class="btn btn-primary" id="createFirstGallery">
+                    <i class="fas fa-plus-circle"></i>
+                    Créer une galerie
+                </button>
+            </div>
+            
+            <!-- Loader -->
+            <div class="loader" id="galleriesLoader" style="display: none;"></div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="galleriesPagination" style="display: none;"></div>
+        </div>
+
+        <!-- VUE LISTE DES GALERIES -->
+        <div class="galleries-view-container" id="galleriesListView" style="display: none;">
+            <div class="galleries-header">
+                <h3><i class="fas fa-list"></i> Liste des Galeries (<span id="galleriesListCount">0</span>)</h3>
+                <div class="view-toggle">
+                    <button class="view-btn" data-view="grid">
+                        <i class="fas fa-th-large"></i>
+                        <span>Grille</span>
+                    </button>
+                    <button class="view-btn active" data-view="list">
+                        <i class="fas fa-list"></i>
+                        <span>Liste</span>
+                    </button>
+                    <button class="view-btn" data-view="stats">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Statistiques</span>
+                    </button>
+                    <button class="view-btn create" id="createGalleryListBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Nouvelle
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Contenu de la liste -->
+            <div id="galleriesListContent">
+                <!-- Les galeries seront injectées ici -->
+            </div>
+            
+            <!-- État Vide -->
+            <div class="empty-state" id="emptyStateGalleriesList" style="display: none;">
+                <i class="fas fa-list"></i>
+                <h3>Aucune galerie trouvée</h3>
+                <p>Créez votre première galerie</p>
+                <button class="btn btn-primary" id="createFirstGalleryList">
+                    <i class="fas fa-plus-circle"></i>
+                    Créer une galerie
+                </button>
+            </div>
+            
+            <!-- Loader -->
+            <div class="loader" id="galleriesListLoader" style="display: none;"></div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="galleriesListPagination" style="display: none;"></div>
+        </div>
+
+        <!-- VUE STATISTIQUES -->
+        <div class="stats-view-container" id="statsView" style="display: none;">
+            <div class="galleries-header in-specific-view">
+                <h3><i class="fas fa-chart-bar"></i> Statistiques des Galeries</h3>
+                <div class="view-toggle">
+                    <button class="view-btn" data-view="grid">
+                        <i class="fas fa-th-large"></i>
+                        <span>Grille</span>
+                    </button>
+                    <button class="view-btn" data-view="list">
+                        <i class="fas fa-list"></i>
+                        <span>Liste</span>
+                    </button>
+                    <button class="view-btn active" data-view="stats">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Statistiques</span>
+                    </button>
+                     <button class="view-btn create" id="createGalleryStatsBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Nouvelle
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Cartes de Statistiques -->
+            <div class="stats-grid">
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-images"></i>
+                        Total des Galeries
+                    </div>
+                    <div class="stat-value" id="totalGalleries">0</div>
+                    <div class="stat-details">Galeries actives</div>
+                </div>
+                
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-photo-video"></i>
+                        Photos Totales
+                    </div>
+                    <div class="stat-value" id="statsPhotosCount">0</div>
+                    <div class="stat-details">Toutes les photos</div>
+                </div>
+                
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-heart"></i>
+                        Engagement Global
+                    </div>
+                    <div class="stat-value" id="statsEngagementScore">0</div>
+                    <div class="stat-details">Score d'engagement moyen</div>
+                </div>
+                
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-shield-alt"></i>
+                        En Modération
+                    </div>
+                    <div class="stat-value" id="statsPendingPhotos">0</div>
+                    <div class="stat-details">Photos en attente</div>
+                </div>
+            </div>
+            
+
+            <!-- Statistiques Rapides 
+        <div class="stats-grid">
+            <div class="stat-card-advanced-advanced">
+                <div class="stat-value" id="totalGalleries">0</div>
+                <div class="stat-label">Galeries</div>
+            </div>
+            <div class="stat-card-advanced-advanced">
+                <div class="stat-value" id="totalPhotos">0</div>
+                <div class="stat-label">Photos</div>
+            </div>
+            <div class="stat-card-advanced-advanced">
+                <div class="stat-value" id="totalLikes">0</div>
+                <div class="stat-label">Likes</div>
+            </div>
+            <div class="stat-card-advanced-advanced">
+                <div class="stat-value" id="totalComments">0</div>
+                <div class="stat-label">Commentaires</div>
+            </div>
+        </div> -->
+            <!-- KPI Cards -->
+            <div class="kpi-grid-container">
+                <div class="kpi-card trending">
+                    <div class="kpi-icon">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Likes par jour</div>
+                        <div class="kpi-value" id="kpiLikesPerDay">0</div>
+                        <div class="kpi-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            +12% cette semaine
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="kpi-card efficiency">
+                    <div class="kpi-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Taux d'approbation</div>
+                        <div class="kpi-value" id="kpiApprovalRate">0%</div>
+                        <div class="kpi-trend stable">
+                            <i class="fas fa-minus"></i>
+                            Stable
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="kpi-card diversity">
+                    <div class="kpi-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Contributeurs</div>
+                        <div class="kpi-value" id="kpiContributorsCount">0</div>
+                        <div class="kpi-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            +5 ce mois
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Graphiques -->
+            <div class="charts-container">
+                <div class="chart-card advanced">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Distribution des Galeries
+                    </div>
+                    <div class="chart-placeholder" id="galleriesDistributionChart">
+                        <!-- Chart.js -->
+                    </div>
+                </div>
+                
+                <div class="chart-card advanced">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-line"></i>
+                        Engagement Trend
+                    </div>
+                    <div class="chart-placeholder" id="engagementTrendChart">
+                        <!-- Chart.js -->
+                    </div>
+                </div>
+                
+                <div class="chart-card advanced">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-pie"></i>
+                        État des Photos
+                    </div>
+                    <div class="chart-placeholder" id="photoStatusChart">
+                        <!-- Chart.js -->
+                    </div>
+                </div>
+                
+                <div class="chart-card advanced">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-area"></i>
+                        Visibilité des Galeries
+                    </div>
+                    <div class="chart-placeholder" id="visibilityChart">
+                        <!-- Chart.js -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loader -->
+            <div class="loader" id="statsLoader" style="display: none;"></div>
+        </div>
+
+        <!-- Pagination Générale -->
+        <div class="pagination" id="pagination" style="display: none;"></div>
+    </div>
+
+    <!-- ============================================
+         VUE PHOTOS D'UNE GALERIE (VUE PRINCIPALE)
+         ============================================ -->
+    <div id="photosView" class="galleries-main" style="display: none;">
+        
+        <!-- En-tête de Page -->
+        <div class="page-header">
+            <div class="page-title">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <a class="back-link" id="backToGalleriesBtn">
+                        <svg class="back-icon-link" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                    <div>
+                       
+
+                         <h1 id="currentGalleryName"><i class="fas fa-camera"></i> Photos</h1>
+                        <div class="event-name" id="galleryNameDisplay">
+                            <i class="fas fa-images"></i>
+                            <span id="currentGalleryDescription">Galerie</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="page-actions">
+                <button class="btn btn-secondary" id="editGalleryCurrentBtn" title="Éditer la galerie">
+                    <i class="fas fa-edit"></i>
+                    <span>Éditer</span>
+                </button>
+                <button class="btn btn-secondary" id="exportCurrentGalleryBtn" title="Exporter les photos">
+                    <i class="fas fa-file-export"></i>
+                    <span>Exporter</span>
+                </button>
+                <button class="btn btn-primary" id="addFirstPhotoBtn" title="Ajouter des photos">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Ajouter Photos</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Barre d'Actions et Filtres -->
+        <div class="actions-bar">
+            <div class="actions-top">
+                <div class="actions-left">
+                    <div class="quick-filters">
+                        <div class="filter-chip active" data-photo-filter="all">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Toutes</span>
+                        </div>
+                        <div class="filter-chip" data-photo-filter="approved">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Approuvées</span>
+                        </div>
+                        <div class="filter-chip" data-photo-filter="pending">
+                            <i class="fas fa-clock"></i>
+                            <span>En attente</span>
+                        </div>
+                        <div class="filter-chip" data-photo-filter="rejected">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Rejetées</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="actions-right">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchPhotos" placeholder="Rechercher une photo..." autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Pagination En Haut -->
+            <div class="mini-pagination-bar" id="miniPhotoPaginationBar" style="display: none;">
+                <div style="color: var(--text-color); font-weight: 500;">
+                    <span id="miniPhotoPaginationInfo">Page 1 sur 1</span>
+                </div>
+                <div class="mini-pagination-controls" id="miniPhotoPaginationControls">
+                    <!-- Générée dynamiquement -->
+                </div>
+            </div>
+        </div>
+
+       
+
+        
+
+        <!-- VUE GRILLE DES PHOTOS -->
+        <div class="galleries-view-container active" id="photosGridView">
+            <div class="galleries-header">
+                <h3><i class="fas fa-images"></i> Photos (<span id="photosCount">0</span>)</h3>
+
+              
+            
+                <div class="view-toggle">
+                    
+                    <button class="view-btn active" data-photo-view="grid">
+                        <i class="fas fa-th-large"></i>
+                        <span>Grille</span>
+                    </button>
+                    <button class="view-btn" data-photo-view="list">
+                        <i class="fas fa-list"></i>
+                        <span>Liste</span>
+                    </button>
+                    <button class="view-btn" data-photo-view="stats">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Statistiques</span>
+                    </button>
+                    <button class="view-btn create" id="moderationPhotoBtn">
+                        <i class="fas fa-shield-alt"></i>
+                        Modération
+                    </button>
+                </div>
+            </div>
+            
+           
+            
+            <!-- Grille de Photos -->
+            <div class="galleries-grid" id="photosGrid">
+                <!-- Les cartes photos seront injectées ici -->
+            </div>
+            
+            <!-- Vue Liste Photos -->
+            <div class="photos-list-view" id="photosListView" style="display: none;">
+                <div class="photos-list" id="photosList">
+                    <!-- Les photos en liste seront injectées ici -->
+                </div>
+            </div>
+            
+            <!-- État Vide -->
+            <div class="empty-state" id="emptyStatePhotos" style="display: none;">
+                <i class="fas fa-camera"></i>
+                <h3>Aucune photo trouvée</h3>
+                <p>Ajoutez votre première photo à cette galerie</p>
+                <button class="btn btn-primary" id="createFirstPhoto">
+                    <i class="fas fa-plus-circle"></i>
+                    Ajouter une photo
+                </button>
+            </div>
+            
+            <!-- Loader -->
+            <div class="loader" id="photosLoader" style="display: none;"></div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="photosPagination" style="display: none;"></div>
+        </div>
+
+        <!-- VUE STATISTIQUES PHOTOS -->
+        <div class="stats-view-container" id="photosStatsView" style="display: none;">
+            <div class="galleries-header in-specific-view">
+                <h3><i class="fas fa-chart-bar"></i> Statistiques des Photos</h3>
+                <div class="view-toggle">
+                    <button class="view-btn" data-photo-view="grid">
+                        <i class="fas fa-th-large"></i>
+                        <span>Grille</span>
+                    </button>
+                    <button class="view-btn" data-photo-view="list">
+                        <i class="fas fa-list"></i>
+                        <span>Liste</span>
+                    </button>
+                    <button class="view-btn active" data-photo-view="stats">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Statistiques</span>
+                    </button>
+                    <button class="view-btn create" id="moderationPhotoStatsBtn">
+                        <i class="fas fa-shield-alt"></i>
+                        Modération
+                    </button>
+                </div>
+            </div>
+            
+             <!-- Statistiques Galerie (Cachée par défaut avec Expand) -->
+        <div style="margin: 20px 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card-bg); border-radius: 8px; cursor: pointer;" id="statsExpandToggle">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-chart-line" style="color: var(--primary);"></i>
+                    <span style="font-weight: 600;">Statistiques</span>
+                </div>
+                <i class="fas fa-chevron-down" id="statsExpandIcon" style="transition: transform 0.3s ease;"></i>
+            </div>
+            <div class="stats-grid" id="statsGridContainer" style="margin: 15px 0; display: none;">
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-images"></i>
+                        Total des Photos
+                    </div>
+                    <div class="stat-value" id="galleryPhotosCount">0</div>
+                    <div class="stat-details">Photos dans cette galerie</div>
+                </div>
+                
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-heart"></i>
+                        Likes
+                    </div>
+                    <div class="stat-value" id="galleryLikesCount">0</div>
+                    <div class="stat-details">Interactions positives</div>
+                </div>
+                
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-comments"></i>
+                        Commentaires
+                    </div>
+                    <div class="stat-value" id="galleryCommentsCount">0</div>
+                    <div class="stat-details">Tous les commentaires</div>
+                </div>
+                
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-eye"></i>
+                        Vues
+                    </div>
+                    <div class="stat-value" id="galleryViewsCount">0</div>
+                    <div class="stat-details">Nombre de visionnages</div>
+                </div>
+            </div>
+        </div>
+            <!-- Cartes de Statistiques -->
+            <div class="stats-grid">
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-image"></i>
+                        Photo la Plus Likée
+                    </div>
+                    <div class="stat-value" id="photoMostLiked">0</div>
+                    <div class="stat-details">Likes maximal</div>
+                </div>
+                
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-comment"></i>
+                        Photo la Plus Commentée
+                    </div>
+                    <div class="stat-value" id="photoMostCommented">0</div>
+                    <div class="stat-details">Commentaires maximal</div>
+                </div>
+                
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-eye"></i>
+                        Engagement Moyen
+                    </div>
+                    <div class="stat-value" id="photoAvgEngagement">0%</div>
+                    <div class="stat-details">Score d'engagement</div>
+                </div>
+                
+                <div class="stat-card-advanced-advanced">
+                    <div class="stat-title">
+                        <i class="fas fa-shield-alt"></i>
+                        En Modération
+                    </div>
+                    <div class="stat-value" id="photosPendingReview">0</div>
+                    <div class="stat-details">Photos en attente</div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-grid-container">
+                <div class="kpi-card trending">
+                    <div class="kpi-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Likes par jour</div>
+                        <div class="kpi-value" id="photoKpiLikesPerDay">0</div>
+                        <div class="kpi-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            Tendance positive
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="kpi-card efficiency">
+                    <div class="kpi-icon">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Commentaires par jour</div>
+                        <div class="kpi-value" id="photoKpiCommentsPerDay">0</div>
+                        <div class="kpi-trend stable">
+                            <i class="fas fa-minus"></i>
+                            Stable
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="kpi-card diversity">
+                    <div class="kpi-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Vues moyennes</div>
+                        <div class="kpi-value" id="photoKpiAvgViews">0</div>
+                        <div class="kpi-trend positive">
+                            <i class="fas fa-arrow-up"></i>
+                            +8% ce mois
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Graphiques -->
+            <div class="charts-container">
+                <div class="chart-card advanced">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Distribution des Engagements
+                    </div>
+                    <div class="chart-placeholder" id="photosEngagementChart">
+                        <!-- Chart.js -->
+                    </div>
+                </div>
+                
+                <div class="chart-card advanced">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-line"></i>
+                        Trend des Likes
+                    </div>
+                    <div class="chart-placeholder" id="photosLikesTrendChart">
+                        <!-- Chart.js -->
+                    </div>
+                </div>
+                
+                <div class="chart-card advanced">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-pie"></i>
+                        État des Photos
+                    </div>
+                    <div class="chart-placeholder" id="photosStatusChart">
+                        <!-- Chart.js -->
+                    </div>
+                </div>
+                
+                <div class="chart-card advanced">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-area"></i>
+                        Performance des Photos
+                    </div>
+                    <div class="chart-placeholder" id="photosPerformanceChart">
+                        <!-- Chart.js -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loader -->
+            <div class="loader" id="photosStatsLoader" style="display: none;"></div>
+        </div>
+
+        <!-- Pagination Générale -->
+        <div class="pagination" id="photosPaginationGeneral" style="display: none;"></div>
+    </div>
+
+
+</main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="row">
+                    <div class="col-lg-4 mb-5 mb-lg-0">
+                        <div class="footer-brand">
+                            <div class="footer-logo">
+                                <img src="assets/images/icon.png" alt="SECURA Logo">
+                            </div>
+                            <div class="footer-title">
+                                <h3>SECURA</h3>
+                                <p>Plateforme d'accès événementiel</p>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            SECURA révolutionne l'accès aux événements avec des solutions innovantes, 
+                            sécurisées et intuitives pour organisateurs et participants.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Navigation</h4>
+                        <ul class="footer-links">
+                            <li><a href="index.html">Accueil</a></li>
+                            <li><a href="access.html">Accès événement</a></li>
+                            <li><a href="#features">Fonctionnalités</a></li>
+                            <li><a href="#how-it-works">Comment ça marche</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Compte</h4>
+                        <ul class="footer-links">
+                            <li><a href="login.html">Connexion</a></li>
+                            <li><a href="register.html">Inscription</a></li>
+                            <li><a href="forgot-password.html">Mot de passe oublié</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4">
+                        <h4>Newsletter</h4>
+                        <p class="mb-4">Inscrivez-vous pour recevoir nos actualités et offres exclusives.</p>
+                        <form class="newsletter-form" id="newsletterForm">
+                            <div class="newsletter-input-group">
+                                <input type="email" class="newsletter-input" placeholder="Votre email" required>
+                                <button type="submit" class="newsletter-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                   
+                                </button>
+                            </div>
+                        </form>
+                       
+                        <div class="footer-controls-inline">
+                            <!-- Theme Switch Button -->
+                            <div class="theme-switch-footer">
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="themeSwitchFooter" aria-label="Basculer le thème">
+                                    <span class="theme-switch-slider">
+                                        <i class="fas fa-moon"></i>
+                                        <i class="fas fa-sun"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Language Selector -->
+                            <div class="language-selector"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright">© 2025 SECURA. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-legal">
+                            <a href="#">Mentions légales</a>
+                            <a href="#">Confidentialité</a>
+                            <a href="#">CGU</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bouton retour en haut -->
+    <button class="scroll-top" id="scrollTop" aria-label="Retour en haut">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+   <!-- ============================================
+     MODALS
+     ============================================ -->
+
+<!-- MODAL CRÉATION GALERIE -->
+<div class="gallery-creation-modal" id="galleryCreationModal">
+    <div class="gallery-creation-wrapper">
+        <button class="modal-close-btn" id="closeGalleryModalBtn" title="Fermer">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <!-- Panel Progression -->
+        <div class="creation-progress-panel">
+            <h3 class="progress-title" id="creationProgressTitle">Création de Galerie</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="creationProgressBar"></div>
+            </div>
+            
+            <div class="vertical-steps">
+                <div class="vertical-step active" data-step="1">
+                    <div class="vertical-step-info">
+                        <span class="vertical-step-label">Informations</span>
+                        <span class="vertical-step-description">Nom et description</span>
+                    </div>
+                </div>
+                <div class="vertical-step" data-step="2">
+                    <div class="vertical-step-info">
+                        <span class="vertical-step-label">Configuration</span>
+                        <span class="vertical-step-description">Paramètres et permissions</span>
+                    </div>
+                </div>
+                <div class="vertical-step" data-step="3">
+                    <div class="vertical-step-info">
+                        <span class="vertical-step-label">Couverture</span>
+                        <span class="vertical-step-description">Image de présentation</span>
+                    </div>
+                </div>
+                <div class="vertical-step" data-step="4">
+                    <div class="vertical-step-info">
+                        <span class="vertical-step-label">Confirmation</span>
+                        <span class="vertical-step-description">Vérification finale</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="creation-progress-info">
+                <div class="creation-progress-text">Progression</div>
+                <div class="creation-progress-percentage" id="creationProgressPercentage">25%</div>
+            </div>
+        </div>
+        
+        <!-- Panel Formulaire -->
+        <div class="creation-form-panel">
+            
+            <!-- ÉTAPE 1: INFORMATIONS -->
+            <div class="creation-step-content active" id="step1Content">
+               
+               <div class="creation-header">
+                <h2 class="creation-title" id="modalCreationTitle">Créer une Galerie</h2>
+                <p class="creation-subtitle" id="modalCreationSubtitle">Ajoutez une nouvelle galerie photos</p>
+            </div>
+
+            
+                <form id="createGalleryForm">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-tag"></i>
+                            Nom de la galerie
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" id="galleryName" class="form-control" 
+                               placeholder="Ex: Photos de l'événement" required>
+                        <div class="form-help">Nom pour identifier votre galerie</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-align-left"></i>
+                            Description
+                        </label>
+                        <textarea id="galleryDescription" class="form-control" 
+                                  placeholder="Description de la galerie..." 
+                                  rows="3" maxlength="500"></textarea>
+                        <div class="form-help">Maximum 500 caractères</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-tags"></i>
+                            Catégorie
+                        </label>
+                        <select id="galleryCategory" class="form-control">
+                            <option value="general">Général</option>
+                            <option value="vip">VIP</option>
+                            <option value="backstage">Backstage</option>
+                            <option value="official">Officiel</option>
+                            <option value="guest">Invités</option>
+                            <option value="behind_scenes">Coulisses</option>
+                        </select>
+                    </div>
+                </form>
+
+                <div class="creation-navigation">
+                    <button class="btn btn-secondary" id="cancelGalleryBtn">
+                        <i class="fas fa-times"></i>
+                        Annuler
+                    </button>
+                    <button class="btn btn-primary" id="nextToStep2Btn">
+                        <i class="fas fa-arrow-right"></i>
+                        Suivant
+                    </button>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 2: CONFIGURATION -->
+            <div class="creation-step-content" id="step2Content">
+                <div class="settings-cards-container">
+                    <!-- CARD 1: VISIBILITÉ -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <div class="settings-card-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="settings-card-info">
+                                <div class="settings-card-title">Visibilité</div>
+                                <div class="settings-card-description">Contrôler qui peut voir cette galerie</div>
+                            </div>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="settings-option">
+                                <div class="settings-option-text">
+                                    <div class="settings-option-title">Galerie publique</div>
+                                    <div class="settings-option-subtitle">Visible par tous les utilisateurs</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="galleryIsPublic" class="toggle-input">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: MODÉRATION -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <div class="settings-card-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="settings-card-info">
+                                <div class="settings-card-title">Modération</div>
+                                <div class="settings-card-description">Contrôler l'approbation du contenu</div>
+                            </div>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="settings-option">
+                                <div class="settings-option-text">
+                                    <div class="settings-option-title">Approbation requise</div>
+                                    <div class="settings-option-subtitle">Les photos doivent être approuvées avant publication</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="moderationRequired" class="toggle-input" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 3: INTERACTIONS -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <div class="settings-card-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="settings-card-info">
+                                <div class="settings-card-title">Interactions</div>
+                                <div class="settings-card-description">Gérer l'engagement des utilisateurs</div>
+                            </div>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="settings-option">
+                                <div class="settings-option-text">
+                                    <div class="settings-option-title">Commentaires</div>
+                                    <div class="settings-option-subtitle">Autoriser les commentaires sur les photos</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="allowComments" class="toggle-input" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-option">
+                                <div class="settings-option-text">
+                                    <div class="settings-option-title">Likes</div>
+                                    <div class="settings-option-subtitle">Autoriser les likes sur les photos</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="allowLikes" class="toggle-input" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-option">
+                                <div class="settings-option-text">
+                                    <div class="settings-option-title">Téléchargements</div>
+                                    <div class="settings-option-subtitle">Autoriser le téléchargement des photos</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="allowDownloads" class="toggle-input">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 4: PERMISSIONS -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <div class="settings-card-icon">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                            <div class="settings-card-info">
+                                <div class="settings-card-title">Permissions</div>
+                                <div class="settings-card-description">Contrôler les contributions utilisateurs</div>
+                            </div>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="settings-option">
+                                <div class="settings-option-text">
+                                    <div class="settings-option-title">Contributions</div>
+                                    <div class="settings-option-subtitle">Autoriser les utilisateurs à ajouter des photos</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="allowContributions" class="toggle-input">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="creation-navigation">
+                    <button class="btn btn-secondary" id="backToStep1Btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Retour
+                    </button>
+                    <button class="btn btn-primary" id="nextToStep3Btn">
+                        <i class="fas fa-arrow-right"></i>
+                        Suivant
+                    </button>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 3: COUVERTURE -->
+            <div class="creation-step-content" id="step3Content">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-palette"></i>
+                        Couverture de la galerie
+                    </label>
+                    <div class="photo-upload-area" id="galleryCoverUpload">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <p class="upload-instructions">Glissez-déposez une image</p>
+                        <p class="upload-formats">JPG, PNG, WEBP - Max 5MB</p>
+                        <input type="file" id="galleryCoverFile" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <div id="coverPreview" style="display: none; margin-top: 20px; text-align: center;">
+                        <img id="coverPreviewImage" src="" alt="Aperçu" style="max-width: 200px; max-height: 150px; border-radius: 8px; margin-bottom: 10px;">
+                        <p style="color: var(--success);">
+                            <i class="fas fa-check-circle"></i> Image sélectionnée
+                        </p>
+                    </div>
+                </div>
+
+                <div class="creation-navigation">
+                    <button class="btn btn-secondary" id="backToStep2Btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Retour
+                    </button>
+                    <button class="btn btn-primary" id="nextToStep4Btn">
+                        <i class="fas fa-arrow-right"></i>
+                        Suivant
+                    </button>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 4: CONFIRMATION -->
+            <div class="creation-step-content" id="step4Content">
+                <div class="step4-title">
+                    <h3><i class="fas fa-eye"></i> Aperçu de votre galerie</h3>
+                    <p>Voici comment votre galerie apparaîtra aux visiteurs</p>
+                </div>
+
+                <!-- PREVIEW GALERIE PROFESSIONNELLE -->
+                <div class="gallery-preview-container">
+                    <!-- En-tête de la galerie -->
+                    <div class="gallery-preview-header">
+                        <div class="preview-cover" id="previewCoverImage" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); background-size: cover; background-position: center;">
+                            <div class="preview-overlay"></div>
+                        </div>
+                        
+                        <div class="gallery-preview-info">
+                            <div class="preview-gallery-name" id="previewGalleryName">Nom de la galerie</div>
+                            <div class="preview-gallery-badges">
+                                <span class="preview-badge visibility" id="previewVisibilityBadge">
+                                    <i class="fas fa-globe"></i> Publique
+                                </span>
+                                <span class="preview-badge category" id="previewCategoryBadge">
+                                    <i class="fas fa-image"></i> Galerie
+                                </span>
+                                <span class="preview-badge moderation" id="previewModerationBadge">
+                                    <i class="fas fa-shield-alt"></i> Modération
+                                </span>
+                            </div>
+                            <div class="preview-gallery-desc" id="previewDescription">Aucune description</div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques aperçu -->
+                    <div class="preview-stats-bar">
+                        <div class="preview-stat">
+                            <div class="stat-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Photos</div>
+                            </div>
+                        </div>
+                        <div class="preview-stat">
+                            <div class="stat-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Vues</div>
+                            </div>
+                        </div>
+                        <div class="preview-stat">
+                            <div class="stat-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Likes</div>
+                            </div>
+                        </div>
+                        <div class="preview-stat">
+                            <div class="stat-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Commentaires</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Détails de configuration -->
+                    <div class="preview-config-details">
+                        <div class="config-section">
+                            <h4>Configuration</h4>
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <span class="config-label">Approbation automatique:</span>
+                                    <span class="config-value" id="previewAutoApprove">Non</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Téléchargements:</span>
+                                    <span class="config-value" id="previewDownloads">Autorisés</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Commentaires:</span>
+                                    <span class="config-value" id="previewComments">Autorisés</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Likes:</span>
+                                    <span class="config-value" id="previewLikes">Autorisés</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Taille max photo:</span>
+                                    <span class="config-value" id="previewMaxSize">8 MB</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Photos max:</span>
+                                    <span class="config-value" id="previewMaxPhotos">1000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder pour les photos -->
+                    <div class="preview-gallery-grid">
+                        <div class="preview-empty-state">
+                            <i class="fas fa-images"></i>
+                            <p>Aucune photo pour le moment</p>
+                            <span>Les photos s'afficheront ici une fois ajoutées</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="creation-navigation">
+                    <button class="btn btn-secondary" id="backToStep3Btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Retour
+                    </button>
+                    <button class="btn btn-success" id="submitGalleryBtn">
+                        <i class="fas fa-check-circle"></i>
+                        Créer la galerie
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL AJOUT DE PHOTOS -->
+<div class="gallery-creation-modal" id="addPhotosModal">
+    <div class="gallery-creation-wrapper">
+        <button class="modal-close-btn" id="closeAddPhotosBtn">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="creation-form-panel" style="padding: 60px 40px;">
+            <div class="creation-header">
+                <h2 class="creation-title">Ajouter des Photos</h2>
+                <p class="creation-subtitle">Sélectionnez les photos à ajouter à votre galerie</p>
+            </div>
+
+            <!-- Conteneur Grille Photos avec Upload -->
+            <div id="photosGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(265px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                <!-- Les cartes de photos sélectionnées seront injectées ici -->
+                <!-- La zone d'upload est ajoutée dynamiquement à la fin -->
+            </div>
+
+            <!-- Zone d'upload initial (cachée après la première sélection) -->
+            <div class="photo-upload-area" id="photosUploadArea" style="cursor: pointer; margin-bottom: 20px;">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <p class="upload-instructions">Glissez-déposez vos photos ici ou cliquez</p>
+                <p class="upload-formats">JPG, PNG, WEBP - Max 10MB par photo</p>
+                <input type="file" id="photosFilesInput" multiple accept="image/*" style="display: none;">
+            </div>
+            
+            <!-- Grid Photos (créé dynamiquement) -->
+            <div id="uploadedPhotosGrid" class="uploaded-photos-grid" style="display: none;"></div>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <label class="form-label">
+                    <i class="fas fa-cog"></i>
+                    Options
+                </label>
+                <div class="settings-mini-card">
+                    <div class="settings-option">
+                        <div class="settings-option-text">
+                            <div class="settings-option-title">Approbation automatique</div>
+                            <div class="settings-option-subtitle">Les photos seront approuvées automatiquement</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoApprovePhotos" class="toggle-input" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="creation-navigation" style="margin-top: 40px;">
+                <button class="btn btn-secondary" id="cancelAddPhotosBtn">
+                    <i class="fas fa-times"></i>
+                    Annuler
+                </button>
+                <button class="btn btn-primary" id="submitPhotosBtn" disabled>
+                    <i class="fas fa-upload"></i>
+                    Ajouter <span id="photosCountToAdd">0</span> photo(s)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL MODÉRATION -->
+<div class="moderation-modal" id="moderationModal">
+    <div class="moderation-wrapper">
+        <button class="modal-close-btn" id="closeModerationBtn">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="moderation-header">
+            <h3><i class="fas fa-shield-alt"></i> Modération des Photos</h3>
+            <p>Approuvez ou rejetez les photos de la galerie</p>
+        </div>
+        
+        <div class="moderation-content">
+            <!-- Sidebar -->
+            <div class="moderation-sidebar">
+                <div class="moderation-stats" style="padding: 20px;">
+                    <h4>Statistiques</h4>
+                    <div class="stats-cards" style="grid-template-columns: 1fr; gap: 10px;">
+                        <div class="stat-card-advanced">
+                            <div class="stat-value" id="moderationPending">0</div>
+                            <div class="stat-label">En attente</div>
+                        </div>
+                        <div class="stat-card-advanced">
+                            <div class="stat-value" id="moderationApproved">0</div>
+                            <div class="stat-label">Approuvées</div>
+                        </div>
+                        <div class="stat-card-advanced">
+                            <div class="stat-value" id="moderationRejected">0</div>
+                            <div class="stat-label">Rejetées</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="moderation-list" id="moderationList"></div>
+            </div>
+            
+            <!-- Contenu Principal -->
+            <div class="moderation-main">
+                <div class="moderation-photo-container" id="currentPhotoContainer"></div>
+                <div class="moderation-photo-info" id="currentPhotoInfo"></div>
+                
+                <div class="moderation-actions">
+                    <button class="btn btn-success" id="approvePhotoBtn">
+                        <i class="fas fa-check-circle"></i>
+                        Approuver
+                    </button>
+                    <button class="btn btn-danger" id="rejectPhotoBtn">
+                        <i class="fas fa-times-circle"></i>
+                        Rejeter
+                    </button>
+                    <button class="btn btn-secondary" id="skipPhotoBtn">
+                        <i class="fas fa-forward"></i>
+                        Passer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL COMMENTAIRES -->
+<div class="gallery-creation-modal" id="commentsModal">
+    <div class="gallery-creation-wrapper" style="max-width: 800px;">
+        <button class="modal-close-btn" id="closeCommentsBtn">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="creation-form-panel" style="padding: 40px; position: static;">
+            <div class="creation-header">
+                <h2 class="creation-title">Commentaires de la Photo</h2>
+            </div>
+            
+            <input type="hidden" id="commentPhotoId">
+            
+            <!-- Liste des Commentaires -->
+            <div id="commentsList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding-right: 10px;">
+                <!-- Les commentaires seront injectés ici -->
+            </div>
+            
+            <!-- Formulaire Ajout Commentaire -->
+            <div style="border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <div class="form-group">
+                    <label class="form-label">Ajouter un commentaire</label>
+                    <textarea id="commentInput" class="form-control" 
+                              placeholder="Votre commentaire..." 
+                              rows="3" maxlength="500"></textarea>
+                </div>
+                
+                <div class="creation-navigation">
+                    <button class="btn btn-secondary" id="cancelCommentBtn">
+                        Fermer
+                    </button>
+                    <button class="btn btn-primary" id="submitCommentBtn">
+                        <i class="fas fa-comment"></i>
+                        Commenter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Scripts -->
+    <script src="js/audio-utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            SECURA_AUDIO.preload();
+        });
+    </script>
+    
+    <!-- Librairies -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="js/toastify.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    
+    <!-- Scripts locaux -->
+
+    <script src="js/storage.js"></script>
+    <script src="js/auth-check.js"></script>
+    <script defer src="js/particles-config.js"></script>
+    <script defer src="js/theme.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/sidebar.js"></script>
+    <script src="js/auth.js"></script>
+    <script defer src="js/langue.js"></script>
+    <script defer src="js/galleries.js"></script>
+    
+
+
+</body>
+</html>

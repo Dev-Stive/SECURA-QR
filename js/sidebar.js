@@ -156,7 +156,7 @@ class SidebarManager {
     }
 
     updateAuthVisibility() {
-        const isLoggedIn = window.storage && window.storage.isLoggedIn();
+        const isLoggedIn = window.storage && window.storage.isLoggedIn() || localStorage.getItem('secura_event_session_token');
         
         // Éléments à masquer si non connecté
         const authElements = [

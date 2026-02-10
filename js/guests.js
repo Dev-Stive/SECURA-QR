@@ -433,7 +433,6 @@ function renderEventsList() {
             grid.style.display = 'grid';
             document.getElementById('eventsTableView').style.display = 'none';
 
-            console.log(eventsList.length);
 
              for (const event of eventsList) {
                 const tables = await storage.getAllTables(event.id);
@@ -902,12 +901,12 @@ function updatePagination() {
         // Afficher la mini-pagination
         miniPaginationBar.style.display = 'flex';
         
-        // Mettre à jour l'info
+        // Mettre à jour l'info - format compact
         const startGuest = (currentPage - 1) * guestsPerPage + 1;
         const endGuest = Math.min(currentPage * guestsPerPage, filteredGuests.length);
-        miniPaginationInfo.textContent = `Affichage ${startGuest}-${endGuest} sur ${filteredGuests.length} • Page ${currentPage}/${totalPages}`;
+        miniPaginationInfo.textContent = `${currentPage}/${totalPages}`;
         
-        // Générer les contrôles mini
+        // Générer les contrôles mini (seulement précédent/suivant)
         let miniHTML = `
             <button class="mini-page-btn ${currentPage === 1 ? 'disabled' : ''}" 
                     onclick="changePage(${currentPage - 1})" 
@@ -915,23 +914,6 @@ function updatePagination() {
                     title="Page précédente">
                 <i class="fas fa-chevron-left"></i>
             </button>
-        `;
-        
-        // Afficher jusqu'à 5 pages
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, currentPage + 2);
-        
-        for (let i = startPage; i <= endPage; i++) {
-            miniHTML += `
-                <button class="mini-page-btn ${i === currentPage ? 'active' : ''}" 
-                        onclick="changePage(${i})"
-                        title="Page ${i}">
-                    ${i}
-                </button>
-            `;
-        }
-        
-        miniHTML += `
             <button class="mini-page-btn ${currentPage === totalPages ? 'disabled' : ''}" 
                     onclick="changePage(${currentPage + 1})" 
                     ${currentPage === totalPages ? 'disabled' : ''}
@@ -1629,7 +1611,7 @@ function createTableRow(guest, index, cachedTables = null) {
                 <div class="guest-details-actions">
                     <button class="action-btn-sm move" onclick="event.stopPropagation(); manageGuestTable('${guest.id}')">
                         <i class="fas fa-chair"></i>
-                        Changer de table
+                        Deplacer
                     </button>
                     <button class="action-btn-sm qr" onclick="event.stopPropagation(); viewGuestQR('${guest.id}')">
                         <i class="bi bi-qr-code"></i>

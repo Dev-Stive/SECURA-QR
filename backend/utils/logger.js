@@ -20,7 +20,6 @@ const LOG_DIR = path.join(__dirname, '../../logs');
 // CONFIGURATION DES COULEURS ET EMOJIS
 // ============================================================================
 
-// Palette de couleurs étendue avec Chalk
 const colors = {
   info: chalk.greenBright,
   success: chalk.green,
@@ -401,6 +400,4 @@ logger.log = function(level, message, meta, callback) {
   const safeMeta = maskSensitiveData(meta);
   return originalLog.call(this, level, message, safeMeta, callback);
 }
-// Schéma pour les métadonnées du QR code;
-
 module.exports = log;

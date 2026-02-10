@@ -23,7 +23,7 @@ window.addEventListener('secura:access-denied', () => {
 // 🔐 GESTION DE LA VISIBILITÉ EN MODE GUEST/AUTHENTIFIÉ
 // ═══════════════════════════════════════════════════════════════
 function updateAuthUIVisibility() {
-    const isLoggedIn = window.storage && window.storage.isLoggedIn();
+    const isLoggedIn = window.storage && window.storage.isLoggedIn()  || localStorage.getItem('secura_event_session_token');
     
     console.log(`🔐 Auth Status: ${isLoggedIn ? 'Connecté' : 'Mode Invité'}`);
     
@@ -1274,7 +1274,238 @@ window.debugSecuraLoading = function() {
 
 
 // ═══════════════════════════════════════════════════════════════
-// 🌐 EXPORTS GLOBAUX
+// � QUICK MENU BUTTON (MENU RAPIDE FLOTTANT)
+// ═══════════════════════════════════════════════════════════════
+
+class QuickMenuButton {
+    constructor() {
+        this.btn = document.getElementById('quickMenuBtn');
+        this.modal = document.getElementById('quickMenuModal');
+        this.closeBtn = document.getElementById('closeQuickMenu');
+        this.featuresContainer = document.getElementById('quickMenuFeatures');
+        
+        if (!this.btn || !this.modal) return;
+        
+        this.isDragging = false;
+        this.startX = 0;
+        this.startY = 0;
+        this.currentX = 0;
+        this.currentY = 0;
+        this.init();
+    }
+    
+    init() {
+        // Drag & Drop
+        this.btn.addEventListener('mousedown', (e) => this.onDragStart(e));
+        this.btn.addEventListener('touchstart', (e) => this.onDragStart(e));
+        document.addEventListener('mousemove', (e) => this.onDragMove(e));
+        document.addEventListener('touchmove', (e) => this.onDragMove(e));
+        document.addEventListener('mouseup', () => this.onDragEnd());
+        document.addEventListener('touchend', () => this.onDragEnd());
+        
+        // Click to open menu
+        this.btn.addEventListener('click', (e) => {
+            if (!this.isDragging) {
+                this.toggleMenu();
+            }
+        });
+        
+        // Close button
+        if (this.closeBtn) {
+            this.closeBtn.addEventListener('click', () => this.closeMenu());
+        }
+        
+        // Close on backdrop click
+        if (this.modal) {
+            this.modal.addEventListener('click', (e) => {
+                if (e.target === this.modal) {
+                    this.closeMenu();
+                }
+            });
+        }
+        
+        // Initialize features on load
+        this.updateQuickMenuFeatures();
+        
+        // Re-update features when session changes
+        window.addEventListener('secura:session-updated', () => {
+            this.updateQuickMenuFeatures();
+        });
+    }
+    
+    onDragStart(e) {
+        this.isDragging = true;
+        const touch = e.touches ? e.touches[0] : e;
+        this.startX = touch.clientX - this.btn.offsetLeft;
+        this.startY = touch.clientY - this.btn.offsetTop;
+        this.btn.style.cursor = 'grabbing';
+    }
+    
+    onDragMove(e) {
+        if (!this.isDragging) return;
+        
+        const touch = e.touches ? e.touches[0] : e;
+        this.currentX = touch.clientX - this.startX;
+        this.currentY = touch.clientY - this.startY;
+        
+        // Limiter aux bordures de l'écran
+        const maxX = window.innerWidth - this.btn.offsetWidth;
+        const maxY = window.innerHeight - this.btn.offsetHeight;
+        
+        this.currentX = Math.max(0, Math.min(this.currentX, maxX));
+        this.currentY = Math.max(0, Math.min(this.currentY, maxY));
+        
+        this.btn.style.left = this.currentX + 'px';
+        this.btn.style.right = 'auto';
+        this.btn.style.top = this.currentY + 'px';
+        this.btn.style.bottom = 'auto';
+    }
+    
+    onDragEnd() {
+        if (!this.isDragging) return;
+        this.isDragging = false;
+        this.btn.style.cursor = 'pointer';
+        
+        // Dock to nearest edge
+        const centerX = window.innerWidth / 2;
+        const btnCenterX = this.currentX + this.btn.offsetWidth / 2;
+        
+        // Si au milieu de l'écran, faire rebondir sur le bord
+        if (Math.abs(btnCenterX - centerX) < 100) {
+            if (btnCenterX < centerX) {
+                this.animateTo(0, this.currentY);
+            } else {
+                this.animateTo(window.innerWidth - this.btn.offsetWidth, this.currentY);
+            }
+        }
+    }
+    
+    animateTo(x, y) {
+        const steps = 10;
+        let currentStep = 0;
+        const startX = this.currentX;
+        const startY = this.currentY;
+        
+        const animate = () => {
+            currentStep++;
+            const progress = currentStep / steps;
+            const easeProgress = progress < 0.5 
+                ? 2 * progress * progress 
+                : -1 + (4 - 2 * progress) * progress;
+            
+            this.currentX = startX + (x - startX) * easeProgress;
+            this.currentY = startY + (y - startY) * easeProgress;
+            
+            this.btn.style.left = this.currentX + 'px';
+            this.btn.style.right = 'auto';
+            this.btn.style.top = this.currentY + 'px';
+            this.btn.style.bottom = 'auto';
+            
+            if (currentStep < steps) {
+                requestAnimationFrame(animate);
+            }
+        };
+        
+        animate();
+    }
+    
+    toggleMenu() {
+        if (this.modal.classList.contains('active')) {
+            this.closeMenu();
+        } else {
+            this.openMenu();
+        }
+    }
+    
+    openMenu() {
+        this.modal.classList.add('active');
+        this.updateQuickMenuFeatures();
+    }
+    
+    closeMenu() {
+        this.modal.classList.remove('active');
+    }
+    
+    updateQuickMenuFeatures() {
+        if (!this.featuresContainer) return;
+        
+        // Récupérer les mêmes features que updateFeatureCards
+        const features = [
+            {
+                id: 'chat',
+                icon: 'fas fa-comments',
+                title: 'Chat de Table',
+                requiresAuth: true,
+                url: '../welcome/event-chat.html'
+            },
+            {
+                id: 'menu',
+                icon: 'fas fa-utensils',
+                title: 'Menu & Restauration',
+                requiresAuth: false,
+                url: '../welcome/event-menu.html'
+            },
+            {
+                id: 'schedule',
+                icon: 'fas fa-calendar-alt',
+                title: 'Programme',
+                requiresAuth: false,
+                url: '../welcome/event-schedule.html'
+            },
+            {
+                id: 'guests',
+                icon: 'fas fa-users',
+                title: 'Liste des invités',
+                requiresAuth: true,
+                url: '../welcome/event-guests.html'
+            },
+            {
+                id: 'photos',
+                icon: 'fas fa-camera',
+                title: 'Photos & Médias',
+                requiresAuth: false,
+                url: '../welcome/event-photos.html'
+            },
+            {
+                id: 'qr',
+                icon: 'fas fa-qrcode',
+                title: 'Mon QR Code',
+                requiresAuth: true,
+                url: '../welcome/my-qr.html'
+            }
+        ];
+        
+        // Déterminer si anonyme (mode invité)
+        const isAnonymous = !window.storage?.isLoggedIn?.() && !localStorage.getItem('secura_event_session_token');
+        
+        // Filtrer les features autorisées
+        const availableFeatures = features.filter(feature => {
+            return !isAnonymous || !feature.requiresAuth;
+        });
+        
+        // Construire le HTML
+        this.featuresContainer.innerHTML = availableFeatures.map(feature => {
+            const isLocked = isAnonymous && feature.requiresAuth;
+            return `
+                <div class="quick-menu-feature" 
+                     onclick="window.location.href='${feature.url}'"
+                     title="${feature.title}">
+                    <i class="${feature.icon}"></i>
+                    <span>${feature.title}</span>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+// Initialiser le Quick Menu Button au chargement du DOM
+document.addEventListener('DOMContentLoaded', () => {
+    window.quickMenuButton = new QuickMenuButton();
+});
+
+
+// ═══════════════════════════════════════════════════════════════
+// �🌐 EXPORTS GLOBAUX
 // ═══════════════════════════════════════════════════════════════
 window.showNotification = showNotification;
 window.confirmDialog = confirmDialog;

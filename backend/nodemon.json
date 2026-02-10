@@ -5,7 +5,8 @@
     "data/secura-data copy.json",
     "backups/",
     "node_modules/",
-    "*.html"
+    "*.html",
+    "*"
   ],
   "ext": "js,json",
   "delay": "300ms",

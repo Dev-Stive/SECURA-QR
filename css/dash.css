@@ -138,7 +138,7 @@
 /* === DROPDOWN === */
 .profile-dropdown {
     position: absolute;
-    top: calc(100% + 12px);
+    top: calc(100% + 0px);
     right: 0;
     width: 280px;
     color: white !important;
@@ -243,7 +243,7 @@
         padding: 6px 10px;
         font-size: 0.9rem;
     }
-    .profile-info { display: none; }
+    .profile-toggle .profile-info { display: none; }
     .profile-avatar { width: 32px; height: 32px; font-size: 1.2rem; }
 }
 
@@ -287,7 +287,7 @@
     gap: 12px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 18px;
+    border-radius: 0.5rem !important;
     padding: 8px 16px;
     color: #525252;
     font-size: 0.95rem;
@@ -532,7 +532,7 @@
         font-size: 1.3rem;
     }
     
-    .profile-info {
+    .profile-toggle .profile-info {
         display: none !important;
     }
     

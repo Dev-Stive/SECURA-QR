@@ -33,51 +33,58 @@ const GUEST_CATEGORIES = {
 
 class SecuraStorage {
 
-    // 🌐 URL d'accès au frontend
+    
     FRONTEND_URL = 'https://secura-qr.vercel.app';
     BACKEND_URL = 'https://secura-qr.onrender.com/api';
-    // Alternative locale pour développement
+
     // FRONTEND_URL = 'http://localhost:5500';
     
     constructor() {
-        // Construire l'URL API en fonction de l'environnement
         if (window.location.hostname === 'localhost') {
             this.API_URL = 'http://localhost:3000/api';
         } else {
             this.API_URL = 'https://secura-qr.onrender.com/api';
         }
 
-        // Récupérer le token et l'utilisateur depuis localStorage (synchronisé avec auth.js)
         this.token = localStorage.getItem('secura_token') || null;
         this.user = JSON.parse(localStorage.getItem('secura_user') || 'null');
         this.isAuthenticated = !!this.token;
 
         this.SYNC_ENABLED = true;
-
-        this.SYNC_INTERVAL = 10000;
+        this.SYNC_INTERVAL = 30000; // 30 secondes au lieu de 10
         this.TOKEN_CHECK_INTERVAL = 180000;
-
-
         this.AUTO_SYNC_ON_CHANGE = true;
         this.USE_API_DIRECT = true;
+        this.CACHE_TTL = 30000; // Cache 30 secondes
 
         this.syncTimer = null;
         this.syncInProgress = false;
+        this.requestCache = new Map(); // Cache pour GET
+        this.requestInFlight = new Map(); // Déduplications requêtes en vol
         this.lastSyncTime = null;
         this.syncErrors = [];
         this.isOnline = navigator.onLine;
+        this.tokenCheckInProgress = false;
+        this.lastTokenCheck = null;
 
-          this.tokenCheckInProgress = false;
-            this.lastTokenCheck = null;
-           
-
-        // 🎯 ÉTAT OBSERVABLE
+        // 🎯 ÉTAT OBSERVABLE 
         this.data = {
             events: [],
             guests: [],
             tables: [],
             qrCodes: [],
             scans: [],
+            users: [],  // 🔑 Cache des utilisateurs pour createdByName
+            
+            galleries: [],
+            photos: [],
+            menus: [],
+            dishes: [],
+            plans: [],
+            chatConversations: [],
+            messages: [],
+            comments: [],  // 🔑 Commentaires des photos
+            
             settings: {
                 theme: 'dark',
                 language: 'fr',
@@ -87,8 +94,9 @@ class SecuraStorage {
             }
         };
 
-        // 🔔 LISTENERS GRANULAIRES
+        // 🔔 LISTENERS GRANULAIRES 
         this.listeners = {
+            // Existants
             'event:created': [],
             'event:updated': [],
             'event:deleted': [],
@@ -97,9 +105,43 @@ class SecuraStorage {
             'guest:deleted': [],
             'scan:created': [],
             'qr:generated': [],
+            'user:created': [],
+            
+            'gallery:created': [],
+            'gallery:updated': [],
+            'gallery:deleted': [],
+            'photo:added': [],
+            'photo:deleted': [],
+            'photo:approved': [],
+            'photo:rejected': [],
+            'like:added': [],
+            'like:removed': [],
+            'comment:added': [],
+            'comment:updated': [],
+            'comment:deleted': [],
+            'comment:liked': [],
+            'menu:created': [],
+            'menu:updated': [],
+            'menu:deleted': [],
+            'dish:added': [],
+            'dish:updated': [],
+            'dish:deleted': [],
+            'rating:added': [],
+            'plan:created': [],
+            'plan:updated': [],
+            'plan:deleted': [],
+            'location:added': [],
+            'location:updated': [],
+            'location:deleted': [],
+            'chat:created': [],
+            'message:sent': [],
+            'message:edited': [],
+            'message:deleted': [],
+            'reaction:added': [],
+            'chat:read': [],
+            
             'data:synced': [],
-            'stats:updated': [],
-            'user:created' : []
+            'stats:updated': []
         };
 
         this.init();
@@ -110,16 +152,12 @@ class SecuraStorage {
     // 🚀 INITIALISATION
     // ═══════════════════════════════════════════════════════════════
     async init() {
-        console.log('🚀 SECURA Storage V5.0 - Initialisation...');
-
-        // Synchroniser d'abord avec localStorage en cas de changements d'auth
+        console.log('🚀 SECURA Storage V6.0 - Initialisation...');
         this.syncAuthFromStorage();
-
-    this.loadFromLocalStorage();
-    window.dispatchEvent(new CustomEvent('secura:storage-ready'));
-
-    this.emitUserEvents();
-    this.emitTableEvents();
+        this.loadFromLocalStorage();
+        window.dispatchEvent(new CustomEvent('secura:storage-ready'));
+        this.emitUserEvents();
+        this.emitTableEvents();
 
         window.addEventListener('online', () => {
             this.isOnline = true;
@@ -132,7 +170,6 @@ class SecuraStorage {
             this.stopAutoSync();
         });
 
-        // Wait for auth-check to complete (indicated by body class change)
         const waitForAuthCheck = () => {
             return new Promise((resolve) => {
                 if (document.body.classList.contains('auth-verified') || document.body.classList.contains('auth-denied')) {
@@ -144,7 +181,6 @@ class SecuraStorage {
                             resolve();
                         }
                     }, 50);
-                    // Fallback timeout after 2 seconds
                     setTimeout(() => {
                         clearInterval(checkInterval);
                         resolve();
@@ -157,7 +193,6 @@ class SecuraStorage {
 
         const serverOnline = await this.checkServerStatus();
         if (serverOnline && this.SYNC_ENABLED) {
-            
             await this.syncPull();
             this.startAutoSync();
         } else {
@@ -166,9 +201,8 @@ class SecuraStorage {
         }
 
         this.emitStatsUpdate();
-        console.log('✅ SECURA Storage V5.0 prêt !');
+        console.log('✅ SECURA Storage V6.0 !');
     }
-
 
 
     // ═══════════════════════════════════════════════════════════════
@@ -227,6 +261,24 @@ class SecuraStorage {
         this.emit('stats:updated', stats);
     }
 
+    getStatistics() {
+        return {
+            events: this.data.events?.length || 0,
+            guests: this.data.guests?.length || 0,
+            tables: this.data.tables?.length || 0,
+            qrCodes: this.data.qrCodes?.length || 0,
+            scans: this.data.scans?.length || 0,
+            galleries: this.data.galleries?.length || 0,
+            photos: this.data.photos?.length || 0,
+            menus: this.data.menus?.length || 0,
+            dishes: this.data.dishes?.length || 0,
+            plans: this.data.plans?.length || 0,
+            conversations: this.data.chatConversations?.length || 0,
+            messages: this.data.messages?.length || 0,
+            lastSync: this.lastSyncTime
+        };
+    }
+
 
     // ═══════════════════════════════════════════════════════════════
     // 🌐 CONNEXION & API
@@ -243,46 +295,128 @@ class SecuraStorage {
         }
     }
 
-   async apiRequest(endpoint, options = {}) {
+    async apiRequest(endpoint, options = {}) {
+        // ⚠️ SÉCURITÉ: Vérifier la connexion pour les endpoints authentifiés
+        const publicEndpoints = ['/auth/login', '/auth/register', '/auth/forgot-password', '/health','/statistics'];
+        const requiresAuth = !publicEndpoints.some(pub => endpoint.includes(pub));
+        
+       /* if (requiresAuth && !this.token) {
+            console.warn(`⚠️ Tentative d'accès à ${endpoint} sans authentification`);
+            this.handleInvalidToken();
+            throw new Error('Non authentifié - veuillez vous reconnecter');
+        }*/
+
         const url = endpoint.startsWith('http')
             ? endpoint
             : `${this.API_URL}${endpoint}`;
 
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers
-        };
+        const headers = {};
+        
+        if (!(options.body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
+        
+        Object.assign(headers, options.headers);
 
-        if (this.token && !endpoint.includes('/auth/')) {
-            headers['Authorization'] = `Bearer ${this.token}`;
+        // Déterminer quel token utiliser (priorité au token de session d'événement)
+        let authToken = localStorage.getItem('secura_event_session_token') || this.token;
+        
+        if (authToken && !endpoint.includes('/auth/')) {
+            headers['Authorization'] = `Bearer ${authToken}`;
         }
 
-        try {
-            const res = await fetch(url, {
-                ...options,
-                headers,
-                signal: options.signal || AbortSignal.timeout(150000)
-            });
+        // Déterminer le timeout basé sur l'endpoint
+        let timeout = 30000; // 30s par défaut
+        if (endpoint.includes('/galleries') || endpoint.includes('/menus') || 
+            endpoint.includes('/plans') || endpoint.includes('/chat/conversations')) {
+            timeout = 45000; // 45s pour les endpoints lents
+        }
 
-            if (!res.ok) {
-                // 401 = Token invalide/expiré
-                if (res.status === 401) {
-                    console.error('❌ API 401 - Token invalide/expiré');
-                    this.handleInvalidToken();
-                    throw new Error(`HTTP 401: Token invalide`);
+        const maxRetries = 3;
+        let lastError;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const res = await fetch(url, {
+                    ...options,
+                    headers,
+                    signal: options.signal || AbortSignal.timeout(timeout)
+                });
+
+                if (!res.ok) {
+                    // 401 = Token invalide/expiré
+                    if (res.status === 401) {
+                        console.error('❌ API 401 - Token invalide/expiré');
+                        this.handleInvalidToken();
+                        throw new Error(`HTTP 401: Token invalide`);
+                    }
+                    const errorText = await res.text();
+                    throw new Error(errorText || `HTTP ${res.status}`);
                 }
-                const errorText = await res.text();
-                throw new Error(errorText || `HTTP ${res.status}`);
-            }
 
-            return await res.json();
-        } catch (err) {
-            const msg = err?.message || 'Unknown error';
-            console.error(`API Error [${endpoint}]:`, msg);
-            throw err;
+                return await res.json();
+            } catch (err) {
+                lastError = err;
+                const msg = err?.message || 'Unknown error';
+                
+                // Ne pas retry sur les erreurs 4xx (sauf 429)
+                if (msg.includes('HTTP 4') && !msg.includes('429')) {
+                    console.error(`API Error [${endpoint}]: ${msg} (Attempt ${attempt}/${maxRetries})`);
+                    throw err;
+                }
+
+                if (attempt < maxRetries) {
+                    // Attendre avant de retry (délai exponentiel)
+                    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+                    console.warn(`⏳ API Retry [${endpoint}]: Tentative ${attempt}/${maxRetries} dans ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    console.error(`API Error [${endpoint}]: ${msg} (Attempt ${attempt}/${maxRetries} - FINAL)`);
+                }
+            }
         }
+
+        throw lastError;
     }
 
+    // 🚀 CACHE & DÉDUPLICATION - Wrapper pour apiRequest
+    async apiRequestWithCache(endpoint, options = {}) {
+        const requestKey = `${endpoint}`;
+        
+        try {
+            // 1️⃣ DÉDUPLICATION: Si la même requête GET est en cours
+            if ((options.method === undefined || options.method === 'GET') && this.requestInFlight.has(requestKey)) {
+                console.log(`♻️ Réutilisation requête en vol: ${endpoint}`);
+                return await this.requestInFlight.get(requestKey);
+            }
+            
+            // 2️⃣ CACHE: Pour les GET seulement
+            if (options.method === undefined || options.method === 'GET') {
+                const cached = this.requestCache.get(requestKey);
+                if (cached && (Date.now() - cached.time) < this.CACHE_TTL) {
+                    console.log(`💾 Cache hit: ${endpoint}`);
+                    return cached.data;
+                }
+            }
+            
+            // 3️⃣ Lancer la vraie requête et la tracker
+            const promise = this.apiRequest(endpoint, options);
+            this.requestInFlight.set(requestKey, promise);
+            
+            const result = await promise;
+            
+            // 4️⃣ Mettre en cache les résultats GET
+            if (options.method === undefined || options.method === 'GET') {
+                this.requestCache.set(requestKey, { data: result, time: Date.now() });
+                // Nettoyer le cache après TTL
+                setTimeout(() => this.requestCache.delete(requestKey), this.CACHE_TTL);
+            }
+            
+            return result;
+        } finally {
+            this.requestInFlight.delete(requestKey);
+        }
+    }
 
 
     // ═══════════════════════════════════════════════════════════════
@@ -291,29 +425,47 @@ class SecuraStorage {
 
     loadFromLocalStorage() {
         try {
-            const stored = localStorage.getItem('secura_data');
-            if (stored) {
-                this.data = JSON.parse(stored);
-               
+            const data = localStorage.getItem('secura_data');
+            const settings = localStorage.getItem('secura_settings');
+            const syncTime = localStorage.getItem('secura_sync_time');
+            
+            if (data) {
+                const parsed = JSON.parse(data);
+                this.data = { ...this.data, ...parsed };
             }
+            
+            if (settings) {
+                this.data.settings = JSON.parse(settings);
+            }
+            
+            if (syncTime) {
+                this.lastSyncTime = syncTime;
+            }
+            
+            console.log('✅ Cache loaded');
         } catch (err) {
-            console.error('❌ Erreur chargement local:', err);
+            console.warn('❌ Cache load failed:', err);
         }
     }
 
     saveToLocalStorage() {
         try {
             localStorage.setItem('secura_data', JSON.stringify(this.data));
+            localStorage.setItem('secura_settings', JSON.stringify(this.data.settings));
+            localStorage.setItem('secura_sync_time', this.lastSyncTime);
         } catch (err) {
-            console.error('❌ Erreur sauvegarde locale:', err);
+            console.warn('❌ Cache save failed:', err);
         }
     }
 
     clearLocalStorage() {
         try {
             localStorage.removeItem('secura_data');
+            localStorage.removeItem('secura_settings');
+            localStorage.removeItem('secura_sync_time');
+            console.log('✅ Local cache cleared');
         } catch (err) {
-            console.error('❌ Erreur effacement:', err);
+            console.warn('❌ Cache clear failed:', err);
         }
     }
 
@@ -322,60 +474,75 @@ class SecuraStorage {
     // ═══════════════════════════════════════════════════════════════
 
     async syncPull() {
+        
+        
         if (!this.SYNC_ENABLED || this.syncInProgress || !this.isOnline) return false;
         
         this.syncInProgress = true;
-        console.log('🔄 Sync Pull...');
+        console.log('🔄 Sync Pull (avec cache & déduplication)...');
         
         try {
-            const result = await this.apiRequest('/sync/pull');
+            const oldData = JSON.parse(JSON.stringify(this.data));
+            
+            // 🚀 Utiliser le cache + déduplication pour toutes les requêtes GET
+            const [syncRes, galleriesRes, menusRes, plansRes, chatRes] = await Promise.all([
+                this.apiRequestWithCache('/sync/pull').catch(() => ({})),
+                this.apiRequestWithCache('/galleries').catch(() => ({ galleries: [] })),
+                this.apiRequestWithCache('/menus').catch(() => ({ menus: [] })),
+                this.apiRequestWithCache('/plans').catch(() => ({ plans: [] })),
+               this.apiRequestWithCache('/plans').catch(() => ({ conversations: [] }))
+            ]);
 
-            if (result.success) {
-                const oldData = JSON.parse(JSON.stringify(this.data));
-
-                const incoming = result.data || {};
-                const sanitizeArray = (arr) => Array.isArray(arr) ? arr.filter(item => item && typeof item === 'object') : [];
-                const sanitizedData = {
-                    events: sanitizeArray(incoming.events),
-                    tables: sanitizeArray(incoming.tables),
-                    guests: sanitizeArray(incoming.guests),
-                    qrCodes: sanitizeArray(incoming.qrCodes),
-                    scans: sanitizeArray(incoming.scans),
-                    settings: incoming.settings && typeof incoming.settings === 'object' ? incoming.settings : this.data.settings
-                };
-
-                const ensureIds = (arr, prefix) => arr.map(item => {
-                    if (!item.id) item.id = `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
-                    return item;
-                });
-                sanitizedData.tables = ensureIds(sanitizedData.tables, 'tbl');
-                sanitizedData.events = ensureIds(sanitizedData.events, 'evt');
-                sanitizedData.guests = ensureIds(sanitizedData.guests, 'gst');
-                sanitizedData.qrCodes = ensureIds(sanitizedData.qrCodes, 'qr');
-                sanitizedData.scans = ensureIds(sanitizedData.scans, 'scn');
-
-                    
-                // Replace internal data with sanitized structure
-                this.data = {
-                    events: sanitizedData.events,
-                    guests: sanitizedData.guests,
-                    qrCodes: sanitizedData.qrCodes,
-                    tables: sanitizedData.tables,
-                    scans: sanitizedData.scans,
-                    settings: sanitizedData.settings || this.data.settings
-                };
-
-                this.saveToLocalStorage();
-                this.lastSyncTime = new Date().toISOString();
-                
-                // 🎯 ÉVÉNEMENTS GRANULAIRES
-                this.detectChanges(oldData, this.data);
-                this.emit('data:synced', { count: result.count });
-                this.emitStatsUpdate();
-                
-                console.log('✅ Sync Pull réussie:', result.count);
-                return true;
+            const sanitizeArray = (arr) => Array.isArray(arr) ? arr.filter(item => item && typeof item === 'object') : [];
+            
+            // Fusionner les données du sync pull
+            if (syncRes.success && syncRes.data) {
+                this.data.events = sanitizeArray(syncRes.data.events || this.data.events);
+                this.data.tables = sanitizeArray(syncRes.data.tables || this.data.tables);
+                this.data.guests = sanitizeArray(syncRes.data.guests || this.data.guests);
+                this.data.qrCodes = sanitizeArray(syncRes.data.qrCodes || this.data.qrCodes);
+                this.data.scans = sanitizeArray(syncRes.data.scans || this.data.scans);
+                this.data.settings = syncRes.data.settings || this.data.settings;
             }
+            
+            // Mise à jour des galleries
+            if (galleriesRes.data) {
+                this.data.galleries = sanitizeArray(galleriesRes.data);
+            } else if (galleriesRes.galleries) {
+                this.data.galleries = sanitizeArray(galleriesRes.galleries);
+            }
+            
+            // Mise à jour des menus
+            if (menusRes.data) {
+                this.data.menus = sanitizeArray(menusRes.data);
+            } else if (menusRes.menus) {
+                this.data.menus = sanitizeArray(menusRes.menus);
+            }
+            
+            // Mise à jour des plans
+            if (plansRes.data) {
+                this.data.plans = sanitizeArray(plansRes.data);
+            } else if (plansRes.plans) {
+                this.data.plans = sanitizeArray(plansRes.plans);
+            }
+            
+            // Mise à jour des conversations
+            if (chatRes.data) {
+                this.data.chatConversations = sanitizeArray(chatRes.data);
+            } else if (chatRes.conversations) {
+                this.data.chatConversations = sanitizeArray(chatRes.conversations);
+            }
+
+            this.saveToLocalStorage();
+            this.lastSyncTime = new Date().toISOString();
+            
+            // 🎯 ÉVÉNEMENTS GRANULAIRES - Détecter les changements
+            this.detectChanges(oldData, this.data);
+            this.emit('data:synced', { timestamp: this.lastSyncTime });
+            this.emitStatsUpdate();
+            
+            console.log('✅ Sync Pull réussie');
+            return true;
         } catch (err) {
             console.warn('⚠️ Sync Pull impossible:', err.message);
             this.syncErrors.push({ type: 'pull', time: new Date(), error: err.message });
@@ -386,6 +553,12 @@ class SecuraStorage {
     }
 
     async syncPush() {
+        // ⚠️ SÉCURITÉ: Ne pas sync si pas authentifié
+        if (!this.token || !this.isAuthenticated) {
+            console.warn('⚠️ Sync Push annulée - Non authentifié');
+            return false;
+        }
+        
         if (!this.SYNC_ENABLED || this.syncInProgress || !this.isOnline) return false;
         
         this.syncInProgress = true;
@@ -413,157 +586,94 @@ class SecuraStorage {
 
 
     detectChanges(oldData, newData) {
-        // Defensive defaults
-        oldData = oldData || { events: [], guests: [], qrCodes: [], scans: [], tables: [] };
-        newData = newData || { events: [], guests: [], qrCodes: [], scans: [], tables: [] };
-
         const safeArr = (arr) => Array.isArray(arr) ? arr.filter(Boolean) : [];
-
-        const newEvents = safeArr(newData.events);
-        const oldEvents = safeArr(oldData.events);
-        const newEventIds = newEvents.map(e => e.id);
-        const oldEventIds = oldEvents.map(e => e.id);
         
-        newEvents.forEach(event => {
-            if (!oldEventIds.includes(event.id)) {
-                this.emit('event:created', event);
-            } else {
-                const oldEvent = oldEvents.find(e => e.id === event.id);
-                if (!oldEvent || JSON.stringify(oldEvent) !== JSON.stringify(event)) {
-                    this.emit('event:updated', { old: oldEvent || null, new: event });
+        // Helper pour détecter les changements dans une ressource
+        const detectResourceChanges = (resourceName, oldArr, newArr) => {
+            oldArr = safeArr(oldArr);
+            newArr = safeArr(newArr);
+            
+            const oldIds = oldArr.map(item => item.id);
+            const newIds = newArr.map(item => item.id);
+            
+            // Créations
+            newArr.forEach(item => {
+                if (!oldIds.includes(item.id)) {
+                    this.emit(`${resourceName}:created`, item);
                 }
-            }
-        });
-
-        oldEvents.forEach(event => {
-            if (!newEventIds.includes(event.id)) {
-                this.emit('event:deleted', event);
-            }
-        });
-
-        const newTables = safeArr(newData.tables);
-        const oldTables = safeArr(oldData.tables);
-        const newTableIds = newTables.map(t => t.id);
-        const oldTableIds = oldTables.map(t => t.id);
-
-        newTables.forEach(table => {
-            if (!oldTableIds.includes(table.id)) {
-                this.emit('table:created', table);
-            } else {
-                const oldTable = oldTables.find(t => t.id === table.id);
-                // Détection de modification (nom, capacité, ou invités assignés)
-                if (!oldTable || JSON.stringify(oldTable) !== JSON.stringify(table)) {
-                    this.emit('table:updated', { old: oldTable || null, new: table });
+            });
+            
+            // Mises à jour
+            newArr.forEach(newItem => {
+                const oldItem = oldArr.find(item => item.id === newItem.id);
+                if (oldItem && JSON.stringify(oldItem) !== JSON.stringify(newItem)) {
+                    this.emit(`${resourceName}:updated`, { old: oldItem, new: newItem });
                 }
-            }
-        });
-
-        oldTables.forEach(table => {
-            if (!newTableIds.includes(table.id)) {
-                this.emit('table:deleted', table);
-            }
-        });
-
-        // Détection des changements d'invités (améliorée)
-        const newGuests = safeArr(newData.guests);
-        const oldGuests = safeArr(oldData.guests);
-        const newGuestIds = newGuests.map(g => g.id);
-        const oldGuestIds = oldGuests.map(g => g.id);
-
-        newGuests.forEach(guest => {
-            if (!oldGuestIds.includes(guest.id)) {
-            this.emit('guest:created', guest);
-            } else {
-            const oldGuest = oldGuests.find(g => g.id === guest.id);
-            if (!oldGuest || JSON.stringify(oldGuest) !== JSON.stringify(guest)) {
-                // Détection des changements spécifiques
-                const changes = {};
-                
-                if (oldGuest.tableId !== guest.tableId) {
-                changes.tableChanged = true;
-                changes.oldTable = oldGuest.tableId;
-                changes.newTable = guest.tableId;
+            });
+            
+            // Suppressions
+            oldArr.forEach(item => {
+                if (!newIds.includes(item.id)) {
+                    this.emit(`${resourceName}:deleted`, item);
                 }
-                
-                if (oldGuest.status !== guest.status) {
-                changes.statusChanged = true;
-                changes.oldStatus = oldGuest.status;
-                changes.newStatus = guest.status;
-                }
-                
-                if (oldGuest.scanned !== guest.scanned) {
-                changes.scanChanged = true;
-                changes.oldScanned = oldGuest.scanned;
-                changes.newScanned = guest.scanned;
-                }
-                
-                this.emit('guest:updated', { 
-                old: oldGuest || null, 
-                new: guest,
-                changes: Object.keys(changes).length > 0 ? changes : undefined
-                });
-            }
-            }
-        });
+            });
+        };
 
-        oldGuests.forEach(guest => {
-            if (!newGuestIds.includes(guest.id)) {
-            this.emit('guest:deleted', guest);
-            }
-        });
-
-
-        // --- SCANS ---
-        const oldScanIds = safeArr(oldData.scans).map(s => s.id);
-        safeArr(newData.scans).forEach(scan => {
-            if (!oldScanIds.includes(scan.id)) {
-                this.emit('scan:created', scan);
-            }
-        });
-
-        // --- QR CODES ---
-        const oldQrIds = safeArr(oldData.qrCodes).map(q => q.id);
-        safeArr(newData.qrCodes).forEach(qr => {
-            if (!oldQrIds.includes(qr.id)) {
-                this.emit('qr:generated', qr);
-            }
-        });
+        // Détection des changements pour chaque ressource
+        detectResourceChanges('event', oldData.events, newData.events);
+        detectResourceChanges('table', oldData.tables, newData.tables);
+        detectResourceChanges('guest', oldData.guests, newData.guests);
+        detectResourceChanges('scan', oldData.scans, newData.scans);
+        detectResourceChanges('qr', oldData.qrCodes, newData.qrCodes);
+        
+        // Ressources supplémentaires
+        detectResourceChanges('gallery', oldData.galleries, newData.galleries);
+        detectResourceChanges('photo', oldData.photos, newData.photos);
+        detectResourceChanges('menu', oldData.menus, newData.menus);
+        detectResourceChanges('dish', oldData.dishes, newData.dishes);
+        detectResourceChanges('plan', oldData.plans, newData.plans);
+        detectResourceChanges('chat', oldData.chatConversations, newData.chatConversations);
+        detectResourceChanges('message', oldData.messages, newData.messages);
     }
 
 
 
 startAutoSync() {
-    if (this.syncTimer) clearInterval(this.syncTimer);
+
+    if (this.syncTimer) {
+        console.log('⚠️ Auto-sync déjà actif, abandon du démarrage');
+        return;
+    }
 
     this.syncTimer = setInterval(async () => {
-        console.log('⏰ Auto-sync déclenché');
-        
-        const now = Date.now();
-        const shouldCheckToken = !this.lastTokenCheck || 
-                               (now - this.lastTokenCheck) > this.TOKEN_CHECK_INTERVAL;
-        
-        if (this.token && shouldCheckToken) {
-            try {
-                const tokenValid = await this.verifyToken();
-                if (!tokenValid) {
-                    console.log('⏹️ Auto-sync stoppé - Token invalide');
-                    this.stopAutoSync();
-                    this.handleInvalidToken();
-                    return;
+        if (this.isOnline && this.SYNC_ENABLED) {
+            console.log(`⏰ Auto-sync déclenché (${this.SYNC_INTERVAL / 1000}s)`);
+            
+            const now = Date.now();
+            const shouldCheckToken = !this.lastTokenCheck || 
+                                   (now - this.lastTokenCheck) > this.TOKEN_CHECK_INTERVAL;
+            
+            if (this.token && shouldCheckToken) {
+                try {
+                    const tokenValid = await this.verifyToken();
+                    if (!tokenValid) {
+                        console.log('⏹️ Auto-sync stoppé - Token invalide');
+                        this.stopAutoSync();
+                        this.handleInvalidToken();
+                        return;
+                    }
+                    this.lastTokenCheck = now;
+                } catch (err) {
+                    console.warn('⚠️ Vérification token échouée, poursuite sync:', err.message);
                 }
-                this.lastTokenCheck = now;
-            } catch (err) {
-                console.warn('⚠️ Vérification token échouée, poursuite sync:', err.message);
             }
+            
+            await this.syncPull();
         }
-        
-        // Sync pull des données
-        await this.syncPull();
     }, this.SYNC_INTERVAL);
     
-    console.log(`✅ Auto-sync activé (${this.SYNC_INTERVAL / 1000}s)`);
+    console.log(`✅ Auto-sync activé (intervalle: ${this.SYNC_INTERVAL / 1000}s, Cache: ${this.CACHE_TTL / 1000}s)`);
 }
-
 
     stopAutoSync() {
         if (this.syncTimer) {
@@ -750,12 +860,14 @@ forceLogout() {
 }
 
 
-
      // ═══════════════════════════════════════════════════════════════
     // 🎫 CRUD ÉVÉNEMENTS (API + LOCAL)
     // ═══════════════════════════════════════════════════════════════
     getAllEvents(filters = {}) {
-        if (this.USE_API_DIRECT && this.isOnline) {
+        // 🔄 Sync token depuis localStorage
+        this.syncAuthFromStorage();
+        
+        if (this.USE_API_DIRECT && this.isOnline && this.token) {
             try {
                 const params = new URLSearchParams(filters).toString();
                 const result = this.apiRequest(`/events${params ? '?' + params : ''}`);
@@ -780,7 +892,10 @@ forceLogout() {
     }
 
     getEventById(id) {
-        if (this.USE_API_DIRECT && this.isOnline) {
+        // 🔄 Sync token depuis localStorage
+        this.syncAuthFromStorage();
+        
+        if (this.USE_API_DIRECT && this.isOnline && this.token) {
             try {
                 const result = this.apiRequest(`/events/${id}`);
                 if (result.success) return result.data;
@@ -907,12 +1022,50 @@ forceLogout() {
         }
         
         const event = this.data.events.find(e => e.id === id);
-        this.data.events = this.data.events.filter(e => e.id !== id);
-        const guestIds = this.data.guests.filter(g => g.eventId === id).map(g => g.id);
+        
+        // ⚠️ CASCADE DELETE: Supprimer toutes les galeries de l'événement
+        const galleriesToDelete = this.data.galleries?.filter(g => g.eventId === id) || [];
+        galleriesToDelete.forEach(gallery => {
+            // Supprimer toutes les photos de la galerie
+            const photosToDelete = this.data.photos?.filter(p => p.galleryId === gallery.id) || [];
+            photosToDelete.forEach(photo => {
+                this.data.photos = this.data.photos.filter(p => p.id !== photo.id);
+            });
+            
+            // Supprimer tous les commentaires des photos de la galerie
+            const commentsToDelete = this.data.comments?.filter(c => 
+                photosToDelete.some(p => p.id === c.photoId)
+            ) || [];
+            commentsToDelete.forEach(comment => {
+                this.data.comments = this.data.comments.filter(c => c.id !== comment.id);
+            });
+            
+            console.log(`🗑️ Galerie supprimée en cascade: ${gallery.id}, Photos: ${photosToDelete.length}`);
+        });
+        this.data.galleries = this.data.galleries.filter(g => g.eventId !== id);
+        
+        // Supprimer les invités de l'événement
         this.data.guests = this.data.guests.filter(g => g.eventId !== id);
+        const guestIds = this.data.guests.filter(g => g.eventId === id).map(g => g.id);
+        
+        // Supprimer les QR codes des invités
         this.data.qrCodes = this.data.qrCodes.filter(q => !guestIds.includes(q.guestId));
+        
+        // Supprimer les scans de l'événement
         this.data.scans = this.data.scans.filter(s => s.eventId !== id);
         
+        // Supprimer tous les menus/plats de l'événement
+        this.data.menus = this.data.menus?.filter(m => m.eventId !== id) || [];
+        
+        // Supprimer tous les plans de table de l'événement
+        this.data.plans = this.data.plans?.filter(p => p.eventId !== id) || [];
+        
+        // Supprimer les messages de l'événement
+        this.data.messages = this.data.messages?.filter(m => m.eventId !== id) || [];
+        
+        console.log(`🗑️ Événement supprimé: ${id}, Galeries: ${galleriesToDelete.length}, Invités: ${guestIds.length}`);
+        
+        this.data.events = this.data.events.filter(e => e.id !== id);
         this.saveToLocalStorage();
         if (this.AUTO_SYNC_ON_CHANGE) this.syncPush();
         this.emit('event:deleted', event);
@@ -3772,13 +3925,25 @@ async getCurrentSessionDetails() {
         const verification = await this.verifyEventSessionToken(token);
         if (!verification.success) return null;
 
-        // Récupérer les données complètes via API
-        const result = await this.apiRequest('/event-sessions/details', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+      // Récupérer les détails de la session via API
+        const response = await fetch(`${this.API_URL}/event-sessions/details`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('secura_event_session_token');
+                        throw new Error('Session expirée');
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+        
 
         if (result.success) {
             return {
@@ -3807,9 +3972,59 @@ isEventSessionActive() {
 /**
  * 5. Effacer la session événement (logout)
  */
-clearEventSession() {
-    localStorage.removeItem('secura_event_session_token');
-    console.log('✅ Session événement effacée');
+async clearEventSession() {
+    try {
+        const token = localStorage.getItem('secura_event_session_token');
+        
+        // Appeler l'API pour supprimer la session du serveur
+        if (token) {
+            try {
+               
+
+                // Récupérer les détails de la session via API
+                const response = await fetch(`${window.storage.API_URL}/event-sessions/logout`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('secura_event_session_token');
+                        throw new Error('Session expirée');
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('🔓 Session événement supprimée du serveur', result.message);
+                }
+            } catch (err) {
+                console.warn('⚠️ Impossible contacter serveur pour logout événement', err.message);
+                // Continuer même si erreur serveur
+            }
+        }
+        
+        // Supprimer le token localement
+        localStorage.removeItem('secura_event_session_token');
+        
+        // Nettoyer la session en mémoire
+        this.currentSession = null;
+        
+        console.log('✅ Session événement effacée complètement');
+        
+        return true;
+        
+    } catch (err) {
+        console.error('❌ Erreur effacement session:', err.message);
+        // Force le nettoyage même en cas d'erreur
+        localStorage.removeItem('secura_event_session_token');
+        this.currentSession = null;
+        return false;
+    }
 }
 
 /**
@@ -4502,26 +4717,48 @@ async checkTokenIfNeeded() {
 }
 
     handleInvalidToken() {
-        console.error('❌ Token invalide - Nettoyage');
+        console.error('❌ Token invalide - Nettoyage et redirection');
         
         // Sauvegarder l'état avant suppression
         const wasAuthenticated = !!this.token;
+        const wasEventSession = !!localStorage.getItem('secura_event_session_token');
         
         this.token = null;
         this.user = null;
         this.isAuthenticated = false;
         
+        // Supprimer les deux types de tokens
         localStorage.removeItem('secura_token');
         localStorage.removeItem('secura_user');
         localStorage.removeItem('secura_data');
         this.stopAutoSync();
         
-        // Émettre un événement plutôt que de rediriger directement
-        // Laisser auth-check.js gérer la redirection
+        // Émettre un événement pour les listeners
         if (wasAuthenticated) {
             window.dispatchEvent(new CustomEvent('storage:auth-invalid', {
                 detail: { reason: 'token_expired_or_invalid' }
             }));
+        }
+        
+        // Rediriger vers login si ce n'est pas déjà sur une page publique
+        const currentPage = window.location.pathname;
+        const publicPages = [
+            '/', '/index.html',
+            '/login', '/login.html',
+            '/register', '/register.html',
+            '/forgot-password', '/forgot-password.html',
+            '/access', '/access.html',
+            '/404', '/404.html'
+        ];
+        
+        const isPublicPage = publicPages.some(page => 
+            currentPage === page || currentPage.endsWith(page)
+        );
+        
+        if (!isPublicPage && typeof window !== 'undefined') {
+            setTimeout(() => {
+                window.location.href = '/?reason=session_expired';
+            }, 500);
         }
     }
 
@@ -4597,6 +4834,8 @@ async getUserById(id) {
         };
     }
 }
+
+
 
 /**
  * 3. Mettre à jour un utilisateur
@@ -5089,6 +5328,9 @@ emitUserEvents() {
     // === PROFIL UTILISATEUR ===
     async getProfile() {
         try {
+            // 🔄 Sync le token depuis localStorage en cas de rechargement
+            this.syncAuthFromStorage();
+            
             if (!this.token) throw new Error('Non authentifié');
             
             const result = await this.apiRequest('/auth/me' , {
@@ -5100,11 +5342,13 @@ emitUserEvents() {
             if (result.success) {
                 this.user = result.user;
                 this.saveUserToCache(result.user);
+                this.isAuthenticated = true;
                 return result.user;
             }
             throw new Error('Profil non trouvé');
         } catch (err) {
             console.warn('⚠️ getProfile échec:', err.message);
+            this.isAuthenticated = false;
             return this.getUserFromCache();
         }
     }
@@ -5315,6 +5559,1074 @@ emitUserEvents() {
             localStorage.removeItem('secura_token');
         }
     }
+
+
+
+
+
+
+
+
+
+    // ═══════════════════════════════════════════════════════════════
+    // 📸 GALERIES (6 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async getGalleries(eventId, filters = {}, forceRefresh = false) {
+        try {
+            // Sync authentication from localStorage
+            this.syncAuthFromStorage();
+            
+            // Utiliser le cache SI pas de forceRefresh ET données existent ET correspondent à l'eventId
+            if (!forceRefresh && this.data.galleries?.length > 0) {
+                // Vérifier que les galeries en cache correspondent à cet eventId
+                const cachedGalleries = this.data.galleries.filter(g => g.eventId === eventId);
+                if (cachedGalleries.length > 0 || this.data.galleries.every(g => g.eventId === eventId)) {
+                    console.log(`✓ Utilisation du cache pour l'événement ${eventId}`);
+                    return cachedGalleries.length > 0 ? cachedGalleries : this.data.galleries;
+                }
+            }
+
+            // Require authentication for API call
+            if (!this.token) {
+                console.warn('⚠️ getGalleries: Non authentifié');
+                // Retourner les galeries du cache filtrées par eventId si possible
+                return this.data.galleries?.filter(g => g.eventId === eventId) || [];
+            }
+
+            const query = new URLSearchParams({ eventId, ...filters }).toString();
+            const result = await this.apiRequest(`/galleries?${query}`);
+            if (result.success) {
+                this.data.galleries = result.galleries || [];
+                this.emit('data:synced', { galleries: this.data.galleries });
+                return this.data.galleries;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getGalleries:', err);
+            // Retourner le cache filtré par eventId même en cas d'erreur
+            return this.data.galleries?.filter(g => g.eventId === eventId) || [];
+        }
+    }
+
+    async getGallery(galleryId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}`);
+            if (result.success) {
+                const idx = this.data.galleries.findIndex(g => g.id === galleryId);
+                if (idx >= 0) this.data.galleries[idx] = result.gallery;
+                else this.data.galleries.push(result.gallery);
+                this.emit('gallery:updated', result.gallery);
+                return result.gallery;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getGallery:', err);
+            return null;
+        }
+    }
+
+    async createGallery(eventId, name, opts = {}) {
+        try {
+            let options = { method: 'POST' };
+            
+            // Si coverFile fourni ET valide, utiliser FormData
+            if (opts.coverFile && opts.coverFile instanceof File) {
+                const formData = new FormData();
+                formData.append('eventId', eventId);
+                formData.append('name', name);
+                formData.append('description', opts.description || '');
+                formData.append('isPublic', opts.isPublic || false);
+                formData.append('settings', JSON.stringify(opts.settings || {}));
+                if (opts.metadata) formData.append('metadata', JSON.stringify(opts.metadata));
+                formData.append('cover', opts.coverFile);
+                options.body = formData;
+            } else {
+                // Envoyer en JSON pur sans fichier
+                options.body = JSON.stringify({
+                    eventId, name,
+                    description: opts.description || '',
+                    isPublic: opts.isPublic || false,
+                    settings: opts.settings || {},
+                    metadata: opts.metadata || {}
+                });
+                options.headers = { 'Content-Type': 'application/json' };
+            }
+            
+            const result = await this.apiRequest('/galleries', options);
+            if (result.success) {
+                this.data.galleries.push(result.gallery);
+                this.emit('gallery:created', result.gallery);
+                this.saveToLocalStorage();
+                return result.gallery;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ createGallery:', err);
+            throw err;
+        }
+    }
+
+    async updateGallery(galleryId, updates) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}`, {
+                method: 'PUT',
+                body: JSON.stringify(updates)
+            });
+            if (result.success) {
+                const idx = this.data.galleries.findIndex(g => g.id === galleryId);
+                if (idx >= 0) this.data.galleries[idx] = result.gallery;
+                this.emit('gallery:updated', result.gallery);
+                this.saveToLocalStorage();
+                return result.gallery;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ updateGallery:', err);
+            throw err;
+        }
+    }
+
+    async deleteGallery(galleryId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}`, { method: 'DELETE' });
+            if (result.success) {
+                // Récupérer l'eventId et cover avant suppression
+                const gallery = this.data.galleries?.find(g => g.id === galleryId);
+                const eventId = gallery?.eventId;
+                const coverImage = gallery?.coverImage;
+                
+                // ⚠️ CASCADE DELETE: Supprimer toutes les photos de cette galerie
+                const photosToDelete = this.data.photos?.filter(p => p.galleryId === galleryId) || [];
+                photosToDelete.forEach(photo => {
+                    this.data.photos = this.data.photos.filter(p => p.id !== photo.id);
+                    console.log(`🗑️ Photo supprimée en cascade: ${photo.id}`);
+                });
+                
+                // ⚠️ CASCADE DELETE: Supprimer tous les commentaires des photos de cette galerie
+                const commentsToDelete = this.data.comments?.filter(c => 
+                    photosToDelete.some(p => p.id === c.photoId)
+                ) || [];
+                commentsToDelete.forEach(comment => {
+                    this.data.comments = this.data.comments.filter(c => c.id !== comment.id);
+                    console.log(`🗑️ Commentaire supprimé en cascade: ${comment.id}`);
+                });
+                
+                // Supprimer la galerie
+                this.data.galleries = this.data.galleries.filter(g => g.id !== galleryId);
+                
+                console.log(`🗑️ Galerie supprimée: ${galleryId}, Photos: ${photosToDelete.length}, Commentaires: ${commentsToDelete.length}`);
+                
+                this.emit('gallery:deleted', { id: galleryId, eventId, photosCount: photosToDelete.length });
+                this.saveToLocalStorage();
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ deleteGallery:', err);
+            throw err;
+        }
+    }
+
+    async getGalleryStats(galleryId) {
+        try {
+            // L'endpoint /galleries/:id retourne déjà les stats enrichies
+            const result = await this.apiRequest(`/galleries/${galleryId}`);
+            if (result.success && result.gallery) {
+                return result.gallery.stats || {};
+            }
+            throw new Error(result.error || 'Galerie non trouvée');
+        } catch (err) {
+            const errorMsg = err?.message || '';
+            
+            if (errorMsg.includes('Galerie non trouvée') || errorMsg.includes('HTTP 404')) {
+                console.log(`🗑️ Suppression de la galerie ${galleryId} du stockage local (non trouvée sur serveur)`);
+                try {
+                    if (this.data.galleries) {
+                        this.data.galleries = this.data.galleries.filter(g => g.id !== galleryId);
+                        this.saveToLocalStorage();
+                    }
+                } catch (deleteErr) {
+                    console.error('❌ Erreur lors de la suppression locale:', deleteErr);
+                }
+            }
+            
+            console.error('❌ getGalleryStats:', err);
+            return null;
+        }
+    }
+
+
+   
+
+
+
+    // ═══════════════════════════════════════════════════════════════
+    // 📷 PHOTOS (8 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async getPhotos(galleryId, opts = {}) {
+        try {
+            const query = new URLSearchParams(opts).toString();
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos?${query}`);
+            if (result.success) {
+                this.data.photos = result.photos || [];
+                return this.data.photos;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getPhotos:', err);
+            return [];
+        }
+    }
+
+    async addPhoto(galleryId, file, metadata = {}) {
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('title', metadata.title || file.name);
+            fd.append('description', metadata.description || '');
+            fd.append('tags', JSON.stringify(metadata.tags || []));
+
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${this.token}` },
+                body: fd
+            });
+
+            if (result.success) {
+                this.data.photos.push(result.photo);
+                this.emit('photo:added', result.photo);
+                this.saveToLocalStorage();
+                return result.photo;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ addPhoto:', err);
+            throw err;
+        }
+    }
+
+    async updatePhoto(galleryId, photoId, updates = {}) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${this.token}` },
+                body: JSON.stringify(updates)
+            });
+            if (result.success) {
+                // Mettre à jour le cache local
+                const photoIndex = this.data.photos?.findIndex(p => p.id === photoId);
+                if (photoIndex !== undefined && photoIndex >= 0) {
+                    this.data.photos[photoIndex] = { ...this.data.photos[photoIndex], ...result.photo };
+                }
+                this.emit('photo:updated', result.photo);
+                this.saveToLocalStorage();
+                return result.photo;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ updatePhoto:', err);
+            throw err;
+        }
+    }
+
+    async deletePhoto(galleryId, photoId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}`, {
+                method: 'DELETE'
+            });
+            if (result.success) {
+                this.data.photos = this.data.photos.filter(p => p.id !== photoId);
+                this.emit('photo:deleted', { id: photoId });
+                this.saveToLocalStorage();
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ deletePhoto:', err);
+            throw err;
+        }
+    }
+
+    async approvePhoto(galleryId, photoId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/approve`, {
+                method: 'POST'
+            });
+            if (result.success) {
+                this.emit('photo:approved', result.photo);
+                this.saveToLocalStorage();
+                return result.photo;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ approvePhoto:', err);
+            throw err;
+        }
+    }
+
+    async rejectPhoto(galleryId, photoId, reason = '') {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/reject`, {
+                method: 'POST',
+                body: JSON.stringify({ reason })
+            });
+            if (result.success) {
+                this.emit('photo:rejected', result.photo);
+                this.saveToLocalStorage();
+                return result.photo;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ rejectPhoto:', err);
+            throw err;
+        }
+    }
+
+    async downloadGalleryZip(galleryId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/download/zip`);
+            if (result.success && result.downloadUrl) {
+                window.open(result.downloadUrl, '_blank');
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ downloadGalleryZip:', err);
+            throw err;
+        }
+    }
+
+
+
+    // ═══════════════════════════════════════════════════════════════
+    // ❤️ LIKES (2 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async likePhoto(galleryId, photoId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/like`, {
+                method: 'POST'
+            });
+            if (result.success) {
+                this.emit(result.action === 'like' ? 'like:added' : 'like:removed', { photoId });
+                this.saveToLocalStorage();
+                return result;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ likePhoto:', err);
+            throw err;
+        }
+    }
+
+    async getLikes(galleryId, photoId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/likes`);
+            if (result.success) return result.likes;
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getLikes:', err);
+            return [];
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 💬 COMMENTAIRES (5 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async addComment(galleryId, photoId, content) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/comments`, {
+                method: 'POST',
+                body: JSON.stringify({ content })
+            });
+            if (result.success) {
+                this.emit('comment:added', result.comment);
+                this.saveToLocalStorage();
+                return result.comment;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ addComment:', err);
+            throw err;
+        }
+    }
+
+    async getComments(galleryId, photoId, opts = {}) {
+        try {
+            const query = new URLSearchParams(opts).toString();
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/comments?${query}`);
+            if (result.success) return result.comments;
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getComments:', err);
+            return [];
+        }
+    }
+
+    async updateComment(galleryId, photoId, commentId, content) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/comments/${commentId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ content })
+            });
+            if (result.success) {
+                this.emit('comment:updated', result.comment);
+                this.saveToLocalStorage();
+                return result.comment;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ updateComment:', err);
+            throw err;
+        }
+    }
+
+    async deleteComment(galleryId, photoId, commentId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/comments/${commentId}`, {
+                method: 'DELETE'
+            });
+            if (result.success) {
+                this.emit('comment:deleted', { id: commentId });
+                this.saveToLocalStorage();
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ deleteComment:', err);
+            throw err;
+        }
+    }
+
+    async likeComment(galleryId, photoId, commentId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/comments/${commentId}/like`, {
+                method: 'POST'
+            });
+            if (result.success) {
+                this.emit('comment:liked', result.comment);
+                this.saveToLocalStorage();
+                return result;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ likeComment:', err);
+            throw err;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 💬 RÉPONSES AUX COMMENTAIRES (4 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async addReply(galleryId, photoId, commentId, content) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/comments/${commentId}/replies`, {
+                method: 'POST',
+                body: JSON.stringify({ content })
+            });
+            if (result.success) {
+                this.emit('reply:added', result.reply);
+                this.saveToLocalStorage();
+                return result.reply;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ addReply:', err);
+            throw err;
+        }
+    }
+
+    async updateReply(galleryId, photoId, commentId, replyId, content) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/comments/${commentId}/replies/${replyId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ content })
+            });
+            if (result.success) {
+                this.emit('reply:updated', result.reply);
+                this.saveToLocalStorage();
+                return result.reply;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ updateReply:', err);
+            throw err;
+        }
+    }
+
+    async deleteReply(galleryId, photoId, commentId, replyId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/comments/${commentId}/replies/${replyId}`, {
+                method: 'DELETE'
+            });
+            if (result.success) {
+                this.emit('reply:deleted', { id: replyId });
+                this.saveToLocalStorage();
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ deleteReply:', err);
+            throw err;
+        }
+    }
+
+    async likeReply(galleryId, photoId, commentId, replyId) {
+        try {
+            const result = await this.apiRequest(`/galleries/${galleryId}/photos/${photoId}/comments/${commentId}/replies/${replyId}/like`, {
+                method: 'POST'
+            });
+            if (result.success) {
+                this.emit('reply:liked', result.reply);
+                this.saveToLocalStorage();
+                return result;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ likeReply:', err);
+            throw err;
+        }
+    }
+
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🍽️ MENUS (4 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async getMenus(eventId, forceRefresh = false) {
+        try {
+            // Utiliser le cache si pas de forceRefresh et données existantes
+            if (!forceRefresh && this.data.menus?.length > 0) {
+                return this.data.menus;
+            }
+
+            const result = await this.apiRequest(`/menus?eventId=${eventId}`);
+            if (result.success) {
+                this.data.menus = result.menus || [];
+                this.emit('data:synced', { menus: this.data.menus });
+                return this.data.menus;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getMenus:', err);
+            // Retourner le cache même en cas d'erreur
+            return this.data.menus || [];
+        }
+    }
+
+    async createMenu(eventId, name, opts = {}) {
+        try {
+            const result = await this.apiRequest('/menus', {
+                method: 'POST',
+                body: JSON.stringify({
+                    eventId, name,
+                    description: opts.description || '',
+                    type: opts.type || 'main'
+                })
+            });
+            if (result.success) {
+                this.data.menus.push(result.menu);
+                this.emit('menu:created', result.menu);
+                this.saveToLocalStorage();
+                return result.menu;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ createMenu:', err);
+            throw err;
+        }
+    }
+
+    async updateMenu(menuId, updates) {
+        try {
+            const result = await this.apiRequest(`/menus/${menuId}`, {
+                method: 'PUT',
+                body: JSON.stringify(updates)
+            });
+            if (result.success) {
+                const idx = this.data.menus.findIndex(m => m.id === menuId);
+                if (idx >= 0) this.data.menus[idx] = result.menu;
+                this.emit('menu:updated', result.menu);
+                this.saveToLocalStorage();
+                return result.menu;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ updateMenu:', err);
+            throw err;
+        }
+    }
+
+    async deleteMenu(menuId) {
+        try {
+            const result = await this.apiRequest(`/menus/${menuId}`, { method: 'DELETE' });
+            if (result.success) {
+                this.data.menus = this.data.menus.filter(m => m.id !== menuId);
+                this.emit('menu:deleted', { id: menuId });
+                this.saveToLocalStorage();
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ deleteMenu:', err);
+            throw err;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🍴 PLATS (5 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async addDish(menuId, name, opts = {}) {
+        try {
+            const fd = new FormData();
+            fd.append('name', name);
+            fd.append('description', opts.description || '');
+            fd.append('price', opts.price || 0);
+            fd.append('ingredients', JSON.stringify(opts.ingredients || []));
+            fd.append('allergens', JSON.stringify(opts.allergens || []));
+            if (opts.image) fd.append('image', opts.image);
+
+            const result = await this.apiRequest(`/menus/${menuId}/dishes`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${this.token}` },
+                body: fd
+            });
+
+            if (result.success) {
+                this.data.dishes.push(result.dish);
+                this.emit('dish:added', result.dish);
+                this.saveToLocalStorage();
+                return result.dish;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ addDish:', err);
+            throw err;
+        }
+    }
+
+    async getDishes(menuId) {
+        try {
+            const result = await this.apiRequest(`/menus/${menuId}/dishes`);
+            if (result.success) {
+                this.data.dishes = result.dishes || [];
+                return this.data.dishes;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getDishes:', err);
+            return [];
+        }
+    }
+
+    async updateDish(menuId, dishId, updates) {
+        try {
+            const result = await this.apiRequest(`/menus/${menuId}/dishes/${dishId}`, {
+                method: 'PUT',
+                body: JSON.stringify(updates)
+            });
+            if (result.success) {
+                this.emit('dish:updated', result.dish);
+                this.saveToLocalStorage();
+                return result.dish;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ updateDish:', err);
+            throw err;
+        }
+    }
+
+    async deleteDish(menuId, dishId) {
+        try {
+            const result = await this.apiRequest(`/menus/${menuId}/dishes/${dishId}`, {
+                method: 'DELETE'
+            });
+            if (result.success) {
+                this.data.dishes = this.data.dishes.filter(d => d.id !== dishId);
+                this.emit('dish:deleted', { id: dishId });
+                this.saveToLocalStorage();
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ deleteDish:', err);
+            throw err;
+        }
+    }
+
+    async rateDish(menuId, dishId, score, comment = '') {
+        try {
+            const result = await this.apiRequest(`/menus/${menuId}/dishes/${dishId}/rating`, {
+                method: 'POST',
+                body: JSON.stringify({ score, comment })
+            });
+            if (result.success) {
+                this.emit('rating:added', result.dish);
+                this.saveToLocalStorage();
+                return result.dish;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ rateDish:', err);
+            throw err;
+        }
+    }
+
+
+
+      // ═══════════════════════════════════════════════════════════════
+    // 🗺️ PLANS (9 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async getPlans(eventId, forceRefresh = false) {
+        try {
+            // Utiliser le cache si pas de forceRefresh et données existantes
+            if (!forceRefresh && this.data.plans?.length > 0) {
+                return this.data.plans;
+            }
+
+            const result = await this.apiRequest(`/plans?eventId=${eventId}`);
+            if (result.success) {
+                this.data.plans = result.plans || [];
+                this.emit('data:synced', { plans: this.data.plans });
+                return this.data.plans;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getPlans:', err);
+            // Retourner le cache même en cas d'erreur
+            return this.data.plans || [];
+        }
+    }
+
+    async createPlan(eventId, name, opts = {}) {
+        try {
+            const fd = new FormData();
+            fd.append('eventId', eventId);
+            fd.append('name', name);
+            fd.append('description', opts.description || '');
+            fd.append('type', opts.type || 'venue');
+            if (opts.image) fd.append('image', opts.image);
+
+            const result = await this.apiRequest('/plans', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${this.token}` },
+                body: fd
+            });
+
+            if (result.success) {
+                this.data.plans.push(result.plan);
+                this.emit('plan:created', result.plan);
+                this.saveToLocalStorage();
+                return result.plan;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ createPlan:', err);
+            throw err;
+        }
+    }
+
+    async addLocation(planId, name, x, y, opts = {}) {
+        try {
+            const result = await this.apiRequest(`/plans/${planId}/locations`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    name, x: parseFloat(x), y: parseFloat(y),
+                    description: opts.description || '',
+                    type: opts.type || 'point',
+                    info: opts.info || {}
+                })
+            });
+            if (result.success) {
+                this.emit('location:added', result.location);
+                this.saveToLocalStorage();
+                return result.location;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ addLocation:', err);
+            throw err;
+        }
+    }
+
+    async getLocations(planId) {
+        try {
+            const result = await this.apiRequest(`/plans/${planId}/locations`);
+            if (result.success) return result.locations || [];
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getLocations:', err);
+            return [];
+        }
+    }
+
+    async updateLocation(planId, locationId, updates) {
+        try {
+            const result = await this.apiRequest(`/plans/${planId}/locations/${locationId}`, {
+                method: 'PUT',
+                body: JSON.stringify(updates)
+            });
+            if (result.success) {
+                this.emit('location:updated', result.location);
+                this.saveToLocalStorage();
+                return result.location;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ updateLocation:', err);
+            throw err;
+        }
+    }
+
+    async deleteLocation(planId, locationId) {
+        try {
+            const result = await this.apiRequest(`/plans/${planId}/locations/${locationId}`, {
+                method: 'DELETE'
+            });
+            if (result.success) {
+                this.emit('location:deleted', { id: locationId });
+                this.saveToLocalStorage();
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ deleteLocation:', err);
+            throw err;
+        }
+    }
+
+
+
+    // ═══════════════════════════════════════════════════════════════
+    // 💬 CHAT (8 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async getConversations(eventId, forceRefresh = false) {
+        try {
+            if (!forceRefresh && this.data.chatConversations?.length > 0) {
+                return this.data.chatConversations;
+            }
+            // Utiliser la route GET /api/chat/conversations avec enrichissement automatique
+            const result = await this.apiRequest(`/chat/conversations?eventId=${eventId}`);
+            if (result.success) {
+                this.data.chatConversations = result.conversations || [];
+                this.emit('data:synced', { chatConversations: this.data.chatConversations });
+                return this.data.chatConversations;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getConversations:', err);
+            return this.data.chatConversations || [];
+        }
+    }
+
+    async createConversation(eventId, name, participantIds = []) {
+        try {
+            const result = await this.apiRequest('/chat/conversations', {
+                method: 'POST',
+                body: JSON.stringify({
+                    eventId, name, participantIds,
+                    type: participantIds.length > 1 ? 'group' : 'direct'
+                })
+            });
+            if (result.success) {
+                // Initialiser le array si nécessaire
+                if (!this.data.chatConversations) {
+                    this.data.chatConversations = [];
+                }
+                this.data.chatConversations.push(result.conversation);
+                this.emit('chat:created', result.conversation);
+                this.saveToLocalStorage();
+                return result.conversation;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ createConversation:', err);
+            throw err;
+        }
+    }
+
+    async sendMessage(conversationId, content) {
+        try {
+            const result = await this.apiRequest(`/chat/conversations/${conversationId}/messages`, {
+                method: 'POST',
+                body: JSON.stringify({ content })
+            });
+            if (result.success) {
+                // Initialiser le array si nécessaire
+                if (!this.data.messages) {
+                    this.data.messages = [];
+                }
+                this.data.messages.push(result.message);
+                this.emit('message:sent', result.message);
+                this.saveToLocalStorage();
+                return result.message;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ sendMessage:', err);
+            throw err;
+        }
+    }
+
+    async getMessages(conversationId, opts = {}) {
+        try {
+            const query = new URLSearchParams(opts).toString();
+            const result = await this.apiRequest(`/chat/conversations/${conversationId}/messages?${query}`);
+            if (result.success) {
+                this.data.messages = result.messages || [];
+                return this.data.messages;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getMessages:', err);
+            return [];
+        }
+    }
+
+    async editMessage(conversationId, messageId, content) {
+        try {
+            const result = await this.apiRequest(`/chat/conversations/${conversationId}/messages/${messageId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ content })
+            });
+            if (result.success) {
+                this.emit('message:edited', result.message);
+                this.saveToLocalStorage();
+                return result.message;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ editMessage:', err);
+            throw err;
+        }
+    }
+
+    async deleteMessage(conversationId, messageId) {
+        try {
+            const result = await this.apiRequest(`/chat/conversations/${conversationId}/messages/${messageId}`, {
+                method: 'DELETE'
+            });
+            if (result.success) {
+                this.emit('message:deleted', { id: messageId });
+                this.saveToLocalStorage();
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ deleteMessage:', err);
+            throw err;
+        }
+    }
+
+    async addReaction(conversationId, messageId, emoji) {
+        try {
+            const result = await this.apiRequest(`/chat/conversations/${conversationId}/messages/${messageId}/reaction`, {
+                method: 'POST',
+                body: JSON.stringify({ emoji })
+            });
+            if (result.success) {
+                this.emit('reaction:added', result.message);
+                this.saveToLocalStorage();
+                return result.message;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ addReaction:', err);
+            throw err;
+        }
+    }
+
+    async removeReaction(conversationId, messageId, emoji) {
+        try {
+            const result = await this.apiRequest(
+                `/chat/conversations/${conversationId}/messages/${messageId}/reaction/${encodeURIComponent(emoji)}`,
+                {
+                    method: 'DELETE'
+                }
+            );
+            if (result.success) {
+                this.emit('reaction:removed', result.message);
+                this.saveToLocalStorage();
+                return result.message;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ removeReaction:', err);
+            throw err;
+        }
+    }
+
+    async getReactions(conversationId, messageId) {
+        try {
+            const result = await this.apiRequest(
+                `/chat/conversations/${conversationId}/messages/${messageId}/reactions`,
+                {
+                    method: 'GET'
+                }
+            );
+            if (result.success) {
+                return result.reactions || {};
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getReactions:', err);
+            throw err;
+        }
+    }
+
+    async markAsRead(conversationId) {
+        try {
+            const result = await this.apiRequest(`/chat/conversations/${conversationId}/mark-as-read`, {
+                method: 'POST'
+            });
+            if (result.success) {
+                this.emit('chat:read', { conversationId });
+                return true;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ markAsRead:', err);
+            throw err;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 💾 STORAGE (2 endpoints)
+    // ═══════════════════════════════════════════════════════════════
+
+    async getStorageStats() {
+        try {
+            const result = await this.apiRequest('/storage/stats');
+            if (result.success) return result.storage;
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ getStorageStats:', err);
+            return null;
+        }
+    }
+
+    async cleanupStorage() {
+        try {
+            const result = await this.apiRequest('/storage/cleanup', { method: 'POST' });
+            if (result.success) {
+                console.log(`✅ ${result.filesDeleted} fichiers supprimés`);
+                return result.filesDeleted;
+            }
+            throw new Error(result.error);
+        } catch (err) {
+            console.error('❌ cleanupStorage:', err);
+            throw err;
+        }
+    }
+    
 }
 
 
@@ -5327,7 +6639,7 @@ window.storage = storage;
 window.storageReady = new Promise((resolve) => {
     window.addEventListener('secura:storage-ready', () => resolve(storage), { once: true });
     
-    setTimeout(() => resolve(storage), 3000);
+    setTimeout(() => resolve(storage), 1500);
 });
 
 

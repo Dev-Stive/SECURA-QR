@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 140">
+  <rect width="200" height="140" rx="12" fill="#fff"/>
+  <g transform="translate(30,20)">
+    <rect x="20" y="10" width="120" height="60" rx="10" fill="#f3f4f6" stroke="#D97706" stroke-width="4"/>
+    <!-- chairs empty -->
+    <circle cx="10" cy="10" r="8" fill="#9CA3AF" opacity="0.4" />
+    <circle cx="190" cy="10" r="8" fill="#9CA3AF" opacity="0.4" />
+  </g>
+</svg>

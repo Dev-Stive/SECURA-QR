@@ -38,8 +38,12 @@
             event: [
             '/welcome', '/welcome/',
             '/welcome/index.html',
-            '/event-chat', '/event-chat.html',
-            '/event-schedule', '/event-schedule.html',
+            '/welcome/event-photos','/welcome/event-photos.html',
+            '/welcome/guests',
+            '/welcome/my-qr','/welcome/my-qr.html',
+            '/welcome/event-guests','/welcome/event-guests.html',
+            '/welcome/event-chat', '/event-chat.html',
+            '/event-schedule', '/welcome/event-schedule.html',
             '/event-map', '/event-map.html',
             '/event-guests', '/event-guests.html'
             ],
@@ -307,6 +311,7 @@ function clearEventSession() {
                 '/event', '/event.html',
                 '/event-info', '/event-info.html',
                 '/guests', '/guests.html',
+                '/galleries', '/galleries.html',
                 '/tables', '/tables.html',
                 '/table-info', '/table-info.html',
                 '/access', '/access.html',

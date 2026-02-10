@@ -50,6 +50,10 @@
                     object-fit: cover;
                 }
 
+                .main-content {
+        min-height: calc(100vh - 80px);
+}
+
 
 /* Vue code personnel */
 .personal-code-view {
@@ -661,6 +665,7 @@
         /* Toggle d'accès */
         .access-toggle {
             display: flex;
+            flex-direction: row;
             gap: 10px;
             background: var(--hover-bg);
             padding: 3px;
@@ -1631,7 +1636,7 @@
     input[type="email"],
     input[type="password"],
     textarea {
-        font-size: 16px !important; /* Empêche le zoom automatique sur iOS */
+        font-size: 35px !important; /* Empêche le zoom automatique sur iOS */
     }
     
     /* Améliorer la zone de clic sur mobile */
@@ -1946,6 +1951,169 @@
         height: 150px;
     }
 }
+
+/* ==========================================
+   RESPONSIVE HEADER - MOBILE OPTIMIZATION
+   ========================================== */
+@media (max-width: 768px) {
+   
+    
+    /* Logo réduit pour mobile */
+    .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .logo-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .home-btn span {
+
+display: none;
+    }
+    
+    .logo-icon img {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .logo-text h1 {
+        font-size: 1.1rem;
+    }
+    
+    .logo-text p {
+        display: none;
+    }
+    
+    /* Réduire le theme-switch-slider */
+    .theme-switch-footer {
+        min-width: auto;
+    }
+    
+    .theme-switch-slider {
+        width: 65px;
+        height: 36px;
+        padding: 0 3px;
+    }
+    
+    .theme-switch-slider i {
+        font-size: 0.75rem;
+    }
+   
+    
+    .theme-switch-slider::before {
+        width: 30px;
+        height: 34px;
+        left: 3px;
+    }
+    
+    .dark-theme .theme-switch-slider::before {
+        transform: translateX(28px);
+    }
+}
+
+@media (max-width: 480px) {
+    /* Header ultra petit */
+    
+    
+ 
+    
+     .logo-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .home-btn span {
+
+display: none;
+    }
+    
+    .logo-icon img {
+        width: 50px;
+        height: 50px;
+    }
+    .logo-text h1 {
+        font-size: 0.95rem;
+    }
+    
+    /* Theme switch encore plus petit */
+    .theme-switch-slider {
+        width: 56px;
+        height: 32px;
+        padding: 0 2px;
+    }
+    
+    .theme-switch-slider i {
+        font-size: 0.65rem;
+    }
+    
+    .theme-switch-slider i.fa-moon {
+        left: 10px;
+        font-size: 0.8rem;
+    }
+    
+    .theme-switch-slider i.fa-sun {
+        right: 6px;
+    }
+    
+    .theme-switch-slider::before {
+        width: 25px;
+        height: 30px;
+        left: 3px;
+    }
+    
+    .dark-theme .theme-switch-slider::before {
+        transform: translateX(23px);
+    }
+}
+
+/* ==========================================
+   RESPONSIVE COUNTDOWN - MOBILE OPTIMIZATION
+   ========================================== */
+@media (max-width: 768px) {
+    .countdown-container {
+        gap: 8px;
+        margin: 20px 0;
+    }
+    
+    .countdown-box {
+        min-width: 48px;
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .countdown-value {
+        font-size: 1.5rem;
+    }
+    
+    .countdown-label {
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .countdown-container {
+        gap: 6px;
+        margin: 15px 0;
+    }
+    
+    .countdown-box {
+        min-width: 42px;
+        padding: 6px;
+    }
+    
+    .countdown-value {
+        font-size: 1.3rem;
+    }
+    
+    .countdown-label {
+        font-size: 0.55rem;
+        letter-spacing: 0.2px;
+    }
+}
    
     </style>
     
@@ -2036,11 +2204,11 @@
                         <p id="accessFormSubtitle">Entrez votre code d'invité pour accéder à l'événement</p>
 
                         <div style="display: flex; gap: 20px; justify-content: center; margin-top: 10px;">
-                            <div class="help-trigger" id="helpTrigger">
+                            <div class="help-trigger help" id="helpTrigger">
                                 <i class="fas fa-question-circle"></i>
                                 <span>Aide & Assistance</span>
                             </div>
-                            <div class="help-trigger" id="linkAccessTrigger" style="cursor: pointer;">
+                            <div class="help-trigger link" id="linkAccessTrigger" style="cursor: pointer;">
                                 <i class="fas fa-link"></i>
                                 <span>Avez-vous un lien ?</span>
                             </div>
@@ -2058,10 +2226,10 @@
                                 <i class="fas fa-chair"></i>
                                 <span>Table</span>
                             </button>
-                            <button class="access-toggle-btn" data-mode="scan" id="scanToggleBtn">
+                         <!--   <button class="access-toggle-btn" data-mode="scan" id="scanToggleBtn">
                                 <i class="bi bi-qr-code"></i>
                                 <span>Scanner</span>
-                            </button>
+                            </button> -->
                         </div>
                         
                         <!-- Formulaire code invité -->
@@ -2172,6 +2340,8 @@
                         </div>
                         <h2 id="ticketCodeTitle">Reconnaissance du billet (optionnel)</h2>
                         <p id="ticketCodeSubtitle">Entrez votre code de billet pour être reconnu parmi les membres de votre table</p>
+
+                        <p>Entrez votre code de billet pour être reconnu parmi les membres de votre table</p>
                         <div id="ticketEventInfo" class="event-info-badge" style="display: none; margin-top: 12px;">
                             <div class="event-badge-content">
                                 <div class="event-badge-header">
@@ -2192,11 +2362,11 @@
                         </div>
 
                          <div style="display: flex; gap: 20px; justify-content: center; margin-top: 10px;">
-                            <div class="help-trigger" id="helpTrigger">
+                            <div class="help-trigger help" id="helpTrigger">
                                 <i class="fas fa-question-circle"></i>
                                 <span>Aide & Assistance</span>
                             </div>
-                            <div class="help-trigger" id="linkAccessTrigger" style="cursor: pointer;">
+                            <div class="help-trigger link" id="linkAccessTrigger" style="cursor: pointer;">
                                 <i class="fas fa-link"></i>
                                 <span>Avez-vous un lien ?</span>
                             </div>
@@ -2916,8 +3086,6 @@
     // ==========================================
     document.addEventListener('DOMContentLoaded', async function() {
          
-    console.log('🚀 Initialisation système d\'accès');
-    
    
     
     
@@ -3119,7 +3287,8 @@
                 }
 
                 isAnonymousAccess = true;
-                showImmediateConfirmation('table');
+                //showImmediateConfirmation('table');
+                showTicketCodeView();
                 return true;
                 
             } catch (error) {
@@ -3346,12 +3515,20 @@ function initCodeInputs() {
             }
         }
         
-        // Focus: vérifier les champs précédents
+        // Focus: vérifier les champs précédents - CORRIGÉ POUR TABLE CODE
         input.addEventListener('focus', function() {
             const currentIndex = parseInt(this.dataset.index);
+            const isTableCode = this.classList.contains('table-code');
             const form = this.closest('.access-form') || document;
             const selector = form instanceof Document ? '.code-input' : '.code-input:not(.personal-code)';
             const inputs = Array.from(form.querySelectorAll(selector)).sort((a,b) => parseInt(a.dataset.index)-parseInt(b.dataset.index));
+
+            // Pour le code table, ne pas forcer le focus si c'est le dernier champ rempli
+            if (isTableCode && currentIndex >= 2) {
+                // C'est un des derniers champs numériques du code table
+                // Laisser le focus naturel, ne pas le forcer
+                return;
+            }
 
             // CORRECTION: Chercher le premier champ vide
             for (let i = 0; i < inputs.length; i++) {
@@ -4113,13 +4290,15 @@ function initScanMode() {
         }
         
         // Modal d'aide
-        const helpTrigger = document.getElementById('helpTrigger');
+        const helpTrigger = document.querySelectorAll('.help-trigger.help');
+
         if (helpTrigger) {
-            helpTrigger.addEventListener('click', () => {
-                const helpModal = document.getElementById('helpModal');
-                const ticketView = document.getElementById('ticketCodeView');
-                
-                if (ticketView && !ticketView.classList.contains('hidden')) {
+            helpTrigger.forEach(trigger => {
+                trigger.addEventListener('click', () => {
+                    const helpModal = document.getElementById('helpModal');
+                    const ticketView = document.getElementById('ticketCodeView');
+                    
+                    if (ticketView && !ticketView.classList.contains('hidden')) {
                     helpModal.classList.add('active');
                     document.querySelectorAll('.help-toggle-btn').forEach(btn => btn.classList.remove('active'));
                     const codesBtn = document.querySelector('.help-toggle-btn[data-view="codes"]');
@@ -4134,7 +4313,8 @@ function initScanMode() {
 
                 helpModal.classList.add('active');
             });
-        }
+        });
+    }
         
         const helpClose = document.getElementById('helpClose');
         if (helpClose) {
@@ -4153,7 +4333,7 @@ function initScanMode() {
         }
         
         // Modal du lien d'accès
-        const linkAccessTrigger = document.getElementById('linkAccessTrigger');
+        const linkAccessTrigger = document.querySelectorAll('.help-trigger.link');
         const linkAccessModal = document.getElementById('linkAccessModal');
         const linkAccessClose = document.getElementById('linkAccessClose');
         const linkAccessInput = document.getElementById('linkAccessInput');
@@ -4162,13 +4342,16 @@ function initScanMode() {
         const linkAccessCancelBtn = document.getElementById('linkAccessCancelBtn');
         
         if (linkAccessTrigger) {
-            linkAccessTrigger.addEventListener('click', () => {
+            linkAccessTrigger.forEach(trigger => {
+                trigger.addEventListener('click', () => {
                 linkAccessModal.classList.add('active');
                 linkAccessInput.value = '';
                 document.getElementById('linkAccessMessage').style.display = 'none';
                 checkClipboardForLink();
             });
-        }
+            
+        });
+    }
         
         if (linkAccessClose) {
             linkAccessClose.addEventListener('click', () => {
@@ -4331,6 +4514,7 @@ async function validateGuestAccess() {
         
         // Sinon, vérifier via API
         const result = await window.storage.verifyAccessCode(code);
+
         
         if (result?.success) {
             // Traitement réussi
@@ -4416,7 +4600,8 @@ async function validateGuestAccess() {
                 showFormMessage('error', errorMsg, 'table');
                 showToast(errorMsg, 'error');
 
-                clearCodeInputsWithError();
+                // Corriger le focus pour le code table - ajouter le sélecteur
+                clearCodeInputsWithError('#tableForm .code-input');
             }
             
         } catch (error) {
@@ -4424,6 +4609,9 @@ async function validateGuestAccess() {
             const errorMsg = 'Erreur de validation. Vérifiez votre connexion.';
             showFormMessage('error', errorMsg, 'table');
             showToast(errorMsg, 'error');
+            
+            // Corriger le focus pour le code table lors d'erreur
+            clearCodeInputsWithError('#tableForm .code-input');
         }
     }
     
@@ -4509,8 +4697,9 @@ async function validateTicketCode() {
                     
                 } else {
                     // ❌ Guest a une autre table
+                    guestTable = await window.storage.getTableById(guestData.tableId);
                     console.error('❌ Invité d\'une autre table:', guestData.tableId, 'vs', currentTable.id);
-                    showFormMessage('error', `Invité assigné à la table ${guestData.tableId} seulement`, 'ticket');
+                    showFormMessage('error', `Invité assigné à la table ${guestTable.tableName} seulement`, 'ticket');
                     showToast('Cet invité est assigné à une autre table', 'error');
                     clearCodeInputsWithError('.ticket-code');
                     if (skipBtn) skipBtn.style.display = 'block';
@@ -4598,7 +4787,7 @@ async function createSessionAndProceedToEvent() {
         if (continueBtn) {
             continueBtn.disabled = true;
             continueBtn.style.opacity = '0.6';
-            continueBtn.innerHTML = '<div class="loader" style="width: 20px; height: 20px;"></div><span>Création de session...</span>';
+            continueBtn.innerHTML = '<div class="loader" style="width: 20px; height: 20px;"></div><span>Chargement...</span>';
         }
 
         // Créer la session
@@ -5412,7 +5601,7 @@ async function proceedToEvent() {
                             <p style="font-size: 0.9rem; color: var(--text-color); opacity: 0.8;">${helpMessage.replace(/\n/g, '<br>')}</p>
                         </div>
                         <p style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7;">
-                            Recherchez le personnel portant le logo SECURA
+                            Recherchez le personnel portant le logo Geekhub
                         </p>
                     </div>
                 `,
@@ -5444,7 +5633,7 @@ async function proceedToEvent() {
                                         <p>Le protocole a été notifié de votre demande.</p>
                                         <p style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7; margin-top: 15px;">
                                             Un membre du personnel vous contactera sous peu.<br>
-                                            Recherchez le logo SECURA sur les tenues.
+                                            Recherchez le logo Geekhub sur les tenues.
                                         </p>
                                     </div>
                                 `,

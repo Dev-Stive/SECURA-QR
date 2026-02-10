@@ -186,7 +186,7 @@
         .theme-toggle {
             width: 44px;
             height: 44px;
-            border-radius: 50%;
+            border-radius: 0.5rem;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
@@ -601,21 +601,6 @@
             pointer-events: none;
         }
 
-        .light-theme .features-track::before {
-            background: linear-gradient(to right, var(--light), transparent);
-        }
-
-        .light-theme .features-track::after {
-            background: linear-gradient(to left, var(--light), transparent);
-        }
-
-        .dark-theme .features-track::before {
-            background: linear-gradient(to right, var(--dark-card), transparent);
-        }
-
-        .dark-theme .features-track::after {
-            background: linear-gradient(to left, var(--dark-card), transparent);
-        }
 
         .features-wrapper {
             display: flex;

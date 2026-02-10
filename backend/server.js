@@ -21,12 +21,36 @@ const moment = require('moment');
 const cron = require('node-cron');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const archiver = require('archiver');
+const multer = require('multer');
+const crypto = require('crypto');
+const { generateUserId } = require('./utils/helpers/idGenerator');
+const { table } = require('console');
+const storageManager = require('./services/storageService');
 
+const SECRET_REGISTER_PATH = "mon_evenement_ultra_secret_2025";
+const SECRET_HASH = crypto.createHash('md5').update(SECRET_REGISTER_PATH).digest('hex');
+//const SECRET_ROUTE = `/secure-register-${SECRET_HASH.substring(0, 16)}`;
+
+const generateGalleryId = () => `gal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generatePhotoId = () => `photo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateLikeId = () => `like_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateCommentId = () => `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateMenuId = () => `menu_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateDishId = () => `dish_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generatePlanId = () => `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateChatId = () => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateMessageId = () => `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+const generatePrefixedId = (prefix, idLength = 12) => {
+  const timestamp = Date.now();
+  const randomPart = nanoid(idLength);
+  return `${prefix}_${timestamp}_${randomPart}`;
+};
 
 //════════════════════════════════════════
 // 🎨 SYSTÈME DE LOGS ULTRA PRO
 // ═══════════════════════════════════════
-
 const log = {
     banner: (text) => console.log(chalk.bold.cyan.bgBlack(`\n${'='.repeat(70)}\n${text}\n${'='.repeat(70)}\n`)),
     
@@ -121,6 +145,34 @@ const CONFIG = {
 
 const app = express();
 
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 500 * 1024 * 1024 }, // 500MB pour les vidéos
+    fileFilter: (req, file, cb) => {
+        const ext = path.extname(file.originalname).substring(1).toLowerCase();
+        
+        // Images supportées
+        const imageFormats = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff', 'svg', 'ico' , 'avif'];
+        
+        // Vidéos supportées
+        const videoFormats = ['mp4', 'webm', 'mpeg', 'mpg', 'avi', 'mov', 'mkv', 'flv', '3gp', 'ogv', 'm4v'];
+        
+        // Documents supportés
+        const docFormats = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+        
+        const allAllowed = [...imageFormats, ...videoFormats, ...docFormats];
+        
+        if (allAllowed.includes(ext)) {
+            cb(null, true);
+        } else {
+            const error = new Error(`Format ".${ext}" non supporté. Formats acceptés: ${imageFormats.join(', ')} (images), ${videoFormats.join(', ')} (vidéos), ${docFormats.join(', ')} (documents)`);
+            error.code = 'INVALID_FILE_TYPE';
+            error.supportedFormats = { images: imageFormats, videos: videoFormats, documents: docFormats };
+            cb(error);
+        }
+    }
+});
+
 app.use(cors({
     origin: '*',
     credentials: true,
@@ -128,8 +180,69 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key' , 'dash']
 }));
 
-app.use(express.json({ limit: '50mb' }));
+// JSON parser qui ignore les requêtes multipart/form-data (gérées par multer)
+app.use(express.json({ 
+    limit: '50mb',
+    skip: (req) => {
+        // Skip JSON parsing pour les requêtes multipart (fichiers)
+        return req.is('multipart/form-data');
+    }
+}));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Middleware de gestion des erreurs Multer (doit être avant les autres middlewares)
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        let message = 'Erreur lors du téléchargement du fichier';
+        let details = err.message;
+        
+        if (err.code === 'FILE_TOO_LARGE') {
+            message = 'Fichier trop volumineux';
+            details = 'La taille maximale est 500MB';
+        } else if (err.code === 'LIMIT_FILE_SIZE') {
+            message = 'Fichier trop volumineux';
+            details = 'Taille maximale: 500MB';
+        } else if (err.code === 'LIMIT_FILE_COUNT') {
+            message = 'Trop de fichiers';
+            details = 'Un seul fichier par requête';
+        }
+        
+        log.error('MULTER ERROR', `[${err.code}] ${message} - ${details}`);
+        return res.status(400).json({
+            success: false,
+            error: message,
+            details: details,
+            code: err.code,
+            timestamp: new Date().toISOString()
+        });
+    } else if (err && err.message) {
+        // Erreur personnalisée du fileFilter
+        if (err.code === 'INVALID_FILE_TYPE') {
+            log.error('FILE TYPE ERROR', err.message);
+            return res.status(400).json({
+                success: false,
+                error: 'Format fichier non supporté',
+                details: err.message,
+                supportedFormats: err.supportedFormats,
+                code: 'INVALID_FILE_TYPE',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        // Autres erreurs
+        log.error('UPLOAD ERROR', err.message);
+        return res.status(400).json({
+            success: false,
+            error: 'Erreur lors du téléchargement',
+            details: err.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    next();
+});
+
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -160,6 +273,27 @@ app.use((req, res, next) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// 🌐 MIDDLEWARE: Calcul du BaseURL dynamique
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Calcule le baseURL basé sur la requête pour gérer
+ * les différents environnements (localhost, domaine, proxy)
+ */
+app.use((req, res, next) => {
+    // Déterminer le protocole
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    
+    // Déterminer l'hôte
+    const host = req.headers['x-forwarded-host'] || req.headers['host'] || 'localhost';
+    
+    // Construire le baseURL de la requête
+    req.baseUrl = `${protocol}://${host}`;
+    
+    next();
+});
+
+// ═══════════════════════════════════════════════════════════════
 // 🔐 MIDDLEWARE SÉCURITÉ (optionnel)
 // ═══════════════════════════════════════════════════════════════
 
@@ -181,24 +315,30 @@ const apiKeyAuth = (req, res, next) => {
 const loadData = () => {
     try {
         if (!fs.existsSync(CONFIG.DB_FILE)) {
-            const initialData = {
-                events: [],
-                guests: [],
-                tables: [],
-                qrCodes: [],
-                scans: [],
-                users: [],
-                sessions: [],
-                eventSessions: [], // ← AJOUTÉ ICI
-                settings: {},
-                tempUsers: [],
-                passwordResets: [],
-                meta: {
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    version: '3.0'
-                }
-            };
+        
+        const initialData = {
+            events: [],
+            guests: [],
+            tables: [],
+            qrCodes: [],
+            scans: [],
+            users: [],
+            sessions: [],
+            eventSessions: [],
+            galleries: [],          // ← NOUVEAU
+            menus: [],              // ← NOUVEAU
+            plans: [],              // ← NOUVEAU
+            chatConversations: [],  // ← NOUVEAU
+            contacts: [],
+            settings: {},
+            tempUsers: [],
+            passwordResets: [],
+            meta: {
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                version: '3.0'
+            }
+        };
             fs.writeFileSync(CONFIG.DB_FILE, JSON.stringify(initialData, null, 2));
             return initialData;
         }
@@ -214,7 +354,11 @@ const loadData = () => {
             scans: data.scans || [],
             users: data.users || [],
             sessions: data.sessions || [],
-            eventSessions: data.eventSessions || [], // ← AJOUTÉ ICI
+            eventSessions: data.eventSessions || [],
+            galleries: data.galleries || [],
+            menus: data.menus || [],
+            plans: data.plans || [],
+            chatConversations: data.chatConversations || [],
             settings: data.settings || {},
             tempUsers: data.tempUsers || [],
             passwordResets: data.passwordResets || [],
@@ -227,12 +371,17 @@ const loadData = () => {
         log.error('Erreur chargement DB', err.message);
         return { 
             events: [], 
+            tables: [],
             guests: [], 
             qrCodes: [], 
             scans: [], 
             users: [], 
             sessions: [], 
             eventSessions: [],
+            galleries: [],
+            menus: [],
+            plans: [],
+            chatConversations: [],
             settings: {},
             tempUsers: [],
             passwordResets: []
@@ -246,13 +395,17 @@ const saveData = (data) => {
         
         const completeData = {
             events: data.events || existingData.events || [],
+            tables: data.tables || existingData.tables || [],
             guests: data.guests || existingData.guests || [],
             qrCodes: data.qrCodes || existingData.qrCodes || [],
             scans: data.scans || existingData.scans || [],
             users: data.users || existingData.users || [],
-            tables: data.tables || existingData.tables || [],
             sessions: data.sessions || existingData.sessions || [],
-            eventSessions: data.eventSessions || existingData.eventSessions || [], // ← AJOUTÉ ICI
+            eventSessions: data.eventSessions || existingData.eventSessions || [],
+            galleries: data.galleries || existingData.galleries || [],
+            menus: data.menus || existingData.menus || [],
+            plans: data.plans || existingData.plans || [],
+            chatConversations: data.chatConversations || existingData.chatConversations || [],
             tempUsers: data.tempUsers || existingData.tempUsers || [],
             passwordResets: data.passwordResets || existingData.passwordResets || [],
             settings: { ...existingData.settings, ...(data.settings || {}) },
@@ -264,7 +417,7 @@ const saveData = (data) => {
         };
         
         fs.writeFileSync(CONFIG.DB_FILE, JSON.stringify(completeData, null, 2));
-        log.db('Sauvegarde OK', `${completeData.events?.length || 0} événements, ${completeData.users?.length || 0} utilisateurs, ${completeData.tempUsers?.length || 0} inscriptions en cours`);
+        log.db('Sauvegarde OK', `${completeData.events?.length || 0} événements, ${completeData.users?.length || 0} utilisateurs, ${completeData.galleries?.length || 0} galeries, ${completeData.tempUsers?.length || 0} inscriptions en cours`);
     } catch (err) {
         log.error('Erreur sauvegarde DB', err.message);
     }
@@ -549,7 +702,7 @@ const generateToken = (user) => {
     );
 };
 
-// Middleware JWT
+// Middleware JWT - Authentification utilisateur standard
 const jwtAuth = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
@@ -567,9 +720,202 @@ const jwtAuth = (req, res, next) => {
     }
 };
 
+// Middleware pour authentification session d'événement OU utilisateur
+const eventSessionAuth = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader?.startsWith('Bearer ')) {
+        return res.status(401).json({ 
+            success: false, 
+            error: 'Token requis',
+            code: 'MISSING_TOKEN'
+        });
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    try {
+        // Essayer de décrypter comme un token JWT standard (user)
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // Vérifier si c'est un token utilisateur ou token de session d'événement
+        if (payload.sessionId) {
+            // Token de session d'événement
+            req.eventSession = {
+                sessionId: payload.sessionId,
+                guestId: payload.guestId,
+                tableId: payload.tableId,
+                eventId: payload.eventId,
+                accessMethod: payload.accessMethod,
+                isEventSession: true
+            };
+            req.user = null; // Pas d'utilisateur standard
+        } else if (payload.role) {
+            // Token utilisateur standard
+            req.user = payload;
+            req.eventSession = null;
+        } else {
+            throw new Error('Format de token invalide');
+        }
+        
+        next();
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ 
+                success: false, 
+                error: 'Token expiré',
+                code: 'TOKEN_EXPIRED'
+            });
+        }
+        if (err.name === 'JsonWebTokenError' || err.message === 'Format de token invalide') {
+            return res.status(401).json({ 
+                success: false, 
+                error: 'Token invalide',
+                code: 'INVALID_TOKEN'
+            });
+        }
+        log.warning('Erreur authentification:', err.message, req.ip);
+        return res.status(401).json({ 
+            success: false, 
+            error: 'Erreur authentification',
+            code: 'AUTH_ERROR'
+        });
+    }
+};
+
+// Middleware pour vérifier que c'est un utilisateur authentifié (pas une session d'événement)
+const requireUser = (req, res, next) => {
+    if (!req.user) {
+        return res.status(403).json({ 
+            success: false, 
+            error: 'Accès utilisateur requis',
+            code: 'USER_REQUIRED'
+        });
+    }
+    next();
+};
+
+// Middleware pour vérifier que c'est une session d'événement valide
+const requireEventSession = (req, res, next) => {
+    if (!req.eventSession) {
+        return res.status(403).json({ 
+            success: false, 
+            error: 'Session d\'événement requise',
+            code: 'EVENT_SESSION_REQUIRED'
+        });
+    }
+    next();
+};
+
+// Helper pour obtenir l'ID utilisateur depuis la requête (user OR eventSession)
+const getUserIdFromRequest = (req) => {
+    return req.user?.id || req.eventSession?.guestId || null;
+};
+
+// Helper pour obtenir le nom de l'utilisateur depuis la requête
+const getUserNameFromRequest = (req) => {
+    return req.user?.name || `Guest ${req.eventSession?.guestId?.substring(0, 8)}` || 'Unknown';
+};
+
+// Helper pour obtenir l'ID d'événement depuis la requête
+const getEventIdFromRequest = (req, query = {}) => {
+    return req.eventSession?.eventId || query.eventId || null;
+};
+
+// 🔥 Helper pour enrichir les participants avec les infos utilisateur complètes
+/**
+ * 🎯 Construit un participant de chat COMPLET et unifié
+ * Utilise les préfixes (gst_, usr_) pour déterrer le type
+ * Fusionne les données user/guest avec les attributs chat
+ * 
+ * Schéma du participant retourné:
+ * {
+ *   userId: string (gst_ ou usr_),
+ *   name: string (firstName + lastName),
+ *   email: string,
+ *   firstName: string,
+ *   lastName: string,
+ *   gender: string,
+ *   notes: string,
+ *   isOnline: boolean (statut en ligne en temps réel),
+ *   status: string ('online' | 'offline'),
+ *   joinedAt: ISO string | null (quand a rejoint la conversation),
+ *   lastReadAt: ISO string | null (quand a lu en dernier),
+ *   lastSeenAt: ISO string | null (dernière activité online)
+ * }
+ */
+const buildChatParticipant = (userId, data) => {
+    // Déterminer si c'est un guest ou user par le préfixe
+    const isGuest = userId?.startsWith('gst_');
+    
+    // Chercher les infos dans guests ou users
+    let userInfo;
+    if (isGuest) {
+        userInfo = data.guests?.find(g => g.id === userId);
+    } else {
+        userInfo = data.users?.find(u => u.id === userId);
+    }
+    
+    // Si pas trouvé, utiliser défauts minimaux
+    if (!userInfo) {
+        return {
+            userId: userId,
+            name: 'Utilisateur',
+            email: '',
+            firstName: '',
+            lastName: '',
+            gender: '',
+            notes: '',
+            isOnline: false,
+            status: 'offline',
+            joinedAt: null,
+            lastReadAt: null,
+            lastSeenAt: null
+        };
+    }
+    
+    // Construire le participant enrichi avec les infos utilisateur
+    return {
+        userId: userId,
+        // Infos de base (depuis guests ou users)
+        name: userInfo.firstName && userInfo.lastName 
+            ? `${userInfo.firstName} ${userInfo.lastName}` 
+            : userInfo.name || 'Utilisateur',
+        email: userInfo.email || '',
+        firstName: userInfo.firstName || '',
+        lastName: userInfo.lastName || '',
+        gender: userInfo.gender || userInfo.sexe || '',
+        notes: userInfo.notes || '',
+        // Statut en ligne (vient de userInfo si disponible)
+        isOnline: userInfo.isOnline || false,
+        status: userInfo.status || 'offline',
+        // Attributs de conversation (null au démarrage, mis à jour via enrichParticipants)
+        joinedAt: null,
+        lastReadAt: null,
+        lastSeenAt: null
+    };
+};
+
+/**
+ * ✨ Enrichir les participants avec leurs infos complètes
+ * Préserve les attributs de conversation du participant original:
+ * - joinedAt, lastReadAt, lastSeenAt
+ */
+const enrichParticipantsWithUserInfo = (participants, data) => {
+    return participants.map(participant => {
+        const chatParticipant = buildChatParticipant(participant.userId, data);
+        return {
+            ...chatParticipant,
+            // Préserver les attributs de conversation du participant original
+            joinedAt: participant.joinedAt || null,
+            lastReadAt: participant.lastReadAt || null,
+            lastSeenAt: participant.lastSeenAt || null
+        };
+    });
+};
 
 const requireRole = (role) => (req, res, next) => {
-    if (req.user.role !== role) {
+    if (!req.user || req.user.role !== role) {
         return res.status(403).json({ success: false, error: 'Accès refusé' });
     }
     next();
@@ -2611,7 +2957,7 @@ cron.schedule('*/2 * * * *', () => {
     }
 });
 
-cron.schedule('*/30 * * * *', () => { // Toutes les 30 minutes
+cron.schedule('*/30 * * * *', () => { 
     try {
         const data = loadData();
         if (!data.eventSessions || data.eventSessions.length === 0) return;
@@ -2634,15 +2980,41 @@ cron.schedule('*/30 * * * *', () => { // Toutes les 30 minutes
     }
 });
 
+// Nettoyage automatique des fichiers temporaires (chaque 6 heures)
+if (CONFIG.BACKUP_ENABLED) {
+    cron.schedule('0 */6 * * *', () => {
+        log.info('Nettoyage des fichiers temporaires', 'Tâche planifiée');
+        const deleted = storageManager.cleanupTempFiles();
+        if (deleted > 0) {
+            log.success(`Fichiers temporaires nettoyés`, `${deleted} fichiers supprimés`);
+        }
+    });
+}
+
+// Archivage des anciennes conversations chat (chaque jour à 2h du matin)
+cron.schedule('0 2 * * *', () => {
+    try {
+        const data = loadData();
+        const thirtyDaysAgo = moment().subtract(30, 'days');
+
+        let archived = 0;
+        data.chatConversations?.forEach(conv => {
+            if (moment(conv.updatedAt).isBefore(thirtyDaysAgo) && !conv.archived) {
+                conv.archived = true;
+                archived++;
+            }
+        });
+
+        if (archived > 0) {
+            saveData(data);
+            log.success(`Conversations archivées`, `${archived} conversations`);
+        }
+    } catch (err) {
+        log.error('Archivage conversations', err.message);
+    }
+});
 
 
-const crypto = require('crypto');
-const { generateUserId } = require('./utils/helpers/idGenerator');
-const { table } = require('console');
-
-const SECRET_REGISTER_PATH = "mon_evenement_ultra_secret_2025";
-const SECRET_HASH = crypto.createHash('md5').update(SECRET_REGISTER_PATH).digest('hex');
-//const SECRET_ROUTE = `/secure-register-${SECRET_HASH.substring(0, 16)}`;
 
 app.get('/register', (req, res) => {
     const registerPath = path.join(__dirname, 'register.html');
@@ -3164,21 +3536,114 @@ app.delete('/api/events/:id', (req, res) => {
             return res.status(404).json({ success: false, error: 'Événement introuvable' });
         }
         
-        // Supprimer en cascade
-        const guestIds = data.guests.filter(g => g.eventId === req.params.id).map(g => g.id);
+        // ⚠️ CASCADE DELETE: Supprimer toutes les galeries de l'événement
+        const galleries = data.galleries?.filter(g => g.eventId === req.params.id) || [];
+        let deletedGalleries = 0;
+        let deletedPhotos = 0;
+        let deletedComments = 0;
+        let deletedLikes = 0;
         
-        data.events = data.events.filter(e => e.id !== req.params.id);
+        galleries.forEach(gallery => {
+            const photoIds = gallery.photos?.map(p => p.id) || [];
+            deletedPhotos += photoIds.length;
+            
+            // Supprimer la cover image de la galerie (coverPhotoUrl ou coverPhoto)
+            if (gallery.metadata?.coverPhotoUrl) {
+                storageManager.deleteFile(gallery.metadata.coverPhotoUrl);
+            } else if (gallery.metadata?.coverPhoto) {
+                storageManager.deleteFile(gallery.metadata.coverPhoto);
+            }
+            if (gallery.metadata?.coverPhotoThumbnail) {
+                storageManager.deleteFile(gallery.metadata.coverPhotoThumbnail);
+            }
+            if (gallery.metadata?.coverImage) {
+                storageManager.deleteFile(gallery.metadata.coverImage);
+            }
+            if (gallery.metadata?.coverImageThumbnail) {
+                storageManager.deleteFile(gallery.metadata.coverImageThumbnail);
+            }
+            
+            // Supprimer les fichiers des photos
+            gallery.photos?.forEach(photo => {
+                // Utiliser l'URL de la photo (plus robuste après redémarrage)
+                if (photo.url) {
+                    storageManager.deleteFile(photo.url);
+                } else if (photo.fileId) {
+                    storageManager.deleteFile(photo.fileId);
+                }
+                // Supprimer les thumbnails si stockés séparément
+                if (photo.thumbnails?.small) storageManager.deleteFile(photo.thumbnails.small);
+                if (photo.thumbnails?.medium) storageManager.deleteFile(photo.thumbnails.medium);
+                if (photo.thumbnails?.large) storageManager.deleteFile(photo.thumbnails.large);
+            });
+            
+            // Supprimer les commentaires des photos
+            if (data.comments) {
+                const commentsToDelete = data.comments.filter(c => photoIds.includes(c.photoId));
+                deletedComments += commentsToDelete.length;
+                data.comments = data.comments.filter(c => !photoIds.includes(c.photoId));
+            }
+            
+            // Supprimer les likes des photos
+            if (data.likes) {
+                const likesToDelete = data.likes.filter(l => photoIds.includes(l.photoId));
+                deletedLikes += likesToDelete.length;
+                data.likes = data.likes.filter(l => !photoIds.includes(l.photoId));
+            }
+            
+            deletedGalleries++;
+        });
+        data.galleries = data.galleries.filter(g => g.eventId !== req.params.id);
+        
+        // Supprimer la cover image de l'événement
+        if (event.coverImage) {
+            storageManager.deleteFile(event.coverImage);
+        }
+        if (event.coverImageThumbnail) {
+            storageManager.deleteFile(event.coverImageThumbnail);
+        }
+        
+        // Supprimer les invités et données associées
+        const guestIds = data.guests.filter(g => g.eventId === req.params.id).map(g => g.id);
         data.guests = data.guests.filter(g => g.eventId !== req.params.id);
         data.qrCodes = data.qrCodes.filter(q => !guestIds.includes(q.guestId));
         data.scans = data.scans.filter(s => s.eventId !== req.params.id);
         data.tables = data.tables.filter(t => t.eventId !== req.params.id);
         
+        // Supprimer les menus/plats de l'événement
+        data.menus = data.menus?.filter(m => m.eventId !== req.params.id) || [];
+        data.dishes = data.dishes?.filter(d => d.eventId !== req.params.id) || [];
+        
+        // Supprimer les plans de table
+        data.plans = data.plans?.filter(p => p.eventId !== req.params.id) || [];
+        
+        // Supprimer les messages de l'événement
+        data.messages = data.messages?.filter(m => m.eventId !== req.params.id) || [];
+        
+        data.events = data.events.filter(e => e.id !== req.params.id);
         saveData(data);
         
-        log.crud('DELETE', 'event', { id: req.params.id, name: event.name });
-        log.warning('Événement supprimé', `+ ${guestIds.length} invités associés`);
+        log.crud('DELETE', 'event', { 
+            id: req.params.id, 
+            name: event.name,
+            galleries: deletedGalleries,
+            photos: deletedPhotos,
+            comments: deletedComments,
+            guests: guestIds.length
+        });
+        log.warning('Événement supprimé', `+ ${guestIds.length} invités, ${deletedGalleries} galeries, ${deletedPhotos} photos`);
         
-        res.json({ success: true, deleted: { event: 1, guests: guestIds.length } });
+        res.json({ 
+            success: true, 
+            deleted: { 
+                event: 1, 
+                guests: guestIds.length,
+                galleries: deletedGalleries,
+                photos: deletedPhotos,
+                comments: deletedComments,
+                likes: deletedLikes
+            } 
+        });
     } catch (err) {
         log.error('DELETE /api/events/:id', err.message);
         res.status(500).json({ success: false, error: err.message });
@@ -5982,16 +6447,7 @@ app.get('/api/tables/:id/guests', (req, res) => {
             
             return {
                 ...ag,
-                guest: fullGuest ? {
-                    id: fullGuest.id,
-                    firstName: fullGuest.firstName,
-                    lastName: fullGuest.lastName,
-                    email: fullGuest.email,
-                    phone: fullGuest.phone,
-                    company: fullGuest.company,
-                    scanned: fullGuest.scanned,
-                    scannedAt: fullGuest.scannedAt
-                } : null
+                guest: fullGuest,
             };
         });
         
@@ -6555,16 +7011,81 @@ app.get('/api/event-sessions/details', (req, res) => {
 // 4. SUPPRIMER UNE SESSION (logout)
 app.delete('/api/event-sessions/logout', (req, res) => {
     try {
-        // Avec JWT, on ne fait que supprimer côté client
-        // Optionnel: invalider le token côté serveur si nécessaire
-        res.json({
-            success: true,
-            message: 'Session terminée'
-        });
+        const authHeader = req.headers.authorization;
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(400).json({
+                success: false,
+                error: 'Token manquant',
+                code: 'MISSING_TOKEN'
+            });
+        }
+        
+        const token = authHeader.split(' ')[1];
+        
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({
+                success: false,
+                error: 'Token invalide ou expiré',
+                code: 'INVALID_TOKEN'
+            });
+        }
+        
+        const data = loadData();
+        
+        if (!data.eventSessions || !Array.isArray(data.eventSessions)) {
+            return res.json({
+                success: true,
+                message: 'Aucune session à supprimer',
+                data: {
+                    removedCount: 0,
+                    logoutAt: new Date().toISOString()
+                }
+            });
+        }
+        
+        const initialLength = data.eventSessions.length;
+        
+        // Filtrer par sessionId
+        data.eventSessions = data.eventSessions.filter(
+            session => session.id !== decoded.sessionId
+        );
+        
+        const removedCount = initialLength - data.eventSessions.length;
+        
+        if (removedCount > 0) {
+            // Sauvegarder les données modifiées
+            saveData(data);
+            console.log('✅ Session supprimée:', { sessionId: decoded.sessionId, removedCount });
+            
+            return res.json({
+                success: true,
+                message: 'Session supprimée avec succès',
+                data: {
+                    sessionId: decoded.sessionId,
+                    removedCount: removedCount,
+                    logoutAt: new Date().toISOString()
+                }
+            });
+        } else {
+            console.log('⚠️ Session non trouvée:', { sessionId: decoded.sessionId });
+            return res.status(404).json({
+                success: false,
+                error: 'Session introuvable',
+                message: 'Le sessionId n\'existe pas ou a déjà été supprimé',
+                code: 'SESSION_NOT_FOUND'
+            });
+        }
+        
     } catch (err) {
+        console.error('❌ Erreur suppression session:', err);
         res.status(500).json({
             success: false,
-            error: 'Erreur serveur'
+            error: 'Erreur serveur lors de la suppression de la session',
+            code: 'SERVER_ERROR'
         });
     }
 });
@@ -6830,90 +7351,8 @@ app.get('/api/events/:id/scans', (req, res) => {
     }
 });
 
-// ═══════════════════════════════════════════════════════════════
-// DASHBOARD API  - RACINE /
-app.get('/', (req, res) => {
-    const dashboard = path.join(__dirname, 'dashboard.html');
-    res.sendFile(dashboard);
-});
-
-app.get('/register', (req, res) => {
-    const registerPath = path.join(__dirname, 'register.html');
-        log.success('Accès au register secret', req.ip);
-        res.sendFile(registerPath);
-});
-
-app.get('/logo', (req, res) => {
-    const registerPath = path.join(__dirname, 'icon.png');
-        log.success('logo charge', req.ip);
-        res.sendFile(registerPath);
-});
-
-// ═══════════════════════════════════════════════════════════════
-// 📄 FRONTEND - PAGES STATIQUES
-// ═══════════════════════════════════════════════════════════════
 
 
-// 404 personnalisé
-app.get('*', (req, res ,next) => {
-
-     const apiKey = req.headers['dash'];
-     
-    if (apiKey === "dashboard") {
-        res.status(404).json({ error: 'Endpoint non trouvé Consultez /api pour la documentation' });
-        next();
-    }
-
-    if (!req.path.startsWith('/api') && !req.path.startsWith('/db')) {
-        const notFoundPath = path.join(__dirname, '404.html');
-        if (fs.existsSync(notFoundPath)) {
-            log.warning('404', `${req.method} ${req.originalUrl}`);
-            res.status(404).sendFile(notFoundPath);
-        } else {
-            res.status(404).send('<h1>404 - Endpoint non trouvé</h1><p><a href="/">Consultez /api pour la documentation</a></p>');
-        }
-    }
-});
-
-
-
-const cleanOldBackups = () => {
-    try {
-        const files = fs.readdirSync(CONFIG.BACKUP_DIR);
-        const cutoff = moment().subtract(CONFIG.BACKUP_RETENTION_DAYS, 'days');
-        
-        let deleted = 0;
-        files.forEach(file => {
-            const filepath = path.join(CONFIG.BACKUP_DIR, file);
-            const stats = fs.statSync(filepath);
-            
-            if (moment(stats.mtime).isBefore(cutoff)) {
-                fs.unlinkSync(filepath);
-                deleted++;
-            }
-        });
-        
-        if (deleted > 0) {
-            log.info(`Backups nettoyés`, `${deleted} fichiers supprimés`);
-        }
-    } catch (err) {
-        log.error('Erreur nettoyage backups', err.message);
-    }
-};
-
-// ═══════════════════════════════════════════════════════════════
-// ❌ ERROR HANDLER GLOBAL
-// ═══════════════════════════════════════════════════════════════
-
-app.use((err, req, res, next) => {
-    log.error('Erreur serveur', err.message);
-    console.error(err.stack);
-    res.status(500).json({
-        success: false,
-        error: err.message || 'Erreur interne du serveur',
-        timestamp: new Date().toISOString()
-    });
-});
 
 // ═══════════════════════════════════════════════════════════════
 // 📧 CONTACT FORM ENDPOINT
@@ -7084,11 +7523,3731 @@ app.delete('/api/contact/messages/:id', jwtAuth, (req, res) => {
     }
 });
 
+
+
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// 📸 ENDPOINTS GALERIES
+// ═══════════════════════════════════════════════════════════════
+
+//k
+app.get('/api/galleries', (req, res) => {
+    try {
+        const data = loadData();
+        const { eventId, userId, status, isPublic } = req.query;
+
+        let galleries = data.galleries || [];
+
+        // Filtres
+        if (eventId) galleries = galleries.filter(g => g.eventId === eventId);
+        if (userId) galleries = galleries.filter(g => g.createdBy === userId);
+        if (status) galleries = galleries.filter(g => g.status === status);
+        if (isPublic !== undefined) galleries = galleries.filter(g => g.isPublic === (isPublic === 'true'));
+
+        // Enrichissement avec stats
+        galleries = galleries.map(g => ({
+            ...g,
+            photoCount: (g.photos || []).length,
+            approvedPhotoCount: (g.photos || []).filter(p => p.status === 'approved').length,
+            engagementScore: calculateGalleryEngagement(g)
+        }));
+
+        // Reconstruire les URLs avec le baseURL de la requête
+        galleries = galleries.map(g => storageManager.buildGalleryUrls(g, req.baseUrl));
+
+        log.crud('READ', 'GALLERIES', { count: galleries.length });
+
+        res.json({
+            success: true,
+            galleries: galleries,
+            meta: {
+                total: galleries.length,
+                timestamp: new Date().toISOString()
+            }
+        });
+
+    } catch (err) {
+        log.error('GET /api/galleries', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+/**
+ * GET /api/galleries/:id
+ * Récupère une galerie spécifique avec détails complets
+ */
+app.get('/api/galleries/:id', (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        // Enrichissement
+        const enrichedGallery = {
+            ...gallery,
+            photoCount: gallery.photos?.length || 0,
+            approvedPhotos: gallery.photos?.filter(p => p.status === 'approved') || [],
+            stats: {
+                totalViews: (gallery.photos || []).reduce((sum, p) => sum + (p.views || 0), 0),
+                totalLikes: (gallery.photos || []).reduce((sum, p) => sum + (p.likes?.length || 0), 0),
+                totalComments: (gallery.photos || []).reduce((sum, p) => sum + (p.comments?.length || 0), 0),
+                totalDownloads: (gallery.photos || []).reduce((sum, p) => sum + (p.downloads || 0), 0)
+            },
+            engagementScore: calculateGalleryEngagement(gallery),
+            createdByUser: data.users?.find(u => u.id === gallery.createdBy),
+            event: data.events?.find(e => e.id === gallery.eventId)
+        };
+
+        // Reconstruire les URLs avec le baseURL de la requête
+        const enrichedGalleryWithUrls = storageManager.buildGalleryUrls(enrichedGallery, req.baseUrl);
+
+        log.crud('READ', 'GALLERY', { id: req.params.id });
+
+        res.json({
+            success: true,
+            gallery: enrichedGalleryWithUrls
+        });
+
+    } catch (err) {
+        log.error('GET /api/galleries/:id', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+
+/**
+ * POST /api/galleries
+ * Crée une nouvelle galerie pour un événement avec support du fichier de couverture
+ */
+app.post('/api/galleries', jwtAuth, upload.single('cover'), async (req, res) => {
+    try {
+        const { eventId, name, description, isPublic, settings, metadata } = req.body;
+        const data = loadData();
+
+        // Validations
+        if (!eventId || !name) {
+            return res.status(400).json({ success: false, error: 'eventId et name requis' });
+        }
+
+        const event = data.events?.find(e => e.id === eventId);
+        if (!event) {
+            return res.status(404).json({ success: false, error: 'Événement non trouvé' });
+        }
+
+        // Parser les settings et metadata s'ils viennent en tant que strings
+        let parsedSettings = settings;
+        let parsedMetadata = metadata;
+        
+        if (typeof settings === 'string') {
+            try {
+                parsedSettings = JSON.parse(settings);
+            } catch (e) {
+                parsedSettings = {};
+            }
+        }
+        
+        if (typeof metadata === 'string') {
+            try {
+                parsedMetadata = JSON.parse(metadata);
+            } catch (e) {
+                parsedMetadata = {};
+            }
+        }
+
+        // Créer la galerie
+        const gallery = {
+            id: generateGalleryId(),
+            eventId: eventId,
+            name: name.trim(),
+            description: description?.trim() || '',
+            createdBy: req.user.id,
+            createdByName: req.user.name,
+            isPublic: Boolean(isPublic),
+            status: 'active',
+            photos: [],
+            moderation: {
+                enabled: parsedSettings?.moderationRequired !== false,
+                approvedPhotos: [],
+                pendingPhotos: [],
+                rejectedPhotos: []
+            },
+            settings: {
+                maxPhotos: parsedSettings?.maxPhotos || 1000,
+                maxPhotoSize: parsedSettings?.maxPhotoSize || 8 * 1024 * 1024,
+                allowedFormats: parsedSettings?.allowedFormats || ['jpg', 'jpeg', 'png', 'webp'],
+                autoApprove: Boolean(parsedSettings?.autoApprove),
+                allowDownloads: parsedSettings?.allowDownloads !== false,
+                allowComments: parsedSettings?.allowComments !== false,
+                allowLikes: parsedSettings?.allowLikes !== false,
+                watermark: Boolean(parsedSettings?.watermark),
+                ...parsedSettings
+            },
+            permissions: {
+                viewers: parsedSettings?.viewers || ['all'],
+                contributors: parsedSettings?.contributors || [req.user.id],
+                moderators: parsedSettings?.moderators || [req.user.id]
+            },
+            stats: {
+                totalPhotos: 0,
+                totalViews: 0,
+                totalLikes: 0,
+                totalComments: 0,
+                totalDownloads: 0
+            },
+            metadata: {
+                coverPhoto: null,
+                coverPhotoUrl: null,
+                tags: parsedMetadata?.tags || parsedSettings?.tags || [],
+                category: parsedMetadata?.category || parsedSettings?.category || 'general',
+                location: parsedMetadata?.location || parsedSettings?.location || null
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        // Upload de la photo de couverture si fournie
+        if (req.file) {
+            try {
+                const uploadedFile = await storageManager.uploadFile(
+                    {
+                        filename: req.file.originalname,
+                        mimetype: req.file.mimetype,
+                        size: req.file.size,
+                        buffer: req.file.buffer
+                    },
+                    'gallery',
+                    { 
+                        userId: req.user.id, 
+                        galleryName: name,
+                        type: 'cover'
+                    }
+                );
+
+                gallery.metadata.coverPhoto = uploadedFile.id;
+                gallery.metadata.coverPhotoUrl = uploadedFile.path;  // Stocker seulement le chemin relatif
+                
+                log.info(`✅ Photo de couverture uploadée: ${uploadedFile.filename}`);
+            } catch (uploadErr) {
+                log.warning(`⚠️ Erreur upload couverture: ${uploadErr.message}`);
+                // Continuer sans couverture, utiliser le défaut
+                gallery.metadata.coverPhotoUrl = null;
+            }
+        }
+
+        // Sauvegarder
+        if (!data.galleries) data.galleries = [];
+        data.galleries.push(gallery);
+        saveData(data);
+
+        log.crud('CREATE', 'GALLERY', { 
+            name: gallery.name, 
+            eventId: eventId,
+            hasCover: !!gallery.metadata.coverPhotoUrl
+        });
+
+        // Reconstruire les URLs avec le baseURL de la requête
+        const enrichedGallery = storageManager.buildGalleryUrls(gallery, req.baseUrl);
+
+        res.status(201).json({
+            success: true,
+            gallery: enrichedGallery,
+            message: 'Galerie créée avec succès'
+        });
+
+    } catch (err) {
+        log.error('POST /api/galleries', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+/**
+ * PUT /api/galleries/:id
+ * Met à jour une galerie complètement
+ */
+app.put('/api/galleries/:id', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (!canEditGallery(gallery, req.user.id)) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        // Mise à jour des champs
+        const { name, description, isPublic, settings, metadata } = req.body;
+
+        if (name) gallery.name = name.trim();
+        if (description !== undefined) gallery.description = description.trim();
+        if (isPublic !== undefined) gallery.isPublic = Boolean(isPublic);
+        if (settings) gallery.settings = { ...gallery.settings, ...settings };
+        if (metadata) gallery.metadata = { ...gallery.metadata, ...metadata };
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('UPDATE', 'GALLERY', { id: req.params.id });
+
+        res.json({
+            success: true,
+            gallery: gallery,
+            message: 'Galerie mise à jour'
+        });
+
+    } catch (err) {
+        log.error('PUT /api/galleries/:id', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+/**
+ * PATCH /api/galleries/:id
+ * Mise à jour partielle d'une galerie
+ */
+app.patch('/api/galleries/:id', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (!canEditGallery(gallery, req.user.id)) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        // Patch sélectif
+        Object.keys(req.body).forEach(key => {
+            if (['name', 'description', 'isPublic', 'status'].includes(key)) {
+                gallery[key] = req.body[key];
+            }
+        });
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({
+            success: true,
+            gallery: gallery
+        });
+
+    } catch (err) {
+        log.error('PATCH /api/galleries/:id', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * DELETE /api/galleries/:id - Supprime une galerie (avec cascade: photos, commentaires)
+ */
+app.delete('/api/galleries/:id', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (gallery.createdBy !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Seul le créateur peut supprimer' });
+        }
+
+        // ⚠️ CASCADE DELETE: Supprimer toutes les photos de cette galerie
+        const photoIds = gallery.photos?.map(p => p.id) || [];
+        let deletedPhotos = 0;
+        
+        // Supprimer la cover image si elle existe (coverPhotoUrl ou coverPhotoId)
+        if (gallery.metadata?.coverPhotoUrl) {
+            storageManager.deleteFile(gallery.metadata.coverPhotoUrl);
+        } else if (gallery.metadata?.coverPhoto) {
+            storageManager.deleteFile(gallery.metadata.coverPhoto);
+        }
+        if (gallery.metadata?.coverPhotoThumbnail) {
+            storageManager.deleteFile(gallery.metadata.coverPhotoThumbnail);
+        }
+        if (gallery.metadata?.coverImage) {
+            storageManager.deleteFile(gallery.metadata.coverImage);
+        }
+        if (gallery.metadata?.coverImageThumbnail) {
+            storageManager.deleteFile(gallery.metadata.coverImageThumbnail);
+        }
+        
+        // Supprimer les fichiers associés aux photos
+        gallery.photos?.forEach(photo => {
+            // Utiliser l'URL de la photo (plus robuste après redémarrage)
+            if (photo.url) {
+                storageManager.deleteFile(photo.url);
+            } else if (photo.fileId) {
+                storageManager.deleteFile(photo.fileId);
+            }
+            // Supprimer les thumbnails si stockés séparément
+            if (photo.thumbnails?.small) storageManager.deleteFile(photo.thumbnails.small);
+            if (photo.thumbnails?.medium) storageManager.deleteFile(photo.thumbnails.medium);
+            if (photo.thumbnails?.large) storageManager.deleteFile(photo.thumbnails.large);
+            deletedPhotos++;
+        });
+        
+        // ⚠️ CASCADE DELETE: Supprimer tous les commentaires des photos de cette galerie
+        let deletedComments = 0;
+        if (data.comments) {
+            const commentsToDelete = data.comments.filter(c => photoIds.includes(c.photoId));
+            deletedComments = commentsToDelete.length;
+            data.comments = data.comments.filter(c => !photoIds.includes(c.photoId));
+        }
+        
+        // ⚠️ CASCADE DELETE: Supprimer toutes les likes des photos de cette galerie
+        let deletedLikes = 0;
+        if (data.likes) {
+            const likesToDelete = data.likes.filter(l => photoIds.includes(l.photoId));
+            deletedLikes = likesToDelete.length;
+            data.likes = data.likes.filter(l => !photoIds.includes(l.photoId));
+        }
+        
+        // Supprimer la galerie
+        data.galleries = data.galleries.filter(g => g.id !== req.params.id);
+        saveData(data);
+
+        log.crud('DELETE', 'GALLERY', { 
+            id: req.params.id,
+            photos: deletedPhotos,
+            comments: deletedComments,
+            likes: deletedLikes
+        });
+
+        res.json({ 
+            success: true, 
+            message: 'Galerie supprimée',
+            deleted: {
+                gallery: 1,
+                photos: deletedPhotos,
+                comments: deletedComments,
+                likes: deletedLikes
+            }
+        });
+
+    } catch (err) {
+        log.error('DELETE /api/galleries/:id', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// 📸 ENDPOINTS PHOTOS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * GET /api/galleries/:id/photos
+ * Récupère les photos d'une galerie
+ */
+app.get('/api/galleries/:id/photos', (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const { status, sort } = req.query;
+
+        let photos = gallery.photos || [];
+
+        // Filtrer par statut
+        if (status) {
+            photos = photos.filter(p => p.status === status);
+        }
+
+        // Tri
+        if (sort === 'recent') {
+            photos = photos.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+        } else if (sort === 'likes') {
+            photos = photos.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
+        } else if (sort === 'views') {
+            photos = photos.sort((a, b) => (b.views || 0) - (a.views || 0));
+        }
+
+        // Reconstruire les URLs avec le baseURL de la requête
+        // ET enrichir avec les informations utilisateur
+        photos = photos.map(photo => {
+            // Chercher l'utilisateur qui a uploadé la photo
+            const uploader = data.users?.find(u => u.id === photo.uploadedBy);
+            
+            return {
+                ...photo,
+                uploadedByName: uploader ? `${uploader.firstName} ${uploader.lastName}`.trim() : 'Utilisateur inconnu',
+                uploadedAvatar: uploader?.avatar || null,
+                url: storageManager.buildFileUrl(photo.url, req.baseUrl),
+                downloadUrl: storageManager.buildFileUrl(photo.url, req.baseUrl),
+                thumbnails: photo.thumbnails ? {
+                    small: storageManager.buildFileUrl(photo.thumbnails.small?.split('?')[0], req.baseUrl) + '?size=small',
+                    medium: storageManager.buildFileUrl(photo.thumbnails.medium?.split('?')[0], req.baseUrl) + '?size=medium',
+                    large: storageManager.buildFileUrl(photo.thumbnails.large?.split('?')[0], req.baseUrl) + '?size=large'
+                } : {}
+            };
+        });
+
+        log.crud('READ', 'PHOTOS', { count: photos.length, galleryId: req.params.id });
+
+        res.json({
+            success: true,
+            photos: photos,
+            meta: {
+                total: photos.length,
+                approved: photos.filter(p => p.status === 'approved').length,
+                pending: photos.filter(p => p.status === 'pending').length
+            }
+        });
+
+    } catch (err) {
+        log.error('GET /api/galleries/:id/photos', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+
+/**
+ * POST /api/galleries/:id/photos - Ajoute une photo avec upload
+ */
+app.post('/api/galleries/:id/photos', jwtAuth, upload.single('file'), async (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (!canContributeGallery(gallery, req.user.id)) {
+            return res.status(403).json({ success: false, error: 'Vous ne pouvez pas contribuer' });
+        }
+
+        if (gallery.photos.length >= gallery.settings.maxPhotos) {
+            return res.status(400).json({ success: false, error: 'Galerie pleine' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'Fichier manquant' });
+        }
+
+        // Upload via storage
+        const uploadedFile = await storageManager.uploadFile(
+            {
+                filename: req.file.originalname,
+                mimetype: req.file.mimetype,
+                size: req.file.size,
+                buffer: req.file.buffer
+            },
+            'gallery',
+            { userId: req.user.id, tags: JSON.parse(req.body.tags || '[]') }
+        );
+
+        // Créer la photo
+        const photoData = {
+            id: generatePhotoId(),
+            galleryId: req.params.id,
+            fileId: uploadedFile.id,
+            filename: uploadedFile.originalName,
+            url: uploadedFile.path,  // Stocker seulement le chemin relatif
+            thumbnails: uploadedFile.thumbnails,
+            uploadedBy: req.user.id,
+            uploadedByName: req.user.name,
+            uploadedAt: new Date().toISOString(),
+            size: uploadedFile.size,
+            format: uploadedFile.extension,
+
+            metadata: {
+                title: req.body.title || '',
+                description: req.body.description || '',
+                tags: JSON.parse(req.body.tags || '[]'),
+                location: req.body.location || null,
+                camera: req.body.camera || null
+            },
+
+            status: gallery.settings.autoApprove ? 'approved' : 'pending',
+            moderated: gallery.settings.autoApprove,
+            moderatedBy: gallery.settings.autoApprove ? 'system' : null,
+            moderatedAt: gallery.settings.autoApprove ? new Date().toISOString() : null,
+
+            views: 0,
+            viewedBy: [],
+            likes: [],
+            likedBy: [],
+            comments: [],
+            downloads: 0,
+            downloadedBy: [],
+
+            featured: Boolean(req.body.featured),
+            isPublic: gallery.isPublic
+        };
+
+        gallery.photos.unshift(photoData);
+        gallery.stats.totalPhotos = gallery.photos.length;
+
+        if (photoData.status === 'pending') {
+            gallery.moderation.pendingPhotos.push(photoData.id);
+        } else {
+            gallery.moderation.approvedPhotos.push(photoData.id);
+        }
+
+        if (!gallery.metadata.coverPhoto && gallery.photos.length === 1) {
+            gallery.metadata.coverPhoto = photoData.id;
+        }
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('CREATE', 'PHOTO', { 
+            galleryId: req.params.id, 
+            filename: photoData.filename,
+            status: photoData.status
+        });
+
+        // Reconstruire les URLs avec le baseURL de la requête
+        const photoWithUrls = {
+            ...photoData,
+            url: storageManager.buildFileUrl(photoData.url, req.baseUrl),
+            downloadUrl: storageManager.buildFileUrl(photoData.url, req.baseUrl),
+            thumbnails: photoData.thumbnails ? {
+                small: storageManager.buildFileUrl(photoData.thumbnails.small?.split('?')[0], req.baseUrl) + '?size=small',
+                medium: storageManager.buildFileUrl(photoData.thumbnails.medium?.split('?')[0], req.baseUrl) + '?size=medium',
+                large: storageManager.buildFileUrl(photoData.thumbnails.large?.split('?')[0], req.baseUrl) + '?size=large'
+            } : {}
+        };
+
+        res.status(201).json({
+            success: true,
+            photo: photoWithUrls,
+            message: `Photo ajoutée (${photoData.status === 'pending' ? 'en attente' : 'approuvée'})`
+        });
+
+
+    } catch (err) {
+        log.error('POST /api/galleries/:id/photos', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+/**
+ * GET /api/galleries/:galleryId/photos/:photoId - Récupère une photo
+ */
+app.get('/api/galleries/:galleryId/photos/:photoId', (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        // Enregistrer la vue
+        const userId = req.user?.id || 'anonymous';
+        if (!photo.viewedBy?.includes(userId)) {
+            photo.views = (photo.views || 0) + 1;
+            photo.viewedBy = photo.viewedBy || [];
+            photo.viewedBy.push(userId);
+            gallery.stats.totalViews = (gallery.stats.totalViews || 0) + 1;
+            saveData(data);
+        }
+
+        // Chercher l'utilisateur qui a uploadé la photo
+        const uploader = data.users?.find(u => u.id === photo.uploadedBy);
+        const uploadedByName = uploader ? `${uploader.firstName} ${uploader.lastName}`.trim() : 'Utilisateur inconnu';
+        const uploadedAvatar = uploader?.avatar || null;
+
+        // Reconstruire les URLs
+        const photoWithUrls = {
+            ...photo,
+            uploadedByName: uploadedByName,
+            uploadedAvatar: uploadedAvatar,
+            url: storageManager.buildFileUrl(photo.url, req.baseUrl),
+            downloadUrl: storageManager.buildFileUrl(photo.url, req.baseUrl),
+            thumbnails: photo.thumbnails ? {
+                small: storageManager.buildFileUrl(photo.thumbnails.small?.split('?')[0], req.baseUrl) + '?size=small',
+                medium: storageManager.buildFileUrl(photo.thumbnails.medium?.split('?')[0], req.baseUrl) + '?size=medium',
+                large: storageManager.buildFileUrl(photo.thumbnails.large?.split('?')[0], req.baseUrl) + '?size=large'
+            } : {}
+        };
+
+        // Statistiques COMPLÈTES de la photo
+        const stats = {
+            // Comptages de base
+            likes: photo.likes?.length || 0,
+            comments: photo.comments?.length || 0,
+            views: photo.views || 0,
+            downloads: photo.downloads || 0,
+            
+            // Détails des vues
+            uniqueViews: photo.viewedBy?.length || 0,
+            viewedByUsers: (photo.viewedBy || []).slice(0, 10),
+            
+            // Détails des likes avec noms
+            likeDetails: (photo.likes || []).map(like => ({
+                id: like.id,
+                userId: like.userId,
+                userName: like.userName,
+                likedAt: like.likedAt
+            })),
+            
+            // Détails des commentaires
+            commentDetails: (photo.comments || []).map(c => ({
+                id: c.id,
+                userId: c.userId,
+                userName: c.userName,
+                content: c.content.substring(0, 100),
+                status: c.status,
+                likeCount: c.likes?.length || 0,
+                createdAt: c.createdAt
+            })),
+            
+            // Détails des téléchargements
+            downloadDetails: (photo.downloadedBy || []).slice(0, 5).map(d => ({
+                userId: d.userId,
+                downloadedAt: d.downloadedAt
+            })),
+            
+            // Engagement
+            engagement: {
+                engagementScore: ((photo.likes?.length || 0) * 2 + (photo.comments?.length || 0) * 3 + (photo.views || 0)),
+                engagementRate: photo.views > 0 
+                    ? (((photo.likes?.length || 0) + (photo.comments?.length || 0)) / photo.views * 100).toFixed(2) + '%'
+                    : '0%'
+            },
+            
+            // Statut et modération
+            moderation: {
+                status: photo.status,
+                moderated: photo.moderated,
+                moderatedBy: photo.moderatedBy,
+                moderatedAt: photo.moderatedAt,
+                rejectionReason: photo.rejectionReason || null
+            },
+            
+            // Métadonnées
+            metadata: photo.metadata || {}
+        };
+
+        // Informations complètes pour mise à jour
+        const photoData = {
+            ...photoWithUrls,
+            stats: stats,
+            permissions: {
+                canEdit: photo.uploadedBy === req.user?.id || canModerateGallery(gallery, req.user?.id),
+                canDelete: photo.uploadedBy === req.user?.id || canModerateGallery(gallery, req.user?.id),
+                canModerate: canModerateGallery(gallery, req.user?.id),
+                canLike: gallery.settings?.allowLikes !== false,
+                canComment: gallery.settings?.allowComments !== false,
+                canDownload: gallery.settings?.allowDownloads !== false
+            },
+            gallery: {
+                id: gallery.id,
+                name: gallery.name,
+                isPublic: gallery.isPublic,
+                settings: gallery.settings
+            }
+        };
+
+        log.crud('READ', 'PHOTO_DETAILS', { photoId: req.params.photoId, userId: req.user?.id });
+
+        res.json({
+            success: true,
+            photo: photoData,
+            message: 'Photo récupérée avec succès'
+        });
+
+    } catch (err) {
+        log.error('GET /api/galleries/:galleryId/photos/:photoId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+/**
+ * PATCH /api/galleries/:galleryId/photos/:photoId - Met à jour une photo (views, metadata, etc.)
+ */
+app.patch('/api/galleries/:galleryId/photos/:photoId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        const { views, viewedBy, title, description, tags, location, featured } = req.body;
+
+        // Mettre à jour les vues
+        if (views !== undefined) {
+            photo.views = views;
+        }
+        if (viewedBy !== undefined) {
+            photo.viewedBy = viewedBy;
+        }
+
+        // Mettre à jour les métadonnées
+        if (title !== undefined || description !== undefined || tags !== undefined || location !== undefined) {
+            photo.metadata = photo.metadata || {};
+            if (title !== undefined) photo.metadata.title = title;
+            if (description !== undefined) photo.metadata.description = description;
+            if (tags !== undefined) photo.metadata.tags = tags;
+            if (location !== undefined) photo.metadata.location = location;
+        }
+
+        // Marquer comme featured
+        if (featured !== undefined) {
+            photo.featured = featured;
+        }
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('UPDATE', 'PHOTO', { photoId: req.params.photoId, userId: req.user?.id });
+
+        // Retourner la photo complète avec toutes les stats
+        const stats = {
+            likes: photo.likes?.length || 0,
+            comments: photo.comments?.length || 0,
+            views: photo.views || 0,
+            downloads: photo.downloads || 0,
+            uniqueViews: photo.viewedBy?.length || 0,
+            engagement: {
+                engagementScore: ((photo.likes?.length || 0) * 2 + (photo.comments?.length || 0) * 3 + (photo.views || 0)),
+                engagementRate: photo.views > 0 
+                    ? (((photo.likes?.length || 0) + (photo.comments?.length || 0)) / photo.views * 100).toFixed(2) + '%'
+                    : '0%'
+            }
+        };
+
+        res.json({
+            success: true,
+            photo: {
+                ...photo,
+                url: storageManager.buildFileUrl(photo.url, req.baseUrl),
+                downloadUrl: storageManager.buildFileUrl(photo.url, req.baseUrl),
+                thumbnails: photo.thumbnails ? {
+                    small: storageManager.buildFileUrl(photo.thumbnails.small?.split('?')[0], req.baseUrl) + '?size=small',
+                    medium: storageManager.buildFileUrl(photo.thumbnails.medium?.split('?')[0], req.baseUrl) + '?size=medium',
+                    large: storageManager.buildFileUrl(photo.thumbnails.large?.split('?')[0], req.baseUrl) + '?size=large'
+                } : {}
+            },
+            stats: stats,
+            message: 'Photo mise à jour avec succès'
+        });
+
+    } catch (err) {
+        log.error('PATCH /api/galleries/:galleryId/photos/:photoId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+/**
+ * DELETE /api/galleries/:galleryId/photos/:photoId - Supprime une photo (avec cascade: commentaires, likes)
+ */
+app.delete('/api/galleries/:galleryId/photos/:photoId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photoIndex = gallery.photos?.findIndex(p => p.id === req.params.photoId);
+
+        if (photoIndex === -1) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        const photo = gallery.photos[photoIndex];
+
+        if (photo.uploadedBy !== req.user.id && !canModerateGallery(gallery, req.user.id)) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        if (photo.fileId) {
+            storageManager.deleteFile(photo.fileId);
+        }
+
+        // ⚠️ CASCADE DELETE: Supprimer tous les commentaires de cette photo
+        let deletedComments = 0;
+        if (data.comments) {
+            const commentsToDelete = data.comments.filter(c => c.photoId === photo.id);
+            deletedComments = commentsToDelete.length;
+            data.comments = data.comments.filter(c => c.photoId !== photo.id);
+        }
+
+        // ⚠️ CASCADE DELETE: Supprimer tous les likes de cette photo
+        let deletedLikes = 0;
+        if (data.likes) {
+            const likesToDelete = data.likes.filter(l => l.photoId === photo.id);
+            deletedLikes = likesToDelete.length;
+            data.likes = data.likes.filter(l => l.photoId !== photo.id);
+        }
+
+        gallery.photos.splice(photoIndex, 1);
+
+        gallery.stats.totalPhotos = gallery.photos.length;
+        gallery.moderation.pendingPhotos = gallery.moderation.pendingPhotos.filter(id => id !== photo.id);
+        gallery.moderation.approvedPhotos = gallery.moderation.approvedPhotos.filter(id => id !== photo.id);
+
+        if (gallery.metadata.coverPhoto === photo.id) {
+            gallery.metadata.coverPhoto = gallery.photos[0]?.id || null;
+        }
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('DELETE', 'PHOTO', { 
+            photoId: req.params.photoId,
+            comments: deletedComments,
+            likes: deletedLikes
+        });
+
+        res.json({ 
+            success: true, 
+            message: 'Photo supprimée',
+            deleted: {
+                photo: 1,
+                comments: deletedComments,
+                likes: deletedLikes
+            }
+        });
+
+    } catch (err) {
+        log.error('DELETE /api/galleries/:galleryId/photos/:photoId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// ❤️  6. ENDPOINTS LIKES
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/galleries/:galleryId/photos/:photoId/like - Like une photo
+ */
+app.post('/api/galleries/:galleryId/photos/:photoId/like', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        if (!gallery.settings.allowLikes) {
+            return res.status(400).json({ success: false, error: 'Les likes sont désactivés' });
+        }
+
+        photo.likes = photo.likes || [];
+        photo.likedBy = photo.likedBy || [];
+
+        const alreadyLiked = photo.likedBy.includes(req.user.id);
+
+        if (alreadyLiked) {
+            photo.likedBy = photo.likedBy.filter(id => id !== req.user.id);
+            photo.likes = photo.likes.filter(like => like.userId !== req.user.id);
+            gallery.stats.totalLikes = Math.max(0, gallery.stats.totalLikes - 1);
+            saveData(data);
+
+            return res.json({
+                success: true,
+                action: 'unlike',
+                likes: photo.likes.length
+            });
+        }
+
+        const like = {
+            id: generateLikeId(),
+            userId: req.user.id,
+            userName: req.user.name,
+            likedAt: new Date().toISOString()
+        };
+
+        photo.likes.push(like);
+        photo.likedBy.push(req.user.id);
+        gallery.stats.totalLikes++;
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('CREATE', 'LIKE', { photoId: req.params.photoId, userId: req.user.id });
+
+        res.status(201).json({
+            success: true,
+            action: 'like',
+            likes: photo.likes.length,
+            like: like
+        });
+
+    } catch (err) {
+        log.error('POST /api/galleries/:galleryId/photos/:photoId/like', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+/**
+ * GET /api/galleries/:galleryId/photos/:photoId/likes - Récupère les likes
+ */
+app.get('/api/galleries/:galleryId/photos/:photoId/likes', (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        res.json({
+            success: true,
+            likes: photo.likes || [],
+            totalLikes: (photo.likes || []).length,
+            userLiked: photo.likedBy?.includes(req.user?.id) || false
+        });
+
+    } catch (err) {
+        log.error('GET /api/galleries/:galleryId/photos/:photoId/likes', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// 💬 7. ENDPOINTS COMMENTAIRES COMPLETS
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/galleries/:galleryId/photos/:photoId/comments - Ajoute un commentaire
+ */
+app.post('/api/galleries/:galleryId/photos/:photoId/comments', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        if (!gallery.settings.allowComments) {
+            return res.status(400).json({ success: false, error: 'Commentaires désactivés' });
+        }
+
+        const { content, parentCommentId } = req.body;
+
+        if (!content || content.trim().length === 0) {
+            return res.status(400).json({ success: false, error: 'Commentaire vide' });
+        }
+
+        photo.comments = photo.comments || [];
+
+        const comment = {
+            id: generateCommentId(),
+            userId: req.user.id,
+            userName: req.user.name,
+            userAvatar: req.user.avatar || null,
+            content: content.trim(),
+            parentCommentId: parentCommentId || null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            status: gallery.moderation.enabled ? 'pending' : 'approved',
+            moderated: !gallery.moderation.enabled,
+            likes: [],
+            likedBy: [],
+            replies: []
+        };
+
+        photo.comments.push(comment);
+        gallery.stats.totalComments++;
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('CREATE', 'COMMENT', { photoId: req.params.photoId, userId: req.user.id });
+
+        res.status(201).json({
+            success: true,
+            comment: comment,
+            message: `Commentaire ${gallery.moderation.enabled ? 'en attente' : 'publié'}`,
+            totalComments: photo.comments.length
+        });
+
+    } catch (err) {
+        log.error('POST /api/galleries/:galleryId/photos/:photoId/comments', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * GET /api/galleries/:galleryId/photos/:photoId/comments - Récupère les commentaires
+ */
+app.get('/api/galleries/:galleryId/photos/:photoId/comments', (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        const { status } = req.query;
+        let comments = photo.comments || [];
+
+        if (status) {
+            comments = comments.filter(c => c.status === status);
+        }
+
+        comments = comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        res.json({
+            success: true,
+            comments: comments,
+            meta: {
+                total: comments.length,
+                approved: comments.filter(c => c.status === 'approved').length,
+                pending: comments.filter(c => c.status === 'pending').length
+            }
+        });
+
+    } catch (err) {
+        log.error('GET /api/galleries/:galleryId/photos/:photoId/comments', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * PUT /api/galleries/:galleryId/photos/:photoId/comments/:commentId - Modifie un commentaire
+ */
+app.put('/api/galleries/:galleryId/photos/:photoId/comments/:commentId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        const comment = photo.comments?.find(c => c.id === req.params.commentId);
+
+        if (!comment) {
+            return res.status(404).json({ success: false, error: 'Commentaire non trouvé' });
+        }
+
+        if (comment.userId !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Vous ne pouvez pas modifier' });
+        }
+
+        const { content } = req.body;
+
+        if (!content || content.trim().length === 0) {
+            return res.status(400).json({ success: false, error: 'Commentaire vide' });
+        }
+
+        comment.content = content.trim();
+        comment.updatedAt = new Date().toISOString();
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({ success: true, comment: comment, message: 'Commentaire modifié' });
+
+    } catch (err) {
+        log.error('PUT /api/galleries/:galleryId/photos/:photoId/comments/:commentId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * DELETE /api/galleries/:galleryId/photos/:photoId/comments/:commentId - Supprime un commentaire
+ */
+app.delete('/api/galleries/:galleryId/photos/:photoId/comments/:commentId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        const commentIndex = photo.comments?.findIndex(c => c.id === req.params.commentId);
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ success: false, error: 'Commentaire non trouvé' });
+        }
+
+        const comment = photo.comments[commentIndex];
+
+        if (comment.userId !== req.user.id && !canModerateGallery(gallery, req.user.id)) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        photo.comments.splice(commentIndex, 1);
+        gallery.stats.totalComments = Math.max(0, gallery.stats.totalComments - 1);
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({ success: true, message: 'Commentaire supprimé' });
+
+    } catch (err) {
+        log.error('DELETE /api/galleries/:galleryId/photos/:photoId/comments/:commentId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/galleries/:galleryId/photos/:photoId/comments/:commentId/like - Like un commentaire
+ */
+app.post('/api/galleries/:galleryId/photos/:photoId/comments/:commentId/like', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        const comment = photo.comments?.find(c => c.id === req.params.commentId);
+
+        if (!comment) {
+            return res.status(404).json({ success: false, error: 'Commentaire non trouvé' });
+        }
+
+        comment.likedBy = comment.likedBy || [];
+        const alreadyLiked = comment.likedBy.includes(req.user.id);
+
+        if (alreadyLiked) {
+            comment.likedBy = comment.likedBy.filter(id => id !== req.user.id);
+            comment.likes = (comment.likes || []).filter(like => like.userId !== req.user.id);
+        } else {
+            comment.likedBy.push(req.user.id);
+            comment.likes = comment.likes || [];
+            comment.likes.push({
+                userId: req.user.id,
+                likedAt: new Date().toISOString()
+            });
+        }
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({
+            success: true,
+            comment: comment,
+            action: alreadyLiked ? 'unlike' : 'like',
+            likes: (comment.likes || []).length
+        });
+
+    } catch (err) {
+        log.error('POST /api/galleries/:galleryId/photos/:photoId/comments/:commentId/like', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+/**
+ * POST /api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies - Ajouter une reply à un commentaire
+ */
+app.post('/api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+        if (!gallery) return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+        if (!photo) return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        const comment = photo.comments?.find(c => c.id === req.params.commentId);
+        if (!comment) return res.status(404).json({ success: false, error: 'Commentaire non trouvé' });
+        comment.replies = comment.replies || [];
+        const replyId = `reply_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const reply = {
+            id: replyId,
+            userId: req.user.id,
+            userAvatar: req.user.avatar || null,
+            content: req.body.content,
+            parentCommentId: comment.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            status: 'pending',
+            moderated: false,
+            likes: [],
+            likedBy: [],
+            replies: []
+        };
+        comment.replies.push(reply);
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+        res.json({ success: true, reply });
+    } catch (err) {
+        log.error('POST /api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies/:replyId/like - Like une reply
+ */
+app.post('/api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies/:replyId/like', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+        if (!gallery) return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+        if (!photo) return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        const comment = photo.comments?.find(c => c.id === req.params.commentId);
+        if (!comment) return res.status(404).json({ success: false, error: 'Commentaire non trouvé' });
+        const reply = comment.replies?.find(r => r.id === req.params.replyId);
+        if (!reply) return res.status(404).json({ success: false, error: 'Reply non trouvée' });
+        reply.likedBy = reply.likedBy || [];
+        const alreadyLiked = reply.likedBy.includes(req.user.id);
+        if (alreadyLiked) {
+            reply.likedBy = reply.likedBy.filter(id => id !== req.user.id);
+            reply.likes = (reply.likes || []).filter(like => like.userId !== req.user.id);
+        } else {
+            reply.likedBy.push(req.user.id);
+            reply.likes = reply.likes || [];
+            reply.likes.push({ userId: req.user.id, likedAt: new Date().toISOString() });
+        }
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+        res.json({ success: true, reply, action: alreadyLiked ? 'unlike' : 'like', likes: (reply.likes || []).length });
+    } catch (err) {
+        log.error('POST /api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies/:replyId/like', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * PUT /api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies/:replyId - Modifier une reply
+ */
+app.put('/api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies/:replyId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+        if (!gallery) return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+        if (!photo) return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        const comment = photo.comments?.find(c => c.id === req.params.commentId);
+        if (!comment) return res.status(404).json({ success: false, error: 'Commentaire non trouvé' });
+        const reply = comment.replies?.find(r => r.id === req.params.replyId);
+        if (!reply) return res.status(404).json({ success: false, error: 'Reply non trouvée' });
+        if (reply.userId !== req.user.id) return res.status(403).json({ success: false, error: 'Non autorisé' });
+        reply.content = req.body.content || reply.content;
+        reply.updatedAt = new Date().toISOString();
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+        res.json({ success: true, reply });
+    } catch (err) {
+        log.error('PUT /api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies/:replyId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * DELETE /api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies/:replyId - Supprimer une reply
+ */
+app.delete('/api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies/:replyId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+        if (!gallery) return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+        if (!photo) return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        const comment = photo.comments?.find(c => c.id === req.params.commentId);
+        if (!comment) return res.status(404).json({ success: false, error: 'Commentaire non trouvé' });
+        const replyIndex = comment.replies?.findIndex(r => r.id === req.params.replyId);
+        if (replyIndex === -1 || replyIndex == null) return res.status(404).json({ success: false, error: 'Reply non trouvée' });
+        const reply = comment.replies[replyIndex];
+        if (reply.userId !== req.user.id) return res.status(403).json({ success: false, error: 'Non autorisé' });
+        comment.replies.splice(replyIndex, 1);
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+        res.json({ success: true });
+    } catch (err) {
+        log.error('DELETE /api/galleries/:galleryId/photos/:photoId/comments/:commentId/replies/:replyId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// 📊 8. ENDPOINTS MODÉRATION
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/galleries/:galleryId/photos/:photoId/approve - Approuve une photo
+ */
+app.post('/api/galleries/:galleryId/photos/:photoId/approve', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (!canModerateGallery(gallery, req.user.id)) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        if (photo.status !== 'pending' && photo.status !== 'rejected' ) {
+            return res.status(400).json({ success: false, error: 'Photo non en attente' });
+        }
+
+        photo.status = 'approved';
+        photo.moderated = true;
+        photo.moderatedBy = req.user.id;
+        photo.moderatedAt = new Date().toISOString();
+
+        gallery.moderation.pendingPhotos = gallery.moderation.pendingPhotos.filter(id => id !== photo.id);
+        gallery.moderation.approvedPhotos.push(photo.id);
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('APPROVE', 'PHOTO', { photoId: req.params.photoId });
+
+        res.json({ success: true, photo: photo, message: 'Photo approuvée' });
+
+    } catch (err) {
+        log.error('POST /api/galleries/:galleryId/photos/:photoId/approve', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/galleries/:galleryId/photos/:photoId/reject - Rejette une photo
+ */
+app.post('/api/galleries/:galleryId/photos/:photoId/reject', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (!canModerateGallery(gallery, req.user.id)) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        if (photo.status !== 'pending') {
+            return res.status(400).json({ success: false, error: 'Photo non en attente' });
+        }
+
+        const { reason } = req.body;
+
+        photo.status = 'rejected';
+        photo.moderated = true;
+        photo.moderatedBy = req.user.id;
+        photo.moderatedAt = new Date().toISOString();
+        photo.rejectionReason = reason || 'Pas de raison';
+
+        gallery.moderation.pendingPhotos = gallery.moderation.pendingPhotos.filter(id => id !== photo.id);
+        gallery.moderation.rejectedPhotos.push(photo.id);
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('REJECT', 'PHOTO', { photoId: req.params.photoId });
+
+        res.json({ success: true, photo: photo, message: 'Photo rejetée' });
+
+    } catch (err) {
+        log.error('POST /api/galleries/:galleryId/photos/:photoId/reject', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * GET /api/galleries/:id/moderation - Photos en attente
+ */
+app.get('/api/galleries/:id/moderation', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (!canModerateGallery(gallery, req.user.id)) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const pendingPhotos = (gallery.photos || [])
+            .filter(p => p.status === 'pending')
+            .map(p => {
+                // Enrichir avec les infos utilisateur
+                const uploader = data.users?.find(u => u.id === p.uploadedBy);
+                const uploadedByName = uploader ? `${uploader.firstName} ${uploader.lastName}`.trim() : 'Utilisateur inconnu';
+                
+                return {
+                    id: p.id,
+                    filename: p.filename,
+                    url: p.url,
+                    uploadedByName: uploadedByName,
+                    uploadedAt: p.uploadedAt
+                };
+            });
+
+        res.json({
+            success: true,
+            pendingPhotos: pendingPhotos,
+            total: pendingPhotos.length
+        });
+
+    } catch (err) {
+        log.error('GET /api/galleries/:id/moderation', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * GET /api/galleries/:id/stats - Statistiques galerie
+ */
+app.get('/api/galleries/:id/stats', (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        const stats = {
+            totalPhotos: gallery.photos?.length || 0,
+            approvedPhotos: (gallery.photos || []).filter(p => p.status === 'approved').length,
+            pendingPhotos: (gallery.photos || []).filter(p => p.status === 'pending').length,
+            rejectedPhotos: (gallery.photos || []).filter(p => p.status === 'rejected').length,
+
+            totalViews: gallery.stats?.totalViews || 0,
+            totalLikes: gallery.stats?.totalLikes || 0,
+            totalComments: gallery.stats?.totalComments || 0,
+            totalDownloads: gallery.stats?.totalDownloads || 0,
+
+            engagement: {
+                avgLikesPerPhoto: gallery.photos?.length > 0 
+                    ? ((gallery.photos || []).reduce((sum, p) => sum + (p.likes?.length || 0), 0) / gallery.photos.length).toFixed(2)
+                    : 0,
+                avgCommentsPerPhoto: gallery.photos?.length > 0
+                    ? ((gallery.photos || []).reduce((sum, p) => sum + (p.comments?.length || 0), 0) / gallery.photos.length).toFixed(2)
+                    : 0,
+                avgViewsPerPhoto: gallery.photos?.length > 0
+                    ? ((gallery.photos || []).reduce((sum, p) => sum + (p.views || 0), 0) / gallery.photos.length).toFixed(2)
+                    : 0
+            },
+
+             recentPhotos: (gallery.photos || [])
+                .slice(0, 5)
+                .map(p => ({
+                    id: p.id,
+                    filename: p.filename,
+                    uploadedAt: p.uploadedAt,
+                    likes: p.likes?.length || 0,
+                    comments: p.comments?.length || 0,
+                    views: p.views || 0
+                })),
+
+            topPhotos: (gallery.photos || [])
+                .filter(p => p.status === 'approved')
+                .sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
+                .slice(0, 5)
+                .map(p => ({
+                    id: p.id,
+                    filename: p.filename,
+                    likes: p.likes?.length || 0,
+                    views: p.views || 0
+                }))
+        };
+
+        res.json({ success: true, stats: stats });
+
+    } catch (err) {
+        log.error('GET /api/galleries/:id/stats', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+/**
+ * POST /api/galleries/:id/permissions
+ * Met à jour les permissions d'une galerie
+ */
+app.post('/api/galleries/:id/permissions', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (!canEditGallery(gallery, req.user.id)) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const { viewers, contributors, moderators } = req.body;
+
+        if (viewers) gallery.permissions.viewers = viewers;
+        if (contributors) gallery.permissions.contributors = contributors;
+        if (moderators) gallery.permissions.moderators = moderators;
+
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('UPDATE', 'PERMISSIONS', { galleryId: req.params.id });
+
+        res.json({
+            success: true,
+            permissions: gallery.permissions,
+            message: 'Permissions mises à jour'
+        });
+
+    } catch (err) {
+        log.error('POST /api/galleries/:id/permissions', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// 📥 9. ENDPOINTS TÉLÉCHARGEMENTS
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/galleries/:galleryId/photos/:photoId/download - Télécharge une photo
+ */
+app.post('/api/galleries/:galleryId/photos/:photoId/download', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.galleryId);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (!gallery.settings.allowDownloads) {
+            return res.status(400).json({ success: false, error: 'Téléchargements désactivés' });
+        }
+
+        const photo = gallery.photos?.find(p => p.id === req.params.photoId);
+
+        if (!photo) {
+            return res.status(404).json({ success: false, error: 'Photo non trouvée' });
+        }
+
+        photo.downloads = (photo.downloads || 0) + 1;
+        photo.downloadedBy = photo.downloadedBy || [];
+        photo.downloadedBy.push({
+            userId: req.user.id,
+            downloadedAt: new Date().toISOString()
+        });
+
+        gallery.stats.totalDownloads++;
+        gallery.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('DOWNLOAD', 'PHOTO', { photoId: req.params.photoId, userId: req.user.id });
+
+        res.json({
+            success: true,
+            downloadUrl: photo.url,
+            filename: photo.filename,
+            message: 'Téléchargement enregistré'
+        });
+
+    } catch (err) {
+        log.error('POST /api/galleries/:galleryId/photos/:photoId/download', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * GET /api/galleries/:id/download/zip - Télécharge la galerie en ZIP
+ */
+app.get('/api/galleries/:id/download/zip', jwtAuth, async (req, res) => {
+    try {
+        const data = loadData();
+        const gallery = data.galleries?.find(g => g.id === req.params.id);
+
+        if (!gallery) {
+            return res.status(404).json({ success: false, error: 'Galerie non trouvée' });
+        }
+
+        if (!gallery.settings.allowDownloads) {
+            return res.status(400).json({ success: false, error: 'Téléchargements désactivés' });
+        }
+
+        const archive = archiver('zip', { zlib: { level: 9 } });
+
+        res.attachment(`${gallery.name}_${moment().format('YYYY-MM-DD')}.zip`);
+        archive.pipe(res);
+
+        gallery.photos?.forEach(photo => {
+            const filePath = path.join(storageManager.galleriesDir, photo.filename);
+            if (fs.existsSync(filePath)) {
+                archive.file(filePath, { name: photo.filename });
+            }
+        });
+
+        await archive.finalize();
+
+        log.crud('DOWNLOAD', 'GALLERY_ZIP', { galleryId: req.params.id });
+
+    } catch (err) {
+        log.error('GET /api/galleries/:id/download/zip', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// 💾 14. ENDPOINTS STOCKAGE & NETTOYAGE
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /api/storage/stats - Statistiques de stockage
+ */
+app.get('/api/storage/stats', jwtAuth, (req, res) => {
+    try {
+        const stats = storageManager.getStorageStats();
+
+        res.json({
+            success: true,
+            storage: stats,
+            provider: process.env.CLOUD_PROVIDER || 'local',
+            quota: '100GB'
+        });
+
+    } catch (err) {
+        log.error('GET /api/storage/stats', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/storage/cleanup - Nettoie les fichiers temp
+ */
+app.post('/api/storage/cleanup', jwtAuth, (req, res) => {
+    try {
+        const deleted = storageManager.cleanupTempFiles();
+
+        res.json({
+            success: true,
+            message: 'Nettoyage effectué',
+            filesDeleted: deleted
+        });
+
+    } catch (err) {
+        log.error('POST /api/storage/cleanup', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// 🛠️ 15. FONCTIONS UTILITAIRES
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Vérifie si l'utilisateur peut éditer une galerie
+ */
+function canEditGallery(gallery, userId) {
+    return gallery.createdBy === userId || gallery.permissions?.moderators?.includes(userId);
+}
+
+/**
+ * Vérifie si l'utilisateur peut contribuer à une galerie
+ */
+function canContributeGallery(gallery, userId) {
+    return gallery.createdBy === userId || 
+           gallery.permissions?.contributors?.includes(userId) ||
+           gallery.permissions?.moderators?.includes(userId);
+}
+
+/**
+ * Vérifie si l'utilisateur peut modérer une galerie
+ */
+function canModerateGallery(gallery, userId) {
+    return gallery.createdBy === userId || gallery.permissions?.moderators?.includes(userId);
+}
+
+/**
+ * Calcule le score d'engagement d'une galerie
+ */
+function calculateGalleryEngagement(gallery) {
+    const totalLikes = (gallery.photos || []).reduce((sum, p) => sum + (p.likes?.length || 0), 0);
+    const totalComments = (gallery.photos || []).reduce((sum, p) => sum + (p.comments?.length || 0), 0);
+    const totalViews = gallery.stats?.totalViews || 0;
+    const photoCount = gallery.photos?.length || 1;
+
+    return Math.round(((totalLikes * 2 + totalComments * 3 + totalViews) / photoCount) || 0);
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// 🍽️  10. ENDPOINTS MENUS & PLATS
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /api/menus - Récupère tous les menus
+ */
+app.get('/api/menus', (req, res) => {
+    try {
+        const data = loadData();
+        const { eventId, status } = req.query;
+
+        let menus = data.menus || [];
+
+        if (eventId) menus = menus.filter(m => m.eventId === eventId);
+        if (status) menus = menus.filter(m => m.status === status);
+
+        menus = menus.map(m => ({
+            ...m,
+            dishCount: (m.dishes || []).length
+        }));
+
+        res.json({
+            success: true,
+            menus: menus,
+            meta: { total: menus.length }
+        });
+
+    } catch (err) {
+        log.error('GET /api/menus', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/menus - Crée un menu
+ */
+app.post('/api/menus', jwtAuth, (req, res) => {
+    try {
+        const { eventId, name, description, type } = req.body;
+        const data = loadData();
+
+        if (!eventId || !name) {
+            return res.status(400).json({ success: false, error: 'eventId et name requis' });
+        }
+
+        if (!data.events?.find(e => e.id === eventId)) {
+            return res.status(404).json({ success: false, error: 'Événement non trouvé' });
+        }
+
+        const menu = {
+            id: generateMenuId(),
+            eventId: eventId,
+            name: name.trim(),
+            description: description?.trim() || '',
+            type: type || 'main', // main, starter, dessert, drink
+            createdBy: req.user.id,
+            createdByName: req.user.name,
+            status: 'active',
+            dishes: [],
+            images: [],
+            stats: {
+                totalDishes: 0,
+                totalRatings: 0,
+                avgRating: 0
+            },
+            metadata: {
+                tags: [],
+                allergens: [],
+                categories: []
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        if (!data.menus) data.menus = [];
+        data.menus.push(menu);
+        saveData(data);
+
+        log.crud('CREATE', 'MENU', { name: menu.name, eventId: eventId });
+
+        res.status(201).json({
+            success: true,
+            menu: menu,
+            message: 'Menu créé avec succès'
+        });
+
+    } catch (err) {
+        log.error('POST /api/menus', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * GET /api/menus/:id - Récupère un menu
+ */
+app.get('/api/menus/:id', (req, res) => {
+    try {
+        const data = loadData();
+        const menu = data.menus?.find(m => m.id === req.params.id);
+
+        if (!menu) {
+            return res.status(404).json({ success: false, error: 'Menu non trouvé' });
+        }
+
+        const enriched = {
+            ...menu,
+            dishCount: menu.dishes?.length || 0,
+            stats: {
+                ...menu.stats,
+                totalDishes: menu.dishes?.length || 0,
+                avgRating: menu.dishes?.length > 0
+                    ? (menu.dishes.reduce((sum, d) => sum + (d.rating || 0), 0) / menu.dishes.length).toFixed(2)
+                    : 0
+            }
+        };
+
+        res.json({ success: true, menu: enriched });
+
+    } catch (err) {
+        log.error('GET /api/menus/:id', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * PUT /api/menus/:id - Met à jour un menu
+ */
+app.put('/api/menus/:id', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const menu = data.menus?.find(m => m.id === req.params.id);
+
+        if (!menu) {
+            return res.status(404).json({ success: false, error: 'Menu non trouvé' });
+        }
+
+        if (menu.createdBy !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const { name, description, type, metadata } = req.body;
+
+        if (name) menu.name = name.trim();
+        if (description !== undefined) menu.description = description.trim();
+        if (type) menu.type = type;
+        if (metadata) menu.metadata = { ...menu.metadata, ...metadata };
+
+        menu.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({ success: true, menu: menu, message: 'Menu mis à jour' });
+
+    } catch (err) {
+        log.error('PUT /api/menus/:id', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * DELETE /api/menus/:id - Supprime un menu
+ */
+app.delete('/api/menus/:id', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const menu = data.menus?.find(m => m.id === req.params.id);
+
+        if (!menu) {
+            return res.status(404).json({ success: false, error: 'Menu non trouvé' });
+        }
+
+        if (menu.createdBy !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        // Supprimer les images
+        menu.images?.forEach(img => {
+            if (img.fileId) storageManager.deleteFile(img.fileId);
+        });
+
+        data.menus = data.menus.filter(m => m.id !== req.params.id);
+        saveData(data);
+
+        log.crud('DELETE', 'MENU', { id: req.params.id });
+
+        res.json({ success: true, message: 'Menu supprimé' });
+
+    } catch (err) {
+        log.error('DELETE /api/menus/:id', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// 🍽️  11. ENDPOINTS PLATS (DISHES)
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/menus/:menuId/dishes - Ajoute un plat au menu
+ */
+app.post('/api/menus/:menuId/dishes', jwtAuth, upload.single('image'), async (req, res) => {
+    try {
+        const data = loadData();
+        const menu = data.menus?.find(m => m.id === req.params.menuId);
+
+        if (!menu) {
+            return res.status(404).json({ success: false, error: 'Menu non trouvé' });
+        }
+
+        if (menu.createdBy !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const { name, description, price, ingredients, allergens, preparation, servings, calories } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ success: false, error: 'Nom du plat requis' });
+        }
+
+        let dishImage = null;
+
+        if (req.file) {
+            const uploadedFile = await storageManager.uploadFile(
+                {
+                    filename: req.file.originalname,
+                    mimetype: req.file.mimetype,
+                    size: req.file.size,
+                    buffer: req.file.buffer
+                },
+                'menu'
+            );
+
+            dishImage = {
+                fileId: uploadedFile.id,
+                url: uploadedFile.url,
+                thumbnails: uploadedFile.thumbnails
+            };
+        }
+
+        const dish = {
+            id: generateDishId(),
+            menuId: req.params.menuId,
+            name: name.trim(),
+            description: description?.trim() || '',
+            price: parseFloat(price) || 0,
+            image: dishImage,
+            ingredients: JSON.parse(ingredients || '[]'),
+            allergens: JSON.parse(allergens || '[]'),
+            preparation: preparation?.trim() || '',
+            servings: parseInt(servings) || 1,
+            calories: parseInt(calories) || 0,
+            rating: 0,
+            ratings: [],
+            reviews: [],
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        menu.dishes = menu.dishes || [];
+        menu.dishes.push(dish);
+        menu.stats.totalDishes = menu.dishes.length;
+        menu.updatedAt = new Date().toISOString();
+
+        saveData(data);
+
+        log.crud('CREATE', 'DISH', { name: dish.name, menuId: req.params.menuId });
+
+        res.status(201).json({
+            success: true,
+            dish: dish,
+            message: 'Plat ajouté au menu'
+        });
+
+    } catch (err) {
+        log.error('POST /api/menus/:menuId/dishes', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * GET /api/menus/:menuId/dishes - Récupère les plats d'un menu
+ */
+app.get('/api/menus/:menuId/dishes', (req, res) => {
+    try {
+        const data = loadData();
+        const menu = data.menus?.find(m => m.id === req.params.menuId);
+
+        if (!menu) {
+            return res.status(404).json({ success: false, error: 'Menu non trouvé' });
+        }
+
+        const dishes = menu.dishes || [];
+
+        res.json({
+            success: true,
+            dishes: dishes,
+            meta: { total: dishes.length }
+        });
+
+    } catch (err) {
+        log.error('GET /api/menus/:menuId/dishes', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * PUT /api/menus/:menuId/dishes/:dishId - Met à jour un plat
+ */
+app.put('/api/menus/:menuId/dishes/:dishId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const menu = data.menus?.find(m => m.id === req.params.menuId);
+
+        if (!menu) {
+            return res.status(404).json({ success: false, error: 'Menu non trouvé' });
+        }
+
+        const dish = menu.dishes?.find(d => d.id === req.params.dishId);
+
+        if (!dish) {
+            return res.status(404).json({ success: false, error: 'Plat non trouvé' });
+        }
+
+        if (menu.createdBy !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const { name, description, price, ingredients, allergens, preparation, servings, calories } = req.body;
+
+        if (name) dish.name = name.trim();
+        if (description !== undefined) dish.description = description.trim();
+        if (price !== undefined) dish.price = parseFloat(price);
+        if (ingredients) dish.ingredients = JSON.parse(ingredients);
+        if (allergens) dish.allergens = JSON.parse(allergens);
+        if (preparation !== undefined) dish.preparation = preparation.trim();
+        if (servings !== undefined) dish.servings = parseInt(servings);
+        if (calories !== undefined) dish.calories = parseInt(calories);
+
+        dish.updatedAt = new Date().toISOString();
+        menu.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({ success: true, dish: dish, message: 'Plat mis à jour' });
+
+    } catch (err) {
+        log.error('PUT /api/menus/:menuId/dishes/:dishId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * DELETE /api/menus/:menuId/dishes/:dishId - Supprime un plat
+ */
+app.delete('/api/menus/:menuId/dishes/:dishId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const menu = data.menus?.find(m => m.id === req.params.menuId);
+
+        if (!menu) {
+            return res.status(404).json({ success: false, error: 'Menu non trouvé' });
+        }
+
+        const dishIndex = menu.dishes?.findIndex(d => d.id === req.params.dishId);
+
+        if (dishIndex === -1) {
+            return res.status(404).json({ success: false, error: 'Plat non trouvé' });
+        }
+
+        if (menu.createdBy !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const dish = menu.dishes[dishIndex];
+
+        if (dish.image?.fileId) {
+            storageManager.deleteFile(dish.image.fileId);
+        }
+
+        menu.dishes.splice(dishIndex, 1);
+        menu.stats.totalDishes = menu.dishes.length;
+        menu.updatedAt = new Date().toISOString();
+
+        saveData(data);
+
+        log.crud('DELETE', 'DISH', { dishId: req.params.dishId });
+
+        res.json({ success: true, message: 'Plat supprimé' });
+
+    } catch (err) {
+        log.error('DELETE /api/menus/:menuId/dishes/:dishId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/menus/:menuId/dishes/:dishId/rating - Ajoute une note
+ */
+app.post('/api/menus/:menuId/dishes/:dishId/rating', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const menu = data.menus?.find(m => m.id === req.params.menuId);
+
+        if (!menu) {
+            return res.status(404).json({ success: false, error: 'Menu non trouvé' });
+        }
+
+        const dish = menu.dishes?.find(d => d.id === req.params.dishId);
+
+        if (!dish) {
+            return res.status(404).json({ success: false, error: 'Plat non trouvé' });
+        }
+
+        const { score, comment } = req.body;
+
+        if (!score || score < 1 || score > 5) {
+            return res.status(400).json({ success: false, error: 'Score de 1 à 5 requis' });
+        }
+
+        dish.ratings = dish.ratings || [];
+
+        // Vérifier si l'utilisateur a déjà noté
+        const existingRating = dish.ratings.find(r => r.userId === req.user.id);
+
+        if (existingRating) {
+            existingRating.score = parseInt(score);
+            existingRating.comment = comment?.trim() || '';
+            existingRating.ratedAt = new Date().toISOString();
+        } else {
+            dish.ratings.push({
+                userId: req.user.id,
+                userName: req.user.name,
+                score: parseInt(score),
+                comment: comment?.trim() || '',
+                ratedAt: new Date().toISOString()
+            });
+        }
+
+        // Calculer la moyenne
+        dish.rating = (dish.ratings.reduce((sum, r) => sum + r.score, 0) / dish.ratings.length).toFixed(2);
+
+        menu.stats.totalRatings = (menu.dishes || []).reduce((sum, d) => sum + (d.ratings?.length || 0), 0);
+        menu.updatedAt = new Date().toISOString();
+
+        saveData(data);
+
+        log.crud('CREATE', 'RATING', { dishId: req.params.dishId, score: score });
+
+        res.json({
+            success: true,
+            dish: dish,
+            message: 'Note enregistrée'
+        });
+
+    } catch (err) {
+        log.error('POST /api/menus/:menuId/dishes/:dishId/rating', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// 🗺️  12. ENDPOINTS PLANS INTERACTIFS
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /api/plans - Récupère tous les plans
+ */
+app.get('/api/plans', (req, res) => {
+    try {
+        const data = loadData();
+        const { eventId } = req.query;
+
+        let plans = data.plans || [];
+
+        if (eventId) plans = plans.filter(p => p.eventId === eventId);
+
+        res.json({
+            success: true,
+            plans: plans,
+            meta: { total: plans.length }
+        });
+
+    } catch (err) {
+        log.error('GET /api/plans', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/plans - Crée un plan
+ */
+app.post('/api/plans', jwtAuth, upload.single('image'), async (req, res) => {
+    try {
+        const { eventId, name, description, type } = req.body;
+        const data = loadData();
+
+        if (!eventId || !name) {
+            return res.status(400).json({ success: false, error: 'eventId et name requis' });
+        }
+
+        if (!data.events?.find(e => e.id === eventId)) {
+            return res.status(404).json({ success: false, error: 'Événement non trouvé' });
+        }
+
+        let planImage = null;
+
+        if (req.file) {
+            const uploadedFile = await storageManager.uploadFile(
+                {
+                    filename: req.file.originalname,
+                    mimetype: req.file.mimetype,
+                    size: req.file.size,
+                    buffer: req.file.buffer
+                },
+                'menu'
+            );
+
+            planImage = {
+                fileId: uploadedFile.id,
+                url: uploadedFile.url,
+                thumbnails: uploadedFile.thumbnails
+            };
+        }
+
+        const plan = {
+            id: generatePlanId(),
+            eventId: eventId,
+            name: name.trim(),
+            description: description?.trim() || '',
+            type: type || 'venue', // venue, seating, layout
+            image: planImage,
+            locations: [],
+            zones: [],
+            createdBy: req.user.id,
+            createdByName: req.user.name,
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        if (!data.plans) data.plans = [];
+        data.plans.push(plan);
+        saveData(data);
+
+        log.crud('CREATE', 'PLAN', { name: plan.name, eventId: eventId });
+
+        res.status(201).json({
+            success: true,
+            plan: plan,
+            message: 'Plan créé'
+        });
+
+    } catch (err) {
+        log.error('POST /api/plans', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/plans/:planId/locations - Ajoute un lieu sur le plan
+ */
+app.post('/api/plans/:planId/locations', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const plan = data.plans?.find(p => p.id === req.params.planId);
+
+        if (!plan) {
+            return res.status(404).json({ success: false, error: 'Plan non trouvé' });
+        }
+
+        if (plan.createdBy !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const { name, description, x, y, type, info } = req.body;
+
+        if (!name || x === undefined || y === undefined) {
+            return res.status(400).json({ success: false, error: 'name, x, y requis' });
+        }
+
+        const location = {
+            id: `loc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name: name.trim(),
+            description: description?.trim() || '',
+            coordinates: { x: parseFloat(x), y: parseFloat(y) },
+            type: type || 'point', // point, zone, room
+            info: info || {},
+            createdAt: new Date().toISOString()
+        };
+
+        plan.locations = plan.locations || [];
+        plan.locations.push(location);
+        plan.updatedAt = new Date().toISOString();
+
+        saveData(data);
+
+        log.crud('CREATE', 'LOCATION', { name: location.name, planId: req.params.planId });
+
+        res.status(201).json({
+            success: true,
+            location: location,
+            message: 'Lieu ajouté au plan'
+        });
+
+    } catch (err) {
+        log.error('POST /api/plans/:planId/locations', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * GET /api/plans/:planId/locations - Récupère les lieux d'un plan
+ */
+app.get('/api/plans/:planId/locations', (req, res) => {
+    try {
+        const data = loadData();
+        const plan = data.plans?.find(p => p.id === req.params.planId);
+
+        if (!plan) {
+            return res.status(404).json({ success: false, error: 'Plan non trouvé' });
+        }
+
+        res.json({
+            success: true,
+            locations: plan.locations || [],
+            meta: { total: (plan.locations || []).length }
+        });
+
+    } catch (err) {
+        log.error('GET /api/plans/:planId/locations', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * PUT /api/plans/:planId/locations/:locationId - Met à jour un lieu
+ */
+app.put('/api/plans/:planId/locations/:locationId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const plan = data.plans?.find(p => p.id === req.params.planId);
+
+        if (!plan) {
+            return res.status(404).json({ success: false, error: 'Plan non trouvé' });
+        }
+
+        if (plan.createdBy !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        const location = plan.locations?.find(l => l.id === req.params.locationId);
+
+        if (!location) {
+            return res.status(404).json({ success: false, error: 'Lieu non trouvé' });
+        }
+
+        const { name, description, x, y, info } = req.body;
+
+        if (name) location.name = name.trim();
+        if (description !== undefined) location.description = description.trim();
+        if (x !== undefined) location.coordinates.x = parseFloat(x);
+        if (y !== undefined) location.coordinates.y = parseFloat(y);
+        if (info) location.info = { ...location.info, ...info };
+
+        plan.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({ success: true, location: location, message: 'Lieu mis à jour' });
+
+    } catch (err) {
+        log.error('PUT /api/plans/:planId/locations/:locationId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * DELETE /api/plans/:planId/locations/:locationId - Supprime un lieu
+ */
+app.delete('/api/plans/:planId/locations/:locationId', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const plan = data.plans?.find(p => p.id === req.params.planId);
+
+        if (!plan) {
+            return res.status(404).json({ success: false, error: 'Plan non trouvé' });
+        }
+
+        if (plan.createdBy !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Permission refusée' });
+        }
+
+        plan.locations = plan.locations.filter(l => l.id !== req.params.locationId);
+        plan.updatedAt = new Date().toISOString();
+
+        saveData(data);
+
+        log.crud('DELETE', 'LOCATION', { locationId: req.params.locationId });
+
+        res.json({ success: true, message: 'Lieu supprimé' });
+
+    } catch (err) {
+        log.error('DELETE /api/plans/:planId/locations/:locationId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════════════
+// 💬 13. ENDPOINTS CHAT ULTRA SÉCURISÉ
+// ═════════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /api/chat/conversations - Récupère les conversations de l'utilisateur avec participants enrichis
+ */
+app.get('/api/chat/conversations', eventSessionAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const { eventId, participantId } = req.query;
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+        const queryEventId = eventId || getEventIdFromRequest(req, req.query);
+
+        let conversations = data.chatConversations || [];
+
+        // Filtrer par événement
+        if (queryEventId) {
+            conversations = conversations.filter(c => c.eventId === queryEventId);
+        }
+
+        // Filtrer par participant spécifique
+        if (participantId) {
+            conversations = conversations.filter(c => 
+                c.participants.some(p => p.userId === participantId)
+            );
+        }
+
+        // Filtrer par utilisateur/invité actuel (seulement ses conversations)
+        conversations = conversations.filter(c => 
+            c.participants.some(p => p.userId === userId)
+        );
+
+        // Enrichir chaque conversation avec les infos utilisateur des participants
+        conversations = conversations.map(conversation => ({
+            ...conversation,
+            participants: enrichParticipantsWithUserInfo(conversation.participants, data),
+            unreadCount: (conversation.messages || []).filter(m => 
+                m.readBy?.some(r => r.userId === userId) === false && m.senderId !== userId
+            ).length,
+            lastMessage: conversation.messages?.[conversation.messages.length - 1] || null
+        }));
+
+        log.success('GET /api/chat/conversations', `${conversations.length} conversations retrieved for user ${userId}`);
+
+        res.json({
+            success: true,
+            conversations: conversations,
+            meta: { 
+                total: conversations.length,
+                eventId: queryEventId
+            },
+            authMethod: req.user ? 'user' : 'eventSession'
+        });
+
+    } catch (err) {
+        log.error('GET /api/chat/conversations', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/chat/conversations - Crée une conversation
+ */
+app.post('/api/chat/conversations', eventSessionAuth, (req, res) => {
+    try {
+        const { eventId, name, participantIds, type } = req.body;
+        const data = loadData();
+
+        if (!eventId) {
+            return res.status(400).json({ success: false, error: 'eventId requis' });
+        }
+
+        if (!data.events?.find(e => e.id === eventId)) {
+            return res.status(404).json({ success: false, error: 'Événement non trouvé' });
+        }
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+        const now = new Date().toISOString();
+
+        const allParticipants = [userId, ...(participantIds || [])];
+        const uniqueParticipants = [...new Set(allParticipants)];
+
+        // Créer les participants avec enrichissement
+        // ⚠️ IMPORTANT : seul le créateur a joinedAt et lastReadAt au démarrage
+        let participants = uniqueParticipants.map(pid => ({
+            userId: pid,
+            joinedAt: pid === userId ? now : null,  // Seulement le créateur
+            lastReadAt: pid === userId ? now : null  // Seulement le créateur
+        }));
+
+        // Enrichir avec les infos utilisateur (firstName, lastName, email, gender, notes, isOnline, lastSeen, status)
+        participants = enrichParticipantsWithUserInfo(participants, data);
+
+        const conversation = {
+            id: generateChatId(),
+            eventId: eventId,
+            name: name?.trim() || `Chat ${moment().format('DD/MM HH:mm')}`,
+            type: type || 'group',
+            participants: participants,
+            messages: [],
+            settings: {
+                allowDelete: true,
+                allowEdit: true,
+                encrypted: true,
+                archiveAfterDays: 90
+            },
+            createdBy: userId,
+            createdAt: now,
+            updatedAt: now
+        };
+
+        if (!data.chatConversations) data.chatConversations = [];
+        data.chatConversations.push(conversation);
+        saveData(data);
+
+        log.crud('CREATE', 'CONVERSATION', { eventId: eventId, participants: uniqueParticipants.length });
+
+        res.status(201).json({
+            success: true,
+            conversation: conversation,
+            message: 'Conversation créée'
+        });
+
+    } catch (err) {
+        log.error('POST /api/chat/conversations', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/chat/conversations/:conversationId/messages - Ajoute un message
+ */
+app.post('/api/chat/conversations/:conversationId/messages', eventSessionAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const conversation = data.chatConversations?.find(c => c.id === req.params.conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ success: false, error: 'Conversation non trouvée' });
+        }
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+        const userName = getUserNameFromRequest(req);
+
+        // Vérifier que l'utilisateur est participant
+        if (!conversation.participants.some(p => p.userId === userId)) {
+            return res.status(403).json({ success: false, error: 'Vous n\'êtes pas participant' });
+        }
+
+        const { content, attachments, type, replyTo } = req.body;
+
+        if (!content || content.trim().length === 0) {
+            return res.status(400).json({ success: false, error: 'Message vide' });
+        }
+
+        // Vérifier que le message auquel on répond existe (si replyTo est fourni)
+        if (replyTo) {
+            const repliedMessage = conversation.messages?.find(m => m.id === replyTo);
+            if (!repliedMessage) {
+                return res.status(400).json({ success: false, error: 'Message auquel répondre introuvable' });
+            }
+        }
+
+        const message = {
+            id: generateMessageId(),
+            conversationId: req.params.conversationId,
+            senderId: userId,
+            senderName: userName,
+            content: content.trim(),
+            type: type || 'text', // text, image, file, system
+            attachments: attachments || [],
+            replyTo: replyTo || null,
+            readBy: [], // Ne PAS inclure le senderId (il a envoyé, donc déjà lu)
+            reactions: {}, // Objet pour stocker les réactions par emoji
+            edited: false,
+            editedAt: null,
+            createdAt: new Date().toISOString(),
+            deletedAt: null
+        };
+
+        conversation.messages = conversation.messages || [];
+        conversation.messages.push(message);
+
+        // Mettre à jour le lastReadAt
+        const participant = conversation.participants.find(p => p.userId === userId);
+        if (participant) {
+            participant.lastReadAt = new Date().toISOString();
+        }
+
+        conversation.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('CREATE', 'MESSAGE', { 
+            conversationId: req.params.conversationId, 
+            senderId: userId,
+            replyTo: replyTo || null,
+            length: content.length
+        });
+
+        res.status(201).json({
+            success: true,
+            message: message,
+            totalMessages: conversation.messages.length
+        });
+
+    } catch (err) {
+        log.error('POST /api/chat/conversations/:conversationId/messages', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * GET /api/chat/conversations/:conversationId/messages - Récupère les messages
+ */
+app.get('/api/chat/conversations/:conversationId/messages', eventSessionAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const conversation = data.chatConversations?.find(c => c.id === req.params.conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ success: false, error: 'Conversation non trouvée' });
+        }
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+
+        if (!conversation.participants.some(p => p.userId === userId)) {
+            return res.status(403).json({ success: false, error: 'Vous n\'êtes pas participant' });
+        }
+
+        const { limit = 50, offset = 0 } = req.query;
+
+        let messages = conversation.messages || [];
+
+        // Normaliser la forme des réactions pour les données legacy
+        // Certains anciens enregistrements avaient `reactions: []` au lieu d'un objet { emoji: [userIds] }
+        conversation.messages = (conversation.messages || []).map(m => {
+            const msg = { ...m };
+            if (Array.isArray(msg.reactions)) {
+                msg.reactions = {};
+            } else if (!msg.reactions) {
+                msg.reactions = {};
+            } else {
+                // S'assurer que chaque clé emoji contient un tableau d'IDs
+                Object.keys(msg.reactions).forEach(emoji => {
+                    if (!Array.isArray(msg.reactions[emoji])) {
+                        // Si la valeur était un objet { users: [...] }, récupérer users, sinon vider
+                        if (msg.reactions[emoji] && Array.isArray(msg.reactions[emoji].users)) {
+                            msg.reactions[emoji] = msg.reactions[emoji].users;
+                        } else {
+                            msg.reactions[emoji] = [];
+                        }
+                    }
+                });
+            }
+            return msg;
+        });
+        messages = messages.filter(m => !m.deletedAt); // Exclure les messages supprimés
+        messages = messages.slice(-limit - offset, -offset || undefined);
+
+        // Marquer comme lus
+        messages.forEach(msg => {
+            if (msg.senderId !== userId) {
+                const alreadyRead = msg.readBy.some(r => r.userId === userId);
+                if (!alreadyRead) {
+                    msg.readBy.push({
+                        userId: userId,
+                        readAt: new Date().toISOString()
+                    });
+                }
+            }
+        });
+
+        conversation.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({
+            success: true,
+            messages: messages,
+            meta: {
+                total: (conversation.messages || []).length,
+                limit: parseInt(limit),
+                offset: parseInt(offset)
+            }
+        });
+
+    } catch (err) {
+        log.error('GET /api/chat/conversations/:conversationId/messages', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/chat/conversations/:conversationId/mark-as-read - Marque une conversation comme lue
+ */
+app.post('/api/chat/conversations/:conversationId/mark-as-read', eventSessionAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const conversation = data.chatConversations?.find(c => c.id === req.params.conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ success: false, error: 'Conversation non trouvée' });
+        }
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+
+        // Vérifier que l'utilisateur est participant
+        if (!conversation.participants.some(p => p.userId === userId)) {
+            return res.status(403).json({ success: false, error: 'Vous n\'êtes pas participant' });
+        }
+
+        // Marquer tous les messages comme lus
+        conversation.messages?.forEach(msg => {
+            if (msg.senderId !== userId) {
+                const alreadyRead = msg.readBy?.some(r => r.userId === userId);
+                if (!alreadyRead) {
+                    msg.readBy = msg.readBy || [];
+                    msg.readBy.push({
+                        userId: userId,
+                        readAt: new Date().toISOString()
+                    });
+                }
+            }
+        });
+
+        // Mettre à jour le lastReadAt du participant
+        const participant = conversation.participants.find(p => p.userId === userId);
+        if (participant) {
+            participant.lastReadAt = new Date().toISOString();
+            participant.unreadCount = 0;
+        }
+
+        conversation.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('UPDATE', 'CONVERSATION_READ', {
+            conversationId: req.params.conversationId,
+            userId: userId
+        });
+
+        res.json({
+            success: true,
+            message: 'Conversation marquée comme lue',
+            lastReadAt: new Date().toISOString()
+        });
+
+    } catch (err) {
+        log.error('POST /api/chat/conversations/:conversationId/mark-as-read', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * POST /api/chat/conversations/:conversationId/messages/:messageId/reaction - Ajoute une réaction à un message
+ */
+app.post('/api/chat/conversations/:conversationId/messages/:messageId/reaction', eventSessionAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const conversation = data.chatConversations?.find(c => c.id === req.params.conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ success: false, error: 'Conversation non trouvée' });
+        }
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+
+        // Vérifier que l'utilisateur est participant
+        if (!conversation.participants.some(p => p.userId === userId)) {
+            return res.status(403).json({ success: false, error: 'Vous n\'êtes pas participant' });
+        }
+
+        // Trouver le message
+        const message = conversation.messages?.find(m => m.id === req.params.messageId);
+        if (!message) {
+            return res.status(404).json({ success: false, error: 'Message non trouvé' });
+        }
+
+        const { emoji } = req.body;
+        if (!emoji) {
+            return res.status(400).json({ success: false, error: 'Emoji requis' });
+        }
+
+        // Normaliser les réactions - convertir array en objet si nécessaire
+        if (Array.isArray(message.reactions)) {
+            message.reactions = {};
+        } else if (!message.reactions) {
+            message.reactions = {};
+        }
+
+        // Ajouter la réaction (emoji = clé)
+        if (!message.reactions[emoji]) {
+            message.reactions[emoji] = [];
+        }
+
+        // Vérifier que l'utilisateur n'a pas déjà mis cette réaction
+        if (!Array.isArray(message.reactions[emoji])) {
+            message.reactions[emoji] = [];
+        }
+        
+        if (!message.reactions[emoji].includes(userId)) {
+            message.reactions[emoji].push(userId);
+        }
+
+        conversation.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('CREATE', 'REACTION', {
+            messageId: req.params.messageId,
+            conversationId: req.params.conversationId,
+            emoji: emoji,
+            userId: userId
+        });
+
+        res.status(201).json({
+            success: true,
+            message: message,
+            reactions: message.reactions,
+            reaction: { emoji, userId }
+        });
+
+    } catch (err) {
+        log.error('POST /api/chat/conversations/:conversationId/messages/:messageId/reaction', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * DELETE /api/chat/conversations/:conversationId/messages/:messageId/reaction/:emoji - Retire une réaction
+ */
+app.delete('/api/chat/conversations/:conversationId/messages/:messageId/reaction/:emoji', eventSessionAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const conversation = data.chatConversations?.find(c => c.id === req.params.conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ success: false, error: 'Conversation non trouvée' });
+        }
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+
+        // Vérifier que l'utilisateur est participant
+        if (!conversation.participants.some(p => p.userId === userId)) {
+            return res.status(403).json({ success: false, error: 'Vous n\'êtes pas participant' });
+        }
+
+        // Trouver le message
+        const message = conversation.messages?.find(m => m.id === req.params.messageId);
+        if (!message) {
+            return res.status(404).json({ success: false, error: 'Message non trouvé' });
+        }
+
+        // Normaliser les réactions - convertir array en objet si nécessaire
+        if (Array.isArray(message.reactions)) {
+            message.reactions = {};
+        }
+        
+        if (!message.reactions || Object.keys(message.reactions).length === 0) {
+            return res.status(404).json({ success: false, error: 'Pas de réactions sur ce message' });
+        }
+
+        const emoji = req.params.emoji;
+
+        if (!message.reactions[emoji]) {
+            return res.status(404).json({ success: false, error: 'Réaction non trouvée' });
+        }
+
+        // Normaliser le tableau de réactions si nécessaire
+        if (!Array.isArray(message.reactions[emoji])) {
+            message.reactions[emoji] = [];
+        }
+
+        // Retirer la réaction de l'utilisateur
+        const reactionIndex = message.reactions[emoji].indexOf(userId);
+        if (reactionIndex === -1) {
+            return res.status(400).json({ success: false, error: 'Vous n\'avez pas mis cette réaction' });
+        }
+
+        message.reactions[emoji].splice(reactionIndex, 1);
+
+        // Supprimer l'emoji s'il n'y a plus de réactions
+        if (message.reactions[emoji].length === 0) {
+            delete message.reactions[emoji];
+        }
+
+        conversation.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('DELETE', 'REACTION', {
+            messageId: req.params.messageId,
+            conversationId: req.params.conversationId,
+            emoji: emoji,
+            userId: userId
+        });
+
+        res.json({
+            success: true,
+            message: message,
+            reactions: message.reactions
+        });
+
+    } catch (err) {
+        log.error('DELETE /api/chat/conversations/:conversationId/messages/:messageId/reaction/:emoji', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * GET /api/chat/conversations/:conversationId/messages/:messageId/reactions - Récupère les réactions d'un message
+ */
+app.get('/api/chat/conversations/:conversationId/messages/:messageId/reactions', eventSessionAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const conversation = data.chatConversations?.find(c => c.id === req.params.conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ success: false, error: 'Conversation non trouvée' });
+        }
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+
+        // Vérifier que l'utilisateur est participant
+        if (!conversation.participants.some(p => p.userId === userId)) {
+            return res.status(403).json({ success: false, error: 'Vous n\'êtes pas participant' });
+        }
+
+        // Trouver le message
+        const message = conversation.messages?.find(m => m.id === req.params.messageId);
+        if (!message) {
+            return res.status(404).json({ success: false, error: 'Message non trouvé' });
+        }
+
+        const reactions = message.reactions || {};
+
+        // Enrichir les réactions avec les infos des utilisateurs
+        const enrichedReactions = {};
+        for (const [emoji, userIds] of Object.entries(reactions)) {
+            enrichedReactions[emoji] = userIds.map(uid => {
+                const participant = conversation.participants.find(p => p.userId === uid);
+                return {
+                    userId: uid,
+                    name: participant?.name || 'Utilisateur inconnu',
+                    avatar: participant?.avatar || null
+                };
+            });
+        }
+
+        res.json({
+            success: true,
+            messageId: req.params.messageId,
+            reactions: reactions,
+            enrichedReactions: enrichedReactions,
+            totalReactions: Object.values(reactions).reduce((sum, users) => sum + users.length, 0)
+        });
+
+    } catch (err) {
+        log.error('GET /api/chat/conversations/:conversationId/messages/:messageId/reactions', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+/**
+ * PUT /api/chat/conversations/:conversationId/messages/:messageId - Édite un message
+ */
+app.put('/api/chat/conversations/:conversationId/messages/:messageId', eventSessionAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const conversation = data.chatConversations?.find(c => c.id === req.params.conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ success: false, error: 'Conversation non trouvée' });
+        }
+
+        const message = conversation.messages?.find(m => m.id === req.params.messageId);
+
+        if (!message) {
+            return res.status(404).json({ success: false, error: 'Message non trouvé' });
+        }
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+
+        if (message.senderId !== userId) {
+            return res.status(403).json({ success: false, error: 'Vous ne pouvez pas éditer' });
+        }
+
+        const { content } = req.body;
+
+        if (!content || content.trim().length === 0) {
+            return res.status(400).json({ success: false, error: 'Contenu vide' });
+        }
+
+        message.content = content.trim();
+        message.edited = true;
+        message.editedAt = new Date().toISOString();
+
+        conversation.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        res.json({ success: true, message: message, message: 'Message édité' });
+
+    } catch (err) {
+        log.error('PUT /api/chat/conversations/:conversationId/messages/:messageId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * DELETE /api/chat/conversations/:conversationId/messages/:messageId - Supprime un message
+ */
+app.delete('/api/chat/conversations/:conversationId/messages/:messageId', eventSessionAuth, (req,res) => {
+    try {
+        const data = loadData();
+        const conversation = data.chatConversations?.find(c => c.id === req.params.conversationId);
+
+        if (!conversation) {
+            return res.status(404).json({ success: false, error: 'Conversation non trouvée' });
+        }
+
+        const message = conversation.messages?.find(m => m.id === req.params.messageId);
+
+        if (!message) {
+            return res.status(404).json({ success: false, error: 'Message non trouvé' });
+        }
+
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+
+        if (message.senderId !== userId) {
+            return res.status(403).json({ success: false, error: 'Vous ne pouvez pas supprimer' });
+        }
+
+        message.deletedAt = new Date().toISOString();
+        message.content = '[Message supprimé]';
+
+        conversation.updatedAt = new Date().toISOString();
+        saveData(data);
+
+        log.crud('DELETE', 'MESSAGE', { messageId: req.params.messageId });
+
+        res.json({ success: true, message: 'Message supprimé' });
+
+    } catch (err) {
+        log.error('DELETE /api/chat/conversations/:conversationId/messages/:messageId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD API  - RACINE /
+app.get('/', (req, res) => {
+    const dashboard = path.join(__dirname, 'dashboard.html');
+    res.sendFile(dashboard);
+});
+
+app.get('/register', (req, res) => {
+    const registerPath = path.join(__dirname, 'register.html');
+        log.success('Accès au register secret', req.ip);
+        res.sendFile(registerPath);
+});
+
+app.get('/logo', (req, res) => {
+    const registerPath = path.join(__dirname, 'icon.png');
+        log.success('logo charge', req.ip);
+        res.sendFile(registerPath);
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 📄 FRONTEND - PAGES STATIQUES
+// ═══════════════════════════════════════════════════════════════
+
+
+// 404 personnalisé
+app.get('*', (req, res ,next) => {
+
+     const apiKey = req.headers['dash'];
+     
+    if (apiKey === "dashboard") {
+        return res.status(404).json({ error: 'Endpoint non trouvé Consultez /api pour la documentation' });
+    }
+
+    if (!req.path.startsWith('/api') && !req.path.startsWith('/db')) {
+        const notFoundPath = path.join(__dirname, '404.html');
+        if (fs.existsSync(notFoundPath)) {
+            log.warning('404', `${req.method} ${req.originalUrl}`);
+            return res.status(404).sendFile(notFoundPath);
+        } else {
+            return res.status(404).send('<h1>404 - Endpoint non trouvé</h1><p><a href="/">Consultez /api pour la documentation</a></p>');
+        }
+    }
+});
+
+/**
+ * DELETE /api/chat/conversations/:conversationId - Supprime une conversation
+ */
+app.delete('/api/chat/conversations/:conversationId', eventSessionAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const conversationId = req.params.conversationId;
+        
+        // Trouver la conversation
+        const conversationIndex = data.chatConversations?.findIndex(c => c.id === conversationId);
+        if (conversationIndex === -1) {
+            return res.status(404).json({ success: false, error: 'Conversation non trouvée' });
+        }
+        
+        const conversation = data.chatConversations[conversationIndex];
+        
+        // Obtenir l'ID utilisateur/invité
+        const userId = getUserIdFromRequest(req);
+        
+        // Vérifier que l'utilisateur est participant
+        if (!conversation.participants.some(p => p.userId === userId)) {
+            return res.status(403).json({ success: false, error: 'Vous ne pouvez pas supprimer cette conversation' });
+        }
+        
+        // Supprimer la conversation
+        data.chatConversations.splice(conversationIndex, 1);
+        saveData(data);
+        
+        log.crud('DELETE', 'CONVERSATION', {
+            conversationId: conversationId,
+            deletedBy: userId,
+            participantCount: conversation.participants.length
+        });
+        
+        res.json({ success: true, message: 'Conversation supprimée' });
+        
+    } catch (err) {
+        log.error('DELETE /api/chat/conversations/:conversationId', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
+
+const cleanOldBackups = () => {
+    try {
+        const files = fs.readdirSync(CONFIG.BACKUP_DIR);
+        const cutoff = moment().subtract(CONFIG.BACKUP_RETENTION_DAYS, 'days');
+        
+        let deleted = 0;
+        files.forEach(file => {
+            const filepath = path.join(CONFIG.BACKUP_DIR, file);
+            const stats = fs.statSync(filepath);
+            
+            if (moment(stats.mtime).isBefore(cutoff)) {
+                fs.unlinkSync(filepath);
+                deleted++;
+            }
+        });
+        
+        if (deleted > 0) {
+            log.info(`Backups nettoyés`, `${deleted} fichiers supprimés`);
+        }
+    } catch (err) {
+        log.error('Erreur nettoyage backups', err.message);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// ❌ ERROR HANDLER GLOBAL
+// ═══════════════════════════════════════════════════════════════
+
+app.use((err, req, res, next) => {
+    log.error('Erreur serveur', err.message);
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        error: err.message || 'Erreur interne du serveur',
+        timestamp: new Date().toISOString()
+    });
+});
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🚀 INITIALISATION WEBSOCKET ET SERVEUR HTTP
+// ═══════════════════════════════════════════════════════════════
+
+const http = require('http');
+const { Server: SocketIOServer } = require('socket.io');
+
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+        credentials: true
+    },
+    transports: ['websocket', 'polling'],
+    pingInterval: 25000,
+    pingTimeout: 20000,
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 💬 WEBSOCKET CHAT HANDLERS
+// ═══════════════════════════════════════════════════════════════
+
+const chatNamespace = io.of('/chat');
+
+// Map pour tracker les utilisateurs par session
+const userSessions = new Map();
+const conversationRooms = new Map();
+
+chatNamespace.on('connection', (socket) => {
+    const sessionToken = socket.handshake.auth.token;
+    const userId = socket.handshake.auth.userId;
+    const eventId = socket.handshake.auth.eventId;
+    
+    if (!sessionToken || !userId || !eventId) {
+        socket.disconnect();
+        return;
+    }
+    
+    // Enregistrer la session utilisateur
+    userSessions.set(socket.id, { userId, eventId, sessionToken, connectedAt: new Date() });
+    
+    log.success('💬 Chat User Connected', `User: ${userId} | Socket: ${socket.id}`);
+    
+    // 🔌 Événement: Utilisateur en ligne
+    socket.on('user:online', (data) => {
+        // Mettre à jour le status dans les données globales
+        const data_obj = loadData();
+        const user = data_obj.guests?.find(g => g.id === userId) || data_obj.users?.find(u => u.id === userId);
+        if (user) {
+            user.isOnline = true;
+            user.status = 'online';
+            user.lastSeen = new Date().toISOString();
+        }
+        
+        // 🔥 IMPORTANT: Mettre à jour tous les participants avec cet userId dans TOUTES les conversations
+        if (data_obj.chatConversations) {
+            data_obj.chatConversations.forEach(conversation => {
+                const participant = conversation.participants?.find(p => p.userId === userId);
+                if (participant) {
+                    participant.isOnline = true;
+                    participant.status = 'online';
+                    participant.lastSeenAt = new Date().toISOString();
+                }
+            });
+        }
+        
+        saveData(data_obj);
+        
+        // Émettre le statut à tous les utilisateurs dans le namespace chat
+        // Schéma: { userId, status, isOnline, lastSeenAt, timestamp }
+        chatNamespace.emit('user:status', {
+            userId,
+            status: 'online',
+            isOnline: true,
+            lastSeenAt: new Date().toISOString(),
+            timestamp: new Date()
+        });
+        
+        log.success('🟢 User Online', `User: ${userId} | Socket: ${socket.id}`);
+    });
+    
+    // 💬 Événement: Nouveau message
+    socket.on('message:send', (data) => {
+        const { conversationId, content, messageId, timestamp } = data;
+        
+        if (!conversationId || !content) return;
+        
+        // Diffuser à tous les utilisateurs dans la conversation
+        chatNamespace.to(`conv:${conversationId}`).emit('message:new', {
+            id: messageId,
+            conversationId,
+            senderId: userId,
+            content,
+            timestamp: timestamp || new Date(),
+            type: 'text'
+        });
+        
+        // Notifier les autres utilisateurs
+        chatNamespace.emit('conversation:message-received', {
+            conversationId,
+            senderId: userId,
+            messagePreview: content.substring(0, 50),
+            timestamp: new Date()
+        });
+        
+        log.success('💬 Message sent', `Conv: ${conversationId} | User: ${userId}`);
+    });
+    
+    socket.on('message:typing', (data) => {
+        const { conversationId } = data;
+        
+        chatNamespace.to(`conv:${conversationId}`).emit('message:typing', {
+            userId,
+            conversationId,
+            isTyping: true,
+            timestamp: new Date()
+        });
+
+    });
+    
+    // 👁️ Événement: Utilisateur arrête de taper
+    socket.on('message:stop-typing', (data) => {
+        const { conversationId } = data;
+        
+        chatNamespace.to(`conv:${conversationId}`).emit('message:typing', {
+            userId,
+            conversationId,
+            isTyping: false,
+            timestamp: new Date()
+        });
+    });
+    
+    // 📍 Événement: Rejoindre une conversation
+    socket.on('conversation:join', (data) => {
+        const { conversationId } = data;
+        
+        socket.join(`conv:${conversationId}`);
+        
+        // Mettre à jour le count des utilisateurs dans la conversation
+        const roomName = `conv:${conversationId}`;
+        const userCount = chatNamespace.sockets?.adapter?.rooms?.get(roomName)?.size || 0;
+        
+        chatNamespace.to(roomName).emit('conversation:user-joined', {
+            userId,
+            userCount,
+            timestamp: new Date()
+        });
+        
+        log.success('📍 User joined conversation', `Conv: ${conversationId} | Users: ${userCount}`);
+    });
+    
+    // 📍 Événement: Quitter une conversation
+    socket.on('conversation:leave', (data) => {
+        const { conversationId } = data;
+        
+        socket.leave(`conv:${conversationId}`);
+        
+        const roomName = `conv:${conversationId}`;
+        const userCount = chatNamespace.sockets?.adapter?.rooms?.get(roomName)?.size || 0;
+        
+        chatNamespace.to(roomName).emit('conversation:user-left', {
+            userId,
+            userCount,
+            timestamp: new Date()
+        });
+        
+        log.success('📍 User left conversation', `Conv: ${conversationId} | Users: ${userCount}`);
+    });
+    
+    // 👍 Événement: Réaction/Emoji - Ajouter une réaction
+    socket.on('message:reaction:add', (data) => {
+        const { conversationId, messageId, emoji } = data;
+        
+        if (!conversationId || !messageId || !emoji) {
+            log.warning('⚠️ message:reaction:add - données manquantes', data);
+            return;
+        }
+        
+        // Charger les données et ajouter la réaction
+        try {
+            const data_obj = loadData();
+            const conversation = data_obj.chatConversations?.find(c => c.id === conversationId);
+            
+            if (!conversation) return;
+            
+            const message = conversation.messages?.find(m => m.id === messageId);
+            if (!message) return;
+            
+            // Initialiser et ajouter la réaction
+            if (!message.reactions) {
+                message.reactions = {};
+            }
+            
+            if (!message.reactions[emoji]) {
+                message.reactions[emoji] = [];
+            }
+            
+            if (!message.reactions[emoji].includes(userId)) {
+                message.reactions[emoji].push(userId);
+                saveData(data_obj);
+            }
+        } catch (err) {
+            log.error('⚠️ message:reaction:add', err.message);
+        }
+        
+        // Diffuser à la conversation
+        chatNamespace.to(`conv:${conversationId}`).emit('message:reaction', {
+            conversationId,
+            messageId,
+            userId,
+            emoji,
+            action: 'added',
+            timestamp: new Date()
+        });
+        
+        log.success('👍 Reaction added', `Conv: ${conversationId} | Message: ${messageId} | Emoji: ${emoji}`);
+    });
+    
+    // 👍 Événement: Réaction/Emoji - Retirer une réaction
+    socket.on('message:reaction:remove', (data) => {
+        const { conversationId, messageId, emoji } = data;
+        
+        if (!conversationId || !messageId || !emoji) {
+            log.warning('⚠️ message:reaction:remove - données manquantes', data);
+            return;
+        }
+        
+        // Charger les données et retirer la réaction
+        try {
+            const data_obj = loadData();
+            const conversation = data_obj.chatConversations?.find(c => c.id === conversationId);
+            
+            if (!conversation) return;
+            
+            const message = conversation.messages?.find(m => m.id === messageId);
+            if (!message) return;
+            
+            if (!message.reactions) return;
+            
+            if (message.reactions[emoji]) {
+                const index = message.reactions[emoji].indexOf(userId);
+                if (index !== -1) {
+                    message.reactions[emoji].splice(index, 1);
+                    
+                    // Supprimer l'emoji s'il n'y a plus de réactions
+                    if (message.reactions[emoji].length === 0) {
+                        delete message.reactions[emoji];
+                    }
+                    
+                    saveData(data_obj);
+                }
+            }
+        } catch (err) {
+            log.error('⚠️ message:reaction:remove', err.message);
+        }
+        
+        // Diffuser à la conversation
+        chatNamespace.to(`conv:${conversationId}`).emit('message:reaction', {
+            conversationId,
+            messageId,
+            userId,
+            emoji,
+            action: 'removed',
+            timestamp: new Date()
+        });
+        
+        log.success('👍 Reaction removed', `Conv: ${conversationId} | Message: ${messageId} | Emoji: ${emoji}`);
+    });
+    
+    // 🔄 Événement: Synchronisation des conversations
+    socket.on('conversations:sync', (data) => {
+        socket.emit('conversations:sync-request', {
+            eventId,
+            userId,
+            timestamp: new Date()
+        });
+    });
+    
+    // 📝 Événement: Modification de message
+    socket.on('message:edit', (data) => {
+        const { conversationId, messageId, newContent } = data;
+        
+        chatNamespace.to(`conv:${conversationId}`).emit('message:edited', {
+            messageId,
+            newContent,
+            editedBy: userId,
+            editedAt: new Date()
+        });
+    });
+    
+    // 🗑️ Événement: Suppression de message
+    socket.on('message:delete', (data) => {
+        const { conversationId, messageId } = data;
+        
+        chatNamespace.to(`conv:${conversationId}`).emit('message:deleted', {
+            messageId,
+            deletedBy: userId,
+            deletedAt: new Date()
+        });
+    });
+    
+    // �️ Événement: Suppression de conversation
+    socket.on('conversation:deleted', (data) => {
+        const { conversationId, deletedBy, timestamp } = data;
+        console.log('🗑️ Conversation delete received:', { conversationId, deletedBy });
+        
+        // ✅ Émettre à TOUS les utilisateurs du namespace
+        chatNamespace.emit('conversation:deleted', {
+            conversationId,
+            deletedBy,
+            timestamp: timestamp || new Date()
+        });
+        
+        log.success('💬 Conversation supprimée via WebSocket', `Conv: ${conversationId} | By: ${deletedBy}`);
+    });
+    
+    // �🔌 Déconnexion
+    
+    socket.on('disconnect', () => {
+        userSessions.delete(socket.id);
+        
+        // Marquer l'utilisateur comme offline
+        const data_obj = loadData();
+        const user = data_obj.guests?.find(g => g.id === userId) || data_obj.users?.find(u => u.id === userId);
+        if (user) {
+            user.isOnline = false;
+            user.status = 'offline';
+            user.lastSeen = new Date().toISOString();
+        }
+        
+        // 🔥 IMPORTANT: Mettre à jour tous les participants avec cet userId dans TOUTES les conversations
+        if (data_obj.chatConversations) {
+            data_obj.chatConversations.forEach(conversation => {
+                const participant = conversation.participants?.find(p => p.userId === userId);
+                if (participant) {
+                    participant.isOnline = false;
+                    participant.status = 'offline';
+                    participant.lastSeenAt = new Date().toISOString();
+                }
+            });
+        }
+        
+        saveData(data_obj);
+        
+        // Notifier les autres utilisateurs
+        // Schéma: { userId, status, isOnline, lastSeenAt, timestamp }
+        chatNamespace.emit('user:status', {
+            userId,
+            status: 'offline',
+            isOnline: false,
+            lastSeenAt: new Date().toISOString(),
+            timestamp: new Date()
+        });
+        
+        log.warning('🔴 Chat User Disconnected', `User: ${userId} | Socket: ${socket.id}`);
+    });
+    
+    // Gestion des erreurs
+    socket.on('error', (err) => {
+        log.error('💬 Socket Error', err.message);
+    });
+});
+
 // ═══════════════════════════════════════════════════════════════
 // 🚀 DÉMARRAGE SERVEUR
 // ═══════════════════════════════════════════════════════════════
 
-app.listen(CONFIG.PORT, () => {
+server.listen(CONFIG.PORT, () => {
     console.clear();
     
     log.box([
@@ -7153,6 +11312,63 @@ app.listen(CONFIG.PORT, () => {
     console.log(chalk.blue('  GET    ') + chalk.white('/api/scans/event/:eventId'));
     console.log('');
     
+    console.log(chalk.bold.cyan('  📸 GALERIES'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/galleries'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/galleries/:id'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/galleries'));
+    console.log(chalk.yellow('  PUT    ') + chalk.white('/api/galleries/:id'));
+    console.log(chalk.red('  DELETE ') + chalk.white('/api/galleries/:id'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/galleries/:id/photos'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/galleries/:id/photos'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/galleries/:id/stats'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/galleries/:id/moderation'));
+    console.log('');
+
+    console.log(chalk.bold.cyan('  ❤️  LIKES & COMMENTAIRES'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/galleries/:gid/photos/:pid/like'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/galleries/:gid/photos/:pid/likes'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/galleries/:gid/photos/:pid/comments'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/galleries/:gid/photos/:pid/comments'));
+    console.log('');
+
+    console.log(chalk.bold.cyan('  🍽️  MENUS & PLATS'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/menus'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/menus'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/menus/:id'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/menus/:id/dishes'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/menus/:id/dishes'));
+    console.log(chalk.yellow('  PUT    ') + chalk.white('/api/menus/:id/dishes/:did'));
+    console.log(chalk.red('  DELETE ') + chalk.white('/api/menus/:id/dishes/:did'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/menus/:id/dishes/:did/rating'));
+    console.log('');
+
+    console.log(chalk.bold.cyan('  🗺️  PLANS INTERACTIFS'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/plans'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/plans'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/plans/:id/locations'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/plans/:id/locations'));
+    console.log(chalk.yellow('  PUT    ') + chalk.white('/api/plans/:id/locations/:lid'));
+    console.log(chalk.red('  DELETE ') + chalk.white('/api/plans/:id/locations/:lid'));
+    console.log('');
+
+    console.log(chalk.bold.cyan('  💬 CHAT ULTRA SÉCURISÉ'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/chat/conversations'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/chat/conversations'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/chat/conversations/:id/messages'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/chat/conversations/:id/messages'));
+    console.log(chalk.yellow('  PUT    ') + chalk.white('/api/chat/conversations/:id/messages/:mid'));
+    console.log(chalk.red('  DELETE ') + chalk.white('/api/chat/conversations/:id/messages/:mid'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/chat/conversations/:id/messages/:mid/reaction'));
+    console.log(chalk.red('  DELETE ') + chalk.white('/api/chat/conversations/:id/messages/:mid/reaction/:emoji'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/chat/conversations/:id/messages/:mid/reactions'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/chat/conversations/:id/mark-as-read'));
+    console.log('');
+
+    console.log(chalk.bold.cyan('  💾 STOCKAGE'));
+    console.log(chalk.blue('  GET    ') + chalk.white('/api/storage/stats'));
+    console.log(chalk.green('  POST   ') + chalk.white('/api/storage/cleanup'));
+    console.log('');
+    
     console.log(chalk.bold.cyan('  🔄 SYNCHRONISATION'));
     console.log(chalk.blue('  GET    ') + chalk.white('/api/sync/pull'));
     console.log(chalk.green('  POST   ') + chalk.white('/api/sync/push'));
@@ -7171,12 +11387,21 @@ app.listen(CONFIG.PORT, () => {
     
     // Afficher statistiques initiales
 
+   
     const data = loadData();
     log.stats({
         'Événements': data.events?.length || 0,
         'Invités': data.guests?.length || 0,
+        'Galeries': data.galleries?.length || 0,
+        'Photos': (data.galleries || []).reduce((sum, g) => sum + (g.photos?.length || 0), 0),
+        'Menus': data.menus?.length || 0,
+        'Plans': data.plans?.length || 0,
+        'Conversations Chat': data.chatConversations?.length || 0,
+        'Messages': (data.chatConversations || []).reduce((sum, c) => sum + (c.messages?.length || 0), 0),
         'QR Codes': data.qrCodes?.length || 0,
         'Scans': data.scans?.length || 0,
+        'Utilisateurs': data.users?.length || 0,
+        'Stockage': storageManager.getStorageStats().totalSizeFormatted,
         'Dernière MAJ': data.meta?.updatedAt ? moment(data.meta.updatedAt).format('DD/MM/YYYY HH:mm:ss') : 'N/A'
     });
 });
