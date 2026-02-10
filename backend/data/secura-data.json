@@ -10351,7 +10351,7 @@
       "gender": "m",
       "notes": "Un frère ou une sœur de la famille.",
       "seats": 2,
-      "status": "online",
+      "status": "offline",
       "accessCode": "6869",
       "tableId": "tbl_1769575124145_o6y4qfi4o",
       "tableNumber": "ST-15",
@@ -10373,8 +10373,8 @@
       "id": "gst_1769634066750_apq113ecc",
       "createdAt": "2026-01-28T21:01:06.750Z",
       "updatedAt": "2026-02-04T20:38:03.183Z",
-      "isOnline": true,
-      "lastSeen": "2026-02-10T11:05:56.528Z"
+      "isOnline": false,
+      "lastSeen": "2026-02-10T18:39:34.040Z"
     },
     {
       "eventId": "evt_1769537993483_82t3xcgsi",
@@ -14710,16 +14710,7 @@
     }
   ],
   "sessions": [],
-  "eventSessions": [
-    {
-      "id": "sess_1770717860974_ec4a71xv8",
-      "guestId": "gst_1769634066750_apq113ecc",
-      "tableId": "tbl_1769575124145_o6y4qfi4o",
-      "eventId": "evt_1769537993483_82t3xcgsi",
-      "createdAt": "2026-02-10T10:04:20.975Z",
-      "expiresAt": "2026-02-10T18:04:20.974Z"
-    }
-  ],
+  "eventSessions": [],
   "galleries": [
     {
       "id": "gal_1770509311298_7yr93j2nn",
@@ -15183,12 +15174,12 @@
           "lastName": "gervais",
           "gender": "m",
           "notes": "Un frère ou une sœur de la famille.",
-          "isOnline": true,
-          "status": "online",
+          "isOnline": false,
+          "status": "offline",
           "joinedAt": "2026-02-10T03:29:45.834Z",
-          "lastReadAt": "2026-02-10T11:06:18.945Z",
+          "lastReadAt": "2026-02-10T15:35:03.291Z",
           "unreadCount": 0,
-          "lastSeenAt": "2026-02-10T11:05:56.528Z"
+          "lastSeenAt": "2026-02-10T18:39:34.040Z"
         },
         {
           "userId": "gst_1769634030979_nreltdza9",
@@ -15273,6 +15264,22 @@
           "editedAt": null,
           "createdAt": "2026-02-10T10:17:22.730Z",
           "deletedAt": null
+        },
+        {
+          "id": "msg_1770737703291_of5ckotvz",
+          "conversationId": "chat_1770694185834_40bbph0mu",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "💢akaa",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T15:35:03.291Z",
+          "deletedAt": null
         }
       ],
       "settings": {
@@ -15283,7 +15290,7 @@
       },
       "createdBy": "gst_1769634066750_apq113ecc",
       "createdAt": "2026-02-10T03:29:45.834Z",
-      "updatedAt": "2026-02-10T11:06:57.382Z"
+      "updatedAt": "2026-02-10T15:35:09.408Z"
     },
     {
       "id": "chat_1770716570498_zqcwbzyw3",
@@ -15299,12 +15306,12 @@
           "lastName": "gervais",
           "gender": "m",
           "notes": "Un frère ou une sœur de la famille.",
-          "isOnline": true,
-          "status": "online",
+          "isOnline": false,
+          "status": "offline",
           "joinedAt": "2026-02-10T09:42:50.498Z",
-          "lastReadAt": "2026-02-10T11:06:16.743Z",
+          "lastReadAt": "2026-02-10T15:35:10.311Z",
           "unreadCount": 0,
-          "lastSeenAt": "2026-02-10T11:05:56.528Z"
+          "lastSeenAt": "2026-02-10T18:39:34.040Z"
         },
         {
           "userId": "gst_1769634031406_08mm60psu",
@@ -15370,7 +15377,7 @@
       },
       "createdBy": "gst_1769634066750_apq113ecc",
       "createdAt": "2026-02-10T09:42:50.498Z",
-      "updatedAt": "2026-02-10T11:06:17.404Z"
+      "updatedAt": "2026-02-10T16:46:02.635Z"
     }
   ],
   "tempUsers": [],
@@ -15380,7 +15387,7 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2026-02-10T11:06:57.386Z",
+    "updatedAt": "2026-02-10T18:39:34.046Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }

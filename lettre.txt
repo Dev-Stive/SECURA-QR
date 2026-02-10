@@ -1,0 +1,17 @@
+Université Paris Cité - UFR Mathématiques
+
+Madame, Monsieur,
+
+Actuellement en troisième année de Licence Professionnelle en Génie Logiciel (ICT4D) à l'Université de Yaoundé 1, je sollicite une admission en Licence 3 Informatique au sein de votre prestigieuse institution.
+
+Mon cursus actuel m’a permis de maîtriser les outils de développement, mais je souhaite désormais confronter mes acquis à la rigueur conceptuelle de l’Université Paris Cité. Votre parcours se distingue par son équilibre entre l'ingénierie logicielle et les fondements théoriques comme les systèmes et réseaux. Mes projets académiques, dont la conception d'un système de préinscription universitaire, ont confirmé mon intérêt pour les architectures complexes. Je sollicite votre formation pour approfondir mes bases algorithmiques, étape indispensable avant d’envisager un Master en Génie Informatique au sein de votre établissement.
+
+Mon expérience chez TESEA illustre ma capacité à transformer des défis opérationnels en solutions numériques. J’y ai digitalisé l’activité de « Njoya Fashion» en développant une plateforme web complète. L'objectif était de supprimer les erreurs de commandes et de stocks dues à une gestion manuelle, en intégrant un système de suivi automatisé sous Laravel et React.js. J’ai également contribué à l’amélioration de la solution "Afrix", une plateforme de suivi des livraisons, ce qui m’a sensibilisé aux enjeux de la gestion logistique en temps réel. Ces expériences renforcent ma conviction que l'innovation numérique est le levier majeur pour résoudre les problèmes opérationnels des PME locales Camerounaises.
+
+Votre établissement, par ses liens avec l'IRIF, offre l'environnement idéal pour acquérir la rigueur de conception qui me permettra, à terme, de piloter des projets de grande envergure. Je projette de devenir un ingénieur logiciel, capable de piloter le cycle de vie complet de solutions scalables et durables.
+
+Conscient des exigences académiques de votre établissement, je suis pleinement déterminé à m'investir pour réussir et apporter ma rigueur à votre promotion.
+
+Je vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations les plus respectueuses. 
+
+

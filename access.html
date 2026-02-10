@@ -1471,7 +1471,6 @@
     
     /* Boutons toggle plus petits */
     .access-toggle {
-        flex-direction: column;
         gap: 5px;
         background: transparent;
         padding: 0;
@@ -1632,12 +1631,7 @@
 
 /* Empêcher le zoom sur les inputs iOS */
 @media screen and (max-width: 768px) {
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    textarea {
-        font-size: 35px !important; /* Empêche le zoom automatique sur iOS */
-    }
+   
     
     /* Améliorer la zone de clic sur mobile */
     .code-input,
@@ -2011,8 +2005,16 @@ display: none;
     }
     
     .dark-theme .theme-switch-slider::before {
-        transform: translateX(28px);
+        transform: translateX(32px);
     }
+
+    .theme-switch-slider i.fa-moon {
+    left: 10px !important;
+}
+
+ .theme-switch-slider  i.fa-sun {
+    right: 6px !important;
+}
 }
 
 @media (max-width: 480px) {
@@ -2404,7 +2406,7 @@ display: none;
                                 <!-- Le bouton de vérification manuel est retiré : la vérification est automatique à la saisie -->
                                 <button class="btn btn-secondary" id="skipTicketCodeBtn" style="margin-top: 15px; width: 100%;" type="button">
                                     <i class="fas fa-forward"></i>
-                                    <span>Passer cette étape et accéder</span>
+                                    <span>Passer cette étape</span>
                                 </button>
                             </div>
                         </form>
@@ -3465,7 +3467,7 @@ function clearCodeInputsWithError(selector = null) {
         
         if (allEmpty) {
             skipBtn.style.display = 'block';
-            skipBtn.innerHTML = '<i class="fas fa-forward"></i><span>Passer cette étape et accéder</span>';
+            skipBtn.innerHTML = '<i class="fas fa-forward"></i><span>Passer cette étape</span>';
         } else {
             skipBtn.style.display = 'none';
         }
@@ -4266,7 +4268,7 @@ function initScanMode() {
             skipTicketCodeBtn.addEventListener('click', function() {
                 clearCodeInputs('.ticket-code');
                 this.style.display = 'block';
-                this.innerHTML = '<i class="fas fa-forward"></i><span>Passer cette étape et accéder</span>';
+                this.innerHTML = '<i class="fas fa-forward"></i><span>Passer cette étape</span>';
                 hideFormMessage('ticket');
                 skipTicketCodeAndConfirm();
             });
@@ -4628,7 +4630,7 @@ async function validateTicketCode() {
     if (allEmpty) {
         if (skipBtn) {
             skipBtn.style.display = 'block';
-            skipBtn.innerHTML = '<i class="fas fa-forward"></i><span>Passer cette étape et accéder</span>';
+            skipBtn.innerHTML = '<i class="fas fa-forward"></i><span>Passer cette étape</span>';
         }
         hideFormMessage('ticket');
         return;
@@ -4828,7 +4830,7 @@ async function createSessionAndProceedToEvent() {
         setTimeout(() => {
             console.log('🔄 Redirection vers welcome/');
             window.location.href = 'welcome/';
-        }, 800);
+        }, 500);
         
     } catch (error) {
         console.error('❌ Erreur:', error);
@@ -5998,412 +6000,4 @@ function processQRCodeData(data) {
             // Injecter le code dans le formulaire actif
             injectCodeToActiveForm(data);
         } else {
-            // Traiter comme URL de contenu
-            try {
-                const url = new URL(data);
-                window.location.href = data;
-            } catch (e) {
-                // Code non reconnu
-                showToast('Code QR non reconnu', 'error');
-                showMainAccessView();
-            }
-        }
-    } catch (error) {
-        console.error('❌ Erreur traitement QR:', error);
-        showToast('Erreur lors du traitement du code', 'error');
-    }
-}
-
-function injectCodeToActiveForm(code) {
-    console.log('💉 Injection du code:', code);
-    
-    if (!currentMode) {
-        showToast('Mode d\'accès non défini', 'error');
-        return;
-    }
-    
-    let inputs = [];
-    
-    if (currentMode === 'guest') {
-        inputs = Array.from(document.querySelectorAll('#guestForm .code-input'));
-    } else if (currentMode === 'table') {
-        inputs = Array.from(document.querySelectorAll('#tableForm .code-input'));
-    }
-    
-    if (inputs.length === 0) {
-        showToast('Formulaire non trouvé', 'error');
-        return;
-    }
-    
-    // Nettoyer le code
-    const cleanCode = code.replace(/[^A-Z0-9]/g, '').toUpperCase();
-    
-    if (cleanCode.length === 0) {
-        showToast('Code invalide', 'error');
-        return;
-    }
-    
-    // Remplir les champs
-    let codeIndex = 0;
-    for (let i = 0; i < inputs.length && codeIndex < cleanCode.length; i++) {
-        const input = inputs[i];
-        
-        // Sauter le tiret pour les codes table
-        if (currentMode === 'table' && i === 2 && code.includes('-')) {
-            continue;
-        }
-        
-        const char = cleanCode[codeIndex];
-        input.value = char;
-        input.classList.add('filled');
-        codeIndex++;
-    }
-    
-    updateCodeInputState();
-    
-    // Focus sur dernier champ
-    inputs[inputs.length - 1].focus();
-    
-    // Validation automatique après un délai
-    setTimeout(() => {
-        if (currentMode === 'guest') {
-            validateGuestAccess();
-        } else if (currentMode === 'table') {
-            validateTableAccess();
-        }
-    }, 300);
-    
-    showToast('Code scanné avec succès !', 'success');
-}
-
-function startQRDetection(video, modal, stream) {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    let lastScanTime = 0;
-    let isScanning = true;
-    let scanAttempts = 0;
-    let lastQRData = null;
-    
-    const scanQR = async (timestamp) => {
-        if (!isScanning || !scanningActive) return;
-        
-        // Scan à 30 FPS pour performance
-        if (timestamp - lastScanTime < 33) {
-            requestAnimationFrame(scanQR);
-            return;
-        }
-        
-        lastScanTime = timestamp;
-        scanAttempts++;
-        
-        try {
-            // Vérifier si la vidéo est prête
-            if (video.videoWidth === 0 || video.videoHeight === 0) {
-                requestAnimationFrame(scanQR);
-                return;
-            }
-            
-            // Ajuster la taille du canvas
-            if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-            }
-            
-            // Dessiner uniquement la zone centrale (optimisation performance)
-            const scanAreaSize = Math.min(video.videoWidth, video.videoHeight) * 0.8;
-            const x = (video.videoWidth - scanAreaSize) / 2;
-            const y = (video.videoHeight - scanAreaSize) / 2;
-            
-            context.drawImage(video, x, y, scanAreaSize, scanAreaSize, 0, 0, scanAreaSize, scanAreaSize);
-            
-            // Récupérer les données d'image
-            const imageData = context.getImageData(0, 0, scanAreaSize, scanAreaSize);
-            
-            // Améliorer le contraste pour les QR codes difficiles
-            const data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-                const gray = data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114;
-                data[i] = data[i+1] = data[i+2] = gray > 128 ? 255 : 0;
-            }
-            
-            // Détecter le QR code
-            const code = jsQR(data, imageData.width, imageData.height, {
-                inversionAttempts: "attemptBoth",
-            });
-            
-            // Si QR code détecté
-            if (code && code.data) {
-                // Vérifier que ce n'est pas un faux positif (même code que précédemment)
-                if (code.data !== lastQRData) {
-                    console.log('✅ QR Code détecté:', code.data);
-                    lastQRData = code.data;
-                    isScanning = false;
-                    
-                    // Feedback visuel et sonore
-                    showScanSuccessFeedback(modal);
-                    
-                    if (SECURA_AUDIO) {
-                        SECURA_AUDIO.play('success');
-                    }
-                    
-                    // Animation du cadre
-                    const frame = modal.querySelector('.scanner-frame');
-                    if (frame) {
-                        frame.style.animation = 'scanSuccess 0.5s ease';
-                        frame.style.borderColor = 'var(--success)';
-                        frame.style.boxShadow = `inset 0 0 20px var(--success), 0 0 0 2000px rgba(0,0,0,0.6), 0 0 30px var(--success)`;
-                    }
-                    
-                    // Attendre un peu pour montrer le feedback
-                    setTimeout(() => {
-                        stopQRScanner(stream, modal);
-                        processQRCodeData(code.data);
-                    }, 800);
-                    
-                    return;
-                }
-            }
-            
-            // Continuer le scan
-            requestAnimationFrame(scanQR);
-            
-        } catch (error) {
-            console.error('❌ Erreur détection QR:', error);
-            
-            // Réessayer après un délai
-            if (isScanning && scanningActive) {
-                setTimeout(() => {
-                    requestAnimationFrame(scanQR);
-                }, 100);
-            }
-        }
-    };
-    
-    // Démarrer le scan
-    requestAnimationFrame(scanQR);
-    
-    // Timeout de sécurité
-    setTimeout(() => {
-        if (isScanning && scanningActive) {
-            console.warn('⏱️ Timeout scan QR après tentatives');
-            isScanning = false;
-            
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            
-            showToast('Scan trop long, réessayez', 'warning');
-            
-            if (modal && modal.parentNode) {
-                modal.remove();
-            }
-            
-            scanningActive = false;
-        }
-    }, 30000); // 30 secondes timeout
-}
-
-
-
-// Arrêter le scanner
-function stopQRScanner(stream, modal) {
-    console.log('🛑 Arrêt du scanner QR');
-    scanningActive = false;
-    
-    // Arrêter tous les flux vidéo
-    if (stream) {
-        stream.getTracks().forEach(track => {
-            track.stop();
-            console.log('✓ Track arrêté:', track.kind);
-        });
-    }
-    
-    // Supprimer le modal avec animation
-    if (modal && modal.parentNode) {
-        modal.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => {
-            if (modal.parentNode) {
-                modal.remove();
-            }
-        }, 300);
-    }
-}
-
-// Traiter les données du QR code
-function processQRCodeData(qrData) {
-    try {
-        console.log('🔍 Traitement QR:', qrData);
-        
-        // Vérifier si c'est une URL
-        let url = null;
-        try {
-            url = new URL(qrData);
-        } catch (e) {
-            // Si ce n'est pas une URL valide, essayer de l'analyser comme paramètres
-            if (qrData.includes('eventId=') || qrData.includes('guestId=') || qrData.includes('tableId=')) {
-                // C'est probablement une query string
-                processQueryString(qrData);
-                return;
-            }
-            
-            // Essayer de parser comme JSON
-            try {
-                const data = JSON.parse(qrData);
-                if (data.eventId || data.guestId || data.tableId) {
-                    processQRData(data);
-                    return;
-                }
-            } catch (jsonError) {
-                // Pas un JSON valide
-            }
-            
-            throw new Error('Format QR non reconnu');
-        }
-        
-        // Si c'est une URL SECURA
-        if (url.hostname.includes('secura') || url.pathname.includes('/access')) {
-            // Extraire les paramètres
-            const params = new URLSearchParams(url.search);
-            processQueryParams(params);
-            return;
-        }
-        
-        // Autres formats d'URL
-        processURLData(url);
-        
-    } catch (error) {
-        console.error('Erreur traitement QR:', error);
-        showToast('QR Code non valide', 'error');
-    }
-}
-
-// Traiter les paramètres de query string
-function processQueryString(queryString) {
-    // Nettoyer la string
-    let cleanString = queryString;
-    
-    // Si ça commence par "?", le retirer
-    if (cleanString.startsWith('?')) {
-        cleanString = cleanString.substring(1);
-    }
-    
-    // Si ça commence par "http", extraire la query
-    if (cleanString.includes('?')) {
-        cleanString = cleanString.split('?')[1];
-    }
-    
-    const params = new URLSearchParams(cleanString);
-    processQueryParams(params);
-}
-
-// Traiter les paramètres d'URL
-function processQueryParams(params) {
-    const guestId = params.get('guestId');
-    const tableId = params.get('tableId');
-    const eventId = params.get('eventId');
-    
-    console.log('📋 Paramètres extraits:', { guestId, tableId, eventId });
-    
-    if (guestId || tableId || eventId) {
-        // Rediriger avec les paramètres
-        const newUrl = new URL(window.location.href);
-        
-        if (guestId) newUrl.searchParams.set('guestId', guestId);
-        if (tableId) newUrl.searchParams.set('tableId', tableId);
-        if (eventId) newUrl.searchParams.set('eventId', eventId);
-        
-        // Ajouter un timestamp pour éviter le cache
-        newUrl.searchParams.set('qr_scanned', Date.now());
-        
-        // Rediriger
-        window.location.href = newUrl.toString();
-    } else {
-        showToast('QR Code sans données valides', 'warning');
-    }
-}
-
-// Traiter les données JSON
-function processQRData(data) {
-    if (data.eventId || data.guestId || data.tableId) {
-        const newUrl = new URL(window.location.href);
-        
-        if (data.guestId) newUrl.searchParams.set('guestId', data.guestId);
-        if (data.tableId) newUrl.searchParams.set('tableId', data.tableId);
-        if (data.eventId) newUrl.searchParams.set('eventId', data.eventId);
-        
-        newUrl.searchParams.set('qr_scanned', Date.now());
-        window.location.href = newUrl.toString();
-    }
-}
-
-// Traiter les données d'URL
-function processURLData(url) {
-    // Pour les URLs externes, ouvrir dans un nouvel onglet
-    if (url.protocol.startsWith('http')) {
-        const confirmed = confirm(`Ouvrir le lien: ${url.href}\n\nVoulez-vous continuer ?`);
-        if (confirmed) {
-            window.open(url.href, '_blank');
-        }
-    } else {
-        showToast('URL non supportée', 'warning');
-    }
-}
-
-// Afficher les instructions de permission caméra
-function showCameraPermissionInstructions() {
-    Swal.fire({
-        title: 'Permission caméra requise',
-        html: `
-            <div style="text-align: center; padding: 20px 0;">
-                <i class="fas fa-camera" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
-                <p>Pour scanner un QR Code, SECURA a besoin d'accéder à votre caméra.</p>
-                <div style="background: var(--hover-bg); border-radius: 10px; padding: 15px; margin: 20px 0; text-align: left;">
-                    <h5 style="color: var(--primary); margin-bottom: 10px;">Instructions :</h5>
-                    <ol style="margin: 0; padding-left: 20px;">
-                        <li style="margin-bottom: 8px;">Cliquez sur l'icône "🔒" dans la barre d'adresse</li>
-                        <li style="margin-bottom: 8px;">Sélectionnez "Autoriser" pour l'accès à la caméra</li>
-                        <li>Actualisez la page et réessayez</li>
-                    </ol>
-                </div>
-                <p style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7;">
-                    Votre caméra n'est utilisée que pour scanner le QR Code, aucune image n'est enregistrée.
-                </p>
-            </div>
-        `,
-        confirmButtonText: 'Compris',
-        confirmButtonColor: '#D97706',
-        width: 500
-    });
-}
-
-function isQRScannerSupported() {
-    return !!(
-        navigator.mediaDevices &&
-        navigator.mediaDevices.getUserMedia &&
-        window.jsQR
-    );
-}
-
-async function testCameraAvailability() {
-    try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(device => device.kind === 'videoinput');
-        
-        console.log('📷 Caméras disponibles:', videoDevices.length);
-        
-        if (videoDevices.length === 0) {
-            console.warn('Aucune caméra détectée');
-            return false;
-        }
-        
-        return true;
-    } catch (error) {
-        console.warn('Erreur détection caméra:', error);
-        return false;
-    }
-}
-
-</script>
-
-</body>
-</html>
+            // Traiter comme URL de conte

@@ -5820,3 +5820,73 @@ textarea.form-control {
             }
         }
 
+/* ==========================================
+   RESPONSIVE HEADER - MOBILE OPTIMIZATION
+   ========================================== */
+@media (max-width: 768px) {
+   
+    
+    /* Logo réduit pour mobile */
+    .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .logo-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .home-btn span {
+
+display: none;
+    }
+    
+    .logo-icon img {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .logo-text h1 {
+        font-size: 1.1rem;
+    }
+    
+    .logo-text p {
+        display: none;
+    }
+    
+    /* Réduire le theme-switch-slider */
+    .theme-switch-footer {
+        min-width: auto;
+    }
+    
+    .theme-switch-slider {
+        width: 65px;
+        height: 36px;
+        padding: 0 3px;
+    }
+    
+    .theme-switch-slider i {
+        font-size: 0.75rem;
+    }
+   
+    
+    .theme-switch-slider::before {
+        width: 30px;
+        height: 34px;
+        left: 3px;
+    }
+    
+    .dark-theme .theme-switch-slider::before {
+        transform: translateX(32px);
+    }
+
+    .theme-switch-slider i.fa-moon {
+    left: 10px !important;
+}
+
+ .theme-switch-slider  i.fa-sun {
+    right: 6px !important;
+}
+}

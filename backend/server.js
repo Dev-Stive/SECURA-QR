@@ -10260,7 +10260,7 @@ app.post('/api/chat/conversations/:conversationId/messages', eventSessionAuth, (
             senderId: userId,
             senderName: userName,
             content: content.trim(),
-            type: type || 'text', // text, image, file, system
+            type: type || 'text', 
             attachments: attachments || [],
             replyTo: replyTo || null,
             readBy: [], // Ne PAS inclure le senderId (il a envoyé, donc déjà lu)
