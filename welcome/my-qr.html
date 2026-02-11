@@ -2397,7 +2397,7 @@
             }
 
             .features-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(1, 1fr);
                 gap: 12px;
             }
 
@@ -6554,20 +6554,28 @@ function initSidebarNavigation() {
         },
         navInfo: () => {
             if (!validateSession()) return;
-            window.location.href = 'welcome/index.html?page=info';
+            window.location.href = './';
         },
         navProgram: () => {
             if (!validateSession()) return;
-            window.location.href = 'welcome/index.html?page=program';
+            window.location.href = './event-program.html';
         },
         navMap: () => {
             if (!validateSession()) return;
-            window.location.href = 'welcome/index.html?page=map';
+            window.location.href = './event-map.html';
         },
         navChat: () => {
             if (!validateSession()) return;
-            window.location.href = 'welcome/index.html?page=chat';
-        }
+            window.location.href = './event-chat.html';
+        },
+        navGuests: () => {
+            if (!validateSession()) return;
+            window.location.href = './event-guests.html';
+        },
+        navPhotos: () => {
+            if (!validateSession()) return;
+            window.location.href = './event-photos.html';
+        },
     };
     
     Object.keys(navItems).forEach(id => {
@@ -7206,11 +7214,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                     }
                     
                     if (statsGrid) {
-                        statsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        statsGrid.style.gridTemplateColumns = 'repeat(1, 1fr)';
                     }
                     
                     if (matesGrid) {
-                        matesGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        matesGrid.style.gridTemplateColumns = 'repeat(1, 1fr)';
                         matesGrid.style.gap = '12px';
                     }
                 } else {

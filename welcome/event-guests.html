@@ -2387,7 +2387,7 @@
             }
 
             .features-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(1, 1fr);
                 gap: 12px;
             }
 
@@ -5417,6 +5417,7 @@
     <script src="../js/sidebar.js"></script>
     <script src="../js/toastify.js" defer></script>
     <script src="../js/langue.js" defer></script>
+    <script src="../Jjs/welcome.js"></script>
 
     <!-- Script d'initialisation -->
     <script>
@@ -7263,11 +7264,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                     }
                     
                     if (statsGrid) {
-                        statsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        statsGrid.style.gridTemplateColumns = 'repeat(1, 1fr)';
                     }
                     
                     if (matesGrid) {
-                        matesGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        matesGrid.style.gridTemplateColumns = 'repeat(1, 1fr)';
                         matesGrid.style.gap = '12px';
                     }
                 } else {

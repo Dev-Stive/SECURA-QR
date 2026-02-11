@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Programme & Horaires - SECURA">
+    <title>Programme de l'Événement - SECURA</title>
+    
+    <link rel="icon" href="../assets/images/icon.png" type="image/x-icon">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" as="style">
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Styles locaux -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/loading.css">
+    <link rel="stylesheet" href="../css/toastify.css">
+    
+    <style>
+        /* ========================================== 
+           VARIABLES GLOBALES
+           ========================================== */
+        :root {
+            --primary: #D97706;
+            --primary-dark: #B45309;
+            --primary-light: #F59E0B;
+            --secondary: #8B5CF6;
+            --secondary-dark: #7C3AED;
+            --dark: #0A0A0A;
+            --dark-card: #121212;
+            --dark-elevated: #1A1A1A;
+            --gradient: linear-gradient(135deg, #B45309 0%, #D97706 50%, #F59E0B 100%);
+            --gradient-secondary: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A78BFA 100%);
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            
+            /* Thème clair */
+            --body-bg: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f8f9fa;
+            --input-bg: #ffffff;
+            --input-border: #e0e0e0;
+            --input-text: #333333;
+            --placeholder-color: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --hover-bg: rgba(0, 0, 0, 0.05);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --progress-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Thème sombre */
+        .dark-theme {
+            --body-bg: #0A0A0A;
+            --text-color: #ffffff;
+            --card-bg: #121212;
+            --input-bg: rgba(255, 255, 255, 0.04);
+            --input-border: rgba(255, 255, 255, 0.12);
+            --input-text: #ffffff;
+            --placeholder-color: rgba(255, 255, 255, 0.4);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --hover-bg: rgba(255, 255, 255, 0.05);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --progress-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        /* ========================================== 
+           STYLES DE BASE
+           ========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.15) 0%, transparent 30%);
+        }
+
+        .dark-theme body {
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.08) 0%, transparent 40%);
+        }
+
+        /* ========================================== 
+           LAYOUT PRINCIPAL
+           ========================================== */
+        .schedule-container {
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .schedule-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========================================== 
+           HEADER SESSION
+           ========================================== */
+        .session-header {
+            background: var(--card-bg);
+            border-bottom: 2px solid var(--border-color);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .session-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .session-header-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .session-header-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .session-header-info small {
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.75rem;
+        }
+
+        .session-header-info strong {
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .session-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .session-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient);
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .session-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        /* ========================================== 
+           HERO SECTION - SCHEDULE
+           ========================================== */
+        .schedule-hero {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(245, 158, 11, 0.1));
+            padding: 40px 20px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 40px;
+            border: 2px solid var(--border-color);
+        }
+
+        .schedule-hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: var(--gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .schedule-hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .schedule-hero-badges {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .schedule-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-bg);
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid var(--primary);
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* ========================================== 
+           TIMELINE - PROGRAMME PRINCIPAL
+           ========================================== */
+        .timeline-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .timeline-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .timeline-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .timeline-header p {
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 1.05rem;
+        }
+
+        /* VERTICAL TIMELINE */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) {
+            margin-right: 50%;
+            text-align: right;
+            padding-right: 40px;
+        }
+
+        .timeline-item:nth-child(even) {
+            margin-left: 50%;
+            text-align: left;
+            padding-left: 40px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border: 4px solid var(--body-bg);
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 20px;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-dot.completed {
+            background: var(--success);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+
+        .timeline-dot.current {
+            background: var(--primary);
+            width: 28px;
+            height: 28px;
+            top: 16px;
+            box-shadow: 0 0 20px rgba(217, 119, 6, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.2);
+            }
+        }
+
+        .timeline-content {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .timeline-content:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px var(--shadow-color);
+            transform: translateY(-4px);
+        }
+
+        .timeline-time {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .timeline-time i {
+            font-size: 1.4rem;
+        }
+
+        .timeline-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .timeline-description {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .timeline-location {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .timeline-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .timeline-tag {
+            background: rgba(217, 119, 6, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* ========================================== 
+           PROGRESS INDICATOR
+           ========================================== */
+        .progress-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 2px solid var(--border-color);
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .progress-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .progress-percentage {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: var(--gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .progress-bar-container {
+            height: 10px;
+            background: var(--progress-bg);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 5px;
+            width: 35%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .progress-stat {
+            padding: 15px;
+            background: var(--progress-bg);
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .progress-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        /* ========================================== 
+           EVENT INFO CARDS
+           ========================================== */
+        .event-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .event-info-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .event-info-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px var(--shadow-color);
+            transform: translateY(-4px);
+        }
+
+        .event-info-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(217, 119, 6, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .event-info-content h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .event-info-content p {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin: 0;
+        }
+
+        /* ========================================== 
+           RESPONSIVE DESIGN
+           ========================================== */
+        @media (max-width: 768px) {
+            .schedule-hero-title {
+                font-size: 1.8rem;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item:nth-child(odd),
+            .timeline-item:nth-child(even) {
+                margin-left: 0;
+                margin-right: 0;
+                padding-left: 80px;
+                padding-right: 0;
+                text-align: left;
+            }
+
+            .timeline-dot {
+                left: 20px;
+            }
+
+            .timeline-content {
+                padding: 20px;
+            }
+
+            .event-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .schedule-hero-badges {
+                flex-direction: column;
+            }
+
+            .schedule-badge {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .timeline-title {
+                font-size: 1.2rem;
+            }
+
+            .timeline-time {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .session-header {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .schedule-hero {
+                padding: 25px 15px;
+            }
+
+            .schedule-hero-title {
+                font-size: 1.4rem;
+            }
+
+            .timeline-container {
+                padding: 20px 0;
+            }
+
+            .timeline::before {
+                left: 15px;
+            }
+
+            .timeline-item {
+                margin-bottom: 40px;
+            }
+
+            .timeline-item:nth-child(odd),
+            .timeline-item:nth-child(even) {
+                padding-left: 60px;
+            }
+
+            .timeline-dot {
+                left: 15px;
+            }
+
+            .timeline-content {
+                padding: 15px;
+            }
+
+            .timeline-title {
+                font-size: 1rem;
+            }
+
+            .timeline-description {
+                font-size: 0.85rem;
+            }
+
+            .event-info-card {
+                padding: 15px;
+            }
+
+            .event-info-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+        }
+
+        /* ========================================== 
+           ANIMATIONS
+           ========================================== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .timeline-item {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
+        .timeline-item:nth-child(6) { animation-delay: 0.6s; }
+
+        /* ========================================== 
+           SCROLLBAR
+           ========================================== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--progress-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ========================================== 
+           LEGEND DES COULEURS
+           ========================================== */
+        .legend-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+            border: 2px solid var(--border-color);
+        }
+
+        .legend-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .legend-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-dot.upcoming {
+            background: var(--primary);
+            box-shadow: 0 0 10px rgba(217, 119, 6, 0.4);
+        }
+
+        .legend-dot.current {
+            background: var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        .legend-dot.completed {
+            background: var(--success);
+        }
+
+        .legend-label {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        /* ========================================== 
+           UTILITIES
+           ========================================== */
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .mb-40 {
+            margin-bottom: 40px;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .text-muted {
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========================================== 
+     HEADER SESSION
+     ========================================== -->
+<div class="session-header">
+    <div class="session-header-left">
+        <div class="session-header-logo">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="session-header-info">
+            <strong id="sessionEventName">Programme Événement</strong>
+            <small id="sessionTableInfo">Table -</small>
+        </div>
+    </div>
+    <div class="session-header-right">
+        <div class="session-avatar" id="sessionAvatarBtn">
+            <i class="fas fa-user" id="avatarIcon"></i>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== 
+     HERO SECTION
+     ========================================== -->
+<div class="schedule-hero">
+    <h1 class="schedule-hero-title">Déroulement de l'Événement</h1>
+    <p class="schedule-hero-subtitle">Découvrez le programme détaillé de votre journée</p>
+    <div class="schedule-hero-badges">
+        <div class="schedule-badge">
+            <i class="fas fa-map-marker-alt"></i> Salle Principale
+        </div>
+        <div class="schedule-badge">
+            <i class="fas fa-clock"></i> 15 Heures
+        </div>
+        <div class="schedule-badge">
+            <i class="fas fa-users"></i> +500 Invités
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== 
+     PROGRESS INDICATOR
+     ========================================== -->
+<div class="progress-section">
+    <div class="progress-header">
+        <h3 class="progress-title">Progression du Mariage</h3>
+        <span class="progress-percentage" id="progressPercentage">35%</span>
+    </div>
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+    <div class="progress-info">
+        <div class="progress-stat">
+            <div class="progress-stat-value" id="completedCount">2</div>
+            <div class="progress-stat-label">Événements terminés</div>
+        </div>
+        <div class="progress-stat">
+            <div class="progress-stat-value" id="currentCount">1</div>
+            <div class="progress-stat-label">En cours</div>
+        </div>
+        <div class="progress-stat">
+            <div class="progress-stat-value" id="upcomingCount">3</div>
+            <div class="progress-stat-label">À venir</div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== 
+     TIMELINE - PROGRAMME PRINCIPAL
+     ========================================== -->
+<div class="timeline-container">
+    <div class="timeline-header">
+        <h2>Chronologie Complète</h2>
+        <p>Détails de chaque moment important</p>
+    </div>
+
+    <div class="timeline">
+        <!-- Item 1 - Arrivée -->
+        <div class="timeline-item">
+            <div class="timeline-dot completed"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">
+                    <i class="fas fa-door-open"></i> 10:00
+                </div>
+                <h3 class="timeline-title">Accueil des Invités</h3>
+                <p class="timeline-description">Ouverture des portes, enregistrement et remise de programmes personnalisés</p>
+                <div class="timeline-location">
+                    <i class="fas fa-map-pin"></i> Vestibule Principal
+                </div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">Enregistrement</span>
+                    <span class="timeline-tag">Déjà passé</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item 2 - Accueil -->
+        <div class="timeline-item">
+            <div class="timeline-dot completed"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">
+                    <i class="fas fa-glass-cheers"></i> 11:00
+                </div>
+                <h3 class="timeline-title">Cocktail de Bienvenue</h3>
+                <p class="timeline-description">Apéritif raffiné avec canapés variés et boissons de prestige</p>
+                <div class="timeline-location">
+                    <i class="fas fa-map-pin"></i> Terrasse Principale
+                </div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">Boisson</span>
+                    <span class="timeline-tag">Déjà passé</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item 3 - Cérémonie -->
+        <div class="timeline-item">
+            <div class="timeline-dot current"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">
+                    <i class="fas fa-ring"></i> 12:30
+                </div>
+                <h3 class="timeline-title">Cérémonie Officielle</h3>
+                <p class="timeline-description">Échange des vœux et prononcé du oui éternel sous les applaudissements</p>
+                <div class="timeline-location">
+                    <i class="fas fa-map-pin"></i> Chapiteau Principal
+                </div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">Point clé</span>
+                    <span class="timeline-tag">En cours</span>
+                    <span class="timeline-tag">Important</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item 4 - Photos -->
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">
+                    <i class="fas fa-camera"></i> 13:30
+                </div>
+                <h3 class="timeline-title">Séance Photos Famille</h3>
+                <p class="timeline-description">Photos de famille officielle et portraits des mariés avec les proches</p>
+                <div class="timeline-location">
+                    <i class="fas fa-map-pin"></i> Jardin Principal
+                </div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">Photos</span>
+                    <span class="timeline-tag">À venir</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item 5 - Déjeuner -->
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">
+                    <i class="fas fa-utensils"></i> 14:30
+                </div>
+                <h3 class="timeline-title">Banquet Gastronomique</h3>
+                <p class="timeline-description">Repas 4 services: entrée, plat principal, dessert et fromages affinés</p>
+                <div class="timeline-location">
+                    <i class="fas fa-map-pin"></i> Salle de Réception Principale
+                </div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">Restauration</span>
+                    <span class="timeline-tag">À venir</span>
+                    <span class="timeline-tag">Premium</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item 6 - Animation -->
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">
+                    <i class="fas fa-music"></i> 17:00
+                </div>
+                <h3 class="timeline-title">Divertissement & Spectacle</h3>
+                <p class="timeline-description">Animations musicales, danse et surprises spéciales pour les mariés</p>
+                <div class="timeline-location">
+                    <i class="fas fa-map-pin"></i> Chapiteau Principal
+                </div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">Animation</span>
+                    <span class="timeline-tag">À venir</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item 7 - Danse -->
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">
+                    <i class="fas fa-shoe-prints"></i> 19:00
+                </div>
+                <h3 class="timeline-title">Ouverture du Bal</h3>
+                <p class="timeline-description">Premier danse des mariés suivie de la piste ouverte à tous les invités</p>
+                <div class="timeline-location">
+                    <i class="fas fa-map-pin"></i> Piste de Danse Principale
+                </div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">Danse</span>
+                    <span class="timeline-tag">À venir</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item 8 - Fin -->
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">
+                    <i class="fas fa-moon"></i> 00:00
+                </div>
+                <h3 class="timeline-title">Fin de Réception</h3>
+                <p class="timeline-description">Clôture de l'événement avec dernier verre et départ des mariés</p>
+                <div class="timeline-location">
+                    <i class="fas fa-map-pin"></i> Entrée Principale
+                </div>
+                <div class="timeline-tags">
+                    <span class="timeline-tag">Fermeture</span>
+                    <span class="timeline-tag">À venir</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== 
+     LEGEND DES COULEURS
+     ========================================== -->
+<div class="legend-section">
+    <h3 class="legend-title">
+        <i class="fas fa-circle-info"></i> Légende
+    </h3>
+    <div class="legend-items">
+        <div class="legend-item">
+            <div class="legend-dot completed"></div>
+            <span class="legend-label">Événement terminé</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot current"></div>
+            <span class="legend-label">En cours actuellement</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot upcoming"></div>
+            <span class="legend-label">Événement à venir</span>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== 
+     EVENT INFO CARDS
+     ========================================== -->
+<div class="event-info-grid">
+    <div class="event-info-card">
+        <div class="event-info-icon">
+            <i class="fas fa-calendar-days"></i>
+        </div>
+        <div class="event-info-content">
+            <h3>Date & Heure</h3>
+            <p id="eventDateTime">Samedi 21 novembre 2025 | 10:00 - 00:00</p>
+        </div>
+    </div>
+
+    <div class="event-info-card">
+        <div class="event-info-icon">
+            <i class="fas fa-location-dot"></i>
+        </div>
+        <div class="event-info-content">
+            <h3>Lieu</h3>
+            <p id="eventLocation">Château de la Loire, Amboise - France</p>
+        </div>
+    </div>
+
+    <div class="event-info-card">
+        <div class="event-info-icon">
+            <i class="fas fa-headset"></i>
+        </div>
+        <div class="event-info-content">
+            <h3>Support Événement</h3>
+            <p>Équipe dédiée disponible 24h/24</p>
+        </div>
+    </div>
+
+    <div class="event-info-card">
+        <div class="event-info-icon">
+            <i class="fas fa-mobile-screen"></i>
+        </div>
+        <div class="event-info-content">
+            <h3>Accès Pratique</h3>
+            <p>Consultez ce programme depuis votre téléphone</p>
+        </div>
+    </div>
+
+    <div class="event-info-card">
+        <div class="event-info-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="event-info-content">
+            <h3>Participants</h3>
+            <p id="guestCount">500+ invités attendus</p>
+        </div>
+    </div>
+
+    <div class="event-info-card">
+        <div class="event-info-icon">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="event-info-content">
+            <h3>Points Importants</h3>
+            <p>Réservez votre place pour les animations</p>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ========================================== 
+    // INITIALISATION ET DONNÉES
+    // ========================================== 
+    const scheduleData = {
+        event: {
+            name: 'Mariage de Gérard et Rania',
+            date: '2025-11-21',
+            time: '10:00',
+            location: 'Château de la Loire, Amboise',
+            guests: 550
+        },
+        timeline: [
+            { time: '10:00', status: 'completed', name: 'Accueil', icon: 'door-open' },
+            { time: '11:00', status: 'completed', name: 'Cocktail', icon: 'glass-cheers' },
+            { time: '12:30', status: 'current', name: 'Cérémonie', icon: 'ring' },
+            { time: '13:30', status: 'upcoming', name: 'Photos', icon: 'camera' },
+            { time: '14:30', status: 'upcoming', name: 'Banquet', icon: 'utensils' },
+            { time: '17:00', status: 'upcoming', name: 'Spectacle', icon: 'music' },
+            { time: '19:00', status: 'upcoming', name: 'Bal', icon: 'shoe-prints' },
+            { time: '00:00', status: 'upcoming', name: 'Fin', icon: 'moon' }
+        ]
+    };
+
+    // ========================================== 
+    // GESTION DU STATUT ET PROGRESSION
+    // ========================================== 
+    function updateProgress() {
+        const totalEvents = scheduleData.timeline.length;
+        const completed = scheduleData.timeline.filter(e => e.status === 'completed').length;
+        const current = scheduleData.timeline.filter(e => e.status === 'current').length;
+        const upcoming = scheduleData.timeline.filter(e => e.status === 'upcoming').length;
+
+        const progressPercentage = Math.round((completed / totalEvents) * 100);
+
+        document.getElementById('progressPercentage').textContent = progressPercentage + '%';
+        document.getElementById('progressBar').style.width = progressPercentage + '%';
+        document.getElementById('completedCount').textContent = completed;
+        document.getElementById('currentCount').textContent = current;
+        document.getElementById('upcomingCount').textContent = upcoming;
+    }
+
+    // ========================================== 
+    // RÉCUPÉRATION DES DONNÉES DE SESSION
+    // ========================================== 
+    async function loadSessionData() {
+        try {
+            // Simuler le chargement des données de session
+            const token = localStorage.getItem('secura_event_session_token');
+            if (!token) {
+                console.warn('⚠️ No session token found');
+                return;
+            }
+
+            // Mettre à jour les infos de session
+            document.getElementById('sessionEventName').textContent = scheduleData.event.name;
+            document.getElementById('eventDateTime').textContent = 
+                `${formatDate(scheduleData.event.date)} | ${scheduleData.event.time} - 00:00`;
+            document.getElementById('eventLocation').textContent = scheduleData.event.location;
+            document.getElementById('guestCount').textContent = `${scheduleData.event.guests}+ invités attendus`;
+
+            console.log('✓ Session data loaded');
+        } catch (error) {
+            console.error('❌ Error loading session:', error);
+        }
+    }
+
+    function formatDate(dateString) {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('fr-FR', options);
+    }
+
+    // ========================================== 
+    // NAVIGATION
+    // ========================================== 
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSessionData();
+        updateProgress();
+
+        // Auto-update progress every minute
+        setInterval(updateProgress, 60000);
+    });
+
+    // Back button
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            window.history.back();
+        }
+    });
+
+    // Avatar button
+    const avatarBtn = document.getElementById('sessionAvatarBtn');
+    if (avatarBtn) {
+        avatarBtn.addEventListener('click', function() {
+            console.log('👤 Avatar clicked - Profile menu would open');
+        });
+    }
+</script>
+
+</body>
+</html>

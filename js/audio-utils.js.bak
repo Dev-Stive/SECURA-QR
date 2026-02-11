@@ -23,43 +23,25 @@ const SECURA_AUDIO = {
         this.loaded = true;
     },
 
-    // 🔊 INITIALISATION - Seulement après un geste utilisateur
     initContext() {
         if (!this.context) {
-            try {
-                this.context = new (window.AudioContext || window.webkitAudioContext)();
-            } catch (e) {
-                console.warn('⚠️ AudioContext non supporté:', e);
-                return;
-            }
+            this.context = new (window.AudioContext || window.webkitAudioContext)();
         }
-        
-        // Si le contexte est 'suspended', le reprendre
-        if (this.context && this.context.state === 'suspended') {
-            this.context.resume().catch(err => {
-                console.warn('⚠️ Impossible de reprendre AudioContext:', err);
-            });
+        if (this.context.state === 'suspended') {
+            this.context.resume();
         }
     },
 
     play(type = 'notify') {
         if (!this.sounds[type]) return;
+        this.initContext();
 
-        // Arrêter tout son précédent avant d'en jouer un nouveau
+        // Arrêter tout son précédent avant d’en jouer un nouveau
         this.stop();
 
         const audio = new Audio(this.sounds[type]);
         audio.volume = this.volume;
-        
-        // Essayer de jouer le son
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.warn('⚠️ Impossible de jouer le son:', error);
-                // Fallback: utiliser un beep synthétisé
-                this.beep();
-            });
-        }
+        audio.play().catch(() => this.beep());
 
         this.currentAudio = audio; // 🔊 Garde la référence pour stop()
     },
@@ -74,31 +56,17 @@ const SECURA_AUDIO = {
     },
 
     beep(frequency = 800, duration = 200) {
-        // Initialiser le contexte seulement si nécessaire
-        if (!this.context) {
-            this.initContext();
-        }
-
-        // Vérifier que le contexte existe et est valide
-        if (!this.context) {
-            console.warn('⚠️ AudioContext non disponible pour beep');
-            return;
-        }
-
-        try {
-            const oscillator = this.context.createOscillator();
-            const gainNode = this.context.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(this.context.destination);
-            oscillator.frequency.value = frequency;
-            oscillator.type = 'sine';
-            gainNode.gain.setValueAtTime(0.3, this.context.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + duration / 1000);
-            oscillator.start();
-            oscillator.stop(this.context.currentTime + duration / 1000);
-        } catch (e) {
-            console.warn('⚠️ Erreur lors de la création du beep:', e);
-        }
+        this.initContext();
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.3, this.context.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + duration / 1000);
+        oscillator.start();
+        oscillator.stop(this.context.currentTime + duration / 1000);
     },
 
     success() {
@@ -137,7 +105,6 @@ const SECURA_AUDIO = {
     }
 };
 
-// 🔊 Initialiser l'AudioContext au premier geste utilisateur (click, touchstart)
 ['click', 'touchstart'].forEach(event =>
     document.addEventListener(event, () => {
         SECURA_AUDIO.initContext();

@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Menu & Restauration Premium - SECURA">
+    <title>Menu & Restauration - SECURA Événements</title>
+    
+    <link rel="icon" href="../assets/images/icon.png" type="image/x-icon">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" as="style">
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Styles locaux -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/loading.css">
+    <link rel="stylesheet" href="../css/dash.css">
+    <link rel="stylesheet" href="../css/toastify.css">
+    
+    <style>
+        /* ==========================================
+           VARIABLES GLOBALES POUR LES THÈMES
+           ========================================== */
+        :root {
+            /* Couleurs personnalisées pour cet événement */
+            --primary: #e8d4f2;
+            --primary-dark: #d666ff;
+            --primary-light: #f0e6ff;
+            --dark: #0A0A0A;
+            --dark-card: #121212;
+            --dark-elevated: #1A1A1A;
+            --gradient: linear-gradient(135deg, #d666ff 0%, #e8d4f2 50%, #f0e6ff 100%);
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --border-radius: 0.5rem;
+            --border-radius-sm: 0.375rem;
+            --card-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            
+            /* Variables pour thème clair */
+            --body-bg: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f8f9fa;
+            --input-bg: #ffffff;
+            --input-border: #e0e0e0;
+            --input-text: #333333;
+            --placeholder-color: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --hover-bg: rgba(0, 0, 0, 0.05);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --progress-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Variables pour thème sombre */
+        .dark-theme {
+            --body-bg: #0A0A0A;
+            --text-color: #ffffff;
+            --card-bg: #121212;
+            --input-bg: rgba(255, 255, 255, 0.04);
+            --input-border: rgba(255, 255, 255, 0.12);
+            --input-text: #ffffff;
+            --placeholder-color: rgba(255, 255, 255, 0.4);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --hover-bg: rgba(255, 255, 255, 0.05);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --progress-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        /* ==========================================
+           STYLES DE BASE
+           ========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        .menu-container {
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ==========================================
+           HEADER MENU
+           ========================================== */
+        .menu-header {
+            background: var(--gradient);
+            color: #ffffff;
+            padding: 40px 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        /* ==========================================
+           FILTRES DE CATÉGORIES
+           ========================================== */
+        .menu-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--primary-dark);
+            background: transparent;
+            color: var(--primary-dark);
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .filter-btn:hover {
+            background: var(--primary-dark);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-dark);
+            color: #ffffff;
+        }
+
+        /* ==========================================
+           SECTIONS DE MENU
+           ========================================== */
+        .menu-section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            font-size: 1.6rem;
+        }
+
+        /* ==========================================
+           GRILLE DE PLATS
+           ========================================== */
+        .dishes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .dish-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .dish-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px var(--shadow-color);
+            border-color: var(--primary-dark);
+        }
+
+        .dish-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dish-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dish-card:hover .dish-image::after {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .dish-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--primary-dark);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .dish-content {
+            padding: 20px;
+        }
+
+        .dish-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .dish-description {
+            font-size: 0.9rem;
+            color: rgba(var(--text-color-rgb), 0.7);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .dish-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .dish-tag {
+            background: rgba(230, 102, 255, 0.1);
+            color: var(--primary-dark);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .dish-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .dish-allergens {
+            display: flex;
+            gap: 5px;
+        }
+
+        .allergen-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--danger);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .dish-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        /* ==========================================
+           GALERIE DE PHOTOS
+           ========================================== */
+        .gallery-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        .gallery-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px var(--shadow-color);
+        }
+
+        /* ==========================================
+           INFORMATIONS NUTRITIONNELLES
+           ========================================== */
+        .nutrition-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nutrition-modal.active {
+            display: flex;
+        }
+
+        .nutrition-content {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .nutrition-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-dark);
+        }
+
+        .nutrition-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .nutrition-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .nutrition-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nutrition-label {
+            font-weight: 500;
+        }
+
+        .nutrition-value {
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        /* ==========================================
+           SIDEBAR NAVIGATION
+           ========================================== */
+        .menu-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--gradient);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .sidebar-title {
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .sidebar-back {
+            color: white;
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-back:hover {
+            transform: translateX(-5px);
+        }
+
+        /* ==========================================
+           RESPONSIVE
+           ========================================== */
+        @media (max-width: 768px) {
+            .menu-container {
+                padding: 80px 15px 20px;
+            }
+
+            .menu-header {
+                margin-top: 10px;
+            }
+
+            .menu-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .dishes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .menu-filters {
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ==========================================
+           ANIMATIONS
+           ========================================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dish-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .dish-card:nth-child(1) { animation-delay: 0.1s; }
+        .dish-card:nth-child(2) { animation-delay: 0.2s; }
+        .dish-card:nth-child(3) { animation-delay: 0.3s; }
+        .dish-card:nth-child(4) { animation-delay: 0.4s; }
+        .dish-card:nth-child(5) { animation-delay: 0.5s; }
+        .dish-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* ==========================================
+           DARK THEME OVERRIDES
+           ========================================== */
+        .dark-theme .dish-description {
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR/NAVIGATION -->
+    <div class="menu-sidebar">
+        <i class="fas fa-arrow-left sidebar-back" id="backBtn"></i>
+        <span class="sidebar-title">MENU DE L'ÉVÉNEMENT</span>
+    </div>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <div class="menu-container">
+        <!-- HEADER -->
+        <div class="menu-header">
+            <h1>🍽️ Menu de Mariage</h1>
+            <p>Découvrez nos délicieux plats préparés spécialement pour vous</p>
+        </div>
+
+        <!-- FILTRES -->
+        <div class="menu-filters">
+            <button class="filter-btn active" data-category="all">Tous les plats</button>
+            <button class="filter-btn" data-category="appetizers">Entrées</button>
+            <button class="filter-btn" data-category="main">Plats Principaux</button>
+            <button class="filter-btn" data-category="desserts">Desserts</button>
+            <button class="filter-btn" data-category="beverages">Boissons</button>
+        </div>
+
+        <!-- SECTION ENTRÉES -->
+        <div class="menu-section" data-section="appetizers">
+            <h2 class="section-title">
+                <i class="fas fa-utensils"></i> Entrées et Amuse-Gueules
+            </h2>
+            <div class="dishes-grid">
+                <!-- Entrée 1 -->
+                <div class="dish-card" data-category="appetizers">
+                    <div class="dish-image">
+                        🥐
+                        <span class="dish-badge">Signature</span>
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Bruchetta Raffinée</h3>
+                        <p class="dish-description">Toasts croustillants garnis de tomates fraîches, basilic et fromage fondant</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Végétarien</span>
+                            <span class="dish-tag">Fait maison</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Gluten">G</div>
+                                <div class="allergen-icon" title="Lactose">L</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entrée 2 -->
+                <div class="dish-card" data-category="appetizers">
+                    <div class="dish-image">
+                        🥖
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Tartare de Saumon</h3>
+                        <p class="dish-description">Saumon frais mariné aux agrumes avec avocat crémeuse et pain grillé</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Fruits de mer</span>
+                            <span class="dish-tag">Délicatesse</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Poisson">P</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entrée 3 -->
+                <div class="dish-card" data-category="appetizers">
+                    <div class="dish-image">
+                        🥗
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Salade Caprese</h3>
+                        <p class="dish-description">Tomates mozzarella fraîche, basil frais, huile d'olive vierge</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Végétarien</span>
+                            <span class="dish-tag">Frais</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Lactose">L</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entrée 4 -->
+                <div class="dish-card" data-category="appetizers">
+                    <div class="dish-image">
+                        🦐
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Crevettes à l'Ail</h3>
+                        <p class="dish-description">Crevettes poêlées à l'ail, persil et filet de citron frais</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Fruits de mer</span>
+                            <span class="dish-tag">Savoureux</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Crustacés">C</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION PLATS PRINCIPAUX -->
+        <div class="menu-section" data-section="main">
+            <h2 class="section-title">
+                <i class="fas fa-crown"></i> Plats Principaux
+            </h2>
+            <div class="dishes-grid">
+                <!-- Plat 1 -->
+                <div class="dish-card" data-category="main">
+                    <div class="dish-image">
+                        🥩
+                        <span class="dish-badge">Spécial</span>
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Filet de Boeuf</h3>
+                        <p class="dish-description">Filet de boeuf grillé à la perfection, sauce au vin rouge et légumes rôtis</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Premium</span>
+                            <span class="dish-tag">Tendre</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Sulfites">S</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plat 2 -->
+                <div class="dish-card" data-category="main">
+                    <div class="dish-image">
+                        🐔
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Poulet aux Herbes</h3>
+                        <p class="dish-description">Poulet fermier rôti aux herbes provençales, garni de pommes de terre nouvelles</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Savoureux</span>
+                            <span class="dish-tag">Gourmand</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Sulfites">S</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plat 3 -->
+                <div class="dish-card" data-category="main">
+                    <div class="dish-image">
+                        🍤
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Homard Thermidor</h3>
+                        <p class="dish-description">Homard grillé, sauce crémeuse au champagne avec sauce bernaise</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Luxe</span>
+                            <span class="dish-tag">Fruits de mer</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Crustacés">C</div>
+                                <div class="allergen-icon" title="Oeufs">O</div>
+                                <div class="allergen-icon" title="Lactose">L</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plat 4 -->
+                <div class="dish-card" data-category="main">
+                    <div class="dish-image">
+                        🍝
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Pâtes aux Truffes</h3>
+                        <p class="dish-description">Pâtes fraîches faites maison, huile de truffe, parmesan reggiano râpé</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Végétarien</span>
+                            <span class="dish-tag">Raffiné</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Gluten">G</div>
+                                <div class="allergen-icon" title="Oeufs">O</div>
+                                <div class="allergen-icon" title="Lactose">L</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plat 5 -->
+                <div class="dish-card" data-category="main">
+                    <div class="dish-image">
+                        🐟
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Bar en Croûte de Sel</h3>
+                        <p class="dish-description">Bar entier cuit en croûte de sel, fenouil rôti et citron frais</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Exclusif</span>
+                            <span class="dish-tag">Poisson</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Poisson">P</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plat 6 -->
+                <div class="dish-card" data-category="main">
+                    <div class="dish-image">
+                        🦃
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Magret de Canard</h3>
+                        <p class="dish-description">Magret grillé saignant, sauce aux fruits rouges et légumes de saison</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Gourmand</span>
+                            <span class="dish-tag">Succulent</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Sulfites">S</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION DESSERTS -->
+        <div class="menu-section" data-section="desserts">
+            <h2 class="section-title">
+                <i class="fas fa-birthday-cake"></i> Desserts et Gâteries
+            </h2>
+            <div class="dishes-grid">
+                <!-- Dessert 1 -->
+                <div class="dish-card" data-category="desserts">
+                    <div class="dish-image">
+                        🎂
+                        <span class="dish-badge">Pièce Montée</span>
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Gâteau de Mariage</h3>
+                        <p class="dish-description">Gâteau à étages, génoise onctueuse, glaçage au fondant blanc et fleurs comestibles</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Signature</span>
+                            <span class="dish-tag">Sublime</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Gluten">G</div>
+                                <div class="allergen-icon" title="Oeufs">O</div>
+                                <div class="allergen-icon" title="Lactose">L</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dessert 2 -->
+                <div class="dish-card" data-category="desserts">
+                    <div class="dish-image">
+                        🍰
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Mousse au Chocolat</h3>
+                        <p class="dish-description">Mousse légère au chocolat noir, crème fouettée et copeaux de cacao</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Gourmand</span>
+                            <span class="dish-tag">Fondant</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Oeufs">O</div>
+                                <div class="allergen-icon" title="Lactose">L</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dessert 3 -->
+                <div class="dish-card" data-category="desserts">
+                    <div class="dish-image">
+                        🍓
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Panna Cotta</h3>
+                        <p class="dish-description">Crème italienne légère, coulis de fraises fraîches et biscuits croquants</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Frais</span>
+                            <span class="dish-tag">Italienne</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Lactose">L</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dessert 4 -->
+                <div class="dish-card" data-category="desserts">
+                    <div class="dish-image">
+                        🍰
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Crème Brûlée</h3>
+                        <p class="dish-description">Crème brûlée traditionnelle avec sucre caramélisé croustillant et vanille de Madagascar</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Classique</span>
+                            <span class="dish-tag">Succulente</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Oeufs">O</div>
+                                <div class="allergen-icon" title="Lactose">L</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION BOISSONS -->
+        <div class="menu-section" data-section="beverages">
+            <h2 class="section-title">
+                <i class="fas fa-wine-glass-alt"></i> Boissons et Vins
+            </h2>
+            <div class="dishes-grid">
+                <!-- Boisson 1 -->
+                <div class="dish-card" data-category="beverages">
+                    <div class="dish-image">
+                        🍾
+                        <span class="dish-badge">Premium</span>
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Champagne de Luxe</h3>
+                        <p class="dish-description">Champagne brut millésimé, bulles fines et notes fruités délicates</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Festif</span>
+                            <span class="dish-tag">Effervescent</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Sulfites">S</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boisson 2 -->
+                <div class="dish-card" data-category="beverages">
+                    <div class="dish-image">
+                        🍷
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Vin Blanc</h3>
+                        <p class="dish-description">Vin blanc sec Bordeaux, fruité avec notes florales subtiles</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Rafraîchissant</span>
+                            <span class="dish-tag">Élégant</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Sulfites">S</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boisson 3 -->
+                <div class="dish-card" data-category="beverages">
+                    <div class="dish-image">
+                        🍷
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Vin Rouge</h3>
+                        <p class="dish-description">Vin rouge Bordeaux corsé, avec tanins charpentés et arômes intenses</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Riche</span>
+                            <span class="dish-tag">Corsé</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <div class="allergen-icon" title="Sulfites">S</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boisson 4 -->
+                <div class="dish-card" data-category="beverages">
+                    <div class="dish-image">
+                        🧃
+                    </div>
+                    <div class="dish-content">
+                        <h3 class="dish-name">Jus Frais Naturel</h3>
+                        <p class="dish-description">Sélection de jus frais pressés, fruits de saison et sans sucre ajouté</p>
+                        <div class="dish-tags">
+                            <span class="dish-tag">Naturel</span>
+                            <span class="dish-tag">Sain</span>
+                        </div>
+                        <div class="dish-footer">
+                            <div class="dish-allergens">
+                                <!-- Pas d'allergènes -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GALERIE DE PHOTOS -->
+        <div class="gallery-section">
+            <h2 class="gallery-title">
+                <i class="fas fa-images"></i> Galerie Photo de nos Creations
+            </h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">📸</div>
+                <div class="gallery-item">📷</div>
+                <div class="gallery-item">🎨</div>
+                <div class="gallery-item">✨</div>
+                <div class="gallery-item">🌟</div>
+                <div class="gallery-item">💎</div>
+                <div class="gallery-item">🍽️</div>
+                <div class="gallery-item">👨‍🍳</div>
+            </div>
+        </div>
+
+        <!-- INFORMATION SUPPLÉMENTAIRE -->
+        <div class="gallery-section" style="text-align: center;">
+            <h2 class="gallery-title" style="justify-content: center;">
+                <i class="fas fa-info-circle"></i> Information Allergènes
+            </h2>
+            <p style="margin-bottom: 20px; line-height: 1.8;">
+                Tous nos plats sont préparés dans une cuisine professionnelle. 
+                Nous sommes attentifs aux allergies et intolérances. 
+                Veuillez nous informer de toute restriction alimentaire avant l'événement.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px;">
+                <div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 10px;">
+                    <strong>G</strong> - Gluten
+                </div>
+                <div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 10px;">
+                    <strong>L</strong> - Lactose
+                </div>
+                <div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 10px;">
+                    <strong>O</strong> - Oeufs
+                </div>
+                <div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 10px;">
+                    <strong>P</strong> - Poisson
+                </div>
+                <div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 10px;">
+                    <strong>C</strong> - Crustacés
+                </div>
+                <div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 10px;">
+                    <strong>S</strong> - Sulfites
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==========================================
+        // SESSION MANAGEMENT
+        // ==========================================
+        let currentUser = null;
+        let currentEvent = null;
+
+        async function loadCurrentUser() {
+            try {
+                const userSession = JSON.parse(localStorage.getItem('userSession') || '{}');
+                const eventSession = JSON.parse(localStorage.getItem('eventSession') || '{}');
+                
+                currentUser = userSession;
+                currentEvent = eventSession;
+                
+                console.log('👤 Menu - User loaded:', currentUser?.email);
+                console.log('📅 Menu - Event loaded:', currentEvent?.name);
+            } catch (error) {
+                console.error('❌ Error loading session:', error);
+                redirectToLogin();
+            }
+        }
+
+        function redirectToLogin() {
+            window.location.href = '../index.html';
+        }
+
+        // ==========================================
+        // FILTRAGE DES CATÉGORIES
+        // ==========================================
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.dataset.category;
+                
+                // Update active button
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Filter cards
+                document.querySelectorAll('.dish-card').forEach(card => {
+                    if (category === 'all' || card.dataset.category === category) {
+                        card.style.display = '';
+                        setTimeout(() => card.style.opacity = '1', 10);
+                    } else {
+                        card.style.opacity = '0';
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // ==========================================
+        // NAVIGATION
+        // ==========================================
+        document.getElementById('backBtn').addEventListener('click', function() {
+            window.history.back();
+        });
+
+        // ==========================================
+        // INITIALISATION
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCurrentUser();
+        });
+    </script>
+</body>
+</html>

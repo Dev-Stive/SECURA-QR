@@ -102,8 +102,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         await selectEvent(eventId);
         
     } else {
-        
-        document.getElementById('eventsHomeView').style.display = 'block';
+        const home = document.getElementById('eventsHomeView');
+        if(!home) return
+        home.style.display = 'block';
         document.getElementById('guestsView').style.display = 'none';
         initListeners();
         await showEventsHome();
@@ -537,6 +538,8 @@ function renderEventsList() {
             const table = document.getElementById('eventsTableBody');
             const grid = document.getElementById('eventsGridView');
             
+            if(!table) return;
+
             grid.style.display = 'none';
             document.getElementById('eventsTableView').style.display = 'block';
             table.innerHTML = '';
@@ -6453,6 +6456,7 @@ async function markGuestPresent(guestId) {
     
     if (confirmed.isConfirmed) {
         try {
+            
             const result = storage.checkInGuest(guestId, {
                 source: 'manual',
                 notes: `Présence validée manuellement le ${new Date().toLocaleString('fr-FR')}`,

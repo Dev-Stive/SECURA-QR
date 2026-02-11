@@ -10263,8 +10263,8 @@ app.post('/api/chat/conversations/:conversationId/messages', eventSessionAuth, (
             type: type || 'text', 
             attachments: attachments || [],
             replyTo: replyTo || null,
-            readBy: [], // Ne PAS inclure le senderId (il a envoyé, donc déjà lu)
-            reactions: {}, // Objet pour stocker les réactions par emoji
+            readBy: [],
+            reactions: {}, 
             edited: false,
             editedAt: null,
             createdAt: new Date().toISOString(),
@@ -10274,12 +10274,17 @@ app.post('/api/chat/conversations/:conversationId/messages', eventSessionAuth, (
         conversation.messages = conversation.messages || [];
         conversation.messages.push(message);
 
+         
+            
+            
         // Mettre à jour le lastReadAt
         const participant = conversation.participants.find(p => p.userId === userId);
         if (participant) {
             participant.lastReadAt = new Date().toISOString();
         }
 
+
+        conversation.lastMessage = message;
         conversation.updatedAt = new Date().toISOString();
         saveData(data);
 
@@ -10736,6 +10741,21 @@ app.delete('/api/chat/conversations/:conversationId/messages/:messageId', eventS
 
         log.crud('DELETE', 'MESSAGE', { messageId: req.params.messageId });
 
+        // ✅ Notifier TOUS les participants via WebSocket
+        if (io && io.of('/chat')) {
+            const participantIds = conversation.participants?.map(p => p.id) || 
+                                  [conversation.createdBy, ...(conversation.participantIds || [])];
+            
+            io.of('/chat').emit('message:deleted', {
+                conversationId: req.params.conversationId,
+                messageId: req.params.messageId,
+                deletedAt: message.deletedAt,
+                participantIds: participantIds
+            });
+            
+            console.log(`🗑️ Message supprimé - ID: ${req.params.messageId}, Conversation: ${req.params.conversationId}`);
+        }
+
         res.json({ success: true, message: 'Message supprimé' });
 
     } catch (err) {
@@ -10967,23 +10987,38 @@ chatNamespace.on('connection', (socket) => {
         
         if (!conversationId || !content) return;
         
-        // Diffuser à tous les utilisateurs dans la conversation
-        chatNamespace.to(`conv:${conversationId}`).emit('message:new', {
-            id: messageId,
-            conversationId,
-            senderId: userId,
-            content,
-            timestamp: timestamp || new Date(),
-            type: 'text'
-        });
-        
-        // Notifier les autres utilisateurs
-        chatNamespace.emit('conversation:message-received', {
-            conversationId,
-            senderId: userId,
-            messagePreview: content.substring(0, 50),
-            timestamp: new Date()
-        });
+        // Charger les données pour obtenir info de la conversation et participants
+        try {
+            const data_obj = loadData();
+            const conversation = data_obj.chatConversations?.find(c => c.id === conversationId);
+            
+           
+           
+            const participantIds = conversation.participants?.map(p => p.userId) || [];
+            
+            // Diffuser à tous les utilisateurs DANS la conversation
+            chatNamespace.to(`conv:${conversationId}`).emit('message:new', {
+                id: messageId,
+                conversationId,
+                senderId: userId,
+                content,
+                timestamp: timestamp || new Date(),
+                type: 'text'
+            });
+            
+            // Notifier TOUS les participants (y compris ceux qui ne sont pas dedans) pour mettre à jour leur liste
+            chatNamespace.emit('conversation:message-received', {
+                conversationId,
+                senderId: userId,
+                messagePreview: content.substring(0, 50),
+                timestamp: new Date(),
+                participantIds: participantIds,
+                lastMessage: messageObj
+            });
+            
+        } catch (err) {
+            log.error('⚠️ Erreur mise à jour conversation message', err.message);
+        }
         
         log.success('💬 Message sent', `Conv: ${conversationId} | User: ${userId}`);
     });
@@ -11156,6 +11191,50 @@ chatNamespace.on('connection', (socket) => {
             userId,
             timestamp: new Date()
         });
+    });
+    
+    // ✨ Événement: Nouvelle conversation créée
+    socket.on('conversation:created', (data) => {
+        const { conversationId, conversationData, participantIds } = data;
+        
+        if (!conversationId || !conversationData) {
+            log.warning('⚠️ conversation:created - données manquantes', data);
+            return;
+        }
+        
+        // ✅ Émettre à TOUS les participants concernés SEULEMENT
+        chatNamespace.emit('conversation:created', {
+            conversationId,
+            conversation: conversationData,
+            participantIds: participantIds,
+            createdBy: userId,
+            createdAt: new Date(),
+            timestamp: new Date()
+        });
+        
+        log.success('✨ Conversation créée via WebSocket', `Conv: ${conversationId} | Participants: ${participantIds?.length || 0}`);
+    });
+    
+    // 📨 Événement: Mise à jour de conversation
+    socket.on('conversation:updated', (data) => {
+        const { conversationId, conversationData, participantIds } = data;
+        
+        if (!conversationId || !conversationData) {
+            log.warning('⚠️ conversation:updated - données manquantes', data);
+            return;
+        }
+        
+        // ✅ Émettre à TOUS les participants concernés
+        chatNamespace.emit('conversation:updated', {
+            conversationId,
+            conversation: conversationData,
+            participantIds: participantIds,
+            updatedBy: userId,
+            updatedAt: new Date(),
+            timestamp: new Date()
+        });
+        
+        log.success('📨 Conversation mise à jour via WebSocket', `Conv: ${conversationId}`);
     });
     
     // 📝 Événement: Modification de message

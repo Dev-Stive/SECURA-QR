@@ -319,6 +319,7 @@ function clearEventSession() {
                 '/ticket-generator', '/ticket-generator.html',
                 '/scanner', '/scanner.html',
                 '/profile', '/profile.html',
+                '/checkin', '/checkin.html',
                 '/settings', '/settings.html'
             ],
             'user': [
@@ -332,7 +333,7 @@ function clearEventSession() {
                 '/access', '/access.html',
                 '/qr-generator', '/qr-generator.html',
                 '/ticket-generator', '/ticket-generator.html',
-                '/scanner', '/scanner.html',
+                
                 '/profile', '/profile.html',
                 '/settings', '/settings.html'
             ]

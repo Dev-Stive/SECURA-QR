@@ -5150,7 +5150,7 @@
       "gender": "m",
       "notes": "Un ami proche des mariés.",
       "seats": 1,
-      "status": "pending",
+      "status": "online",
       "accessCode": "3780",
       "tableId": "tbl_1769575124807_chedzlng9",
       "tableNumber": "CL-49",
@@ -5171,7 +5171,9 @@
       "confirmationHistory": [],
       "id": "gst_1769634030507_eiyicu0lh",
       "createdAt": "2026-01-28T21:00:30.507Z",
-      "updatedAt": "2026-02-04T21:43:31.813Z"
+      "updatedAt": "2026-02-04T21:43:31.813Z",
+      "isOnline": true,
+      "lastSeen": "2026-02-11T11:52:07.735Z"
     },
     {
       "eventId": "evt_1769537993483_82t3xcgsi",
@@ -10374,7 +10376,7 @@
       "createdAt": "2026-01-28T21:01:06.750Z",
       "updatedAt": "2026-02-04T20:38:03.183Z",
       "isOnline": true,
-      "lastSeen": "2026-02-09T22:22:39.359Z"
+      "lastSeen": "2026-02-11T11:52:56.367Z"
     },
     {
       "eventId": "evt_1769537993483_82t3xcgsi",
@@ -14712,20 +14714,20 @@
   "sessions": [],
   "eventSessions": [
     {
-      "id": "sess_1770649871050_ii6sud3he",
+      "id": "sess_1770804516047_mbko8rcii",
       "guestId": "gst_1769634066750_apq113ecc",
       "tableId": "tbl_1769575124145_o6y4qfi4o",
       "eventId": "evt_1769537993483_82t3xcgsi",
-      "createdAt": "2026-02-09T15:11:11.053Z",
-      "expiresAt": "2026-02-09T23:11:11.050Z"
+      "createdAt": "2026-02-11T10:08:36.048Z",
+      "expiresAt": "2026-02-11T18:08:36.047Z"
     },
     {
-      "id": "sess_1770658872687_cb3zkldk3",
-      "guestId": "gst_1769634066750_apq113ecc",
-      "tableId": "tbl_1769575124145_o6y4qfi4o",
+      "id": "sess_1770804518159_kf471erv0",
+      "guestId": "gst_1769634030507_eiyicu0lh",
+      "tableId": "tbl_1769575124807_chedzlng9",
       "eventId": "evt_1769537993483_82t3xcgsi",
-      "createdAt": "2026-02-09T17:41:12.690Z",
-      "expiresAt": "2026-02-10T01:41:12.687Z"
+      "createdAt": "2026-02-11T10:08:38.159Z",
+      "expiresAt": "2026-02-11T18:08:38.159Z"
     }
   ],
   "galleries": [
@@ -15178,62 +15180,140 @@
   "plans": [],
   "chatConversations": [
     {
-      "id": "chat_1770644948490_15058vwk9",
+      "id": "chat_1770694185834_40bbph0mu",
       "eventId": "evt_1769537993483_82t3xcgsi",
       "name": "Chat with participant",
       "type": "direct",
       "participants": [
         {
           "userId": "gst_1769634066750_apq113ecc",
-          "joinedAt": "2026-02-09T13:49:08.566Z",
-          "lastReadAt": "2026-02-09T22:22:40.223Z",
-          "unreadCount": 0
+          "name": "M. gervais",
+          "email": "gervais.m@gmail.com",
+          "firstName": "M.",
+          "lastName": "gervais",
+          "gender": "m",
+          "notes": "Un frère ou une sœur de la famille.",
+          "isOnline": true,
+          "status": "online",
+          "joinedAt": "2026-02-10T03:29:45.834Z",
+          "lastReadAt": "2026-02-11T11:08:52.342Z",
+          "unreadCount": 0,
+          "lastSeenAt": "2026-02-11T11:52:56.367Z"
         },
         {
-          "userId": "gst_1769634030507_eiyicu0lh",
-          "joinedAt": "2026-02-09T13:49:08.566Z",
-          "lastReadAt": "2026-02-09T13:49:08.566Z"
+          "userId": "gst_1769634030979_nreltdza9",
+          "name": "Batang Christelle",
+          "email": "christelle.batang@gmail.com",
+          "firstName": "Batang",
+          "lastName": "Christelle",
+          "gender": "f",
+          "notes": "Une amie proche des mariés.",
+          "isOnline": false,
+          "status": "offline",
+          "joinedAt": null,
+          "lastReadAt": null
         }
       ],
       "messages": [
         {
-          "id": "msg_1770663226839_p6vg6ymjx",
-          "conversationId": "chat_1770644948490_15058vwk9",
+          "id": "msg_1770694689584_ya0ledcjp",
+          "conversationId": "chat_1770694185834_40bbph0mu",
           "senderId": "gst_1769634066750_apq113ecc",
           "senderName": "Guest gst_1769",
-          "content": "yo",
+          "content": "😭😭🤨",
           "type": "text",
           "attachments": [],
-          "readBy": [
-            {
-              "userId": "gst_1769634066750_apq113ecc",
-              "readAt": "2026-02-09T18:53:46.839Z"
-            }
-          ],
-          "reactions": [],
+          "readBy": [],
+          "reactions": {
+            "🔥": [
+              "gst_1769634066750_apq113ecc"
+            ]
+          },
           "edited": false,
           "editedAt": null,
-          "createdAt": "2026-02-09T18:53:46.839Z",
+          "createdAt": "2026-02-10T03:38:09.584Z",
           "deletedAt": null
         },
         {
-          "id": "msg_1770664688654_5s5x4n6d8",
-          "conversationId": "chat_1770644948490_15058vwk9",
+          "id": "msg_1770694703811_m9b6l4iq6",
+          "conversationId": "chat_1770694185834_40bbph0mu",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "ekie gar😝",
+          "type": "text",
+          "attachments": [],
+          "readBy": [],
+          "reactions": {
+            "👏": [
+              "gst_1769634066750_apq113ecc"
+            ]
+          },
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T03:38:23.811Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770716150658_9b8no1gns",
+          "conversationId": "chat_1770694185834_40bbph0mu",
           "senderId": "gst_1769634066750_apq113ecc",
           "senderName": "Guest gst_1769",
           "content": "yo",
           "type": "text",
           "attachments": [],
-          "readBy": [
-            {
-              "userId": "gst_1769634066750_apq113ecc",
-              "readAt": "2026-02-09T19:18:08.654Z"
-            }
-          ],
-          "reactions": [],
+          "readBy": [],
+          "reactions": {},
           "edited": false,
           "editedAt": null,
-          "createdAt": "2026-02-09T19:18:08.654Z",
+          "createdAt": "2026-02-10T09:35:50.658Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770718642730_57ybwaskv",
+          "conversationId": "chat_1770694185834_40bbph0mu",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "Acerrr",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T10:17:22.730Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770737703291_of5ckotvz",
+          "conversationId": "chat_1770694185834_40bbph0mu",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "💢akaa",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T15:35:03.291Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770760398713_cuvjs1klu",
+          "conversationId": "chat_1770694185834_40bbph0mu",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "ok",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T21:53:18.713Z",
           "deletedAt": null
         }
       ],
@@ -15244,8 +15324,158 @@
         "archiveAfterDays": 90
       },
       "createdBy": "gst_1769634066750_apq113ecc",
-      "createdAt": "2026-02-09T13:49:08.566Z",
-      "updatedAt": "2026-02-09T22:34:36.823Z"
+      "createdAt": "2026-02-10T03:29:45.834Z",
+      "updatedAt": "2026-02-11T11:08:52.663Z"
+    },
+    {
+      "id": "chat_1770716570498_zqcwbzyw3",
+      "eventId": "evt_1769537993483_82t3xcgsi",
+      "name": "Chat with participant",
+      "type": "direct",
+      "participants": [
+        {
+          "userId": "gst_1769634066750_apq113ecc",
+          "name": "M. gervais",
+          "email": "gervais.m@gmail.com",
+          "firstName": "M.",
+          "lastName": "gervais",
+          "gender": "m",
+          "notes": "Un frère ou une sœur de la famille.",
+          "isOnline": true,
+          "status": "online",
+          "joinedAt": "2026-02-10T09:42:50.498Z",
+          "lastReadAt": "2026-02-11T11:52:27.459Z",
+          "unreadCount": 0,
+          "lastSeenAt": "2026-02-11T11:52:56.367Z"
+        },
+        {
+          "userId": "gst_1769634031406_08mm60psu",
+          "name": "Mme AUDREY",
+          "email": "audrey.mme@gmail.com",
+          "firstName": "Mme",
+          "lastName": "AUDREY",
+          "gender": "f",
+          "notes": "Une amie proche des mariés.",
+          "isOnline": false,
+          "status": "offline",
+          "joinedAt": null,
+          "lastReadAt": null
+        }
+      ],
+      "messages": [
+        {
+          "id": "msg_1770720762198_9ur9t7fw4",
+          "conversationId": "chat_1770716570498_zqcwbzyw3",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "hello gurl",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [],
+          "reactions": {
+            "👏": [
+              "gst_1769634066750_apq113ecc"
+            ]
+          },
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T10:52:42.198Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770720782686_l5wdhbze0",
+          "conversationId": "chat_1770716570498_zqcwbzyw3",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "je vouais quon parle de nous si ca ne te derange pas",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [],
+          "reactions": {
+            "😂": [
+              "gst_1769634066750_apq113ecc"
+            ]
+          },
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T10:53:02.686Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770760369798_owjq93j65",
+          "conversationId": "chat_1770716570498_zqcwbzyw3",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "ok",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T21:52:49.798Z",
+          "deletedAt": null
+        }
+      ],
+      "settings": {
+        "allowDelete": true,
+        "allowEdit": true,
+        "encrypted": true,
+        "archiveAfterDays": 90
+      },
+      "createdBy": "gst_1769634066750_apq113ecc",
+      "createdAt": "2026-02-10T09:42:50.498Z",
+      "updatedAt": "2026-02-11T11:52:27.548Z"
+    },
+    {
+      "id": "chat_1770810771588_mbp9xkn9d",
+      "eventId": "evt_1769537993483_82t3xcgsi",
+      "name": "Chat with participant",
+      "type": "direct",
+      "participants": [
+        {
+          "userId": "gst_1769634066750_apq113ecc",
+          "name": "M. gervais",
+          "email": "gervais.m@gmail.com",
+          "firstName": "M.",
+          "lastName": "gervais",
+          "gender": "m",
+          "notes": "Un frère ou une sœur de la famille.",
+          "isOnline": true,
+          "status": "online",
+          "joinedAt": "2026-02-11T11:52:51.588Z",
+          "lastReadAt": "2026-02-11T11:52:51.742Z",
+          "lastSeenAt": "2026-02-11T11:52:56.367Z",
+          "unreadCount": 0
+        },
+        {
+          "userId": "gst_1769634030507_eiyicu0lh",
+          "name": "M. Joel",
+          "email": "joel.m@gmail.com",
+          "firstName": "M.",
+          "lastName": "Joel",
+          "gender": "m",
+          "notes": "Un ami proche des mariés.",
+          "isOnline": true,
+          "status": "online",
+          "joinedAt": null,
+          "lastReadAt": null,
+          "lastSeenAt": null
+        }
+      ],
+      "messages": [],
+      "settings": {
+        "allowDelete": true,
+        "allowEdit": true,
+        "encrypted": true,
+        "archiveAfterDays": 90
+      },
+      "createdBy": "gst_1769634066750_apq113ecc",
+      "createdAt": "2026-02-11T11:52:51.588Z",
+      "updatedAt": "2026-02-11T11:52:53.726Z"
     }
   ],
   "settings": {
@@ -15255,7 +15485,7 @@
   "tempUsers": [],
   "passwordResets": [],
   "meta": {
-    "updatedAt": "2026-02-09T22:34:36.834Z",
+    "updatedAt": "2026-02-11T11:52:56.389Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }

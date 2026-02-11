@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="SECURA - Protocole d’entrée événementiel • Validation présence ultra-rapide • Codes d’accès 4 chiffres • Recherche instantanée • Drawer coulissant">
+    <title>SECURA • Protocole d’entrée</title>
+    <link rel="icon" href="assets/images/icon.png" type="image/x-icon">
+
+    <!-- ===== PRELOADS CRITIQUES ===== -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" as="style">
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="css/dash.css" as="style">
+
+    <!-- ===== POLICES & ICÔNES ===== -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- ===== STYLES LOCAUX ===== -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/dash.css">
+    <link rel="stylesheet" href="css/toastify.css">
+    <link rel="stylesheet" href="css/index.css">
+
+    <!-- ===== STYLES CRITIQUES INLINE (ULTRA COMPLET) ===== -->
+    <style>
+        /* ==========================================
+           🎨 SYSTEME DE DESIGN SECURA — VARIABLES
+           ========================================== */
+        :root {
+            --primary: #D97706;
+            --primary-dark: #B45309;
+            --primary-light: #F59E0B;
+            --dark: #0A0A0A;
+            --dark-card: #121212;
+            --dark-elevated: #1A1A1A;
+            --gray: #2D3436;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --purple: #8B5CF6;
+            --gradient: linear-gradient(135deg, #B45309 0%, #D97706 50%, #F59E0B 100%);
+            --gradient-vertical: linear-gradient(180deg, #B45309 0%, #D97706 100%);
+            --card-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            --border-radius: 20px;
+            --border-radius-sm: 12px;
+            
+            /* Thème sombre (par défaut) */
+            --body-bg: var(--dark);
+            --text-color: #ffffff;
+            --card-bg: var(--dark-card);
+            --input-bg: rgba(255,255,255,0.04);
+            --input-border: rgba(255,255,255,0.12);
+            --input-text: #ffffff;
+            --placeholder-color: rgba(255,255,255,0.4);
+            --border-color: rgba(255,255,255,0.1);
+            --hover-bg: rgba(255,255,255,0.05);
+            --shadow-color: rgba(0,0,0,0.5);
+        }
+
+        .badge.success{
+            background-color: var(--success) !important;
+            color: white;
+        }
+
+        /* Thème clair */
+        .light-theme {
+            --body-bg: #f8f9fa;
+            --text-color: #1a1a1a;
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-border: #e0e0e0;
+            --input-text: #333333;
+            --placeholder-color: #666666;
+            --border-color: rgba(0,0,0,0.1);
+            --hover-bg: rgba(0,0,0,0.05);
+            --shadow-color: rgba(0,0,0,0.1);
+        }
+
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container-fluid {
+         
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+
+        /* ===== SÉLECTION ÉVÉNEMENT ===== */
+        .event-selector-screen {
+            text-align: center;
+            padding: 80px 20px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        /* ===== INTERFACE DE VALIDATION ===== */
+        .validation-interface {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            padding: 35px;
+            margin-top: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--card-shadow);
+            animation: slideUp 0.5s ease;
+        }
+
+        /* ===== VIEW TOGGLE PREMIUM ===== */
+        .view-toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .view-mode-toggle {
+            display: inline-flex;
+            gap: 8px;
+            background: var(--hover-bg);
+            padding: 6px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .view-mode-btn {
+            padding: 12px 28px;
+            border-radius: 40px;
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-color);
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .view-mode-btn i {
+            font-size: 1.1rem;
+        }
+
+        .view-mode-btn:hover {
+            background: var(--hover-bg);
+            opacity: 1;
+        }
+
+        .view-mode-btn.active {
+            background: var(--gradient);
+            color: white;
+            opacity: 1;
+            box-shadow: 0 5px 15px rgba(217, 119, 6, 0.4);
+        }
+
+        /* ===== CODE-BOX 4 CASES ===== */
+        .code-box-section {
+            transition: all 0.4s ease;
+        }
+
+        .code-box-section.hidden {
+            display: none !important;
+        }
+
+        .code-box-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0 15px;
+            flex-wrap: wrap;
+        }
+
+        .code-box {
+            width: 80px;
+            height: 80px;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: 16px;
+            font-size: 2.8rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+            font-family: 'Courier New', monospace;
+            caret-color: var(--primary);
+        }
+
+        .code-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.2);
+            transform: scale(1.05);
+        }
+
+        .code-box.filled {
+            border-color: var(--primary);
+            background: rgba(217, 119, 6, 0.15);
+        }
+
+        .code-box.error {
+            border-color: var(--danger);
+            animation: shake 0.5s ease;
+        }
+
+        /* ===== RECHERCHE SECTION ===== */
+        .search-section {
+            transition: all 0.4s ease;
+        }
+
+        .search-section.hidden {
+            display: none !important;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--placeholder-color);
+            font-size: 1.1rem;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            font-size: 1rem;
+            background: var(--input-bg);
+            color: var(--input-text);
+            transition: all 0.3s;
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);
+        }
+
+        /* ===== RÉSULTATS RECHERCHE ===== */
+        .search-results {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px var(--shadow-color);
+            animation: slideDown 0.3s ease;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: rgba(217, 119, 6, 0.1);
+        }
+
+        .search-result-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+
+
+        .search-result-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+              text-align: initial;
+        }
+
+        .search-result-code {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ===== DRAWER LATÉRAL ===== */
+        .guest-drawer {
+            position: fixed;
+            top: 0;
+            left: -450px;
+            width: 400px;
+            height: 100vh;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 10px 0 40px var(--shadow-color);
+            z-index: 10000;
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        @media (max-width: 768px) {
+            .guest-drawer {
+                width: 85%;
+                left: -85%;
+            }
+        }
+
+        .guest-drawer.open {
+            left: 0;
+        }
+
+        .drawer-header {
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.15), transparent);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-header h3 {
+            margin: 0;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .drawer-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--hover-bg);
+            border: none;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .drawer-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .drawer-search {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .drawer-search input {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            color: var(--input-text);
+            font-size: 0.95rem;
+        }
+
+        .drawer-guest-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .drawer-guest-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: var(--hover-bg);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .drawer-guest-item:hover {
+            border-color: var(--primary);
+            background: rgba(217, 119, 6, 0.15);
+            transform: translateX(5px);
+        }
+
+        .drawer-guest-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .drawer-guest-info {
+            flex: 1;
+        }
+
+        .drawer-guest-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .drawer-guest-code {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        #drawerOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1040;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        /* ===== PROFIL INVITÉ PREMIUM ===== */
+        .guest-profile-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            padding: 35px;
+            margin-top: 30px;
+            animation: slideUp 0.5s ease;
+            position: relative;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(20px);
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar-large {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 10px 30px rgba(217, 119, 6, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .profile-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            color: var(--text-color);
+            opacity: 0.85;
+        }
+
+        
+        .table-badge-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            font-size: 2rem;
+            background: rgba(217, 119, 6, 0.15);
+            border-radius: 20px;
+            font-weight: 600;
+            color: var(--primary);
+            border: 2px solid rgba(217, 119, 6, 0.3);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .detail-card {
+            background: var(--hover-bg);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .detail-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-checkin {
+            background: linear-gradient(135deg, var(--success), #0D9488);
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-checkin:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.5);
+        }
+
+        .btn-checkin:disabled {
+            opacity: 0.5;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .container-fluid { padding: 15px; }
+            .logo-text h1 { font-size: 1.4rem; }
+            .logo-icon { width: 45px; height: 45px; }
+            .profile-toggle .profile-info { display: none; }
+            .code-box { width: 65px; height: 65px; font-size: 2.2rem; }
+            .profile-header { text-align: center; }
+            .profile-meta { justify-content: center; }
+            .view-mode-btn { padding: 10px 18px; font-size: 0.85rem; }
+        }
+
+        @media (max-width: 480px) {
+            .code-box { width: 55px; height: 55px; font-size: 2rem; }
+            .guest-drawer { width: 90%; }
+            .btn-checkin { width: 100%; justify-content: center; }
+        }
+
+        /* ===== UTILITAIRES ===== */
+        .hidden { display: none !important; }
+        .text-gradient { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glow { box-shadow: 0 0 20px rgba(217, 119, 6, 0.3); }
+    </style>
+
+    <!-- ===== LIBRAIRIES ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body class="dark-theme">
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <img src="assets/images/icon.png" alt="logo secura">
+                </div>
+                <div class="sidebar-logo-text">
+                    <h1>SECURA</h1>
+                    <p>Gestion Sécurisée</p>
+                </div>
+            </div>
+            <button class="sidebar-close action-btn" id="sidebarClose" aria-label="Fermer le menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <!-- Profile Section -->
+        <div class="sidebar-profile">
+            <div class="profile-avatar large">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="profile-details">
+                <strong id="sidebarProfileName">Chargement...</strong>
+                <small id="sidebarProfileEmail">email@exemple.com</small>
+                <span class="badge-role" id="sidebarProfileRole">Utilisateur</span>
+            </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="navMenu" class="sidebar-menu">
+            <a href="index.html" class="sidebar-link">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="events.html" class="sidebar-link">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Événements</span>
+            </a>
+            <a href="guests.html" class="sidebar-link">
+                <i class="fas fa-users"></i>
+                <span>Invités</span>
+            </a>
+            <a href="tables.html" class="sidebar-link active">
+                <i class="fas fa-chair"></i>
+                <span>Tables</span>
+            </a>
+             <a href="galleries.html" class="sidebar-link">
+                <i class="fas fa-images"></i>
+                <span>Galeries</span>
+            </a>
+            <a href="qr-generator.html" class="sidebar-link">
+                <i class="bi bi-qr-code"></i>
+                <span>Générateur QR</span>
+            </a>
+            <a href="ticket-generator.html" class="sidebar-link">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Billets</span>
+            </a>
+            <a href="checkin.html" class="sidebar-link">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Validation de Présence</span>
+            </a>
+            <hr class="sidebar-divider">
+            <a href="access.html" class="sidebar-link" id="accessEventLink">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Accès Événement</span>
+            </a>
+            <a href="profile.html" class="sidebar-link">
+                <i class="fas fa-user"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="settings.html" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+            </a>
+            <button class="sidebar-link text-danger" id="sidebarLogout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+                <span>Mode Sombre</span>
+            </button>
+            <button class="fullscreen-toggle" id="fullscreenToggle">
+                <i class="fas fa-expand"></i>
+                <span>Plein écran</span>
+            </button>
+        </div>
+    </nav>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Bouton flottant pour ouvrir la sidebar -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+
+    <!-- ===== HEADER PREMIUM ===== -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <img src="assets/images/icon.png" alt="SECURA Logo">
+                </div>
+                <div class="logo-text">
+                    <h1>SECURA</h1>
+                    <p>Protocole d'entrée</p>
+                </div>
+            </div>
+            <div class="profile-menu">
+                <button class="profile-toggle" id="profileToggle" aria-expanded="false">
+                    <div class="profile-avatar">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="profile-info">
+                        <span class="profile-name" id="profileName">Chargement...</span>
+                        <span class="profile-role" id="profileRole">Agent</span>
+                    </div>
+                    <i class="bi bi-chevron-down profile-arrow"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== DROPDOWN PROFIL FLOTTANT ===== -->
+    <div class="floating-profile-menu" id="floatingProfileMenu">
+        <div class="profile-dropdown" id="profileDropdown">
+            <div class="profile-header">
+                <div class="profile-avatar large">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="profile-details">
+                    <strong id="dropdownName">Chargement...</strong>
+                    <small id="dropdownEmail">email@secura.com</small>
+                    <span class="badge-role" id="dropdownRole">Agent</span>
+                </div>
+            </div>
+            <div class="dropdown-actions">
+                <a href="profile.html" class="dropdown-item">
+                    <i class="bi bi-person"></i> Mon Profil
+                </a>
+                <a href="settings.html" class="dropdown-item">
+                    <i class="bi bi-gear"></i> Paramètres
+                </a>
+                <hr class="dropdown-divider">
+                <button class="dropdown-item text-danger" id="logoutBtn">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content">
+    <div class="container-fluid">
+        <!-- ===== ÉCRAN SÉLECTION ÉVÉNEMENT ===== -->
+        <div id="eventSelectorScreen" class="event-selector-screen">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap;">
+                <h1 style="font-size: 2.5rem; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    <i class="fas fa-clipboard-check"></i> Protocole d'entrée
+                </h1>
+                
+            </div>
+            <p style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 30px;">Sélectionnez un événement pour commencer la validation</p>
+            <div id="eventGridContainer" class="event-grid"></div>
+            <div id="noEventsMessage" style="display: none; padding: 60px; color: var(--text-color);">
+                <i class="fas fa-calendar-times fa-4x mb-3"></i>
+                <h3>Aucun événement actif</h3>
+                <p>Créez ou activez un événement pour commencer.</p>
+                <a href="events.html" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus-circle"></i> Créer un événement
+                </a>
+            </div>
+        </div>
+
+        <!-- ===== INTERFACE DE VALIDATION (APRÈS SÉLECTION) ===== -->
+        <div id="validationScreen" class="event-selector-screen" style="display: none;">
+            <!-- Barre d'en-tête événement -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; flex-wrap: wrap;">
+                <div>
+                    <h1 id="selectedEventTitle" style="font-size: 2rem; font-weight: 700; color: var(--primary);">
+                        <i class="fas fa-arrow-left me-2" style="cursor: pointer;" onclick="resetEventSelection()"></i>
+                        Chargement...
+                    </h1>
+                    <p id="eventMetaInfo" style="opacity: 0.7; margin-top: 5px;">Chargement...</p>
+                </div>
+               
+            </div>
+
+            <!-- ===== VIEW TOGGLE (Code / Recherche / Table) ===== -->
+            <div class="view-toggle-container">
+                <div class="view-mode-toggle">
+                    <button class="view-mode-btn active" data-mode="code">
+                        <i class="fas fa-hashtag"></i> Code
+                    </button>
+                    <button class="view-mode-btn" data-mode="search">
+                        <i class="fas fa-search"></i> Recherche
+                    </button>
+                    <button class="view-mode-btn" data-mode="table">
+                        <i class="fas fa-chair"></i> Table
+                    </button>
+                     <button class="view-mode-btn" data-mode="code" onclick="openGuestDrawer()">
+                    <i class="fas fa-users me-2"></i> Liste
+                </button>
+                </div>
+            </div>
+
+            <div id="Views">
+            <!-- ===== SECTION CODE-BOX (4 CASES) ===== -->
+            <div id="codeBoxSection" class="validation-interface code-box-section">
+                <div style="text-align: center;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px;">
+                        <i class="fas fa-qrcode" style="font-size: 2rem; color: var(--primary);"></i>
+                        <h3 style="margin: 0; font-weight: 600;">Code d'accès rapide</h3>
+                    </div>
+                    <div class="code-box-container">
+                        <input type="text" class="code-box" id="code1" maxlength="1" autocomplete="off" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" class="code-box" id="code2" maxlength="1" autocomplete="off" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" class="code-box" id="code3" maxlength="1" autocomplete="off" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" class="code-box" id="code4" maxlength="1" autocomplete="off" inputmode="numeric" pattern="[0-9]">
+                    </div>
+                    <small style="opacity: 0.6;">Saisissez les 4 chiffres du code d'accès</small>
+                </div>
+            </div>
+
+            <!-- ===== SECTION RECHERCHE ===== -->
+            <div id="searchSection" class="validation-interface search-section hidden">
+                <div style="text-align: center;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                        <i class="fas fa-user-search" style="font-size: 2rem; color: var(--primary);"></i>
+                        <h3 style="margin: 0; font-weight: 600;">Rechercher un invité</h3>
+                    </div>
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="quickSearchInput" placeholder="Prénom, Nom, Email, Code..." autocomplete="off">
+                    </div>
+                    <div id="searchResultsContainer" class="search-results" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- ===== SECTION RECHERCHE TABLE ===== -->
+            <div id="tableSearchSection" class="validation-interface search-section hidden">
+                <div style="text-align: center;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                        <i class="fas fa-chair" style="font-size: 2rem; color: var(--primary);"></i>
+                        <h3 style="margin: 0; font-weight: 600;">Rechercher une table</h3>
+                    </div>
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="tableSearchInput" placeholder="Numéro de table, nom..." autocomplete="off">
+                    </div>
+                    <div id="tableSearchResultsContainer" class="search-results" style="display: none;"></div>
+                </div>
+            </div>
+            </div>
+
+
+            <!-- ===== PROFIL INVITÉ / TABLE ===== -->
+            <div id="guestProfileContainer"></div>
+        </div>
+    </div>
+
+    </main>
+
+
+
+     <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="row">
+                    <div class="col-lg-4 mb-5 mb-lg-0">
+                        <div class="footer-brand">
+                            <div class="footer-logo">
+                                <img src="../assets/images/icon.png" alt="SECURA Logo">
+                            </div>
+                            <div class="footer-title">
+                                <h3>SECURA</h3>
+                                <p>Plateforme d'accès événementiel</p>
+                            </div>
+                        </div>
+                        <p class="footer-description">
+                            SECURA révolutionne l'accès aux événements avec des solutions innovantes, 
+                            sécurisées et intuitives pour organisateurs et participants.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Navigation</h4>
+                        <ul class="footer-links">
+                            <li><a href="../index.html">Accueil</a></li>
+                            <li><a href="../access.html">Accès événement</a></li>
+                            <li><a href="#features">Fonctionnalités</a></li>
+                            <li><a href="#how-it-works">Comment ça marche</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 mb-5">
+                        <h4>Compte</h4>
+                        <ul class="footer-links">
+                            <li><a href="../login.html">Connexion</a></li>
+                            <li><a href="../register.html">Inscription</a></li>
+                            <li><a href="../forgot-password.html">Mot de passe oublié</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4">
+                        <h4>Newsletter</h4>
+                        <p class="mb-4">Inscrivez-vous pour recevoir nos actualités et offres exclusives.</p>
+                        <form class="newsletter-form" id="newsletterForm">
+                            <div class="newsletter-input-group">
+                                <input type="email" class="newsletter-input" placeholder="Votre email" required>
+                                <button type="submit" class="newsletter-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                       
+                        <div class="footer-controls-inline">
+                            <!-- Theme Switch Button -->
+                            <div class="theme-switch-footer">
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="themeSwitchFooter" aria-label="Basculer le thème">
+                                    <span class="theme-switch-slider">
+                                        <i class="fas fa-moon"></i>
+                                        <i class="fas fa-sun"></i>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Language Selector -->
+                            <div class="language-selector"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright">© 2025 SECURA. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-legal">
+                            <a href="#">Mentions légales</a>
+                            <a href="#">Confidentialité</a>
+                            <a href="#">CGU</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== DRAWER LATÉRAL (LISTE DES INVITÉS) ===== -->
+    <div id="guestDrawer" class="guest-drawer">
+        <div class="drawer-header">
+            <h3><i class="fas fa-users"></i> Invités</h3>
+            <button class="drawer-close" onclick="closeGuestDrawer()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <div class="drawer-search">
+            <input type="text" id="drawerSearchInput" placeholder="Rechercher un invité..." autocomplete="off">
+        </div>
+        <div id="drawerGuestList" class="drawer-guest-list"></div>
+    </div>
+    <div id="drawerOverlay" onclick="closeGuestDrawer()"></div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="js/audio-utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/auth-check.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/langue.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/guests.js"></script>
+    <script>
+        // ============================================================
+        // ⚡ PROTOCOLE D'ENTRÉE ULTIME - VALIDATION PRÉSENCE
+        // Basé sur storage.js & guests.js - Design PREMIUM
+        // ============================================================
+        (function() {
+            'use strict';
+
+            // ---------- VARIABLES GLOBALES ----------
+            let currentEvent = null;
+            let currentEventId = null;
+            let currentGuests = [];
+            let currentTables = [];
+            let currentUser = null;
+            let currentDisplayedGuest = null;
+            let currentDisplayedTable = null;
+            let drawerOpen = false;
+
+            // ---------- INITIALISATION ----------
+            document.addEventListener('DOMContentLoaded', async function() {
+                await loadUser();
+                await loadEvents();
+                initEventListeners();
+                initSwipeDetection();
+            });
+
+            // ---------- CHARGEMENT UTILISATEUR ----------
+            async function loadUser() {
+                try {
+                    currentUser = await storage.getProfile() || { name: 'Agent SECURA', email: 'agent@secura.com', role: 'Agent' };
+                    document.getElementById('profileName').textContent = currentUser.name || 'Agent';
+                    document.getElementById('profileRole').textContent = currentUser.role || 'Agent';
+                    document.getElementById('dropdownName').textContent = currentUser.name || 'Agent';
+                    document.getElementById('dropdownEmail').textContent = currentUser.email || 'agent@secura.com';
+                    document.getElementById('dropdownRole').textContent = currentUser.role || 'Agent';
+                } catch(e) {
+                    console.warn('Utilisateur non connecté, mode démo');
+                }
+            }
+
+            // ---------- CHARGEMENT ÉVÉNEMENTS ----------
+            async function loadEvents() {
+                let events = await storage.getAllEvents() || [];
+                if (currentUser && currentUser.role !== 'admin' && currentUser.id) {
+                    events = events.filter(e => e.organizerId == currentUser.id);
+                }
+                const container = document.getElementById('eventGridContainer');
+                const noEventsMsg = document.getElementById('noEventsMessage');
+                if (!events || events.length === 0) {
+                    container.style.display = 'none';
+                    noEventsMsg.style.display = 'block';
+                    return;
+                }
+                container.style.display = 'grid';
+                noEventsMsg.style.display = 'none';
+                container.innerHTML = events.map(event => {
+                    const guestCount = storage.getGuestsByEventId(event.id)?.length || 0;
+                    const eventDate = new Date(event.date);
+                    return `
+                        <div class="event-card-pro" onclick="window.selectCheckinEvent('${event.id}')" style ="background:url('${getEventImage(event.type)}'); border-left: 4px solid ${event.design?.primaryColor || '#D97706'};">
+                           <div class="event-type-badge" style="background: ${getTypeColor(event.type)}">
+                            ${getTypeLabel(event.type)}
+                        </div>
+                        
+                        <div class="event-content">
+                            <h3 class="event-title">${escapeHtml(event.name)}</h3>
+                            
+                            <div class="event-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>${eventDate.toLocaleDateString('fr-FR')}</span>
+                                </div>
+                                ${event.time ? `
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${event.time}</span>
+                                </div>` : ''}
+                                ${event.location ? `
+                                <div class="meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${event.location}</span>
+                                </div>` : ''}
+                            </div>
+
+                            <div class="event-stats-circle">
+                                <div class="stat-circle">
+                                    <div class="circle" style="border-color: ${event.design?.primaryColor || '#D97706'}20;">
+                                        <span class="value">${guestCount}</span>
+                                        <span class="label">Invités</span>
+                                    </div>
+                                </div>
+                                
+                                 
+                                <div class="stat-circle">
+                                    <div class="circle" style="border-color: #3B82F620;">
+                                        <span class="value">${event.capacity || '∞'}</span>
+                                        <span class="label">Capacité</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="event-footer">
+                                <div class="event-status" style="background: ${event.active ? '#10B981' : '#EF4444'} !important; color: white">
+                                    <i class="fas ${event.active ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                                    <span>${event.active ? 'Actif' : 'Inactif'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="event-actions" onclick="event.stopPropagation()">
+                            <button class="action-btn view" onclick="viewEvent('${event.id}')" title="Voir invités">
+                                <i class="fas fa-users"></i>
+                            </button>
+                            <button class="action-btn edit" onclick="editEvent('${event.id}')" title="Modifier">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="action-btn duplicate" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="action-btn stats" onclick="viewEventStats('${event.id}')" title="Statistiques">
+                                <i class="fas fa-chart-bar"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // ---------- SÉLECTION ÉVÉNEMENT ----------
+            window.selectCheckinEvent = async function(eventId) {
+                const event = storage.getEventById(eventId);
+                if (!event) {
+                    Swal.fire('Erreur', 'Événement introuvable', 'error');
+                    return;
+                }
+                currentEvent = event;
+                currentEventId = eventId;
+                currentGuests = storage.getGuestsByEventId(eventId) || [];
+                const response = await storage.getAllTables(eventId);
+                currentTables = response.data || [];
+                
+                document.getElementById('eventSelectorScreen').style.display = 'none';
+                document.getElementById('validationScreen').style.display = 'block';
+                document.getElementById('selectedEventTitle').innerHTML = `<i class="fas fa-arrow-left me-2" onclick="resetEventSelection()"></i> ${escapeHtml(event.name)}`;
+                document.getElementById('eventMetaInfo').innerHTML = `${new Date(event.date).toLocaleDateString('fr-FR')} • ${currentGuests.length} invités • ${currentTables.length} tables`;
+
+                resetUI();
+                focusFirstCodeBox();
+            };
+
+            window.resetEventSelection = function() {
+                document.getElementById('validationScreen').style.display = 'none';
+                document.getElementById('eventSelectorScreen').style.display = 'block';
+                loadEvents();
+                currentEvent = null;
+                currentEventId = null;
+                currentDisplayedGuest = null;
+            };
+
+            // ---------- TOGGLE DE VUE ----------
+            function initViewToggle() {
+                const viewBtns = document.querySelectorAll('.view-mode-btn');
+                viewBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        viewBtns.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        const mode = this.dataset.mode;
+                        
+                        // Masquer toutes les sections
+                        document.getElementById('codeBoxSection').classList.add('hidden');
+                        document.getElementById('searchSection').classList.add('hidden');
+                        document.getElementById('tableSearchSection').classList.add('hidden');
+                        
+                        // Afficher la section correspondante
+                        if (mode === 'code') {
+                            document.getElementById('codeBoxSection').classList.remove('hidden');
+                            focusFirstCodeBox();
+                        } else if (mode === 'search') {
+                            document.getElementById('searchSection').classList.remove('hidden');
+                            document.getElementById('quickSearchInput').focus();
+                        } else if (mode === 'table') {
+                            document.getElementById('tableSearchSection').classList.remove('hidden');
+                            document.getElementById('tableSearchInput').focus();
+                        }
+                    });
+                });
+            }
+
+            // ---------- RÉINITIALISATION UI ----------
+            function resetUI() {
+                for (let i = 1; i <= 4; i++) {
+                    const box = document.getElementById(`code${i}`);
+                    if (box) { box.value = ''; box.classList.remove('filled'); }
+                }
+                document.getElementById('quickSearchInput').value = '';
+                document.getElementById('searchResultsContainer').innerHTML = '';
+                document.getElementById('searchResultsContainer').style.display = 'none';
+                document.getElementById('tableSearchInput').value = '';
+                document.getElementById('tableSearchResultsContainer').innerHTML = '';
+                document.getElementById('tableSearchResultsContainer').style.display = 'none';
+                document.getElementById('guestProfileContainer').innerHTML = '';
+                currentDisplayedGuest = null;
+                currentDisplayedTable = null;
+            }
+
+            // ---------- CODE-BOX LOGIQUE ----------
+            function initCodeBoxes() {
+                for (let i = 1; i <= 4; i++) {
+                    const input = document.getElementById(`code${i}`);
+                    input.removeEventListener('input', codeBoxHandler);
+                    input.removeEventListener('keydown', codeBoxKeyDown);
+                    input.addEventListener('input', codeBoxHandler);
+                    input.addEventListener('keydown', codeBoxKeyDown);
+                }
+            }
+
+            function codeBoxHandler(e) {
+                const input = e.target;
+                input.value = input.value.replace(/[^0-9]/g, '').slice(0,1);
+                input.classList.toggle('filled', input.value.length === 1);
+                
+                if (input.value.length === 1) {
+                    const next = input.id.replace('code', '');
+                    const nextId = parseInt(next) + 1;
+                    if (nextId <= 4) {
+                        document.getElementById(`code${nextId}`).focus();
+                    } else {
+                        validateAccessCode();
+
+                    }
+                }
+                
+            }
+
+            function codeBoxKeyDown(e) {
+                if (e.key === 'Backspace' && e.target.value === '') {
+                    const prev = e.target.id.replace('code', '');
+                    const prevId = parseInt(prev) - 1;
+                    if (prevId >= 1) {
+                        document.getElementById(`code${prevId}`).focus();
+                    }
+                }
+            }
+
+            function focusFirstCodeBox() {
+                setTimeout(() => document.getElementById('code1')?.focus(), 100);
+            }
+
+            async function validateAccessCode() {
+                const code = `${document.getElementById('code1').value}${document.getElementById('code2').value}${document.getElementById('code3').value}${document.getElementById('code4').value}`;
+                if (code.length !== 4) return;
+                
+                const guest = currentGuests.find(g => g.accessCode === code);
+                if (!guest) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Code invalide',
+                        text: 'Aucun invité ne correspond à ce code.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    // Effet d'erreur
+                    for (let i = 1; i <= 4; i++) {
+                        const box = document.getElementById(`code${i}`);
+                        box.classList.add('error');
+                        setTimeout(() => box.classList.remove('error'), 500);
+                        box.value = ''; box.classList.remove('filled');
+                    }
+                    focusFirstCodeBox();
+                    return;
+                }
+
+                await displayGuestProfile(guest);
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById(`code${i}`).value = '';
+                    document.getElementById(`code${i}`).classList.remove('filled');
+                }
+                focusFirstCodeBox();
+            }
+
+            // ---------- RECHERCHE INVITÉS ----------
+            function initQuickSearch() {
+                const input = document.getElementById('quickSearchInput');
+                let timeout;
+                input.addEventListener('input', function() {
+                    clearTimeout(timeout);
+                    const term = this.value.trim().toLowerCase();
+                    if (term.length < 2) {
+                        document.getElementById('searchResultsContainer').style.display = 'none';
+                        return;
+                    }
+                    timeout = setTimeout(() => {
+                        const results = currentGuests.filter(g => 
+                            (g.firstName?.toLowerCase().includes(term) ||
+                             g.lastName?.toLowerCase().includes(term) ||
+                             g.email?.toLowerCase().includes(term) ||
+                             (g.accessCode && g.accessCode.toLowerCase().includes(term)))
+                        ).slice(0, 8);
+                        
+                        const container = document.getElementById('searchResultsContainer');
+                        if (results.length === 0) {
+                            container.innerHTML = '<div style="padding: 20px; text-align: center; opacity: 0.7;">Aucun résultat</div>';
+                            container.style.display = 'block';
+                            return;
+                        }
+                        container.innerHTML = results.map(g => `
+                            <div class="search-result-item" onclick="window.displayGuestFromSearch('${g.id}')">
+                                <div class="search-result-avatar header-avatar">
+                                     ${getGuestAvatarImage(g) 
+                                        ? `<img src="${getGuestAvatarImage(g)}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">`
+                                        : `<span style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-weight: 700; font-size: 1.4rem;">${getInitials(`${g.firstName || ''} ${g.lastName || ''}`)}</span>`
+                                    } 
+                                </div>
+                                <div class="search-result-info">
+                                    <div class="search-result-name">${escapeHtml(g.firstName || '')} ${escapeHtml(g.lastName || '')}</div>
+                                    <div class="search-result-code">
+                                        <i class="fas fa-hashtag"></i> ${g.accessCode || '—'} 
+                                        <span class="badge ${g.scanned ? 'success' : 'bg-warning'} ms-2">${g.scanned ? 'Présent' : 'En attente'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                        container.style.display = 'block';
+                    }, 300);
+                });
+            }
+
+            window.displayGuestFromSearch = async function(guestId) {
+                const guest = storage.getGuestById(guestId);
+                if (guest) {
+                    
+                    await displayGuestProfile(guest);
+                    document.getElementById('searchResultsContainer').style.display = 'none';
+                    document.getElementById('quickSearchInput').value = '';
+                }
+            };
+
+            // ---------- RECHERCHE TABLE ----------
+            function initTableSearch() {
+                const input = document.getElementById('tableSearchInput');
+                let timeout;
+                input.addEventListener('input', function() {
+                    clearTimeout(timeout);
+                    const term = this.value.trim().toLowerCase();
+                    if (term.length < 2) {
+                        document.getElementById('tableSearchResultsContainer').style.display = 'none';
+                        return;
+                    }
+                    timeout = setTimeout(() => {
+                        const results = currentTables.filter(t => 
+                            (t.tableNumber?.toLowerCase().includes(term) ||
+                             t.tableName?.toLowerCase().includes(term) ||
+                             t.location?.toLowerCase().includes(term))
+                        ).slice(0, 8);
+                        
+                        const container = document.getElementById('tableSearchResultsContainer');
+                        if (results.length === 0) {
+                            container.innerHTML = '<div style="padding: 20px; text-align: center; opacity: 0.7;">Aucune table trouvée</div>';
+                            container.style.display = 'block';
+                            return;
+                        }
+                        container.innerHTML = results.map(t => {
+                            const assignedGuests = storage.getGuestsByEventId(currentEventId)?.filter(g => g.tableId === t.id) || [];
+                            const occupied = assignedGuests.reduce((sum, g) => sum + (g.seats || 1), 0);
+                            return `
+                                <div class="search-result-item" onclick="window.displayTableProfile('${t.id}')">
+                                    <div class="search-result-avatar header-avatar" style="background: linear-gradient(135deg, #2b2a28);">
+                                         <img src="assets/images/table.png" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">
+                    
+                                    </div>
+                                    <div class="search-result-info">
+                                        <div class="search-result-name">Table ${escapeHtml(t.tableNumber || '')} ${t.tableName ? `- ${escapeHtml(t.tableName)}` : ''}</div>
+                                        <div class="search-result-code">
+                                            <i class="fas fa-users"></i> ${assignedGuests.length} invités • ${occupied}/${t.capacity} places
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                        container.style.display = 'block';
+                    }, 300);
+                });
+            }
+
+            window.displayTableProfile = async function(tableId) {
+                const table = storage.getTableById(tableId);
+                if (!table) return;
+                currentDisplayedTable = table;
+                await displayTableDetails(table);
+                document.getElementById('tableSearchResultsContainer').style.display = 'none';
+                document.getElementById('tableSearchInput').value = '';
+            };
+
+            // ---------- AFFICHAGE PROFIL INVITÉ ----------
+            async function displayGuestProfile(guest) {
+
+
+                document.getElementById('Views').classList.add('hidden');
+
+                currentDisplayedGuest = guest;
+                let table = null;
+                if (guest.tableId) {
+                    table = storage.getTableById(guest.tableId);
+                } else {
+                    const found = currentTables.find(t => t.assignedGuests?.some(ag => ag.guestId === guest.id));
+                    if (found) table = found;
+                }
+
+                const avatarColor = stringToColor(`${guest.firstName} ${guest.lastName}`);
+                const initials = getInitials(`${guest.firstName || ''} ${guest.lastName || ''}`);
+                const fullName = `${guest.firstName || ''} ${guest.lastName || ''}`.trim() || guest.email;
+                const isScanned = guest.scanned === true;
+
+                const profileHTML = `
+                    <div class="guest-profile-card">
+                        <div style="position: absolute; top: 20px; right: 20px;">
+                            <span class="badge ${isScanned ? 'success' : 'bg-warning'}" style="font-size: 1rem; padding: 10px 20px;">
+                                <i class="fas ${isScanned ? 'fa-check-circle' : 'fa-hourglass-half'}"></i> 
+                                ${isScanned ? 'Présent' : 'En attente'}
+                            </span>
+                        </div>
+                        <div class="profile-header">
+                            <div class="profile-avatar-large" style="background: linear-gradient(135deg, ${avatarColor}, ${avatarColor}aa);">
+                                ${getGuestAvatarImage(guest) 
+                                    ? `<img src="${getGuestAvatarImage(guest)}" alt="Avatar">`
+                                    : `<span>${initials}</span>`
+                                }
+                            </div>
+                            <div class="profile-info">
+                                <h2>${escapeHtml(fullName)}</h2>
+                                <div class="profile-meta">
+                                    <span><i class="fas fa-envelope"></i> ${escapeHtml(guest.email || '—')}</span>
+                                    <span><i class="fas fa-phone"></i> ${escapeHtml(guest.phone || '—')}</span>
+                                    ${guest.company ? `<span><i class="fas fa-building"></i> ${escapeHtml(guest.company)}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-card">
+                                <div class="detail-title">
+                                    <i class="fas fa-chair"></i> Table assignée
+                                </div>
+                                ${table ? `
+                                    <div class="table-badge-large">
+                                        <i class="fas fa-hashtag"></i> ${escapeHtml(table.tableNumber || '?')}
+                                        ${table.tableName ? `<span style="font-size: 0.9rem; opacity: 0.9;">(${escapeHtml(table.tableName)})</span>` : ''}
+                                    </div>
+                                    <div style="margin-top: 20px;text-align: left; display: flex; flex-direction: column; gap: 10px;">
+                                        <div><i class="fas fa-users"></i> Capacité: ${table.capacity || '?'} places</div>
+                                        <div><i class="fas fa-map-pin"></i> ${escapeHtml(table.location || 'Non spécifié')}</div>
+                                    </div>
+                                ` : `
+                                    <div style="padding: 20px; background: rgba(239,68,68,0.1); border-radius: 16px;">
+                                        <i class="fas fa-exclamation-triangle text-warning"></i> Non assigné à une table
+                                    </div>
+                                `}
+                            </div>
+
+                            <div class="detail-card">
+                                <div class="detail-title">
+                                    <i class="fas fa-ticket-alt"></i> Détails invitation
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 15px;text-align: left;">
+                                    <div><i class="fas fa-chair"></i> Places: ${guest.seats || 1}</div>
+                                    <div><i class="fas fa-hashtag"></i> Code: <strong style="font-size: 1.5rem; letter-spacing: 3px;">${guest.accessCode || '—'}</strong></div>
+                                    <div><i class="fas fa-calendar"></i> Inscription: ${new Date(guest.createdAt || Date.now()).toLocaleDateString('fr-FR')}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${guest.notes ? `
+                        <div style="background: rgba(245,158,11,0.1); border-left: 4px solid var(--warning); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                            <i class="fas fa-sticky-note"></i> <strong>Note:</strong> ${escapeHtml(guest.notes)}
+                        </div>
+                        ` : ''}
+
+                        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 25px; flex-wrap: wrap;">
+                            ${!isScanned ? `
+                                <button class="btn-checkin" onclick="window.confirmCheckin('${guest.id}')">
+                                    <i class="fas fa-check-circle"></i> Valider l'entrée
+                                </button>
+                            ` : `
+                                <div style="background: rgba(16,185,129,0.1); padding: 15px 30px; border-radius: 50px; color: var(--success); font-weight: 600;">
+                                    <i class="fas fa-check-circle"></i> Déjà enregistré le ${new Date(guest.scannedAt).toLocaleString('fr-FR')}
+                                </div>
+                            `}
+                            <button class="btn btn-secondary" onclick="resetToVerificationView()">
+                                <i class="fas fa-undo"></i> Nouvelle vérification
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('guestProfileContainer').innerHTML = profileHTML;
+            }
+
+            // ---------- AFFICHAGE PROFIL TABLE ----------
+            async function displayTableDetails(table) {
+                const assignedGuests = storage.getGuestsByEventId(currentEventId)?.filter(g => g.tableId === table.id) || [];
+                const occupied = assignedGuests.reduce((sum, g) => sum + (g.seats || 1), 0);
+                
+                const profileHTML = `
+                    <div class="guest-profile-card">
+                        <div style="position: absolute; top: 20px; right: 20px;">
+                            <span class="badge bg-info" style="font-size: 1rem; padding: 10px 20px;">
+                                <i class="fas fa-chair"></i> Table
+                            </span>
+                        </div>
+                        <div class="profile-header">
+                            <div class="profile-avatar-large" style="background: linear-gradient(135deg, #2b2a28);">
+                                <img src="assets/images/table.png" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">
+                    
+                            </div>
+                           
+                            <div class="profile-info">
+                                <h2>Table ${escapeHtml(table.tableNumber || '')}</h2>
+                                ${table.tableName ? `<h4 style="opacity: 0.9;">${escapeHtml(table.tableName)}</h4>` : ''}
+                                <div class="profile-meta">
+                                    <span><i class="fas fa-users"></i> ${assignedGuests.length} invités</span>
+                                    <span><i class="fas fa-chair"></i> ${occupied}/${table.capacity} places</span>
+                                    ${table.location ? `<span><i class="fas fa-map-pin"></i> ${escapeHtml(table.location)}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 30px;">
+                            <h5 style="font-weight: 600; margin-bottom: 20px;"><i class="fas fa-list"></i> Invités assignés</h5>
+                            ${assignedGuests.length > 0 ? `
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    ${assignedGuests.map(g => `
+                                        <div class="search-result-item" onclick="window.displayGuestFromSearch('${g.id}')">
+                                            <div class="search-result-avatar header-avatar">
+                                                 ${getGuestAvatarImage(g) 
+                                                        ? `<img src="${getGuestAvatarImage(g)}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">`
+                                                        : `<span style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-weight: 700; font-size: 1.4rem;">${getInitials(`${g.firstName || ''} ${g.lastName || ''}`)}</span>`
+                                                    } 
+                                            </div>
+                                            <div class="search-result-info">
+                                                <div class="search-result-name">${escapeHtml(g.firstName || '')} ${escapeHtml(g.lastName || '')}</div>
+                                                <div class="search-result-code">
+                                                    <i class="fas fa-hashtag"></i> ${g.accessCode || '—'}
+                                                    <span class="badge ${g.scanned ? 'success' : 'bg-warning'} ms-2">${g.scanned ? 'Présent' : 'En attente'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <div style="padding: 30px; text-align: center; background: var(--hover-bg); border-radius: 16px;">
+                                    <i class="fas fa-user-slash fa-3x mb-3" style="opacity: 0.5;"></i>
+                                    <p>Aucun invité assigné à cette table</p>
+                                </div>
+                            `}
+                        </div>
+
+                        <div style="display: flex; gap: 20px; justify-content: flex-end; margin-top: 30px;">
+                            <button class="btn btn-secondary" onclick="resetToVerificationView()">
+                                <i class="fas fa-undo"></i> Nouvelle recherche
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('guestProfileContainer').innerHTML = profileHTML;
+            }
+
+            // ---------- VALIDATION PRÉSENCE ----------
+            window.confirmCheckin = async function(guestId) {
+                const guest = storage.getGuestById(guestId);
+                if (!guest) return;
+                
+                const result = await Swal.fire({
+                    title: 'Confirmer la présence ?',
+                    html: `Valider l'entrée de <strong>${escapeHtml(guest.firstName || '')} ${escapeHtml(guest.lastName || '')}</strong> ?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui, enregistrer',
+                    cancelButtonText: 'Annuler',
+                    confirmButtonColor: '#10B981'
+                });
+                
+                if (result.isConfirmed) {
+                    try {
+
+
+                        await storage.updateGuest(guestId, { 
+                        confirmed: true, 
+                        status: 'confirmed',
+                        updatedAt: new Date().toISOString()
+                    });
+                        const updated = storage.checkInGuest(guestId, {
+                            source: 'checkin_protocol',
+                            notes: `Entrée validée le ${new Date().toLocaleString('fr-FR')}`,
+                            changedBy: currentUser?.email || 'agent'
+                        });
+
+                        const qrData = {
+                            t: 'INV',
+                            e: currentEventId,
+                            g: guestId,
+                            source: 'manual_validation'
+                        };
+                        await storage.scanQRCode(qrData);
+                        
+                        if (updated) {
+                            const idx = currentGuests.findIndex(g => g.id === guestId);
+                            if (idx !== -1) {
+                                currentGuests[idx] = {...currentGuests[idx], scanned: true, scannedAt: new Date().toISOString(), scanCount: (guest.scanCount||0)+1};
+                            }
+                            await displayGuestProfile(currentGuests.find(g => g.id === guestId));
+                            
+                            SECURA_AUDIO?.play('success');
+                            confetti({particleCount: 80, spread: 70, origin: { y: 0.5 }});
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Présence validée !',
+                                text: `${guest.firstName || ''} ${guest.lastName || ''} est maintenant enregistré.`,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+                    } catch(e) {
+                        console.error(e);
+                        Swal.fire('Erreur', 'Échec de la validation', 'error');
+                    }
+                }
+            };
+
+            // ---------- DRAWER ----------
+            window.openGuestDrawer = function() {
+                if (!currentEventId) {
+                    Swal.fire('Attention', 'Sélectionnez d\'abord un événement', 'warning');
+                    return;
+                }
+                document.getElementById('guestDrawer').classList.add('open');
+                document.getElementById('drawerOverlay').style.display = 'block';
+                renderDrawerGuestList();
+            };
+
+            window.closeGuestDrawer = function() {
+                document.getElementById('guestDrawer').classList.remove('open');
+                document.getElementById('drawerOverlay').style.display = 'none';
+            };
+
+            function renderDrawerGuestList() {
+                const container = document.getElementById('drawerGuestList');
+                const searchVal = document.getElementById('drawerSearchInput').value.toLowerCase();
+                let filtered = currentGuests;
+                if (searchVal.length >= 2) {
+                    filtered = currentGuests.filter(g => 
+                        (g.firstName?.toLowerCase().includes(searchVal) ||
+                         g.lastName?.toLowerCase().includes(searchVal) ||
+                         g.email?.toLowerCase().includes(searchVal))
+                    );
+                }
+                container.innerHTML = filtered.sort((a,b) => (a.scanned === b.scanned ? 0 : a.scanned ? 1 : -1)).map(g => `
+                    <div class="drawer-guest-item" onclick="window.handleDrawerGuestClick('${g.id}')">
+                        <div class="drawer-guest-avatar header-avatar">  ${getGuestAvatarImage(g) 
+                                                        ? `<img src="${getGuestAvatarImage(g)}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">`
+                                                        : `<span style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-weight: 700; font-size: 1.4rem;">${getInitials(`${g.firstName || ''} ${g.lastName || ''}`)}</span>`
+                                                    } 
+                        </div>
+                        <div class="drawer-guest-info">
+                            <div class="drawer-guest-name">${escapeHtml(g.firstName || '')} ${escapeHtml(g.lastName || '')}</div>
+                            <div class="drawer-guest-code">Code: ${g.accessCode || '—'}</div>
+                        </div>
+                        <div><span class="badge ${g.scanned ? 'success' : 'bg-warning'}">${g.scanned ? 'Présent' : 'En attente'}</span></div>
+                    </div>
+                `).join('');
+            }
+
+            window.handleDrawerGuestClick = async function(guestId) {
+                const guest = storage.getGuestById(guestId);
+                if (guest) {
+                    await displayGuestProfile(guest);
+                    closeGuestDrawer();
+                }
+            };
+
+            // ---------- SWIPE DÉTECTION ----------
+            function initSwipeDetection() {
+                let touchstartX = 0;
+                document.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; });
+                document.addEventListener('touchend', e => {
+                    if (!currentEventId) return;
+                    const touchendX = e.changedTouches[0].screenX;
+                    if (touchendX > touchstartX + 80) {
+                        if (!document.getElementById('guestDrawer').classList.contains('open')) {
+                            openGuestDrawer();
+                        }
+                    }
+                    if (touchendX < touchstartX - 80) {
+                        closeGuestDrawer();
+                    }
+                });
+            }
+
+            // ---------- RESET ----------
+            window.resetToVerificationView = function() {
+                resetUI();
+                // Réactiver la vue active
+                const activeMode = document.querySelector('.view-mode-btn.active')?.dataset.mode || 'code';
+                document.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector(`.view-mode-btn[data-mode="${activeMode}"]`).classList.add('active');
+                
+
+                document.getElementById('Views').classList.remove('hidden');
+                document.getElementById('codeBoxSection').classList.add('hidden');
+                document.getElementById('searchSection').classList.add('hidden');
+                document.getElementById('tableSearchSection').classList.add('hidden');
+                
+                if (activeMode === 'code') {
+                    document.getElementById('codeBoxSection').classList.remove('hidden');
+                    focusFirstCodeBox();
+                } else if (activeMode === 'search') {
+                    document.getElementById('searchSection').classList.remove('hidden');
+                    document.getElementById('quickSearchInput').focus();
+                } else {
+                    document.getElementById('tableSearchSection').classList.remove('hidden');
+                    document.getElementById('tableSearchInput').focus();
+                }
+            };
+
+          
+
+            // ---------- INITIALISATION ÉCOUTEURS ----------
+            function initEventListeners() {
+                initViewToggle();
+                initCodeBoxes();
+                initQuickSearch();
+                initTableSearch();
+                
+                // Recherche drawer
+                document.getElementById('drawerSearchInput')?.addEventListener('input', renderDrawerGuestList);
+            }
+
+            // Exposer les fonctions globalement
+            window.selectCheckinEvent = selectCheckinEvent;
+            window.resetEventSelection = resetEventSelection;
+            window.displayGuestFromSearch = displayGuestFromSearch;
+            window.displayTableProfile = displayTableProfile;
+            window.confirmCheckin = confirmCheckin;
+            window.openGuestDrawer = openGuestDrawer;
+            window.closeGuestDrawer = closeGuestDrawer;
+            window.handleDrawerGuestClick = handleDrawerGuestClick;
+            window.resetToVerificationView = resetToVerificationView;
+
+        })();
+    </script>
+</body>
+</html>

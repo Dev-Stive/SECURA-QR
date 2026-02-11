@@ -2165,7 +2165,7 @@
             }
 
             .features-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(1, 1fr);
                 gap: 12px;
             }
 
@@ -5190,7 +5190,7 @@
         <!-- VUE LISTE DES GALERIES -->
         <div class="galleries-view-container" id="galleriesListView" style="display: none;">
             <div class="galleries-header">
-                <h3><i class="fas fa-list"></i> Liste des Galeries (<span id="galleriesListCount">0</span>)</h3>
+                <h3><i class="fas fa-list"></i> Galeries (<span id="galleriesListCount">0</span>)</h3>
                   <div class="actions-left">
                     <!-- View Toggle pour Galeries -->
                     <div class="view-toggle" id="galleriesViewToggle">
@@ -5205,7 +5205,7 @@
                     </div>
                     
                     <!-- Quick Filters pour Galeries -->
-                    <select class="quick-filters-select" id="galleriesFilterSelect2" data-type="gallery">
+                    <select class="quick-filters-selec form-select" id="galleriesFilterSelect2" data-type="gallery">
                         <option value="all" selected>Toutes les galeries</option>
                         <option value="public">Publiques</option>
                         <option value="private">Privées</option>
@@ -5233,163 +5233,7 @@
             <div class="pagination" id="galleriesListPagination" style="display: none;"></div>
         </div>
 
-        <!-- VUE STATISTIQUES -->
-        <div class="stats-view-container" id="statsView" style="display: none;">
-            <div class="galleries-header in-specific-view">
-                <h3><i class="fas fa-chart-bar"></i> Statistiques des Galeries</h3>
-                <div class="view-toggle">
-                    <button class="view-btn" data-view="grid">
-                        <i class="fas fa-th-large"></i>
-                        <span>Grille</span>
-                    </button>
-                    <button class="view-btn" data-view="list">
-                        <i class="fas fa-list"></i>
-                        <span>Liste</span>
-                    </button>
-                    <button class="view-btn active" data-view="stats">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Statistiques</span>
-                    </button>
-                     <button class="view-btn create" id="createGalleryStatsBtn">
-                        <i class="fas fa-plus-circle"></i>
-                        Nouvelle
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Cartes de Statistiques -->
-            <div class="stats-grid">
-                <div class="stat-card-advanced-advanced">
-                    <div class="stat-title">
-                        <i class="fas fa-images"></i>
-                        Total des Galeries
-                    </div>
-                    <div class="stat-value" id="totalGalleries">0</div>
-                    <div class="stat-details">Galeries actives</div>
-                </div>
-                
-                <div class="stat-card-advanced-advanced">
-                    <div class="stat-title">
-                        <i class="fas fa-photo-video"></i>
-                        Photos Totales
-                    </div>
-                    <div class="stat-value" id="statsPhotosCount">0</div>
-                    <div class="stat-details">Toutes les photos</div>
-                </div>
-                
-                <div class="stat-card-advanced-advanced">
-                    <div class="stat-title">
-                        <i class="fas fa-heart"></i>
-                        Engagement Global
-                    </div>
-                    <div class="stat-value" id="statsEngagementScore">0</div>
-                    <div class="stat-details">Score d'engagement moyen</div>
-                </div>
-                
-                <div class="stat-card-advanced-advanced">
-                    <div class="stat-title">
-                        <i class="fas fa-shield-alt"></i>
-                        En Modération
-                    </div>
-                    <div class="stat-value" id="statsPendingPhotos">0</div>
-                    <div class="stat-details">Photos en attente</div>
-                </div>
-            </div>
-            
-
-           
-            <!-- KPI Cards -->
-            <div class="kpi-grid-container">
-                <div class="kpi-card trending">
-                    <div class="kpi-icon">
-                        <i class="fas fa-arrow-up"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-label">Likes par jour</div>
-                        <div class="kpi-value" id="kpiLikesPerDay">0</div>
-                        <div class="kpi-trend positive">
-                            <i class="fas fa-arrow-up"></i>
-                            +12% cette semaine
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="kpi-card efficiency">
-                    <div class="kpi-icon">
-                        <i class="fas fa-tachometer-alt"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-label">Taux d'approbation</div>
-                        <div class="kpi-value" id="kpiApprovalRate">0%</div>
-                        <div class="kpi-trend stable">
-                            <i class="fas fa-minus"></i>
-                            Stable
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="kpi-card diversity">
-                    <div class="kpi-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-label">Contributeurs</div>
-                        <div class="kpi-value" id="kpiContributorsCount">0</div>
-                        <div class="kpi-trend positive">
-                            <i class="fas fa-arrow-up"></i>
-                            +5 ce mois
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Graphiques -->
-            <div class="charts-container">
-                <div class="chart-card advanced">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-bar"></i>
-                        Distribution des Galeries
-                    </div>
-                    <div class="chart-placeholder" id="galleriesDistributionChart">
-                        <!-- Chart.js -->
-                    </div>
-                </div>
-                
-                <div class="chart-card advanced">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-line"></i>
-                        Engagement Trend
-                    </div>
-                    <div class="chart-placeholder" id="engagementTrendChart">
-                        <!-- Chart.js -->
-                    </div>
-                </div>
-                
-                <div class="chart-card advanced">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-pie"></i>
-                        État des Photos
-                    </div>
-                    <div class="chart-placeholder" id="photoStatusChart">
-                        <!-- Chart.js -->
-                    </div>
-                </div>
-                
-                <div class="chart-card advanced">
-                    <div class="chart-title">
-                        <i class="fas fa-chart-area"></i>
-                        Visibilité des Galeries
-                    </div>
-                    <div class="chart-placeholder" id="visibilityChart">
-                        <!-- Chart.js -->
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Loader -->
-            <div class="loader" id="statsLoader" style="display: none;"></div>
-        </div>
-
+    
         <!-- Pagination Générale -->
         <div class="pagination" id="pagination" style="display: none;"></div>
     </div>
@@ -7498,11 +7342,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                     }
                     
                     if (statsGrid) {
-                        statsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        statsGrid.style.gridTemplateColumns = 'repeat(1, 1fr)';
                     }
                     
                     if (matesGrid) {
-                        matesGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        matesGrid.style.gridTemplateColumns = 'repeat(1, 1fr)';
                         matesGrid.style.gap = '12px';
                     }
                 } else {

@@ -3519,13 +3519,38 @@
       "company": "-",
       "notes": "Table Paix",
       "id": "sec_1762209804227_qgoseulfr",
-      "updatedAt": "2025-11-03T22:43:24.227Z",
+      "updatedAt": "2026-02-11T18:18:49.027Z",
       "createdAt": "2025-11-03T22:43:24.227Z",
-      "scanned": false,
-      "status": "pending",
+      "scanned": true,
+      "status": "checked_in",
       "tableId": "tbl_1768650878715_orgdagi5h",
       "tableNumber": "2",
-      "assignedAt": "2026-01-17T11:55:39.283Z"
+      "assignedAt": "2026-01-17T11:55:39.283Z",
+      "scannedAt": "2026-02-11T18:18:49.027Z",
+      "scanCount": 1,
+      "lastScanSource": "checkin_protocol",
+      "confirmationHistory": [
+        {
+          "status": "checked_in",
+          "changedAt": "2026-02-11T18:18:49.027Z",
+          "notes": "Entrée validée le 11/02/2026 19:18:49",
+          "changedBy": "admin@secura.com",
+          "source": "checkin_protocol",
+          "ip": null,
+          "alreadyScanned": false
+        }
+      ],
+      "scanHistory": [
+        {
+          "scanId": "scn_1770833929027_vwkbvk8nu",
+          "scannedAt": "2026-02-11T18:18:49.027Z",
+          "source": "checkin_protocol",
+          "location": null,
+          "scannerName": "Système",
+          "ip": null,
+          "alreadyScanned": false
+        }
+      ]
     },
     {
       "eventId": "sec_1762209757419_exl3pjlf0",
@@ -4966,14 +4991,38 @@
       "eventId": "sec_1762209757419_exl3pjlf0",
       "id": "gst_1763195952740_tizvnifn3",
       "createdAt": "2025-11-15T08:39:12.728Z",
-      "updatedAt": "2026-01-23T12:25:43.867Z",
-      "scanned": false,
-      "scannedAt": null,
-      "status": "pending",
+      "updatedAt": "2026-02-11T18:08:12.589Z",
+      "scanned": true,
+      "scannedAt": "2026-02-11T18:08:12.589Z",
+      "status": "checked_in",
       "tableId": "tbl_1769135677120_ly38zucqn",
       "tableNumber": "TA-95",
       "assignedAt": "2026-01-23T12:25:43.867Z",
-      "seats": 1
+      "seats": 1,
+      "scanCount": 1,
+      "lastScanSource": "checkin_protocol",
+      "confirmationHistory": [
+        {
+          "status": "checked_in",
+          "changedAt": "2026-02-11T18:08:12.589Z",
+          "notes": "Entrée validée le 11/02/2026 19:08:12",
+          "changedBy": "admin@secura.com",
+          "source": "checkin_protocol",
+          "ip": null,
+          "alreadyScanned": false
+        }
+      ],
+      "scanHistory": [
+        {
+          "scanId": "scn_1770833292589_icmmvzqyz",
+          "scannedAt": "2026-02-11T18:08:12.589Z",
+          "source": "checkin_protocol",
+          "location": null,
+          "scannerName": "Système",
+          "ip": null,
+          "alreadyScanned": false
+        }
+      ]
     },
     {
       "firstName": "Maman Julienne",
@@ -5150,7 +5199,7 @@
       "gender": "m",
       "notes": "Un ami proche des mariés.",
       "seats": 1,
-      "status": "pending",
+      "status": "offline",
       "accessCode": "3780",
       "tableId": "tbl_1769575124807_chedzlng9",
       "tableNumber": "CL-49",
@@ -5171,7 +5220,9 @@
       "confirmationHistory": [],
       "id": "gst_1769634030507_eiyicu0lh",
       "createdAt": "2026-01-28T21:00:30.507Z",
-      "updatedAt": "2026-02-04T21:43:31.813Z"
+      "updatedAt": "2026-02-04T21:43:31.813Z",
+      "isOnline": false,
+      "lastSeen": "2026-02-11T15:09:12.959Z"
     },
     {
       "eventId": "evt_1769537993483_82t3xcgsi",
@@ -10374,7 +10425,7 @@
       "createdAt": "2026-01-28T21:01:06.750Z",
       "updatedAt": "2026-02-04T20:38:03.183Z",
       "isOnline": false,
-      "lastSeen": "2026-02-10T18:39:34.040Z"
+      "lastSeen": "2026-02-11T14:47:07.732Z"
     },
     {
       "eventId": "evt_1769537993483_82t3xcgsi",
@@ -14572,7 +14623,16 @@
       "createdAt": "2026-02-04T17:45:25.783Z"
     }
   ],
-  "scans": [],
+  "scans": [
+    {
+      "id": "scn_1770833292626_0lp2mdesh",
+      "eventId": "sec_1762209757419_exl3pjlf0",
+      "guestId": "gst_1763195952740_tizvnifn3",
+      "guestName": "Mr & Mme Defo",
+      "eventName": "Mariage de Rania et Gérard",
+      "scannedAt": "2026-02-11T18:08:12.627Z"
+    }
+  ],
   "users": [
     {
       "id": "usr_1762606689312_tg4o61hz2",
@@ -14710,7 +14770,16 @@
     }
   ],
   "sessions": [],
-  "eventSessions": [],
+  "eventSessions": [
+    {
+      "id": "sess_1770804516047_mbko8rcii",
+      "guestId": "gst_1769634066750_apq113ecc",
+      "tableId": "tbl_1769575124145_o6y4qfi4o",
+      "eventId": "evt_1769537993483_82t3xcgsi",
+      "createdAt": "2026-02-11T10:08:36.048Z",
+      "expiresAt": "2026-02-11T18:08:36.047Z"
+    }
+  ],
   "galleries": [
     {
       "id": "gal_1770509311298_7yr93j2nn",
@@ -15177,9 +15246,9 @@
           "isOnline": false,
           "status": "offline",
           "joinedAt": "2026-02-10T03:29:45.834Z",
-          "lastReadAt": "2026-02-10T15:35:03.291Z",
+          "lastReadAt": "2026-02-11T14:41:11.239Z",
           "unreadCount": 0,
-          "lastSeenAt": "2026-02-10T18:39:34.040Z"
+          "lastSeenAt": "2026-02-11T14:47:07.733Z"
         },
         {
           "userId": "gst_1769634030979_nreltdza9",
@@ -15280,6 +15349,22 @@
           "editedAt": null,
           "createdAt": "2026-02-10T15:35:03.291Z",
           "deletedAt": null
+        },
+        {
+          "id": "msg_1770760398713_cuvjs1klu",
+          "conversationId": "chat_1770694185834_40bbph0mu",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "ok",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T21:53:18.713Z",
+          "deletedAt": null
         }
       ],
       "settings": {
@@ -15290,7 +15375,7 @@
       },
       "createdBy": "gst_1769634066750_apq113ecc",
       "createdAt": "2026-02-10T03:29:45.834Z",
-      "updatedAt": "2026-02-10T15:35:09.408Z"
+      "updatedAt": "2026-02-11T14:45:15.340Z"
     },
     {
       "id": "chat_1770716570498_zqcwbzyw3",
@@ -15309,9 +15394,9 @@
           "isOnline": false,
           "status": "offline",
           "joinedAt": "2026-02-10T09:42:50.498Z",
-          "lastReadAt": "2026-02-10T15:35:10.311Z",
+          "lastReadAt": "2026-02-11T14:41:09.545Z",
           "unreadCount": 0,
-          "lastSeenAt": "2026-02-10T18:39:34.040Z"
+          "lastSeenAt": "2026-02-11T14:47:07.733Z"
         },
         {
           "userId": "gst_1769634031406_08mm60psu",
@@ -15338,11 +15423,7 @@
           "attachments": [],
           "replyTo": null,
           "readBy": [],
-          "reactions": {
-            "👏": [
-              "gst_1769634066750_apq113ecc"
-            ]
-          },
+          "reactions": {},
           "edited": false,
           "editedAt": null,
           "createdAt": "2026-02-10T10:52:42.198Z",
@@ -15358,14 +15439,26 @@
           "attachments": [],
           "replyTo": null,
           "readBy": [],
-          "reactions": {
-            "😂": [
-              "gst_1769634066750_apq113ecc"
-            ]
-          },
+          "reactions": {},
           "edited": false,
           "editedAt": null,
           "createdAt": "2026-02-10T10:53:02.686Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770760369798_owjq93j65",
+          "conversationId": "chat_1770716570498_zqcwbzyw3",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "ok",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-10T21:52:49.798Z",
           "deletedAt": null
         }
       ],
@@ -15377,7 +15470,286 @@
       },
       "createdBy": "gst_1769634066750_apq113ecc",
       "createdAt": "2026-02-10T09:42:50.498Z",
-      "updatedAt": "2026-02-10T16:46:02.635Z"
+      "updatedAt": "2026-02-11T14:41:09.545Z"
+    },
+    {
+      "id": "chat_1770814932037_u3h5rdk4f",
+      "eventId": "evt_1769537993483_82t3xcgsi",
+      "name": "Chat with participant",
+      "type": "direct",
+      "participants": [
+        {
+          "userId": "gst_1769634066750_apq113ecc",
+          "name": "M. gervais",
+          "email": "gervais.m@gmail.com",
+          "firstName": "M.",
+          "lastName": "gervais",
+          "gender": "m",
+          "notes": "Un frère ou une sœur de la famille.",
+          "isOnline": false,
+          "status": "offline",
+          "joinedAt": "2026-02-11T13:02:12.037Z",
+          "lastReadAt": "2026-02-11T14:47:05.294Z",
+          "lastSeenAt": "2026-02-11T14:47:07.733Z",
+          "unreadCount": 0
+        },
+        {
+          "userId": "gst_1769634030507_eiyicu0lh",
+          "name": "M. Joel",
+          "email": "joel.m@gmail.com",
+          "firstName": "M.",
+          "lastName": "Joel",
+          "gender": "m",
+          "notes": "Un ami proche des mariés.",
+          "isOnline": false,
+          "status": "offline",
+          "joinedAt": null,
+          "lastReadAt": "2026-02-11T15:07:57.510Z",
+          "lastSeenAt": "2026-02-11T15:09:12.959Z",
+          "unreadCount": 0
+        }
+      ],
+      "messages": [
+        {
+          "id": "msg_1770814972282_hdd4jfgax",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "Hello guy👋🏻",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634030507_eiyicu0lh",
+              "readAt": "2026-02-11T13:02:52.641Z"
+            }
+          ],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T13:02:52.282Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770814980536_z0n46kekt",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634030507_eiyicu0lh",
+          "senderName": "Guest gst_1769",
+          "content": "Hi",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634066750_apq113ecc",
+              "readAt": "2026-02-11T13:03:02.135Z"
+            }
+          ],
+          "reactions": {
+            "🔥": [
+              "gst_1769634030507_eiyicu0lh"
+            ]
+          },
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T13:03:00.536Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770814987778_vpdlgn2lh",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "How are you ?",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634030507_eiyicu0lh",
+              "readAt": "2026-02-11T13:03:08.772Z"
+            }
+          ],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T13:03:07.778Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770814995978_h5c6ggfci",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634030507_eiyicu0lh",
+          "senderName": "Guest gst_1769",
+          "content": "Find and you ?",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634066750_apq113ecc",
+              "readAt": "2026-02-11T13:03:16.113Z"
+            }
+          ],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T13:03:15.978Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770815020603_ci8qol7d0",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "I'm find too thank you😊.",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634030507_eiyicu0lh",
+              "readAt": "2026-02-11T13:03:40.970Z"
+            }
+          ],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T13:03:40.603Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770815039778_grp7igy1i",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634030507_eiyicu0lh",
+          "senderName": "Guest gst_1769",
+          "content": "cool😁!",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634066750_apq113ecc",
+              "readAt": "2026-02-11T13:04:00.134Z"
+            }
+          ],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T13:03:59.778Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770818443644_kufd2epay",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "hello",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634030507_eiyicu0lh",
+              "readAt": "2026-02-11T14:00:45.186Z"
+            }
+          ],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T14:00:43.644Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770820419738_7ua86stsz",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "yo bro🤥",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634030507_eiyicu0lh",
+              "readAt": "2026-02-11T14:33:42.489Z"
+            }
+          ],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T14:33:39.738Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770820436911_tpoh9phc4",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634030507_eiyicu0lh",
+          "senderName": "Guest gst_1769",
+          "content": "yes ca dis quoi ?",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634066750_apq113ecc",
+              "readAt": "2026-02-11T14:33:57.420Z"
+            }
+          ],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T14:33:56.911Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_1770820802922_w5xpl6xx6",
+          "conversationId": "chat_1770814932037_u3h5rdk4f",
+          "senderId": "gst_1769634066750_apq113ecc",
+          "senderName": "Guest gst_1769",
+          "content": "massah",
+          "type": "text",
+          "attachments": [],
+          "replyTo": null,
+          "readBy": [
+            {
+              "userId": "gst_1769634030507_eiyicu0lh",
+              "readAt": "2026-02-11T14:40:04.206Z"
+            }
+          ],
+          "reactions": {},
+          "edited": false,
+          "editedAt": null,
+          "createdAt": "2026-02-11T14:40:02.922Z",
+          "deletedAt": null
+        }
+      ],
+      "settings": {
+        "allowDelete": true,
+        "allowEdit": true,
+        "encrypted": true,
+        "archiveAfterDays": 90
+      },
+      "createdBy": "gst_1769634066750_apq113ecc",
+      "createdAt": "2026-02-11T13:02:12.037Z",
+      "updatedAt": "2026-02-11T15:09:11.191Z",
+      "lastMessage": {
+        "id": "msg_1770820802922_w5xpl6xx6",
+        "conversationId": "chat_1770814932037_u3h5rdk4f",
+        "senderId": "gst_1769634066750_apq113ecc",
+        "senderName": "Guest gst_1769",
+        "content": "massah",
+        "type": "text",
+        "attachments": [],
+        "replyTo": null,
+        "readBy": [],
+        "reactions": {},
+        "edited": false,
+        "editedAt": null,
+        "createdAt": "2026-02-11T14:40:02.922Z",
+        "deletedAt": null
+      }
     }
   ],
   "tempUsers": [],
@@ -15387,7 +15759,7 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2026-02-10T18:39:34.046Z",
+    "updatedAt": "2026-02-11T18:18:49.141Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }

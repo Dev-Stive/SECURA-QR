@@ -23,9 +23,6 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
     
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -468,7 +465,7 @@
         /* Bouton de retour pour les vues d'appel */
         .back-to-chat-btn {
             position: absolute;
-            top: 20px;
+            top: 100px;
             left: 20px;
             width: 44px;
             height: 44px;
@@ -1032,6 +1029,21 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-status-icon {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .preview-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .conversation-meta {
@@ -1753,8 +1765,7 @@
 
         .message-actions-menu {
             position: absolute;
-            top: 100%;
-            right: 0;
+            bottom: 100%;
             background: var(--card-bg);
             border-radius: 0.5rem;
             box-shadow: 0 6px 20px rgba(0,0,0,0.3);
@@ -1766,6 +1777,14 @@
             margin-top: 4px;
             display: none;
             flex-direction: column;
+        }
+
+        .message-actions-menu.outgoing {
+            right: 0;
+        }
+
+        .message-actions-menu.incoming {
+            left: 0;
         }
 
        
@@ -1831,7 +1850,6 @@
             position: absolute;
             bottom: auto;
             top: -60px;
-            right: 0;
             background: var(--card-bg);
             border-radius: 50px;
             padding: 8px 12px;
@@ -1841,6 +1859,14 @@
             align-items: center;
             z-index: 10001;
             animation: popUp 0.3s ease;
+        }
+
+        .emoji-reactions-picker.outgoing {
+            right: 0;
+        }
+
+        .emoji-reactions-picker.incoming {
+            left: 0;
         }
 
         .emoji-reactions-picker.show {
@@ -1912,6 +1938,7 @@
             font-weight: 600;
             color: var(--primary);
             margin-bottom: 4px;
+            margin-right: 20px;
             font-size: 0.85rem;
         }
 
@@ -2036,54 +2063,185 @@
             background: var(--card-bg);
             border-top: 1px solid var(--border-color);
             display: flex;
-            align-items: flex-end;
-            gap: 15px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0;
             position: sticky;
             bottom: 0;
             z-index: 10;
             order: 3;
         }
 
-        .input-actions {
+        /* Conteneur principal du message input */
+        .message-input-container {
+            flex: 1;
             display: flex;
-            gap: 8px;
-            flex-shrink: 0;
+            flex-direction: column;
+            gap: 10px;
         }
-
-        .input-action-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        
+        /* État normal: input de message */
+        .message-input-container.input-mode {
+            gap: 10px;
+        }
+        
+    
+        
+        .message-input-container.input-mode .input-wrapper textarea {
+            flex: 1;
+        }
+        
+        /* État actions: affiche les options d'attachement */
+        .message-input-container.actions-mode .input-wrapper {
+            display: none;
+        }
+        
+        .message-input-container.actions-mode .input-actions {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        /* Input text area */
+        .input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 10px;
+            min-height: 44px;
+            max-height: 200px;
+            overflow: hidden;
+        }
+        
+        .input-wrapper textarea {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            resize: none;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .input-wrapper textarea::placeholder {
+            color: var(--text-muted);
+        }
+        
+        /* Actions section */
+        .input-actions {
+            display: none;
+            gap: 10px;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        
+        .message-input-container.actions-mode .input-actions {
+            display: flex;
+        }
+        
+        /* Boutons d'action */
+        .input-action-btn,
+        .input-action-btn-back {
+            padding: 10px 16px;
+            border-radius: 12px;
             background: var(--hover-bg);
             border: 1px solid var(--border-color);
             color: var(--text-color);
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 13px;
+            white-space: nowrap;
+            flex: 1;
+            justify-content: center;
+            min-width: 0;
         }
-
-        .input-action-btn:hover {
+        
+        .input-action-btn:hover,
+        .input-action-btn-main:hover {
             background: var(--primary);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .input-action-btn-back {
+            background: var(--border-color);
+            color: var(--text-color);
+        }
+        
+        .input-action-btn-back:hover {
+            background: var(--hover-bg);
+        }
+        
+        /* Bouton main + */
+        .input-wrapper .input-action-btn-main {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+
+            padding: 10px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            justify-content: center;
+            min-width: 0;
+        }
+        
+        .input-wrapper .emoji-btn {
+            flex: 0;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+        }
+        
+        .input-wrapper .emoji-btn:hover {
             transform: scale(1.05);
         }
 
-        .message-input-container {
-            flex: 1;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 10px 20px;
-            display: flex;
-            align-items: flex-end;
-            gap: 10px;
-            min-height: 44px;
-            max-height: 200px;
-            overflow: hidden;
-            flex-wrap: wrap;
-            align-content: flex-start;
+          .emoji-btn {
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: transform 0.2s ease;
+        }
+
+        
+        @media (max-width: 768px) {
+            .input-action-btn {
+                flex: 1;
+                min-width: 100px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .input-action-btn {
+                flex: 1;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
         }
 
         /* Reply preview inline dans message-input-container */
@@ -2174,31 +2332,29 @@
             border-radius: 2px;
         }
 
-        .emoji-btn {
-            color: var(--primary);
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: transform 0.2s ease;
-        }
-
-        .emoji-btn:hover {
-            transform: scale(1.1);
-        }
+      
 
         .send-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 0.5rem;
+      
+            flex-shrink: 0;
+
+
+             width: 30px;
+            height: 30px;
+            border-radius: 50%;
+
+            padding: 10px;
             background: var(--hover-bg);
-            border: 1px solid var(--border-color) !important;
-            color: white;
-            border: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            flex-shrink: 0;
+            white-space: nowrap;
+            justify-content: center;
+            min-width: 0;
         }
 
         .send-btn:hover {
@@ -2247,15 +2403,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 15px;
-            font-size: 0.85rem;
+            padding: 12px 0;
+            margin: 10px 0;
+            font-size: 0.75rem;
             color: var(--placeholder-color);
-            background: var(--card-bg);
-            border-top: 1px solid var(--border-color);
-            border-radius: 0;
-            box-shadow: none;
             animation: fadeIn 0.3s ease;
-            order: 2;
+            align-self: flex-start;
         }
 
         .typing-dots {
@@ -2967,15 +3120,32 @@
             
             .chat-input-area {
                 padding: 10px 15px;
+                gap: 0;
             }
             
             .message-input-container {
-                padding: 8px 15px;
+                gap: 8px;
+            }
+            
+            .input-wrapper {
+                padding: 8px 12px;
+                min-height: 40px;
+                border-radius: 20px;
             }
             
             .input-action-btn {
-                width: 36px;
-                height: 36px;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            .input-wrapper .input-action-btn-main {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .input-wrapper .emoji-btn {
+                width: 40px;
+                height: 40px;
             }
             
             .send-btn {
@@ -5258,16 +5428,7 @@
 
             <!-- Zone de saisie -->
             <div class="chat-input-area" id="chatInputArea" style="display: none;">
-                <div class="input-actions">
-                    <button class="input-action-btn" id="attachFileBtn" title="Joindre un fichier">
-                        <i class="fas fa-paperclip"></i>
-                    </button>
-                    <button class="input-action-btn" id="attachImageBtn" title="Joindre une image">
-                        <i class="fas fa-image"></i>
-                    </button>
-                </div>
-                
-                <div class="message-input-container">
+                <div class="message-input-container input-mode" id="messageInputContainer">
                     <!-- Aperçu de réponse -->
                     <div id="replyPreview" class="reply-preview-inline" style="display: none;">
                         <div class="reply-preview-content">
@@ -5281,26 +5442,36 @@
                         </div>
                     </div>
 
-                    <textarea id="messageInput" placeholder="Écrivez votre message..." rows="1"></textarea>
-                    <div class="emoji-btn" id="emojiBtn">
-                        <span>😀</span>
+                    <!-- Wrapper du textarea et boutons -->
+                    <div class="input-wrapper">
+                        <button class="input-action-btn-main" id="toggleActionsBtn" title="Actions">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <textarea id="messageInput" placeholder="Écrivez votre message..." rows="1"></textarea>
+                        
+                        <div class="emoji-btn" id="emojiBtn">
+                            <span>😀</span>
+                        </div>
+                        <button class="send-btn" id="sendBtn" title="Envoyer">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Actions (attachement, etc) - masquées par défaut -->
+                    <div class="input-actions" id="inputActions">
+                        <button class="input-action-btn-back" id="closeActionsBtn" title="Retour">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </button>
+                        <button class="input-action-btn" id="attachFileBtn" title="Joindre un fichier">
+                            <i class="fas fa-paperclip"></i> Fichier
+                        </button>
+                        <button class="input-action-btn" id="attachImageBtn" title="Joindre une image">
+                            <i class="fas fa-image"></i> Image
+                        </button>
                     </div>
                 </div>
-                
-                <button class="send-btn" id="sendBtn" title="Envoyer">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
             </div>
 
-            <!-- Indicateur d'écriture -->
-            <div class="typing-indicator" id="typingIndicator" style="display: none;">
-                <div class="typing-dots">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-                <span id="typingText">quelqu'un est en train d'écrire...</span>
-            </div>
         </div>
     </div>
 
@@ -5728,13 +5899,23 @@
             });
 
             chatSocket.on('conversation:message-received', (data) => {
-                const { conversationId, senderId, messagePreview, timestamp } = data;
+                const { conversationId, senderId, messagePreview, timestamp, participantIds, lastMessage } = data;
                 
-                console.log('📬 WebSocket: Message reçu dans conversation', { conversationId });
+                console.log('📬 WebSocket: Message reçu dans conversation', { 
+                    conversationId,
+                    isMember: participantIds?.includes(currentUser?.id)
+                });
+
+                // ✅ Vérifier si JE suis un participant de cette conversation
+                if (participantIds && !participantIds.includes(currentUser?.id)) {
+                    console.log('ℹ️ Message pour une conversation dont je ne suis pas membre');
+                    return;
+                }
 
                 const conv = conversations.find(c => c.id === conversationId);
                 if (conv) {
-                    conv.lastMessage = {
+                    // Utiliser le lastMessage complet du serveur s'il est fourni, sinon construire
+                    conv.lastMessage = lastMessage || {
                         content: messagePreview,
                         senderId,
                         createdAt: timestamp,
@@ -5835,8 +6016,27 @@
                     }
                 }
                 
-                // Rerendre les messages pour afficher la réaction
                 renderMessages(messages);
+                renderConversationsList(conversations);
+                
+                
+                console.log(`👍 WebSocket: Réaction ${action}`, {
+                    messageId,
+                    emoji,
+                    userId: reactionUserId
+                });
+            });
+
+
+
+            chatSocket.on('message:reaction', (data) => {
+                const { conversationId, messageId, userId: reactionUserId, emoji, action, timestamp } = data;
+                
+                loadConversations();
+                loadMessages(conversationId, false);
+                renderMessages(messages);
+                renderConversationsList(conversations);
+                
                 
                 console.log(`👍 WebSocket: Réaction ${action}`, {
                     messageId,
@@ -5851,6 +6051,15 @@
 
             chatSocket.on('message:typing', (data) => {
                 const { userId: typingUserId, conversationId, isTyping } = data;
+                
+                console.log(`🔊 WebSocket typing event:`, {
+                    typingUserId,
+                    conversationId,
+                    isTyping,
+                    currentUserId: currentUser?.id,
+                    currentConversationId,
+                    conversationExists: !!conversations.find(c => c.id === conversationId)
+                });
                 
                 if (isTyping && typingUserId !== (currentUser?.id || 'anonymous')) {
                     showTypingIndicator(conversationId, typingUserId);
@@ -5951,7 +6160,6 @@
                     conversations.splice(conversationIndex, 1);
                 }
 
-                // ✅ Si c'est la conversation actuellement ouverte
                 if (currentConversationId === conversationId) {
                     // Déterminer qui a supprimé (nom du supprimant)
                     let deleterName = 'Un utilisateur';
@@ -5984,36 +6192,219 @@
                     // Cacher le chat
                     hideChatArea();
                 } else {
-                    // Simplement montrer un toast si ce n'est pas la conversation courante
                     showToast('Une conversation a été supprimée', 'info');
                 }
 
                 // Rerendre la liste des conversations
                 renderConversationsList(conversations);
             });
+
+            // ────────────────────────────────────────────────────────
+            // ✨ Événement: Nouvelle conversation créée (par d'autres utilisateurs)
+            // ────────────────────────────────────────────────────────
+            
+            chatSocket.on('conversation:created', (data) => {
+                const { conversationId, conversation, participantIds, createdBy, createdAt } = data;
+                
+                console.log('✨ WebSocket: Nouvelle conversation créée', { 
+                    conversationId, 
+                    createdBy,
+                    participantIds,
+                    isMember: participantIds?.includes(currentUser?.id)
+                });
+                
+                // ✅ Vérifier si MOI je suis dans les participants
+                if (!participantIds?.includes(currentUser?.id) && createdBy !== currentUser?.id) {
+                    console.log('ℹ️ Conversation créée pour d\'autres participants, ignorée pour moi');
+                    return;
+                }
+                
+                // ✅ Ajouter la conversation à notre liste si elle n'existe pas
+                if (!conversations.find(c => c.id === conversationId)) {
+                    conversations.push(conversation);
+                    console.log('✅ Conversation ajoutée à la liste locale');
+                    
+                    // Mettre à jour l'affichage
+                    renderConversationsList(conversations);
+                    
+                    // Si c'est MOI qui l'ai créée, la sélectionner automatiquement
+                    if (createdBy === currentUser?.id) {
+                        setTimeout(() => selectConversation(conversationId), 100);
+                    }
+                }
+            });
+
+            // ────────────────────────────────────────────────────────
+            // 📨 Événement: Conversation mise à jour (pour les listes)
+            // ────────────────────────────────────────────────────────
+            
+            chatSocket.on('conversation:updated', (data) => {
+                const { conversationId, conversation, participantIds, updatedBy } = data;
+                
+                console.log('📨 WebSocket: Conversation mise à jour', { 
+                    conversationId, 
+                    updatedBy,
+                    isMember: participantIds?.includes(currentUser?.id)
+                });
+                
+                // ✅ Vérifier si MOI je suis dans les participants
+                if (!participantIds?.includes(currentUser?.id)) {
+                    return;
+                }
+                
+                // ✅ Mettre à jour la conversation dans notre liste
+                const convIndex = conversations.findIndex(c => c.id === conversationId);
+                if (convIndex !== -1) {
+                    conversations[convIndex] = {
+                        ...conversations[convIndex],
+                        ...conversation
+                    };
+                    console.log('✅ Conversation mise à jour dans la liste locale');
+                    renderConversationsList(conversations);
+                }
+            });
+
+            // ────────────────────────────────────────────────────────
+            // 🗑️ Événement: Message supprimé par quelqu'un d'autre
+            // ────────────────────────────────────────────────────────
+            
+            chatSocket.on('message:deleted', (data) => {
+                const { conversationId, messageId, deletedAt, participantIds } = data;
+                
+                // ✅ Vérifier si MOI je suis dans les participants
+                if (!participantIds?.includes(currentUser?.id)) {
+                    return;
+                }
+                
+                // Si c'est dans la conversation courante, mettre à jour les messages
+                if (conversationId === currentConversationId) {
+                    const msg = messages.find(m => m.id === messageId);
+                    if (msg) {
+                        msg.deletedAt = deletedAt;
+                        console.log(`🗑️ Message supprimé dans la conversation courante: ${messageId}`);
+                        renderMessages(messages);
+                    }
+                }
+            });
         }
 
         // Fonctions utilitaires WebSocket
-
         function showTypingIndicator(conversationId, userId) {
-            const typingElement = document.querySelector(`[data-typing-indicator="${userId}"]`);
-            if (!typingElement) {
-                const indicator = document.createElement('div');
-                indicator.setAttribute('data-typing-indicator', userId);
-                indicator.className = 'typing-indicator';
-                indicator.innerHTML = '<span></span><span></span><span></span>';
-                
-                const messagesContainer = document.getElementById('messagesContainer');
-                if (messagesContainer) {
-                    messagesContainer.appendChild(indicator);
+            if (userId === (currentUser?.id || 'anonymous')) return;
+            
+            if (conversationId !== currentConversationId) {
+                console.log(`⚠️ Typing: Conversation ${conversationId} n'est pas active (currentConversationId=${currentConversationId})`);
+                updateConversationTypingPreview(conversationId, userId, true);
+                return;
+            }
+            
+            const typingElement = document.querySelector('[data-typing-indicator]');
+            if (typingElement) {
+                typingElement.style.display = 'flex';
+                if (userId) {
+                    typingElement.setAttribute('data-typing-indicator', userId);
+                    
+                    let typingUserName = 'quelqu\'un';
+                    let foundUser = null;
+                    let searchLocations = [];
+                 
+                    
+                    // Chercher dans currentConversation
+                    if (currentConversation?.participants) {
+                        foundUser = currentConversation.participants.find(p => p.userId === userId);
+                        if (foundUser) searchLocations.push('currentConversation');
+                    }
+                    
+                    // Si pas trouvé, chercher dans la conversation du groupe
+                    if (!foundUser) {
+                        const targetConversation = conversations.find(c => c.id === conversationId);
+                        if (targetConversation?.participants) {
+                          
+                            foundUser = targetConversation.participants.find(p => p.userId === userId);
+                            if (foundUser) searchLocations.push(`targetConversation(${conversationId})`);
+                        }
+                    }
+                    
+                    // Si toujours pas trouvé, chercher dans TOUTES les conversations
+                    if (!foundUser) {
+                        for (const conv of conversations) {
+                            if (conv.participants) {
+                                foundUser = conv.participants.find(p => p.userId === userId);
+                                if (foundUser) {
+                                    searchLocations.push(`allConversations(${conv.id})`);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (foundUser) {
+                        typingUserName = foundUser.name || foundUser.email || 'Utilisateur';
+                    }
+               
+                    
+                    // Mettre à jour le texte
+                    const typingText = typingElement.querySelector('#typingText');
+                    if (typingText) {
+                        typingText.textContent = `${typingUserName} est en train d'écrire...`;
+                    }
                 }
             }
+            
+            // 📝 Mettre à jour aussi le preview dans la liste des conversations
+            updateConversationTypingPreview(conversationId, userId, true);
         }
 
         function hideTypingIndicator(conversationId, userId) {
-            const indicator = document.querySelector(`[data-typing-indicator="${userId}"]`);
-            if (indicator) {
-                indicator.remove();
+            const typingElement = document.querySelector('[data-typing-indicator]');
+            if (typingElement) {
+                typingElement.style.display = 'none';
+                typingElement.setAttribute('data-typing-indicator', '');
+            }
+            
+            // 📝 Mettre à jour aussi le preview dans la liste des conversations
+            updateConversationTypingPreview(conversationId, userId, false);
+        }
+        
+        // 📝 Mettre à jour le preview de typing dans la liste des conversations
+        function updateConversationTypingPreview(conversationId, userId, isTyping) {
+            const previewElement = document.querySelector(`[data-conversation-preview="${conversationId}"]`);
+            if (!previewElement) return;
+            
+            const conversation = conversations.find(c => c.id === conversationId);
+            if (!conversation) return;
+            
+            if (isTyping) {
+                // Ne pas afficher si c'est MOI qui tape
+                if (userId === (currentUser?.id || 'anonymous')) return;
+                
+                // Récupérer le nom du participant qui tape
+                let typingUserName = 'quelqu\'un';
+                let foundUser = null;
+                
+                // Chercher dans la conversation
+                if (conversation.participants) {
+                    foundUser = conversation.participants.find(p => p.userId === userId);
+                }
+                
+                // Si pas trouvé, chercher dans toutes les conversations
+                if (!foundUser) {
+                    for (const conv of conversations) {
+                        if (conv.participants) {
+                            foundUser = conv.participants.find(p => p.userId === userId);
+                            if (foundUser) break;
+                        }
+                    }
+                }
+                
+                if (foundUser) {
+                    typingUserName = foundUser.name || foundUser.email || 'Utilisateur';
+                }
+                
+                previewElement.innerHTML = `<em style="color: var(--placeholder-color);">${escapeHtml(typingUserName)} est en train d'écrire...</em>`;
+                previewElement.classList.add('typing');
+            } else {
+                renderConversationsList(conversations);
             }
         }
 
@@ -6109,6 +6500,9 @@
             // Initialiser le picker emoji
             initEmojiPicker();
             
+            // Basculer input/actions
+            setupActionsToggle();
+            
             // Écouteurs d'événements
             setupEventListeners();
             
@@ -6151,6 +6545,32 @@
                 });
             }
         }
+        // ═══════════════════════════════════════════════════════════════════
+        // ⚡ Basculer entre input et actions
+        // ═══════════════════════════════════════════════════════════════════
+        function setupActionsToggle() {
+            const toggleActionsBtn = document.getElementById('toggleActionsBtn');
+            const closeActionsBtn = document.getElementById('closeActionsBtn');
+            const messageInputContainer = document.getElementById('messageInputContainer');
+            
+            if (toggleActionsBtn) {
+                toggleActionsBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    messageInputContainer.classList.remove('input-mode');
+                    messageInputContainer.classList.add('actions-mode');
+                });
+            }
+            
+            if (closeActionsBtn) {
+                closeActionsBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    messageInputContainer.classList.remove('actions-mode');
+                    messageInputContainer.classList.add('input-mode');
+                    document.getElementById('messageInput')?.focus();
+                });
+            }
+        }
+
         function setupEventListeners() {
             // Boutons de navigation
             document.getElementById('backToEventsBtn')?.addEventListener('click', () => {
@@ -6737,6 +7157,17 @@ function renderConversationsList(conversationsList) {
             }
         }
         
+        // Vérifier si quelqu'un est en train d'écrire dans cette conversation
+        let isTypingInConversation = false;
+        let typingParticipantName = '';
+        if (conversation.type === 'direct' && conversation.participants) {
+            const otherParticipants = conversation.participants.filter(p => p.userId !== currentUser?.id);
+            if (otherParticipants.length > 0) {
+                // À mettre à jour via WebSocket - pour l'instant placeholder
+                typingParticipantName = otherParticipants[0].name || otherParticipants[0].email || 'Utilisateur';
+            }
+        }
+        
         // Nom de la conversation et infos de la personne
         let conversationName = conversation.name || 'Chat';
         let otherParticipant = null;
@@ -6749,44 +7180,36 @@ function renderConversationsList(conversationsList) {
                 otherParticipant = otherParticipants[0];
                 conversationName = otherParticipant.name || otherParticipant.email || 'Utilisateur';
                 
-                
-
-            if (otherParticipant.isOnline) {
-                onlineStatus = '<span class="status-dot connection-status-indicator online"></span>En ligne';
-            } else if (otherParticipant.lastReadAt) {
-                const lastReadDate = new Date(otherParticipant.lastReadAt);
-                const now = new Date();
-                const diffMs = now - lastReadDate;
-                const diffMins = Math.floor(diffMs / 60000);
-                const diffHours = Math.floor(diffMs / 3600000);
-                const diffDays = Math.floor(diffMs / 86400000);
-                
-                let lastReadText;
-                if (diffMins < 1) {
-                    lastReadText = 'vu à l\'instant';
-                } else if (diffMins < 60) {
-                    lastReadText = `vu il y a ${diffMins}m`;
-                } else if (diffHours < 24) {
-                    lastReadText = `vu il y a ${diffHours}h`;
-                } else if (diffDays < 7) {
-                    lastReadText = `vu il y a ${diffDays}j`;
+                if (otherParticipant.isOnline) {
+                    onlineStatus = '<span class="status-dot online"></span>';
+                } else if (otherParticipant.lastReadAt) {
+                    const lastReadDate = new Date(otherParticipant.lastReadAt);
+                    const now = new Date();
+                    const diffMs = now - lastReadDate;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+                    
+                    let lastReadText;
+                    if (diffMins < 1) {
+                        lastReadText = 'vu à l\'instant';
+                    } else if (diffMins < 60) {
+                        lastReadText = `vu il y a ${diffMins}m`;
+                    } else if (diffHours < 24) {
+                        lastReadText = `vu il y a ${diffHours}h`;
+                    } else if (diffDays < 7) {
+                        lastReadText = `vu il y a ${diffDays}j`;
+                    } else {
+                        lastReadText = `vu le ${lastReadDate.toLocaleDateString('fr-FR')}`;
+                    }
+                    onlineStatus = `<span class="status-dot offline"></span><span>${lastReadText}</span>`;
                 } else {
-                    lastReadText = `vu le ${lastReadDate.toLocaleDateString('fr-FR')}`;
+                    onlineStatus = '<span class="status-dot offline"></span>Hors ligne';
                 }
-                onlineStatus = `<span class="status-dot offline"></span><span>${lastReadText}</span>`;
-            } else {
-                onlineStatus = '<span class="status-dot offline"></span>Hors ligne';
             }
-
-
-        }
-    }else if (conversation.type === 'group') {
-        
-
-
+        } else if (conversation.type === 'group') {
             const participantCount = conversation.participants ? conversation.participants.length : 0;
             conversationName = conversation.name ? `${conversation.name} (${participantCount})` : `Groupe (${participantCount})`;
-
         }
                 
         // Avatar de la conversation - Générer via getGuestAvatarImage() selon sexe/nom
@@ -6835,16 +7258,16 @@ function renderConversationsList(conversationsList) {
                         <div class="conversation-name">${escapeHtml(conversationName)}</div>
                         <div class="conversation-time-status">
                             <div class="conversation-time">${timeText}</div>
-                            ${lastMessage?.senderId === currentUser?.id ? 
-                                `<span class="message-status status-icon ${lastMessage?.readBy && lastMessage.readBy.length > 0 ? 'read' : lastMessage?.delivered ? 'delivered' : 'sent'}">
-                                    ${statusIcon}
-                                </span>` : ''}
+                           
                         </div>
                     </div>
                     
 
                     <div class="conversation-header">
-                    <div class="conversation-preview">${escapeHtml(previewText || 'Envoyez un message')}</div>
+                    <div class="conversation-preview" data-conversation-preview="${conversation.id}">
+                        <span class="preview-status-icon">${statusIcon}</span>
+                        <span class="preview-text">${escapeHtml(previewText || 'Envoyez un message')}</span>
+                    </div>
                     ${onlineStatus ? `<div class="conversation-status-text">${onlineStatus}</div>` : ''}
                     </div>
                 </div>
@@ -6856,6 +7279,7 @@ function renderConversationsList(conversationsList) {
     container.querySelectorAll('.conversation-item').forEach(item => {
         item.addEventListener('click', () => {
             const conversationId = item.getAttribute('data-conversation-id');
+            switchViewState('chat');
             selectConversation(conversationId);
         });
     });
@@ -6992,7 +7416,7 @@ function updateChatHeader() {
             
             // Afficher le statut de présence
             if (participant.isOnline) {
-                chatStatus.innerHTML = '<span class="status-dot connection-status-indicator online"></span>En ligne';
+                chatStatus.innerHTML = '<span class="status-dot online"></span>En ligne';
             } else if (participant.lastReadAt) {
                 const lastReadDate = new Date(participant.lastReadAt);
                 const now = new Date();
@@ -7131,9 +7555,20 @@ async function loadMessages(conversationId, loadMore = false) {
         if (result && Array.isArray(result)) {
             if (loadMore) {
                 // Ajouter les anciens messages au début
-                messages = [...result, ...messages];
+                // ✅ Déduplication: ne pas ajouter les messages qui existent déjà
+                const newMessages = result.filter(rm => !messages.some(m => m.id === rm.id));
+                messages = [...newMessages, ...messages];
             } else {
-                messages = result;
+                // ✅ Au premier chargement, fusionner les messages WebSocket avec ceux du serveur
+                // Les messages reçus via WebSocket ont déjà été ajoutés à messages[]
+                // On doit éviter les doublons
+                const existingIds = new Set(messages.map(m => m.id));
+                const newMessages = result.filter(m => !existingIds.has(m.id));
+                
+                // Fusionner: messages du serveur + messages WebSocket non encore sauvegardés
+                messages = [...result, ...messages.filter(m => !result.some(rm => rm.id === m.id))];
+                
+                console.log(`📊 loadMessages: ${result.length} du serveur + ${newMessages.length} de WebSocket = ${messages.length} total`);
             }
             
             renderMessages(messages, loadMore);
@@ -7184,7 +7619,25 @@ function renderMessages(messagesList, loadMore = false) {
         messagesList = [];
     }
     
-    // Récupérer ou créer le conteneur des messages (séparé des placeholders)
+    // ✅ DÉDUPLICATION: Supprimer les doublons dans la liste
+    const uniqueMessages = [];
+    const seenIds = new Set();
+    
+    for (const message of messagesList) {
+        if (!seenIds.has(message.id)) {
+            seenIds.add(message.id);
+            uniqueMessages.push(message);
+        } else {
+            console.warn(`⚠️ renderMessages: Doublon détecté et supprimé - ${message.id}`);
+        }
+    }
+    
+    // Mettre à jour la liste globale des messages pour éviter les doublons futurs
+    if (uniqueMessages.length !== messagesList.length) {
+        console.log(`🔄 renderMessages: ${messagesList.length} → ${uniqueMessages.length} (${messagesList.length - uniqueMessages.length} doublons supprimés)`);
+        messages = uniqueMessages;
+    }
+    
     let messagesWrapper = document.getElementById('messagesWrapper');
     if (!messagesWrapper) {
         messagesWrapper = document.createElement('div');
@@ -7198,7 +7651,7 @@ function renderMessages(messagesList, loadMore = false) {
     }
     
     // Grouper les messages par date
-    const groupedMessages = groupMessagesByDate(messagesList);
+    const groupedMessages = groupMessagesByDate(uniqueMessages);
     
     // Générer le HTML des messages
     let messagesHTML = '';
@@ -7247,6 +7700,18 @@ function renderMessages(messagesList, loadMore = false) {
             }
         }
     }
+    
+    // Ajouter le typing indicator à la fin du wrapper
+    messagesHTML += `
+        <div class="typing-indicator" data-typing-indicator="" style="display: none;">
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+            <span id="typingText">quelqu'un est en train d'écrire...</span>
+        </div>
+    `;
     
     messagesWrapper.innerHTML = messagesHTML;
     
@@ -7366,46 +7831,53 @@ function renderSingleMessage(message) {
     // Contenu du message en fonction du type
     let messageContent = '';
     
-    switch (message.type) {
-        case 'text':
-            messageContent = `
-                <div class="message-text">${escapeHtml(message.content || '')}</div>
-            `;
-            break;
-            
-        case 'image':
-            messageContent = `
-                <div class="message-image">
-                    <img src="${message.content}" alt="Image" onerror="this.src='https://via.placeholder.com/300?text=Image+non+disponible'">
-                </div>
-                ${message.caption ? `<div class="message-text">${escapeHtml(message.caption)}</div>` : ''}
-            `;
-            break;
-            
-        case 'file':
-            const fileName = message.content.split('/').pop() || 'Fichier';
-            const fileSize = message.fileSize ? formatFileSize(message.fileSize) : '';
-            
-            messageContent = `
-                <div class="message-file">
-                    <div class="file-icon">
-                        <i class="fas fa-file"></i>
+    // ✅ Si le message est supprimé, afficher "message supprimé" en italic/muted
+    if (message.deletedAt) {
+        messageContent = `
+            <div class="message-text" style="font-style: italic; opacity: 0.5; color: #9CA3AF;">message supprimé</div>
+        `;
+    } else {
+        switch (message.type) {
+            case 'text':
+                messageContent = `
+                    <div class="message-text">${escapeHtml(message.content || '')}</div>
+                `;
+                break;
+                
+            case 'image':
+                messageContent = `
+                    <div class="message-image">
+                        <img src="${message.content}" alt="Image" onerror="this.src='https://via.placeholder.com/300?text=Image+non+disponible'">
                     </div>
-                    <div class="file-info">
-                        <div class="file-name">${escapeHtml(fileName)}</div>
-                        ${fileSize ? `<div class="file-size">${fileSize}</div>` : ''}
+                    ${message.caption ? `<div class="message-text">${escapeHtml(message.caption)}</div>` : ''}
+                `;
+                break;
+                
+            case 'file':
+                const fileName = message.content.split('/').pop() || 'Fichier';
+                const fileSize = message.fileSize ? formatFileSize(message.fileSize) : '';
+                
+                messageContent = `
+                    <div class="message-file">
+                        <div class="file-icon">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">${escapeHtml(fileName)}</div>
+                            ${fileSize ? `<div class="file-size">${fileSize}</div>` : ''}
+                        </div>
+                        <a href="${message.content}" class="download-btn" download>
+                            <i class="fas fa-download"></i>
+                        </a>
                     </div>
-                    <a href="${message.content}" class="download-btn" download>
-                        <i class="fas fa-download"></i>
-                    </a>
-                </div>
-            `;
-            break;
-            
-        default:
-            messageContent = `
-                <div class="message-text">${escapeHtml(message.content || '')}</div>
-            `;
+                `;
+                break;
+                
+            default:
+                messageContent = `
+                    <div class="message-text">${escapeHtml(message.content || '')}</div>
+                `;
+        }
     }
     
     // Réponse à un message
@@ -7428,7 +7900,7 @@ function renderSingleMessage(message) {
     
     // Réactions
     let reactionsSection = '';
-    if (message.reactions && Object.keys(message.reactions).length > 0) {
+    if (!message.deletedAt && message.reactions && Object.keys(message.reactions).length > 0) {
         // Vérifier si l'utilisateur a déjà réagi à au moins une réaction
         const userHasReacted = Object.values(message.reactions).some(users => 
             users.includes(currentUser.id)
@@ -7453,7 +7925,7 @@ function renderSingleMessage(message) {
         
         // N'afficher le bouton add QUE si l'utilisateur n'a pas déjà réagi
         const addButtonHTML = userHasReacted ? '' : `
-            <button class="add-reaction-btn" onclick="const msgId='${message.id}'; toggleEmojiPicker(msgId)" title="Ajouter réaction">
+            <button class="add-reaction-btn" onclick="let mssgId='${message.id}'; toggleEmojiPicker(mssgId)" title="Ajouter réaction">
                 <span>❤️</span>
             </button>
         `;
@@ -7464,10 +7936,10 @@ function renderSingleMessage(message) {
                 ${addButtonHTML}
             </div>
         `;
-    } else {
+    } else if (!message.deletedAt) {
         reactionsSection = `
             <div class="message-reactions">
-                <button class="add-reaction-btn" onclick="const msgId='${message.id}'; toggleEmojiPicker(msgId)" title="Ajouter réaction">
+                <button class="add-reaction-btn" onclick="let mssgId='${message.id}'; toggleEmojiPicker(mssgId)" title="Ajouter réaction">
                     <span>❤️</span>
                 </button>
             </div>
@@ -7496,36 +7968,81 @@ function renderSingleMessage(message) {
         `<button class="emoji-reaction-btn" onclick="addReaction('${message.id}', '${emoji}')" title="Réaction">${emoji}</button>`
     ).join('');
     
-    emojiPicker = `
-        <div class="emoji-reactions-picker" id="emoji-picker-${message.id}">
-            ${emojiPickerButtons}
-        </div>
-    `;
+
+   
     
     if (isOutgoing) {
+
+         emojiPicker = `
+            <div class="emoji-reactions-picker outgoing" id="emoji-picker-${message.id}">
+                ${emojiPickerButtons}
+            </div>
+        `;
+
         actionsDropdown = `
             <div class="message-actions-dropdown" style="position: absolute; top: 0; right: 0;">
-                <button class="btn-message-actions" onclick="const msgId='${message.id}'; toggleMessageActions(event, msgId)" title="Autres actions">
+                <button class="btn-message-actions" onclick="let mesgId='${message.id}'; toggleMessageActions(event, mesgId)" title="Autres actions">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
-                <div class="message-actions-menu " id="actions-${message.id}">
-                    <button onclick="let msgId='${message.id}'; replyToMessage(msgId)">
-                        <i class="fas fa-reply"></i> Répondre
-                    </button>
-                    <button onclick="let msgId='${message.id}'; toggleEmojiPicker(msgId)">
-                        <i class="fas fa-smile"></i> Réagir
-                    </button>
-                    <button onclick="let msgId='${message.id}'; copyMessageContent(msgId)">
-                        <i class="fas fa-copy"></i> Copier
-                    </button>
-                    <button onclick="let msgId='${message.id}'; forwardMessageContent(msgId)">
-                        <i class="fas fa-share"></i> Transférer
-                    </button>
-                    <button onclick="editMessage('${message.id}')">
-                        <i class="fas fa-edit"></i> Éditer
-                    </button>
+                <div class="message-actions-menu outgoing" id="actions-${message.id}">
+                    ${!message.deletedAt ? `
+                        <button onclick="let mesgId='${message.id}'; replyToMessage(mesgId)">
+                            <i class="fas fa-reply"></i> Répondre
+                        </button>
+                        <button onclick="let mesgId='${message.id}'; toggleEmojiPicker(mesgId)">
+                            <i class="fas fa-smile"></i> Réagir
+                        </button>
+                        <button onclick="let mesgId='${message.id}'; copyMessageContent(mesgId)">
+                            <i class="fas fa-copy"></i> Copier
+                        </button>
+                        <button onclick="let mesgId='${message.id}'; forwardMessageContent(mesgId)">
+                            <i class="fas fa-share"></i> Transférer
+                        </button>
+                        <button onclick="editMessage('${message.id}')">
+                            <i class="fas fa-edit"></i> Éditer
+                        </button>
+                    ` : ''}
                     <button class="danger" onclick="deleteMessage('${message.id}')">
-                        <i class="fas fa-trash"></i> Supprimer
+                        <i class="fas fa-trash"></i> ${message.deletedAt ? 'Message supprimé' : 'Supprimer'}
+                    </button>
+                </div>
+            </div>
+            ${emojiPicker}
+        `;
+    }else{
+
+
+            emojiPicker = `
+                <div class="emoji-reactions-picker incoming" id="emoji-picker-${message.id}">
+                    ${emojiPickerButtons}
+                </div>
+            `;
+
+        actionsDropdown = `
+            <div class="message-actions-dropdown" style="position: absolute; top: 0; right: 0;">
+                <button class="btn-message-actions" onclick="let mesgId='${message.id}'; toggleMessageActions(event, mesgId)" title="Autres actions">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="message-actions-menu incoming" id="actions-${message.id}">
+                    ${!message.deletedAt ? `
+                        <button onclick="let mesgId='${message.id}'; replyToMessage(mesgId)">
+                            <i class="fas fa-reply"></i> Répondre
+                        </button>
+                        <button onclick="let mesgId='${message.id}'; toggleEmojiPicker(mesgId)">
+                            <i class="fas fa-smile"></i> Réagir
+                        </button>
+                        <button onclick="let mesgId='${message.id}'; copyMessageContent(mesgId)">
+                            <i class="fas fa-copy"></i> Copier
+                        </button>
+                        <button onclick="let mesgId='${message.id}'; forwardMessageContent(mesgId)">
+                            <i class="fas fa-share"></i> Transférer
+                        </button>
+                        <button onclick="editMessage('${message.id}')">
+                            <i class="fas fa-edit"></i> Éditer
+                        </button>
+                    ` : ''}
+                    <button class="danger" onclick="deleteMessage('${message.id}')">
+                        <i class="fas fa-trash"></i> ${message.deletedAt ? 'Message supprimé' : 'Supprimer'}
                     </button>
                 </div>
             </div>
@@ -7538,11 +8055,7 @@ function renderSingleMessage(message) {
              data-message-id="${message.id}"
              data-sender-id="${message.senderId}">
             
-            ${!isOutgoing ? `
-                <div class="message-avatar">
-                    ${avatarHTML}
-                </div>
-            ` : ''}
+           
             
             <div class="message-content">
                 ${!isOutgoing ? `<div class="conversation-meta sender-name">${escapeHtml(senderName)}</div>` : ''}
@@ -7559,11 +8072,7 @@ function renderSingleMessage(message) {
                 ${reactionsSection}
             </div>
             
-            ${isOutgoing ? `
-                <div class="message-avatar">
-                    ${avatarHTML}
-                </div>
-            ` : ''}
+           
         </div>
     `;
 }
@@ -7673,7 +8182,7 @@ async function sendMessage() {
         renderMessages(messages);
         scrollToBottom();
         
-        console.log('📤 Envoi du message via HTTP/REST...', { replyToId, messageText });
+      
         const result = await window.storage.sendMessage(currentConversationId, messageText, {
             replyTo: replyToId
         });
@@ -7690,7 +8199,6 @@ async function sendMessage() {
                 console.log('📡 Émission via WebSocket...');
                 sendMessageViaWebSocket(currentConversationId, messageText);
             } else {
-                console.warn('⚠️ WebSocket non connecté, affichage immédiat du message');
                 messages.push({
                     id: result.id,
                     conversationId: currentConversationId,
@@ -7706,12 +8214,12 @@ async function sendMessage() {
                 renderMessages(messages);
                 scrollToBottom();
             }
+
+            renderConversationsList(conversations);
             
             SECURA_AUDIO.play('notification');
             
         } else {
-            // ❌ Erreur d'enregistrement - afficher un message d'erreur
-            console.error('❌ Échec de l\'enregistrement du message');
             showToast('Impossible d\'envoyer le message', 'error');
             
             // Retirer le message temporaire
@@ -8430,6 +8938,12 @@ function forwardMessage(message) {
 // Supprimer un message
 async function deleteMessage(message) {
     try {
+        // ✅ Si le message est déjà supprimé, ne rien faire
+        if (message.deletedAt) {
+            showToast('Ce message est déjà supprimé', 'info');
+            return;
+        }
+        
         // Demander confirmation
         const result = await Swal.fire({
             title: 'Supprimer le message ?',
@@ -8457,10 +8971,10 @@ async function deleteMessage(message) {
         
         if (!response.ok) throw new Error('Échec de la suppression');
         
-        // Supprimer le message localement
-        const messageIndex = messages.findIndex(m => m.id === message.id);
-        if (messageIndex !== -1) {
-            messages.splice(messageIndex, 1);
+        // ✅ Marquer le message comme supprimé localement
+        const msg = messages.find(m => m.id === message.id);
+        if (msg) {
+            msg.deletedAt = new Date().toISOString();
             renderMessages(messages);
         }
         
@@ -9635,6 +10149,25 @@ async function createNewConversationWithGroupName(groupName, selectedUsers) {
         // Récupérer les résultats
         if (!result) throw new Error('Échec création conversation');
         
+        // Ajouter la conversation à notre liste locale AVANT le reload
+        conversations.push(result);
+        
+        // 📡 IMPORTANT: Émettre via WebSocket pour notifier les autres participants
+        const allParticipantIds = [currentUser?.id, ...selectedUsers];
+        if (chatSocket && chatSocket.connected) {
+            console.log('📡 Émission conversation:created (groupe) via WebSocket', {
+                conversationId: result.id,
+                groupName,
+                participantIds: allParticipantIds
+            });
+            
+            chatSocket.emit('conversation:created', {
+                conversationId: result.id,
+                conversationData: result,
+                participantIds: allParticipantIds
+            });
+        }
+        
         // Recharger les conversations
         await loadConversations(eventId, true);
         
@@ -9691,6 +10224,20 @@ async function createNewConversation() {
         
         // Récupérer les résultats
         if (!result) throw new Error('Échec création conversation');
+        
+        // Ajouter la conversation à notre liste locale AVANT le reload
+        conversations.push(result);
+        
+        // 📡 IMPORTANT: Émettre via WebSocket pour notifier les autres participants
+        if (chatSocket && chatSocket.connected) {
+            
+            
+            chatSocket.emit('conversation:created', {
+                conversationId: result.id,
+                conversationData: result,
+                participantIds: [currentUser?.id, ...selectedUsers]
+            });
+        }
         
         // Recharger les conversations
         await loadConversations(eventId, true);
@@ -10399,7 +10946,7 @@ function deleteMessage(messageId) {
     
     // Marquer comme supprimé
     messages[messageIndex].deletedAt = new Date().toISOString();
-    messages[messageIndex].content = '[Message supprimé]';
+    messages[messageIndex].content = 'Message supprimé';
     
     // Mettre à jour en base de données
     const message = messages[messageIndex];
@@ -11157,14 +11704,14 @@ function startAudioCall() {
 
     const audioCallState = document.getElementById('audioCallState');
     
-    // Utiliser le nouveau système d'états
     switchViewState('audio');
     
-    // Initialiser l'appel
     callStartTime = Date.now();
     
     if (audioCallState && currentConversation?.type === 'direct' && currentConversation?.participants) {
+       
         const otherParticipant = currentConversation.participants.find(p => p.userId !== currentUser?.id);
+    
         if (otherParticipant) {
             const callName = document.getElementById('callName');
             const callAvatar = document.getElementById('callAvatar');
@@ -11178,7 +11725,6 @@ function startAudioCall() {
         }
     }
     
-    showToast('Appel audio démarré', 'info');
 }
 
 /**
@@ -11189,7 +11735,6 @@ function endAudioCall() {
     callStartTime = null;
     switchViewState('chat');
     renderMessages(messages);
-    showToast('Appel audio terminé', 'info');
 }
 
 /**
@@ -11207,7 +11752,9 @@ function startVideoCall() {
     callStartTime = Date.now();
     
     if (videoCallState && currentConversation?.type === 'direct' && currentConversation?.participants) {
-        const otherParticipant = currentConversation.participants.find(p => p.userId !== currentUser?.id);
+        
+        
+        
         if (otherParticipant) {
             const callName = document.getElementById('videoCallName');
             const callAvatar = document.getElementById('videoCallAvatar');
@@ -11221,7 +11768,6 @@ function startVideoCall() {
         }
     }
     
-    showToast('Appel vidéo démarré', 'info');
 }
 
 /**
@@ -11232,7 +11778,6 @@ function endVideoCall() {
     callStartTime = null;
     switchViewState('chat');
     renderMessages(messages);
-    showToast('Appel vidéo terminé', 'info');
 }
 
 /**
@@ -11477,3 +12022,5 @@ window.chatManager = {
 
 console.log('Chat System Initialized Successfully!');
 </script>
+</body>
+</html>
