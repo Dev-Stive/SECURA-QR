@@ -5678,7 +5678,7 @@
             
             try {
                 // Vérifier que la session existe et est valide
-                const sessionResult = await window.storage.getCurrentSessionDetails();
+                const sessionResult = await storage.getCurrentSessionDetails();
                 
                 if (!sessionResult?.success || !sessionResult?.data) {
                     throw new Error('Session invalide ou expirée');
