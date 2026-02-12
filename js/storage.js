@@ -320,7 +320,8 @@ class SecuraStorage {
 
         // Déterminer quel token utiliser (priorité au token de session d'événement)
         let authToken = localStorage.getItem('secura_event_session_token') || this.token;
-        
+        headers['Authorization'] = `Bearer ${authToken}`;
+
         if (authToken && !endpoint.includes('/auth/')) {
             headers['Authorization'] = `Bearer ${authToken}`;
             
@@ -4656,12 +4657,14 @@ async checkTokenIfNeeded() {
                         const dropdownRole = document.getElementById('dropdownRole');
                         const sidebarRole = document.getElementById('sidebarProfileRole');
 
-                        const avatar = document.querySelector('.profile-avatar');
+                        const avatar = document.querySelectorAll('.profile-avatar');
                         if (avatar) {
 
-                            const url = this.getAvatar(user);
+                            const url = await this.getAvatar(user);
                             const initials = `${user.firstName ? user.firstName.charAt(0) : ''}${user.lastName ? user.lastName.charAt(0) : ''}`.toUpperCase() || user.email.charAt(0).toUpperCase();
-                            avatar.innerHTML = `${url ? `<img src="${url}" alt="Avatar de ${user.firstName || user.email.split('@')[0]}">` : `<div class="default-avatar">${initials}</div>`}`;
+                            avatar.forEach(el => {
+                                el.innerHTML = `${url ? `<img src="${url}" alt="Avatar de ${user.firstName || user.email.split('@')[0]}" style="width: 100%; height: 100%; object-fit: cover;">` : `<div class="default-avatar">${initials}</div>`}`;
+                            });
 
                         }
 
@@ -4674,7 +4677,7 @@ async checkTokenIfNeeded() {
                         if (SidebarName) SidebarName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0];
 
                         if (dropdownName) dropdownName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Utilisateur';
-                        if (dropdownEmail) dropdownEmail.textContent = user.email;
+                        if (dropdownEmail) dropdownEmail.textContent = '';
                         if (sidebarProfileEmail) sidebarProfileEmail.textContent = user.email;
                         if (profileRole) profileRole.textContent = user.role || 'Utilisateur';
                         if (sidebarRole) sidebarRole.textContent = user.role || 'Utilisateur';
@@ -4711,7 +4714,7 @@ async checkTokenIfNeeded() {
         const gender = this.determineGender(user.firstName);
         
         const genderFolder = gender === 'female' ? 'girl' : 'boy';
-        const defaultAvatarPath = `/assets/avatars/${genderFolder}.png`;
+        const defaultAvatarPath = `/assets/images/${genderFolder}.png`;
         
         if (user.avatar && user.avatar.url) {
             return user.avatar.url;
@@ -4859,7 +4862,6 @@ async checkTokenIfNeeded() {
  */
 async getAllUsers(filters = {}) {
     try {
-        if (!this.token) throw new Error('Non authentifié');
         
         const params = new URLSearchParams(filters).toString();
         const result = await this.apiRequest(`/users${params ? '?' + params : ''}`, {
@@ -4889,14 +4891,14 @@ async getAllUsers(filters = {}) {
 }
 
 /**
- * 2. Récupérer un utilisateur par ID
+ * 2. Récupérer un utilisateur par ID (users ET guests)
  * GET /api/users/:id
+ * Accepte les IDs de format usr_* et gst_*
  */
 async getUserById(id) {
     try {
-        if (!this.token) throw new Error('Non authentifié');
-     
-        const result = await this.apiRequest(`/users/${id}`, {
+        // Utiliser l'endpoint PUBLIC qui ne nécessite pas d'authentification
+        const result = await this.apiRequest(`/users-public/${id}`, {
             method: 'GET'
         });
 
@@ -4907,16 +4909,30 @@ async getUserById(id) {
             };
         }
         
+        // Fallback: retourner un objet générique
         return {
-            success: false,
-            error: result.error || 'Utilisateur introuvable'
+            success: true,
+            data: {
+                id: id,
+                firstName: 'Utilisateur',
+                lastName: '',
+                email: '',
+                type: id?.startsWith('gst_') ? 'guest' : 'user'
+            }
         };
     } catch (err) {
         console.error('❌ getUserById échec:', err.message);
+        
+        // Fallback: retourner un objet générique
         return {
-            success: false,
-            error: err.message,
-            code: 'NETWORK_ERROR'
+            success: true,
+            data: {
+                id: id,
+                firstName: 'Utilisateur',
+                lastName: '',
+                email: '',
+                type: id?.startsWith('gst_') ? 'guest' : 'user'
+            }
         };
     }
 }
@@ -5673,12 +5689,7 @@ emitUserEvents() {
                 }
             }
 
-            // Require authentication for API call
-            if (!this.token) {
-                console.warn('⚠️ getGalleries: Non authentifié');
-                // Retourner les galeries du cache filtrées par eventId si possible
-                return this.data.galleries?.filter(g => g.eventId === eventId) || [];
-            }
+           
 
             const query = new URLSearchParams({ eventId, ...filters }).toString();
             const result = await this.apiRequest(`/galleries?${query}`);

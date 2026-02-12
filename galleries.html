@@ -24,17 +24,15 @@
     <script src="https://cdn.jsdelivr.net/npm/viewerjs@1.11.6/dist/viewer.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/viewerjs@1.11.6/dist/viewer.min.css">
     
+    <!-- Swiper Carousel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
     <!-- SweetAlert2 -->
     <link rel="preload" href="js/auth-check.js" as="script">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <style>
-        /* ============================================================================
-   GALERIES - CSS ULTRA-COMPLET ET FUSIONNÉ
-   Gestion complète: cartes, modales, statistiques, filtres, pagination
-   Basé sur l'architecture des tables avec toutes les interactions JS
-   ============================================================================ */
 
 /* ==========================================
    VARIABLES GLOBALES POUR LES THÈMES
@@ -132,7 +130,6 @@ body {
             display: flex;
             flex-direction: column;
             padding: 20px;
-            margin-top: 100px;
             max-width: 1400px;
             margin-left: auto;
             margin-right: auto;
@@ -324,7 +321,6 @@ body {
     display: flex;
     gap: 15px;
     align-items: center;
-    flex-wrap: wrap;
 }
 
 /* Filtres rapides */
@@ -3278,6 +3274,54 @@ body {
     background-repeat: no-repeat;
 }
 
+/* Carousel container */
+.photo-carousel-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.photo-carousel {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+.photo-carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.photo-carousel {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.photo-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+}
 
 .photo-card.photo-modal-card {
     position: relative;
@@ -3294,6 +3338,21 @@ body {
     inset: 0;
     background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 50%, rgba(0,0,0,0.3) 100%);
     pointer-events: none;
+}
+
+/* Dots navigation - bottom center */
+.photo-modal-dots-container {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 8;
+}
+
+.photo-modal-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
 }
 
 /* Title section - top left */
@@ -3330,13 +3389,13 @@ body {
 
 /* Actions buttons - top right */
 .photo-modal-actions {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 10;
+   position: absolute;
+  bottom: 50px;
+  right: 38px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
 }
 
 .photo-modal-actions .action-btn {
@@ -3442,13 +3501,9 @@ body {
 
 /* Dots navigation - bottom center */
 .photo-modal-dots {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     gap: 6px;
-    z-index: 8;
+    justify-content: center;
 }
 
 .photo-dot {
@@ -4555,7 +4610,6 @@ body {
 @media (max-width: 768px) {
     .galleries-main,
     .events-home-container {
-        margin-top: 80px;
         padding: 15px;
     }
 
@@ -4563,6 +4617,19 @@ body {
         flex-direction: column;
         gap: 15px;
         align-items: stretch;
+    }
+
+    .page-header h1{
+        font-size: 1.4rem;
+    }
+
+    .page-title .event-name{
+        font-size: 0.7rem;
+    }
+
+    .back-icon-link {
+        width: 24px;
+        height: 24px;
     }
 
     .page-actions {
@@ -5717,6 +5784,249 @@ body {
     color: #ef4444;
 }
 
+/* ==========================================
+   SELECT FILTERS STYLING
+   ========================================== */
+.quick-filters-select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quick-filters-select:hover {
+    border-color: var(--primary);
+    background: var(--hover-bg);
+}
+
+.quick-filters-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.1);
+}
+
+/* ==========================================
+   RESPONSIVE MOBILE STYLES
+   ========================================== */
+@media (max-width: 768px) {
+    /* Actions Bar - Responsive */
+    .actions-bar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .actions-top {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .actions-left {
+        gap: 0.75rem;
+    }
+    
+    .actions-right {
+        width: 100%;
+    }
+    
+    /* View Toggle - Smaller on mobile */
+    .view-toggle {
+        display: flex;
+        gap: 0.25rem;
+    }
+    
+    .view-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .view-btn span {
+        display: none;
+    }
+    
+    .view-btn i {
+        font-size: 1rem;
+    }
+    
+    /* Quick Filters Select - Full width on mobile */
+    .quick-filters-select {
+        width: 100%;
+    }
+    
+    /* Galleries Header - Responsive */
+    .galleries-header {
+        flex-direction: row;
+        gap: 1rem;
+    }
+    
+    .galleries-header h3 {
+        font-size: 1rem;
+    }
+    
+    /* Empty State - Responsive */
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+    
+    .empty-state .btn i {
+        font-size: 1rem;
+    }
+    
+    .empty-state h3 {
+        font-size: 1rem;
+    }
+    
+    .empty-state p {
+        font-size: 0.875rem;
+    }
+    
+    /* Search container - Full width */
+    .search-container {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Extra small mobile adjustments */
+    .view-btn {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.65rem;
+    }
+    
+    .view-btn i {
+        font-size: 0.9rem;
+    }
+    
+    .empty-state {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    .empty-state i {
+        font-size: 1.5rem;
+    }
+    
+    .quick-filters-select {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.5rem;
+    }
+    
+    .search-container input {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+     /* Galleries Header - Responsive */
+    .galleries-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+     
+    /* Galleries Header - Responsive */
+    .galleries-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+}
+
+/* ==========================================
+   CAROUSEL MODAL STYLES - SWIPER
+   ========================================== */
+
+.modal-content.modal-lg.photo-modal-content {
+    overflow: hidden !important;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-modal-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Swiper Carousel */
+.swiper.photo-carousel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.photo-carousel .swiper-wrapper {
+    height: 100%;
+}
+
+.photo-carousel .swiper-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    overflow: hidden;
+}
+
+.photo-carousel .swiper-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+}
+
+/* Swiper Pagination (Dots) */
+.photo-carousel .swiper-pagination {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    width: auto !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+.photo-carousel .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    background: rgba(255,255,255,0.3) !important;
+    border-radius: 50%;
+    margin: 0 !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 1 !important;
+}
+
+.photo-carousel .swiper-pagination-bullet:hover {
+    background: rgba(255,255,255,0.5) !important;
+}
+
+.photo-carousel .swiper-pagination-bullet-active {
+    width: 24px !important;
+    background: white !important;
+    border-radius: 4px;
+}
+
+.photo-carousel .swiper-pagination-horizontal.swiper-pagination-bullets .swiper-pagination-bullet {
+    margin: 0 3px !important;
+}
+
     </style>
 </head>
 
@@ -5942,7 +6252,7 @@ body {
     <!-- ============================================
          VUE PRINCIPALE GALERIES
          ============================================ -->
-    <div id="galleriesView" class="galleries-main" style="display: none;">
+    <div id="galleriesView" class="events-home-container" style="display: none;">
         
         <!-- En-tête de Page -->
         <div class="page-header">
@@ -6300,7 +6610,7 @@ body {
     <!-- ============================================
          VUE PHOTOS D'UNE GALERIE (VUE PRINCIPALE)
          ============================================ -->
-    <div id="photosView" class="galleries-main" style="display: none;">
+    <div id="photosView" class="events-home-container" style="display: none;">
         
         <!-- En-tête de Page -->
         <div class="page-header">

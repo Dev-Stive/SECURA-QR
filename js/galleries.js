@@ -113,36 +113,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 // ============================================
 // 🔐 AUTHENTIFICATION
 // ============================================
-
-// ==========================================
-// VALIDATION SESSION POUR NAVIGATION
-// ==========================================
-async function validateSession() {
-    try {
-        const token = localStorage.getItem('secura_event_session_token');
-        if (!token) {
-            showToast('Session expirée. Veuillez vous reconnecter.', 'error');
-            return false;
-        }
-
-        const result = await storage.verifyEventSessionToken(token);
-
-        return result.success;
-        
-    } catch (error) {
-        console.error('Erreur validation session:', error);
-        return false;
-    }
-}
-
 async function checkAuth() {
     try {
         currentUser = await storage.getProfile();
-        currentsession = await validateSession();
-
-        // Passer si connecté OU si on a une session invité active
-        if (!currentUser && !currentsession) {
-            window.location.href = 'login.html';
+        
+        if (!currentUser) {
+            window.location.href = '/';
             return false;
         }
         return true;
@@ -4382,11 +4358,10 @@ function navigatePhoto(direction) {
 }
 
 // ============================================
-// SYSTÈME MODAL GALERIE - SINGLE INSTANCE
+// SYSTÈME MODAL GALERIE - SWIPER CAROUSEL
 // ============================================
 let photoModalInstance = null;
-let swipeStartX = 0;
-let swipeStartY = 0;
+let photoSwiper = null;
 
 function getOrCreatePhotoModal() {
     if (photoModalInstance) return photoModalInstance;
@@ -4397,8 +4372,10 @@ function getOrCreatePhotoModal() {
     modal.innerHTML = `
         <div class="modal-content modal-lg photo-modal-content">
             <div class="photo-modal-card">
-                <div class="photo-card-image"></div>
-                <div class="photo-card-overlay"></div>
+                <div class="swiper photo-carousel" id="photoCarousel">
+                    <div class="swiper-wrapper" id="swiperWrapper"></div>
+                    <div class="swiper-pagination"></div>
+                </div>
                 
                 <div class="photo-modal-title-section">
                     <div class="photo-modal-title-event"></div>
@@ -4432,8 +4409,6 @@ function getOrCreatePhotoModal() {
                     <div class="photo-modal-stats"></div>
                     <p class="photo-modal-desc"></p>
                 </div>
-                
-                <div class="photo-modal-dots"></div>
             </div>
             
             <button class="modal-close" title="Fermer">
@@ -4453,62 +4428,119 @@ function getOrCreatePhotoModal() {
 
 function setupPhotoModalListeners(modal) {
     const closeBtn = modal.querySelector('.modal-close');
-    const content = modal.querySelector('.modal-content');
     
-    // Close button
-    closeBtn.addEventListener('click', closePhotoModal);
-    
-    // Overlay click
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closePhotoModal();
+    // Close button only
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closePhotoModal();
     });
     
-    // Keyboard navigation
+    // Prevent modal closing on overlay/swiper click - only close button closes it
+    const content = modal.querySelector('.modal-content');
+    content.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    
+    // Keyboard navigation - only Escape closes
     const keyHandler = (e) => {
         if (!modal.classList.contains('active')) return;
         if (e.key === 'Escape') closePhotoModal();
-        if (e.key === 'ArrowLeft') navigatePhoto(-1);
-        if (e.key === 'ArrowRight') navigatePhoto(1);
     };
     document.addEventListener('keydown', keyHandler);
-    
-    // Swipe touch
-    content.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-            swipeStartX = e.touches[0].clientX;
-            swipeStartY = e.touches[0].clientY;
-        }
-    });
-    
-    content.addEventListener('touchend', (e) => {
-        if (e.changedTouches.length === 1) {
-            const endX = e.changedTouches[0].clientX;
-            const endY = e.changedTouches[0].clientY;
-            const deltaX = endX - swipeStartX;
-            const deltaY = endY - swipeStartY;
-            
-            // Swipe horizontal only
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 60) {
-                if (deltaX > 0 && currentPhotoIndex > 0) {
-                    navigatePhoto(-1);
-                } else if (deltaX < 0 && currentPhotoIndex < filteredPhotos.length - 1) {
-                    navigatePhoto(1);
-                }
-            }
-        }
-        swipeStartX = 0;
-        swipeStartY = 0;
-    });
 }
 
 function closePhotoModal() {
     if (photoModalInstance) {
         photoModalInstance.classList.remove('active');
+        // Preserve currentPhotoIndex for next time modal opens
+        if (photoSwiper) {
+            currentPhotoIndex = photoSwiper.activeIndex;
+            photoSwiper.destroy();
+            photoSwiper = null;
+        }
+    }
+}
+
+function syncSwiperWithPhotos() {
+    if (!photoSwiper || filteredPhotos.length === 0) return;
+    
+    const index = photoSwiper.activeIndex;
+    currentPhotoIndex = Math.max(0, Math.min(index, filteredPhotos.length - 1));
+    
+    const photo = filteredPhotos[currentPhotoIndex];
+    if (photo) {
+        updatePhotoInfoDisplay(photo).catch(err => {
+            console.error('Error updating photo info:', err);
+        });
     }
 }
 
 async function updatePhotoModal(photo) {
     const modal = getOrCreatePhotoModal();
+    const wrapper = modal.querySelector('.swiper-wrapper');
+    
+    // Find the index of the clicked photo
+    const photoIndex = filteredPhotos.findIndex(p => p.id === photo.id);
+    if (photoIndex !== -1) {
+        currentPhotoIndex = photoIndex;
+    }
+    
+    // Build carousel slides with Swiper
+    wrapper.innerHTML = '';
+    filteredPhotos.forEach((p) => {
+        const slide = document.createElement('div');
+        slide.className = 'swiper-slide';
+        const img = document.createElement('img');
+        img.src = p.url;
+        img.alt = p.filename;
+        img.loading = 'lazy';
+        img.draggable = false;
+        slide.appendChild(img);
+        wrapper.appendChild(slide);
+    });
+    
+    // Destroy old swiper if exists
+    if (photoSwiper) {
+        photoSwiper.destroy();
+        photoSwiper = null;
+    }
+    
+    // Initialize Swiper after DOM is ready
+    setTimeout(() => {
+        const swiperEl = modal.querySelector('.photo-carousel');
+        
+        photoSwiper = new Swiper(swiperEl, {
+            initialSlide: currentPhotoIndex,
+            effect: 'slide',
+            speed: 300,
+            centeredSlides: true,
+            preventClicks: false,
+            preventClicksPropagation: false,
+            pagination: {
+                el: '.swiper-pagination',
+                type: 'bullets',
+                clickable: true,
+                dynamicBullets: true,
+                dynamicMainBullets: 5,
+            },
+            on: {
+                slideChange: syncSwiperWithPhotos
+            }
+        });
+        
+        // Update initial photo info
+        updatePhotoInfoDisplay(photo).catch(err => {
+            console.error('Error updating photo info:', err);
+        });
+    }, 50);
+    
+    // Show modal
+    modal.classList.add('active');
+}
+
+async function updatePhotoInfoDisplay(photo) {
+    const modal = photoModalInstance;
+    if (!modal) return;
     
     // Get user info
     const allUsersResponse = await storage.getAllUsers();
@@ -4522,10 +4554,6 @@ async function updatePhotoModal(photo) {
     const creatorName = userInfo?.firstName || 'Utilisateur';
     const avatar = getGuestAvatarImage(userInfo);
     const uploadDate = getRelativeDate(photo.uploadedAt);
-    
-    // Update image
-    const imageEl = modal.querySelector('.photo-card-image');
-    imageEl.style.backgroundImage = `url('${photo.url}')`;
     
     // Update title section
     modal.querySelector('.photo-modal-title-event').textContent = currentEvent.name;
@@ -4573,27 +4601,15 @@ async function updatePhotoModal(photo) {
     const descEl = modal.querySelector('.photo-modal-desc');
     descEl.textContent = photo.metadata?.description || '';
     descEl.style.display = photo.metadata?.description ? 'block' : 'none';
-    
-    // Update dots
-    updatePhotoDots(modal);
-    
-    // Show modal
-    modal.classList.add('active');
 }
 
-function updatePhotoDots(modal) {
-    const dotsEl = modal.querySelector('.photo-modal-dots');
-    dotsEl.innerHTML = '';
+function updatePhotoDots(carousel) {
+    const modal = photoModalInstance;
+    if (!modal || !photoSwiper) return;
     
-    for (let i = 0; i < filteredPhotos.length; i++) {
-        const dot = document.createElement('button');
-        dot.className = `photo-dot ${i === currentPhotoIndex ? 'active' : ''}`;
-        dot.onclick = () => {
-            currentPhotoIndex = i;
-            updatePhotoModal(filteredPhotos[i]);
-        };
-        dotsEl.appendChild(dot);
-    }
+    // Swiper handles dots automatically via pagination
+    // Just ensure activeIndex is synced
+    currentPhotoIndex = photoSwiper.activeIndex;
 }
 
 // ============================================

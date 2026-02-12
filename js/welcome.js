@@ -1206,6 +1206,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 if (result.success) {
                     // Stocker les données dans le storage
                     window.storage.currentSession = result.data;
+
+
+                    await startCountdownTimer(result.data);
                     
                     // Mettre à jour l'interface
                     populateSessionHeader(result.data);  // Remplir le header session
@@ -1214,7 +1217,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 updateTimeRemaining(result.data.event);
                     
-                    startCountdownTimer(result.data);
                 
                      // Données basées sur les membres de table
                 const present = result.data.stats?.present;
@@ -1924,7 +1926,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 seconds: -1
             };
 
-            function startCountdownTimer(event) {
+            async function startCountdownTimer(event) {
                 // Arrêter le countdown précédent s'il existe
                 if (countdownInterval) {
                     clearInterval(countdownInterval);

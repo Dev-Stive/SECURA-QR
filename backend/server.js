@@ -1962,7 +1962,7 @@ app.get('/api/auth/export-data', jwtAuth, (req, res) => {
 
 
 // 📋 GET ALL USERS
-app.get('/api/users', jwtAuth, requireRole('admin'), (req, res) => {
+app.get('/api/users', eventSessionAuth, (req, res) => {
     try {
         const data = loadData();
         const { limit, offset, search, role } = req.query;
@@ -2004,11 +2004,21 @@ app.get('/api/users', jwtAuth, requireRole('admin'), (req, res) => {
     }
 });
 
-// 👤 GET USER BY ID
-app.get('/api/users/:id', jwtAuth, (req, res) => {
+// 👤 GET USER BY ID - INFOS PUBLIQUES (pour créateurs de photos, sans auth restrictive)
+// Endpoint public - cherche dans users ET guests
+app.get('/api/users-public/:id', (req, res) => {
     try {
         const data = loadData();
-        const user = data.users?.find(u => u.id === req.params.id);
+        const userId = req.params.id;
+        let user = null;
+        
+        // Chercher d'abord dans les users
+        user = data.users?.find(u => u.id === userId);
+        
+        // Si pas trouvé et c'est un ID de guest (gst_...), chercher dans les guests
+        if (!user && userId?.startsWith('gst_')) {
+            user = data.guests?.find(g => g.id === userId);
+        }
         
         if (!user) {
             return res.status(404).json({ 
@@ -2017,8 +2027,44 @@ app.get('/api/users/:id', jwtAuth, (req, res) => {
             });
         }
         
-        // Vérifier les permissions (admin ou utilisateur lui-même)
-        if (req.user.role !== 'admin' && req.user.id !== user.id) {
+        // Retourner UNIQUEMENT les infos publiques
+        const publicInfo = {
+            id: user.id,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            email: user.email || '',
+            gender: user.gender || '',
+            company: user.company || '',
+            type: user.type || (userId.startsWith('gst_') ? 'guest' : 'user')
+        };
+        
+        log.crud('READ', 'user-public', { id: user.id, email: user.email });
+        res.json({ success: true, data: publicInfo });
+    } catch (err) {
+        log.error('GET /api/users-public/:id', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 👤 GET USER BY ID - INFOS COMPLETES (accès authentifié uniquement)
+app.get('/api/users/:id', jwtAuth, (req, res) => {
+    try {
+        const data = loadData();
+        const userId = req.params.id;
+        let user = data.users?.find(u => u.id === userId);
+        
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Utilisateur introuvable' 
+            });
+        }
+        
+        // Vérifier les permissions
+        const isAdmin = req.user?.role === 'admin';
+        const isSelf = req.user.id === userId;
+        
+        if (!isAdmin && !isSelf) {
             return res.status(403).json({ 
                 success: false, 
                 error: 'Accès non autorisé' 
@@ -10736,7 +10782,7 @@ app.delete('/api/chat/conversations/:conversationId/messages/:messageId', eventS
         }
 
         message.deletedAt = new Date().toISOString();
-        message.content = '[Message supprimé]';
+        message.content = 'Message supprimé';
 
         conversation.updatedAt = new Date().toISOString();
         saveData(data);
