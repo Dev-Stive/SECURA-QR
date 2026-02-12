@@ -1414,20 +1414,24 @@ class QuickMenuButton {
     closeMenu() {
         this.modal.classList.remove('active');
     }
-    
-    updateQuickMenuFeatures() {
-        if (!this.featuresContainer) return;
-        
-        // Récupérer les mêmes features que updateFeatureCards
-        const features = [
-            {
-                id: 'chat',
-                icon: 'fas fa-comments',
-                title: 'Chat de Table',
-                requiresAuth: true,
-                url: '../welcome/event-chat.html'
-            },
-            {
+
+    /*  {
+            id: 'menu',
+            icon: 'fas fa-utensils',
+            title: 'Menu & Restauration',
+            description: 'Découvrez le menu, les services de restauration et les options disponibles',
+            requiresAuth: false,
+            backgroundImage: '/assets/images/feature/menu.png'
+        },
+        {
+            id: 'schedule',
+            icon: 'fas fa-calendar-alt',
+            title: 'Programme',
+            description: 'Consultez le déroulement de l\'événement et les activités prévues',
+            requiresAuth: false,
+            backgroundImage: '/assets/images/feature/planing.png'
+        },
+   {
                 id: 'menu',
                 icon: 'fas fa-utensils',
                 title: 'Menu & Restauration',
@@ -1441,6 +1445,21 @@ class QuickMenuButton {
                 requiresAuth: false,
                 url: '../welcome/event-schedule.html'
             },
+*/
+    
+    updateQuickMenuFeatures() {
+        if (!this.featuresContainer) return;
+        
+        // Récupérer les mêmes features que updateFeatureCards
+        const features = [
+            {
+                id: 'chat',
+                icon: 'fas fa-comments',
+                title: 'Chat de Table',
+                requiresAuth: true,
+                url: '../welcome/event-chat.html'
+            },
+         
             {
                 id: 'guests',
                 icon: 'fas fa-users',

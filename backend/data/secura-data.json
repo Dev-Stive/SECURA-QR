@@ -10425,7 +10425,7 @@
       "createdAt": "2026-01-28T21:01:06.750Z",
       "updatedAt": "2026-02-04T20:38:03.183Z",
       "isOnline": false,
-      "lastSeen": "2026-02-12T14:55:19.087Z"
+      "lastSeen": "2026-02-12T16:27:39.833Z"
     },
     {
       "eventId": "evt_1769537993483_82t3xcgsi",
@@ -14826,6 +14826,14 @@
       "eventId": "evt_1769537993483_82t3xcgsi",
       "createdAt": "2026-02-12T11:43:51.624Z",
       "expiresAt": "2026-02-12T19:43:51.619Z"
+    },
+    {
+      "id": "sess_1770913463570_ppmoa9z4d",
+      "guestId": "gst_1769634066750_apq113ecc",
+      "tableId": "tbl_1769575124145_o6y4qfi4o",
+      "eventId": "evt_1769537993483_82t3xcgsi",
+      "createdAt": "2026-02-12T16:24:23.570Z",
+      "expiresAt": "2026-02-13T00:24:23.570Z"
     }
   ],
   "galleries": [
@@ -15334,7 +15342,7 @@
           "joinedAt": "2026-02-10T03:29:45.834Z",
           "lastReadAt": "2026-02-11T14:41:11.239Z",
           "unreadCount": 0,
-          "lastSeenAt": "2026-02-12T14:55:19.087Z"
+          "lastSeenAt": "2026-02-12T16:27:39.833Z"
         },
         {
           "userId": "gst_1769634030979_nreltdza9",
@@ -15480,9 +15488,9 @@
           "isOnline": false,
           "status": "offline",
           "joinedAt": "2026-02-10T09:42:50.498Z",
-          "lastReadAt": "2026-02-12T12:40:04.701Z",
+          "lastReadAt": "2026-02-12T16:27:36.938Z",
           "unreadCount": 0,
-          "lastSeenAt": "2026-02-12T14:55:19.087Z"
+          "lastSeenAt": "2026-02-12T16:27:39.833Z"
         },
         {
           "userId": "gst_1769634031406_08mm60psu",
@@ -15556,7 +15564,7 @@
       },
       "createdBy": "gst_1769634066750_apq113ecc",
       "createdAt": "2026-02-10T09:42:50.498Z",
-      "updatedAt": "2026-02-12T12:40:05.047Z"
+      "updatedAt": "2026-02-12T16:27:38.219Z"
     },
     {
       "id": "chat_1770814932037_u3h5rdk4f",
@@ -15576,7 +15584,7 @@
           "status": "offline",
           "joinedAt": "2026-02-11T13:02:12.037Z",
           "lastReadAt": "2026-02-12T12:39:44.900Z",
-          "lastSeenAt": "2026-02-12T14:55:19.087Z",
+          "lastSeenAt": "2026-02-12T16:27:39.833Z",
           "unreadCount": 0
         },
         {
@@ -15855,7 +15863,7 @@
           "status": "offline",
           "joinedAt": "2026-02-12T12:03:03.081Z",
           "lastReadAt": "2026-02-12T12:39:43.964Z",
-          "lastSeenAt": "2026-02-12T14:55:19.087Z",
+          "lastSeenAt": "2026-02-12T16:27:39.833Z",
           "unreadCount": 0
         },
         {
@@ -15941,7 +15949,7 @@
     "language": "fr"
   },
   "meta": {
-    "updatedAt": "2026-02-12T16:13:17.999Z",
+    "updatedAt": "2026-02-12T16:27:39.839Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }
