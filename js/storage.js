@@ -35,7 +35,7 @@ class SecuraStorage {
 
     
     FRONTEND_URL = 'https://secura-qr.vercel.app';
-    BACKEND_URL = 'https://secura-qr.onrender.com/api';
+    BACKEND_URL = 'https://breakable-leela-geekhub-team-240bba40.koyeb.app/api';
 
     // FRONTEND_URL = 'http://localhost:5500';
     
@@ -43,7 +43,7 @@ class SecuraStorage {
         if (window.location.hostname === 'localhost') {
             this.API_URL = 'http://localhost:3000/api';
         } else {
-            this.API_URL = 'https://secura-qr.onrender.com/api';
+            this.API_URL = 'https://breakable-leela-geekhub-team-240bba40.koyeb.app/api';
         }
 
         this.token = localStorage.getItem('secura_token') || null;
@@ -323,6 +323,7 @@ class SecuraStorage {
         
         if (authToken && !endpoint.includes('/auth/')) {
             headers['Authorization'] = `Bearer ${authToken}`;
+            
         }
 
         // Déterminer le timeout basé sur l'endpoint
@@ -798,11 +799,15 @@ async logout() {
         // 1️⃣ Appeler le serveur pour se déconnecter
         if (this.token) {
             try {
-                const response = await this.apiRequest('/auth/logout', {
-                    method: 'POST'
+                const response = await fetch(`${this.API_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
 
-                if (response.success) {
+                if (response.ok) {
                     console.log('🔓 Déconnexion serveur confirmée', response.data?.email);
                 }
             } catch (err) {
@@ -4608,8 +4613,74 @@ async checkTokenIfNeeded() {
     }
 }
 
-    // === CHARGER LES INFOS UTILISATEUR ===
+
+
+
+ async getAvatar(user) {
+        if (!user) return null;
+
+        const gender = this.determineGender(user.firstName);
+        
+        const genderFolder = gender === 'female' ? 'girl' : 'boy';
+        const defaultAvatarPath = `/assets/avatars/${genderFolder}.png`;
+        
+        if (user.avatar && user.avatar.url) {
+            return user.avatar.url;
+        }
+        
+        return defaultAvatarPath;
+    }
+
+    /**
+     * Déterminer le genre d'une personne basé sur son prénom
+     * Utilise une liste de prénoms masculins et féminins courants
+     */
+    determineGender(firstName) {
+        if (!firstName) return 'male';
+        
+        const name = firstName.toLowerCase().trim();
+        
+        // Liste de prénoms féminins courants
+        const femaleNames = [
+            'marie', 'sandra', 'anne', 'christine', 'monique', 'isabelle',
+            'françoise', 'catherine', 'jennifer', 'jessica', 'sarah', 'laura',
+            'emma', 'olivia', 'sophia', 'ava', 'isabella', 'mia', 'charlotte',
+            'amelia', 'harper', 'evelyn', 'abigail', 'elizabeth', 'natalie',
+            'grace', 'hannah', 'lily', 'rose', 'victoria', 'alice','stessy', 
+            'caroline', 'sylvie', 'valérie', 'corinne', 'marion', 'audrey',    
+            'sophie', 'pauline', 'sandrine', 'nadine', 'céline', 'valérie',
+            'stéphanie', 'martine', 'sylvie', 'nathalie', 'veronique',
+            'sabine', 'jacqueline', 'josée', 'josiane', 'josyane', 'joëlle',
+            'josianne', 'josèphe', 'ghislaine', 'germaine', 'georgette',
+            'fernande', 'ernestine', 'edmée', 'marcelle', 'michèle',
+            'élise', 'margot', 'marguerite', 'martiale', 'marthe', 'martha'
+        ];
+        
+        const maleNames = [
+            'jean', 'pierre', 'michel', 'andré', 'robert', 'jacques',
+            'alain', 'ali', 'stessy', 'francis', 'christian', 'thomas',
+            'patrick', 'daniel', 'philippe', 'marc', 'olivier', 'laurent',
+            'nicolas', 'françois', 'vincent', 'gérard', 'louis', 'joseph',
+            'paul', 'charles', 'anthony', 'david', 'michael', 'james',
+            'john', 'robert', 'william', 'richard', 'joseph', 'charles',
+            'george', 'frank', 'edward', 'henry', 'walter', 'albert',
+            'raymond', 'roy', 'ralph', 'ronald', 'russell', 'martin',
+            'bernard', 'roger', 'leon', 'claude', 'gerald', 'samuel',
+            'benjamin', 'arthur', 'alexander', 'lawrence', 'jerome',
+            'armand', 'arnaud', 'arsène', 'aurélien', 'augustin'
+        ];
+        
+        if (femaleNames.includes(name)) {
+            return 'female';
+        }
+        
+        return 'male';
+    }
+
+
+
         async updateProfileInfo() {
+   
     
         if (!this.token) return false;
     const tokenValid = await this.checkTokenIfNeeded();
@@ -4644,7 +4715,16 @@ async checkTokenIfNeeded() {
                         const profileRole = document.getElementById('profileRole');
                         const dropdownRole = document.getElementById('dropdownRole');
                         const sidebarRole = document.getElementById('sidebarProfileRole');
-                        
+
+                        const avatar = document.querySelector('.profile-avatar');
+                        if (avatar) {
+
+                            const url = getAvatar(user);
+                            const initials = `${user.firstName ? user.firstName.charAt(0) : ''}${user.lastName ? user.lastName.charAt(0) : ''}`.toUpperCase() || user.email.charAt(0).toUpperCase();
+                            avatar.innerHTML = `${url ? `<img src="${url}" alt="Avatar de ${user.firstName || user.email.split('@')[0]}">` : `<div class="default-avatar">${initials}</div>`}`;
+
+                        }
+
 
 
 
@@ -6665,11 +6745,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
     });
 
-    document.getElementById('logout-btn')?.addEventListener('click', () => {
-        storage.logout();
-        authManager.logout();
-        window.location.href = '/index.html';
-    });
+    
 
     storage.updateProfileInfo();
 
@@ -6691,3 +6767,7 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 console.log('✅ SECURA Storage V5.0 Observable chargé et prêt !');
+
+
+
+

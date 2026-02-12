@@ -601,4 +601,4 @@ Tous les endpoints retournent:
 ---
 
 **Documentation générée pour SECURA v3.0.0**
-**API Base**: `https://secura-qr.onrender.com/api` ou `http://localhost:3000/api`
+**API Base**: `https://breakable-leela-geekhub-team-240bba40.koyeb.app/api` ou `http://localhost:3000/api`

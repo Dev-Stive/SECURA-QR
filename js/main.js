@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       //  initializeNavigation();
         initializeScrollTop();
         initializeFullscreen();
-        initializeLogout();
+      
         setupGranularListeners();
         
         updateStatsGranular();
@@ -186,7 +186,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
 
                     setTimeout(async () => {
-                        const success = await storage.logout();
+                        
+                    await storage.logout();
                         
                         setTimeout(() => {
                             window.location.href = '/';
@@ -953,18 +954,6 @@ function updateFullscreenIcon() {
         const icon = btn.querySelector('i');
         if (icon) icon.className = document.fullscreenElement ? 'fas fa-compress' : 'fas fa-expand';
     });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 🚪 LOGOUT
-// ═══════════════════════════════════════════════════════════════
-function initializeLogout() {
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            storage.logout();
-        });
-    }
 }
 
 // ═══════════════════════════════════════════════════════════════

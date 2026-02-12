@@ -15,3 +15,128 @@ Conscient des exigences académiques de votre établissement, je suis pleinement
 Je vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations les plus respectueuses. 
 
 
+
+
+
+Madame, Monsieur,
+
+Actuellement en troisième année de Licence Professionnelle en Génie Logiciel (ICT4D) à l'Université de Yaoundé 1, je sollicite une admission en Licence 3 Informatique au sein de votre prestigieux Institut Gaspard-Monge.
+
+Mon choix de rejoindre l'Université Gustave Eiffel repose sur l'approche concrète de votre programme et son excellence dans le domaine de l'informatique appliquée. Mon cursus actuel m’a permis de maîtriser les outils de développement, mais je souhaite désormais l'enrichir par la rigueur conceptuelle de l'IGM. Lors de mes expériences chez TESEA, j'ai compris que le développement d'excellence ne se limite pas au code : il exige une architecture pensée pour l'utilisateur. En digitalisant l'activité de "Njoya Fashion" via Laravel et React.js, j'ai conçu des solutions répondant à des problématiques réelles de gestion de stocks et de commandes. Votre cursus est le pont idéal pour transformer ce savoir-faire technique en une véritable expertise d'ingénierie.
+
+Mon expérience de consultant numérique pour L&L Ouest Services, où j'ai conçu et déployé une application de gestion centralisée des prestations de nettoyage sous Angular.js et Node.js, a été déterminante dans ma compréhension des cycles de développement. Je souhaite profiter de l'écosystème innovant de Marne-la-Vallée pour maîtriser les standards européens de production logicielle et de gestion de projet. Cette Licence 3 constitue pour moi l'étape préparatoire indispensable avant de poursuivre vers un Master Informatique au sein de votre établissement.
+
+Je projette de devenir un ingénieur logiciel, capable de piloter le cycle de vie complet de solutions scalables et durables, adaptées aux défis de modernisation des PME camerounaises. Intégrer votre formation constitue une opportunité unique de développer la rigueur nécessaire pour piloter des projets technologiques d'envergure.
+
+Conscient des exigences académiques de votre établissement, je suis pleinement déterminé à m'investir pour réussir et contribuer positivement à votre promotion.
+
+Je vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations les plus respectueuses.
+
+
+
+
+Madame, Monsieur,
+
+Actuellement en troisième année de Licence Professionnelle en Génie Logiciel (ICT4D) à l'Université de Yaoundé I, je sollicite une admission en Licence 3 MIAGE au sein de votre prestigieuse Université Paris Cité. Je souhaite intégrer votre formation pour apprendre à maîtriser les outils de gestion aussi bien que le développement informatique.
+
+Le parcours MIAGE, par sa double compétence informatique et management, correspond exactement à la spécialisation à laquelle j'aspire. Mes travaux académiques m'ont sensibilisé à cette logique : pour mon projet de L2, j'ai dû concevoir un système de préinscription universitaire en C#. La problématique était de fluidifier un workflow d'admission complexe ; la solution a été de traduire des règles administratives rigides en un algorithme de décision efficace.
+
+Mon expérience chez TESEA a renforcé cette approche. Pour le projet « Njoya Fashion », la problématique était la perte de revenus liée à une gestion manuelle des stocks. J’ai développé une plateforme e-commerce complète sous Laravel et React.js, en intégrant un système de suivi automatisé. Cette mission m’a appris à traduire des besoins métiers concrets en fonctionnalités techniques pour supprimer les erreurs humaines.
+
+L'Université Paris Cité est mon premier choix car elle offre les méthodes de gestion de projet et les outils d'aide à la décision dont j'ai besoin. Au Cameroun, le développement des PME dépendra de notre capacité à créer des ponts entre la technique et la logistique. C’est ce rôle de « traducteur métier-technique » que je souhaite assumer pour accompagner la croissance des entreprises locales.
+
+Je projette de devenir un ingénieur logiciel, capable de piloter le cycle de vie complet de solutions scalables et durables. Après ma Licence, je souhaite poursuivre en Master MIAGE au sein de votre établissement pour concrétiser ce rêve.
+
+Conscient de l'exigence de cette filière, je suis déterminé à m'investir pleinement pour apporter ma rigueur et contribuer positivement à votre promotion.
+
+Je vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations les plus respectueuses.
+
+
+
+Madame, Monsieur,
+
+Actuellement en troisième année de Licence Professionnelle en Génie Logiciel (ICT4D) à l'Université de Yaoundé I, je sollicite une admission en Licence 3 informatique au sein de votre prestigieuse Sorbonne Université.
+
+Mon parcours à l'Université de Yaoundé I m'a permis de développer une solide base technique, concrétisée par la conception d'un système MVC graphique en Java et d'un workflow d'admission en C#. Ces projets m'ont donné la confiance nécessaire pour viser l'excellence de la Sorbonne. Mon ambition est de consolider ma formation par une approche fondamentale de très haut niveau afin d'acquérir la rigueur théorique indispensable à une expertise internationale. Mon choix se porte naturellement sur la Sorbonne pour la qualité de son parcours, notamment dans la perspective d'une spécialisation future en Master Science et Technologie du Logiciel (STL).
+
+Après avoir consulté votre programme, je suis convaincu que l'étude de la sémantique des langages, de la logique et des systèmes répartis est exactement ce qu'il me manque pour passer un cap technique. Lors de mon stage chez TESEA, j’ai conçu la plateforme e-commerce « Njoya Fashion » sous Laravel et React.js. Cette expérience de terrain m'a convaincu que l’innovation technologique durable ne peut se faire sans une maîtrise parfaite des fondements algorithmiques et des couches profondes de l'informatique que propose votre Licence.
+
+L'adossement de votre formation au laboratoire LIP6 représente pour moi un environnement stimulant, particulièrement pour ses travaux sur l'architecture. Une admission à la Sorbonne me permettrait de bâtir un socle scientifique irréprochable, garant de ma réussite en Master STL. Je projette de devenir un ingénieur logiciel, capable de piloter le cycle de vie complet des systèmes logiciels de haute fiabilité , adaptées aux défis de modernisation des PME camerounaises.
+
+Conscient des exigences de Sorbonne Université, je suis pleinement déterminé à m'investir pour atteindre l'excellence requise et apporter ma rigueur à votre promotion.
+
+Je vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations les plus respectueuses.
+
+
+Madame, Monsieur,
+
+Actuellement en troisième année de Licence Professionnelle en Génie Logiciel (ICT4D) à l'Université de Yaoundé I, je sollicite une admission en Licence 3 Informatique, Parcours Informatique fondamentale, au sein de votre prestigieuse Université Paris Cité.
+
+Mon cursus actuel m'a apporté des compétences techniques solides, mais je souhaite désormais maîtriser les couches plus profondes de la discipline : l'algorithmique complexe et les méthodes formelles. Cette démarche est motivée par la volonté de développer une compréhension scientifique des systèmes pour concevoir des architectures logicielles réellement robustes. Mes projets académiques, comme le développement d'un système de gestion de notes en Java ou d'un workflow d'admission en C#, m'ont fait réaliser que la fiabilité du code repose avant tout sur une logique mathématique irréprochable.
+
+Mon expérience chez TESEA a été le déclic de cette orientation. En travaillant sur la plateforme e-commerce « Njoya Fashion », j'ai dû optimiser des requêtes SQL lourdes et des algorithmes de recherche sous Laravel. C'est à ce moment précis que j'ai compris que sans une base théorique solide en structures de données, les limites techniques sont vite atteintes. Je viens chercher au sein de votre UFR cet approfondissement théorique rigoureux pour transformer ma pratique en expertise d'ingénierie.
+
+L'excellence de Paris Cité et son lien étroit avec le laboratoire IRIF offrent le cadre idéal pour appréhender l'informatique sous un angle scientifique. Cette Licence 3 est pour moi le socle indispensable pour réussir mon futur Master en Génie Informatique au sein de votre établissement. Je projette de devenir un ingénieur logiciel, capable de piloter le cycle de vie complet de solutions scalables et durables, adaptées aux défis de modernisation technologique des PME camerounaises.
+
+Conscient des exigences académiques de votre établissement, je suis pleinement déterminé à m'investir pour réussir et apporter ma rigueur à votre promotion.
+
+
+	
+année 3
+(bac + 3)
+Université Evry Paris-Saclay - UFR de sciences fondamentales et appliquées	Evry	
+label
+Consulter
+Changer motivation
+Madame, Monsieur,
+
+Actuellement en troisième année de Licence Professionnelle en Génie Logiciel (ICT4D) à l'Université de Yaoundé I, je sollicite une admission en Licence 3 Informatique, parcours CILS au sein de votre prestigieuse Université d'Évry-Val-d'Essonne.
+
+Ce parcours m'intéresse pour son focus sur l'intelligence des systèmes. Fort d'une base technique acquise à l'Université de Yaoundé I, je souhaite désormais dépasser le stade de la simple programmation pour concevoir des architectures capables de traiter intelligemment de gros volumes de données. Mes projets académiques, notamment le développement d'un système de préinscription universitaire avec workflow automatisé en C#, m'ont permis d'aborder les premières problématiques de structure logicielle. Je souhaite approfondir cette maîtrise et m'initier à l'intelligence artificielle pour contribuer à la modernisation numérique du Cameroun.
+
+Lors de mon stage chez TESEA, j’ai pu confronter mes compétences au monde professionnel en concevant la plateforme e-commerce « Njoya Fashion ». En utilisant Laravel et React.js pour automatiser la gestion des stocks et des commandes, j'ai apporté une solution à la problématique des erreurs de gestion manuelle. Cette expérience a confirmé ma volonté de maîtriser l'intelligence logicielle pour créer des outils plus performants.
+
+Intégrer l'UFR de Sciences d'Évry, au cœur du cluster Paris-Saclay, représente l'opportunité idéale pour passer du rôle de développeur à celui de concepteur logiciel. L’équilibre entre théorie et pratique de me permettra de consolider mes acquis en architecture logicielle au sein d'un écosystème d'innovation. Cette Licence 3 constitue pour moi le socle indispensable pour assurer ma réussite et préparer mon intégration future au sein de votre Master en Informatique. Je projette de devenir un ingénieur logiciel, capable de concevoir des solutions scalables et durables.
+
+Conscient du niveau d'exigence de votre établissement, je suis pleinement déterminé à m'investir pour réussir et apporter ma rigueur à votre promotion.
+
+Je vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations les plus respectueuses.
+
+
+
+
+	
+année 3
+(bac + 3)
+Université Evry Paris-Saclay - UFR de sciences fondamentales et appliquées	Evry	
+label
+Consulter
+Changer motivation
+NANA TCHOFFO STEVE JUNIOR 
+nanatchoffojunior@gmail.com 
++237 672037300
+
+Yaoundé, le 05 janvier 2026
+
+À l’attention du Responsable des Admissions Licence MIAGE - UFR de sciences fondamentales et appliquées Université d'Évry-Val-d'Essonne
+
+Objet : Demande d’admission en Licence 3 MIAGE - Rentrée 2026/2027
+
+Madame, Monsieur,
+
+Actuellement en troisième année de Licence Professionnelle en Génie Logiciel (ICT4D) à l'Université de Yaoundé I, je sollicite une admission en Licence 3 MIAGE au sein de votre prestigieuse Université d'Évry-Val-d'Essonne.
+
+Mon parcours à l'Université de Yaoundé I m'a permis de maîtriser des outils variés, illustrée par des projets tels que l'automatisation du calcul des salaires en C ou la conception d'un workflow d'admission universitaire en C#. Cependant, j'ai réalisé lors de mon stage chez TESEA que l’efficacité d’un logiciel dépend avant tout de son adéquation avec l’organisation.En développant la plateforme e-commerce « Njoya Fashion » sous Laravel et React.js, j'ai été confronté à une problématique majeure : adapter une architecture logicielle à des flux logistiques réels pour supprimer les erreurs de gestion manuelle. Cette mission a révélé mon intérêt pour l'ingénierie des systèmes d'information (SI).
+
+L'Université d'Évry, au cœur du cluster Paris-Saclay, propose un cursus MIAGE reconnu pour son excellence. Votre programme m'attire par sa fusion entre ingénierie des SI et gestion d'entreprise. Mon expérience de consultant pour L&L Ouest Services, où j'ai conçu et déployé une application de gestion centralisée des prestations de nettoyage sous Node.js et Tailwind CSS, a renforcé ma capacité à traduire des besoins métiers concrets en solutions numériques efficaces.
+
+Mon projet est d'adapter les méthodes de gestion agiles apprises à Évry aux réalités des entreprises camerounaises, pour qui la digitalisation est un levier de croissance majeur. Je projette de devenir un ingénieur logiciel, capable de piloter le cycle de vie complet des systèmes logiciels de haute fiabilité, scalables et durables.
+
+
+Cette Licence 3 représente pour moi le socle indispensable pour poursuivre sereinement en Master MIAGE au sein de votre établissement ou de l'écosystème Paris-Saclay.
+
+Conscient des exigences académiques de votre établissement, je suis déterminé à m'investir pour réussir et apporter ma rigueur à votre promotion.
+
+Je vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations les plus respectueuses.
+
+NANA TCHOFFO STEVE JUNIOR

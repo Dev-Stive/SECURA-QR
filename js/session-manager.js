@@ -93,10 +93,7 @@ class SessionManager {
      * Nettoyer le token
      */
     clearToken() {
-        localStorage.removeItem(this.keys.token);
-        localStorage.removeItem(this.keys.user);
-        localStorage.removeItem('secura_token_exp');
-        localStorage.removeItem('secura_data');
+       
         console.log('🧹 Token nettoyé');
     }
 

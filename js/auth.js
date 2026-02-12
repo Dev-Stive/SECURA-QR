@@ -13,7 +13,7 @@ class SecuraAuthManager {
          if (window.location.hostname === 'localhost') {
             this.API_URL = 'http://localhost:3000/api';
         } else {
-            this.API_URL = 'https://secura-qr.onrender.com/api';
+            this.API_URL = 'https://breakable-leela-geekhub-team-240bba40.koyeb.app/api';
         }
 
         

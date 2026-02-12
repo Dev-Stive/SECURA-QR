@@ -260,7 +260,7 @@
             // Construire l'URL API sans dépendre de storage.js
             const apiUrl = window.location.hostname === 'localhost' 
                 ? 'http://localhost:3000/api'
-                : 'https://secura-qr.onrender.com/api';
+                : 'https://breakable-leela-geekhub-team-240bba40.koyeb.app/api';
             
             const response = await fetch(`${apiUrl}/auth/me`, {
                 headers: {
@@ -411,13 +411,7 @@
         
         console.warn(`❌ Accès refusé: ${reason}`);
         
-        // Nettoyer le token invalide
-        if (reason.includes('token') || reason.includes('Invalid')) {
-            localStorage.removeItem('secura_token');
-            localStorage.removeItem('secura_user');
-            redirectTo = '/index.html';
-            console.log('🧹 Token nettoyé');
-        }
+      
         
         setTimeout(() => {
             if (!window.location.pathname.includes(redirectTo)) {

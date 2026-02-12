@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="css/dash.css">
     <link rel="stylesheet" href="css/toastify.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/gallerie.css">
 
     <!-- ===== STYLES CRITIQUES INLINE (ULTRA COMPLET) ===== -->
     <style>
@@ -811,33 +812,35 @@
         </div>
     </header>
 
-    <!-- ===== DROPDOWN PROFIL FLOTTANT ===== -->
+    <!-- Profile Menu -->
     <div class="floating-profile-menu" id="floatingProfileMenu">
-        <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-dropdown show" id="profileDropdown" role="menu">
             <div class="profile-header">
                 <div class="profile-avatar large">
                     <i class="bi bi-person-circle"></i>
                 </div>
                 <div class="profile-details">
                     <strong id="dropdownName">Chargement...</strong>
-                    <small id="dropdownEmail">email@secura.com</small>
-                    <span class="badge-role" id="dropdownRole">Agent</span>
+                    <small id="dropdownEmail">email@exemple.com</small>
+                    <span class="badge-role" id="dropdownRole">Utilisateur</span>
                 </div>
             </div>
+
             <div class="dropdown-actions">
-                <a href="profile.html" class="dropdown-item">
+                <a href="profile.html" class="dropdown-item" role="menuitem">
                     <i class="bi bi-person"></i> Mon Profil
                 </a>
-                <a href="settings.html" class="dropdown-item">
+                <a href="settings.html" class="dropdown-item" role="menuitem">
                     <i class="bi bi-gear"></i> Paramètres
                 </a>
                 <hr class="dropdown-divider">
-                <button class="dropdown-item text-danger" id="logoutBtn">
+                <button class="dropdown-item text-danger" id="logout-btn" role="menuitem">
                     <i class="bi bi-box-arrow-right"></i> Déconnexion
                 </button>
             </div>
         </div>
     </div>
+
 
     <main class="main-content">
     <div class="container-fluid">
@@ -866,7 +869,7 @@
             <!-- Barre d'en-tête événement -->
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; flex-wrap: wrap;">
                 <div>
-                    <h1 id="selectedEventTitle" style="font-size: 2rem; font-weight: 700; color: var(--primary);">
+                    <h1 id="selectedEventTitle" style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">
                         <i class="fas fa-arrow-left me-2" style="cursor: pointer;" onclick="resetEventSelection()"></i>
                         Chargement...
                     </h1>
@@ -899,7 +902,7 @@
                 <div style="text-align: center;">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px;">
                         <i class="fas fa-qrcode" style="font-size: 2rem; color: var(--primary);"></i>
-                        <h3 style="margin: 0; font-weight: 600;">Code d'accès rapide</h3>
+                        <h3 style="margin: 0; font-weight: 600;">Code d'accès</h3>
                     </div>
                     <div class="code-box-container">
                         <input type="text" class="code-box" id="code1" maxlength="1" autocomplete="off" inputmode="numeric" pattern="[0-9]">
@@ -1192,21 +1195,12 @@
                         </div>
 
                         <div class="event-actions" onclick="event.stopPropagation()">
-                            <button class="action-btn view" onclick="viewEvent('${event.id}')" title="Voir invités">
-                                <i class="fas fa-users"></i>
-                            </button>
+                            
                             <button class="action-btn edit" onclick="editEvent('${event.id}')" title="Modifier">
                                 <i class="bi bi-pencil-square"></i>
                             </button>
-                            <button class="action-btn duplicate" onclick="duplicateEvent('${event.id}')" title="Dupliquer">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                            <button class="action-btn stats" onclick="viewEventStats('${event.id}')" title="Statistiques">
-                                <i class="fas fa-chart-bar"></i>
-                            </button>
-                            <button class="action-btn delete" onclick="deleteEvent('${event.id}')" title="Supprimer">
-                                <i class="bi bi-trash3"></i>
-                            </button>
+                          
+                         
                         </div>
                         </div>
                     `;
@@ -1231,6 +1225,7 @@
                 document.getElementById('selectedEventTitle').innerHTML = `<i class="fas fa-arrow-left me-2" onclick="resetEventSelection()"></i> ${escapeHtml(event.name)}`;
                 document.getElementById('eventMetaInfo').innerHTML = `${new Date(event.date).toLocaleDateString('fr-FR')} • ${currentGuests.length} invités • ${currentTables.length} tables`;
 
+                resetToVerificationView();
                 resetUI();
                 focusFirstCodeBox();
             };
@@ -1572,9 +1567,13 @@
                                     <i class="fas fa-check-circle"></i> Déjà enregistré le ${new Date(guest.scannedAt).toLocaleString('fr-FR')}
                                 </div>
                             `}
+                           
+
+                             <div style="display: flex; gap: 20px; justify-content: flex-end; margin-top: 30px;">
                             <button class="btn btn-secondary" onclick="resetToVerificationView()">
-                                <i class="fas fa-undo"></i> Nouvelle vérification
+                                <i class="fas fa-undo"></i> Nouvelle recherche
                             </button>
+                        </div>
                         </div>
                     </div>
                 `;
@@ -1645,6 +1644,7 @@
                                 <i class="fas fa-undo"></i> Nouvelle recherche
                             </button>
                         </div>
+                        
                     </div>
                 `;
                 document.getElementById('guestProfileContainer').innerHTML = profileHTML;
