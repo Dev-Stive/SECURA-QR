@@ -4616,6 +4616,95 @@ async checkTokenIfNeeded() {
 
 
 
+
+
+
+        async updateProfileInfo() {
+   
+    
+        if (!this.token) return false;
+    const tokenValid = await this.checkTokenIfNeeded();
+    
+    
+    if (!tokenValid) {
+        this.handleInvalidToken();
+        return;
+    }
+    
+
+
+            try {
+                const data = await this.apiRequest('/auth/me', {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${this.token}`,
+                    }
+                });
+
+
+                if (data.success) {
+                    const user = data.user;
+                    
+                    if (user) {
+                        const profileName = document.getElementById('profileName');
+                        const dropdownName = document.getElementById('dropdownName');
+                        const SidebarName = document.getElementById('sidebarProfileName');
+
+                        const dropdownEmail = document.getElementById('dropdownEmail');
+                        const sidebarProfileEmail = document.getElementById('sidebarProfileEmail');
+                        const profileRole = document.getElementById('profileRole');
+                        const dropdownRole = document.getElementById('dropdownRole');
+                        const sidebarRole = document.getElementById('sidebarProfileRole');
+
+                        const avatar = document.querySelector('.profile-avatar');
+                        if (avatar) {
+
+                            const url = this.getAvatar(user);
+                            const initials = `${user.firstName ? user.firstName.charAt(0) : ''}${user.lastName ? user.lastName.charAt(0) : ''}`.toUpperCase() || user.email.charAt(0).toUpperCase();
+                            avatar.innerHTML = `${url ? `<img src="${url}" alt="Avatar de ${user.firstName || user.email.split('@')[0]}">` : `<div class="default-avatar">${initials}</div>`}`;
+
+                        }
+
+
+
+
+                                   
+
+                        if (profileName) profileName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0];
+                        if (SidebarName) SidebarName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0];
+
+                        if (dropdownName) dropdownName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Utilisateur';
+                        if (dropdownEmail) dropdownEmail.textContent = user.email;
+                        if (sidebarProfileEmail) sidebarProfileEmail.textContent = user.email;
+                        if (profileRole) profileRole.textContent = user.role || 'Utilisateur';
+                        if (sidebarRole) sidebarRole.textContent = user.role || 'Utilisateur';
+                        
+                        if (dropdownRole) {
+                            dropdownRole.textContent = (user.role || 'Utilisateur').toUpperCase();
+                            dropdownRole.style.color = 'white';
+                            dropdownRole.style.background = user.role === 'admin' ? '#EF4444' : '#D97706';
+
+
+                                
+
+
+                        }
+                    }
+                } else {
+            console.log('Utilisateur introuvable, nettoyage token');
+            this.handleInvalidToken();
+        }
+    } catch (err) {
+        console.error('❌ Erreur récupération profil:', err);
+        
+        const tokenStillValid = await this.verifyToken();
+        if (!tokenStillValid) {
+            this.handleInvalidToken();
+        }
+    }
+}
+
+
  async getAvatar(user) {
         if (!user) return null;
 
@@ -4678,92 +4767,6 @@ async checkTokenIfNeeded() {
     }
 
 
-
-        async updateProfileInfo() {
-   
-    
-        if (!this.token) return false;
-    const tokenValid = await this.checkTokenIfNeeded();
-    
-    
-    if (!tokenValid) {
-        this.handleInvalidToken();
-        return;
-    }
-    
-
-
-            try {
-                const data = await this.apiRequest('/auth/me', {
-                    method: 'GET',
-                    headers: { 
-                        'Authorization': `Bearer ${this.token}`,
-                    }
-                });
-
-
-                if (data.success) {
-                    const user = data.user;
-                    
-                    if (user) {
-                        const profileName = document.getElementById('profileName');
-                        const dropdownName = document.getElementById('dropdownName');
-                        const SidebarName = document.getElementById('sidebarProfileName');
-
-                        const dropdownEmail = document.getElementById('dropdownEmail');
-                        const sidebarProfileEmail = document.getElementById('sidebarProfileEmail');
-                        const profileRole = document.getElementById('profileRole');
-                        const dropdownRole = document.getElementById('dropdownRole');
-                        const sidebarRole = document.getElementById('sidebarProfileRole');
-
-                        const avatar = document.querySelector('.profile-avatar');
-                        if (avatar) {
-
-                            const url = getAvatar(user);
-                            const initials = `${user.firstName ? user.firstName.charAt(0) : ''}${user.lastName ? user.lastName.charAt(0) : ''}`.toUpperCase() || user.email.charAt(0).toUpperCase();
-                            avatar.innerHTML = `${url ? `<img src="${url}" alt="Avatar de ${user.firstName || user.email.split('@')[0]}">` : `<div class="default-avatar">${initials}</div>`}`;
-
-                        }
-
-
-
-
-                                   
-
-                        if (profileName) profileName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0];
-                        if (SidebarName) SidebarName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0];
-
-                        if (dropdownName) dropdownName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Utilisateur';
-                        if (dropdownEmail) dropdownEmail.textContent = user.email;
-                        if (sidebarProfileEmail) sidebarProfileEmail.textContent = user.email;
-                        if (profileRole) profileRole.textContent = user.role || 'Utilisateur';
-                        if (sidebarRole) sidebarRole.textContent = user.role || 'Utilisateur';
-                        
-                        if (dropdownRole) {
-                            dropdownRole.textContent = (user.role || 'Utilisateur').toUpperCase();
-                            dropdownRole.style.color = 'white';
-                            dropdownRole.style.background = user.role === 'admin' ? '#EF4444' : '#D97706';
-
-
-                                
-
-
-                        }
-                    }
-                } else {
-            console.log('Utilisateur introuvable, nettoyage token');
-            this.handleInvalidToken();
-        }
-    } catch (err) {
-        console.error('❌ Erreur récupération profil:', err);
-        
-        const tokenStillValid = await this.verifyToken();
-        if (!tokenStillValid) {
-            this.handleInvalidToken();
-        }
-    }
-}
-
     // ═══════════════════════════════════════════════════════════════
     // 🔐 VÉRIFICATION DU TOKEN AVANT UTILISATION
     // ═══════════════════════════════════════════════════════════════
@@ -4795,6 +4798,9 @@ async checkTokenIfNeeded() {
         return true;
     }
 }
+
+
+
 
     handleInvalidToken() {
         console.error('❌ Token invalide - Nettoyage et redirection');
