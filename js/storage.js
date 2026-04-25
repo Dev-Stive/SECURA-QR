@@ -4783,7 +4783,6 @@ async checkTokenIfNeeded() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${this.token}`
             },
-            signal: AbortSignal.timeout(5000)
         });
         
         if (response.status === 401) {
