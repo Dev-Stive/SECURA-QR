@@ -39,6 +39,7 @@
             '/welcome', '/welcome/',
             '/welcome/index.html',
             '/welcome/event-photos','/welcome/event-photos.html',
+            '/welcome/event-info','/welcome/event-info.html',
             '/welcome/guests',
             '/welcome/my-qr','/welcome/my-qr.html',
             '/welcome/event-guests','/welcome/event-guests.html',

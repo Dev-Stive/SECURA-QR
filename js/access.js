@@ -1083,7 +1083,7 @@ function initCodeInputs() {
             if (diff <= 0) {
                 // L'événement a commencé
                 countdownSubtitle.innerHTML = `
-                    <span style="font-size: 1rem; color: var(--success); font-weight: 600;">
+                    <span style="font-size: 0.5rem; color: var(--success); font-weight: 600;">
                         <i class="fas fa-check-circle"></i> L'événement a commencé !
                     </span>
                 `;

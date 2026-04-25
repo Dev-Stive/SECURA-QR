@@ -1942,8 +1942,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                         const container = document.getElementById('countdownContainer');
                         if (container) {
                             container.innerHTML = `
-                                <div style="text-align: center; width: 100%; padding: 20px;">
-                                    <span style="font-size: 1.3rem; color: var(--success); font-weight: 700;">
+                                <div style="text-align: center; width: 100%; padding: 5px;">
+                                    <span style="font-size: 1rem; color: var(--success); font-weight: 700;">
                                         <i class="fas fa-check-circle"></i> L'événement a commencé !
                                     </span>
                                 </div>

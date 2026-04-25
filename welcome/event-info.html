@@ -248,20 +248,31 @@
             </div>
         </div>
     </div>
+ <!-- Librairies -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    
 
-    <!-- Scripts -->
+        <!-- Scripts locaux -->
     <script src="../js/storage.js"></script>
-    <script src="../js/toastify.js"></script>
     <script src="../js/auth-check.js"></script>
+    <script src="../js/particles-config.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+    <script src="../js/main.js" defer></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/toastify.js" defer></script>
+    <script src="../js/langue.js" defer></script>
+    <script src="../js/welcome.js" defer></script>
+    
     
     <script>
         async function initInfo() {
             try {
                 const sessionData = localStorage.getItem('secura_event_session');
-                if (!sessionData) {
-                    window.location.href = '/access.html';
-                    return;
-                }
+               
 
                 const currentEvent = JSON.parse(sessionData);
                 const storage = window.storage;

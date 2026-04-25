@@ -38,7 +38,7 @@
       "id": "evt_1769537993483_82t3xcgsi",
       "name": "MARIAGE DE CHANELLE ET JOSÉ",
       "type": "marriage",
-      "date": "2026-04-25",
+      "date": "2026-02-14",
       "time": "18:00",
       "location": "EEC MELEN (Église Évangélique du Cameroun)",
       "capacity": 200,
@@ -3177,18 +3177,18 @@
       "description": "Anciens collègues et partenaires professionnels",
       "eventId": "evt_1769537993483_82t3xcgsi",
       "qrCode": {
-        "id": "qr_tbl_1777119726807_ahfwji0ek",
+        "id": "qr_tbl_1769792083178_qwzsykc8y",
         "qrData": {
           "t": "TBL",
           "e": "evt_1769537993483_82t3xcgsi",
           "tb": "tbl_1769575124807_chedzlng9",
           "tn": "CL-49",
-          "d": "2026-04-25T12:22:06.807Z"
+          "d": "2026-01-30T16:54:43.178Z"
         },
         "qrUrl": "http://localhost:3000/table/tbl_1769575124807_chedzlng9/info",
         "scanCount": 0,
         "lastScan": null,
-        "createdAt": "2026-04-25T12:22:06.807Z"
+        "createdAt": "2026-01-30T16:54:43.178Z"
       },
       "assignedGuests": [
         {
@@ -3252,7 +3252,7 @@
       "status": "active",
       "isActive": true,
       "createdAt": "2026-01-28T04:38:44.807Z",
-      "updatedAt": "2026-04-25T12:22:06.807Z"
+      "updatedAt": "2026-02-04T21:43:31.979Z"
     },
     {
       "id": "tbl_1769575125213_jql6e2omq",
@@ -5234,7 +5234,7 @@
       "gender": "f",
       "notes": "Une amie proche des mariés.",
       "seats": 1,
-      "status": "offline",
+      "status": "pending",
       "accessCode": "6969",
       "tableId": "tbl_1769575124807_chedzlng9",
       "tableNumber": "CL-49",
@@ -5255,9 +5255,7 @@
       "confirmationHistory": [],
       "id": "gst_1769634030793_lu5ehvju8",
       "createdAt": "2026-01-28T21:00:30.793Z",
-      "updatedAt": "2026-02-04T21:43:31.894Z",
-      "isOnline": false,
-      "lastSeen": "2026-04-10T22:43:55.753Z"
+      "updatedAt": "2026-02-04T21:43:31.894Z"
     },
     {
       "eventId": "evt_1769537993483_82t3xcgsi",
@@ -9047,7 +9045,7 @@
       "gender": "f",
       "notes": "Membre du groupe d'intercession.",
       "seats": 1,
-      "status": "offline",
+      "status": "pending",
       "accessCode": "1234",
       "tableId": "tbl_1769575122995_l3ithyme9",
       "tableNumber": "OU-27",
@@ -9068,9 +9066,7 @@
       "confirmationHistory": [],
       "id": "gst_1769634056260_o62d3ric1",
       "createdAt": "2026-01-28T21:00:56.260Z",
-      "updatedAt": "2026-02-04T20:49:32.393Z",
-      "isOnline": false,
-      "lastSeen": "2026-04-25T08:25:32.618Z"
+      "updatedAt": "2026-02-04T20:49:32.393Z"
     },
     {
       "eventId": "evt_1769537993483_82t3xcgsi",
@@ -9082,7 +9078,7 @@
       "gender": "f",
       "notes": "Une invitée à la cérémonie.",
       "seats": 1,
-      "status": "offline",
+      "status": "pending",
       "accessCode": "6955",
       "tableId": "tbl_1769575122995_l3ithyme9",
       "tableNumber": "OU-27",
@@ -9103,9 +9099,7 @@
       "confirmationHistory": [],
       "id": "gst_1769634056510_photd0j1h",
       "createdAt": "2026-01-28T21:00:56.510Z",
-      "updatedAt": "2026-02-04T20:49:32.585Z",
-      "isOnline": false,
-      "lastSeen": "2026-04-25T08:11:06.336Z"
+      "updatedAt": "2026-02-04T20:49:32.585Z"
     },
     {
       "eventId": "evt_1769537993483_82t3xcgsi",
@@ -14824,7 +14818,24 @@
     }
   ],
   "sessions": [],
-  "eventSessions": [],
+  "eventSessions": [
+    {
+      "id": "sess_1770896631619_x9e2r00b4",
+      "guestId": "gst_1769634066750_apq113ecc",
+      "tableId": "tbl_1769575124145_o6y4qfi4o",
+      "eventId": "evt_1769537993483_82t3xcgsi",
+      "createdAt": "2026-02-12T11:43:51.624Z",
+      "expiresAt": "2026-02-12T19:43:51.619Z"
+    },
+    {
+      "id": "sess_1770913463570_ppmoa9z4d",
+      "guestId": "gst_1769634066750_apq113ecc",
+      "tableId": "tbl_1769575124145_o6y4qfi4o",
+      "eventId": "evt_1769537993483_82t3xcgsi",
+      "createdAt": "2026-02-12T16:24:23.570Z",
+      "expiresAt": "2026-02-13T00:24:23.570Z"
+    }
+  ],
   "galleries": [
     {
       "id": "gal_1770509311298_7yr93j2nn",
@@ -14861,11 +14872,10 @@
           "moderated": true,
           "moderatedBy": "usr_1762606689312_tg4o61hz2",
           "moderatedAt": "2026-02-08T00:21:08.441Z",
-          "views": 3,
+          "views": 2,
           "viewedBy": [
             "usr_1762606689312_tg4o61hz2",
-            "gst_1769634066750_apq113ecc",
-            "gst_1769634056260_o62d3ric1"
+            "gst_1769634066750_apq113ecc"
           ],
           "likes": [
             {
@@ -14880,35 +14890,10 @@
             {
               "id": "like_1770909111472_oznklo3oz",
               "likedAt": "2026-02-12T15:11:51.472Z"
-            },
-            {
-              "id": "like_1775861398826_j6kivf9ws",
-              "likedAt": "2026-04-10T22:49:58.826Z"
-            },
-            {
-              "id": "like_1775861402707_0ynad43wc",
-              "likedAt": "2026-04-10T22:50:02.708Z"
-            },
-            {
-              "id": "like_1777105639607_ld2o2qo14",
-              "likedAt": "2026-04-25T08:27:19.607Z"
-            },
-            {
-              "id": "like_1777105679995_1soq3s8gl",
-              "likedAt": "2026-04-25T08:27:59.995Z"
-            },
-            {
-              "id": "like_1777105701017_w6pqp01vc",
-              "likedAt": "2026-04-25T08:28:21.017Z"
             }
           ],
           "likedBy": [
             "usr_1762606689312_tg4o61hz2",
-            null,
-            null,
-            null,
-            null,
-            null,
             null,
             null
           ],
@@ -14962,24 +14947,9 @@
             {
               "id": "like_1770910462360_g04wom5mb",
               "likedAt": "2026-02-12T15:34:22.360Z"
-            },
-            {
-              "id": "like_1775861223387_8cwrwk0pa",
-              "likedAt": "2026-04-10T22:47:03.387Z"
-            },
-            {
-              "id": "like_1777105617355_iosmypeg2",
-              "likedAt": "2026-04-25T08:26:57.355Z"
-            },
-            {
-              "id": "like_1777105675298_8ujrax9lc",
-              "likedAt": "2026-04-25T08:27:55.298Z"
             }
           ],
           "likedBy": [
-            null,
-            null,
-            null,
             null,
             null,
             null
@@ -15025,15 +14995,10 @@
               "id": "like_1770510786788_sn40n5czw",
               "userId": "usr_1762606689312_tg4o61hz2",
               "likedAt": "2026-02-08T00:33:06.788Z"
-            },
-            {
-              "id": "like_1777105663142_y3zld1g2r",
-              "likedAt": "2026-04-25T08:27:43.142Z"
             }
           ],
           "likedBy": [
-            "usr_1762606689312_tg4o61hz2",
-            null
+            "usr_1762606689312_tg4o61hz2"
           ],
           "comments": [],
           "downloads": 0,
@@ -15067,10 +15032,9 @@
           "moderated": true,
           "moderatedBy": "usr_1762606689312_tg4o61hz2",
           "moderatedAt": "2026-02-08T00:21:15.650Z",
-          "views": 2,
+          "views": 1,
           "viewedBy": [
-            "usr_1762606689312_tg4o61hz2",
-            "gst_1769634030793_lu5ehvju8"
+            "usr_1762606689312_tg4o61hz2"
           ],
           "likes": [
             {
@@ -15124,30 +15088,19 @@
           "moderated": true,
           "moderatedBy": "usr_1762606689312_tg4o61hz2",
           "moderatedAt": "2026-02-08T00:17:04.186Z",
-          "views": 2,
+          "views": 1,
           "viewedBy": [
-            "usr_1762606689312_tg4o61hz2",
-            "gst_1769634030793_lu5ehvju8"
+            "usr_1762606689312_tg4o61hz2"
           ],
           "likes": [
             {
               "id": "like_1770511005654_tm9hf0925",
               "userId": "usr_1762606689312_tg4o61hz2",
               "likedAt": "2026-02-08T00:36:45.654Z"
-            },
-            {
-              "id": "like_1775861434581_myydmaqzi",
-              "likedAt": "2026-04-10T22:50:34.581Z"
-            },
-            {
-              "id": "like_1777105713828_0p0pcugtg",
-              "likedAt": "2026-04-25T08:28:33.828Z"
             }
           ],
           "likedBy": [
-            "usr_1762606689312_tg4o61hz2",
-            null,
-            null
+            "usr_1762606689312_tg4o61hz2"
           ],
           "comments": [],
           "downloads": 0,
@@ -15191,25 +15144,10 @@
               "id": "like_1770902259540_qwbyun7q3",
               "userId": "usr_1762606689312_tg4o61hz2",
               "likedAt": "2026-02-12T13:17:39.540Z"
-            },
-            {
-              "id": "like_1775861379981_mymfkxbks",
-              "likedAt": "2026-04-10T22:49:39.981Z"
-            },
-            {
-              "id": "like_1775861383889_39jiiy5fv",
-              "likedAt": "2026-04-10T22:49:43.889Z"
-            },
-            {
-              "id": "like_1777105612900_fddqhlfoe",
-              "likedAt": "2026-04-25T08:26:52.900Z"
             }
           ],
           "likedBy": [
-            "usr_1762606689312_tg4o61hz2",
-            null,
-            null,
-            null
+            "usr_1762606689312_tg4o61hz2"
           ],
           "comments": [],
           "downloads": 0,
@@ -15367,7 +15305,7 @@
       "stats": {
         "totalPhotos": 8,
         "totalViews": 0,
-        "totalLikes": 28,
+        "totalLikes": 14,
         "totalComments": 0,
         "totalDownloads": 0
       },
@@ -15379,7 +15317,7 @@
         "location": "EEC MELEN (Église Évangélique du Cameroun)"
       },
       "createdAt": "2026-02-08T00:08:31.298Z",
-      "updatedAt": "2026-04-25T08:28:33.828Z"
+      "updatedAt": "2026-02-12T16:07:50.038Z"
     }
   ],
   "menus": [],
@@ -16002,223 +15940,16 @@
         "createdAt": "2026-02-12T12:18:11.132Z",
         "deletedAt": null
       }
-    },
-    {
-      "id": "chat_1775860896627_r42u595wz",
-      "eventId": "evt_1769537993483_82t3xcgsi",
-      "name": "Chat with participant",
-      "type": "direct",
-      "participants": [
-        {
-          "userId": "gst_1769634030793_lu5ehvju8",
-          "name": "Mezatio Kelly",
-          "email": "kelly.mezatio@gmail.com",
-          "firstName": "Mezatio",
-          "lastName": "Kelly",
-          "gender": "f",
-          "notes": "Une amie proche des mariés.",
-          "isOnline": false,
-          "status": "offline",
-          "joinedAt": "2026-04-10T22:41:36.626Z",
-          "lastReadAt": "2026-04-10T22:42:51.203Z",
-          "lastSeenAt": "2026-04-10T22:43:55.753Z",
-          "unreadCount": 0
-        },
-        {
-          "userId": "gst_1770227124140_y38oobnfa",
-          "name": "Tata Collette",
-          "email": "tata.collette@exemple.com",
-          "firstName": "Tata",
-          "lastName": "Collette",
-          "gender": "f",
-          "notes": "Invité hors du pays.",
-          "isOnline": false,
-          "status": "pending",
-          "joinedAt": null,
-          "lastReadAt": null,
-          "lastSeenAt": null
-        }
-      ],
-      "messages": [
-        {
-          "id": "msg_1775860909422_jsznkfvbz",
-          "conversationId": "chat_1775860896627_r42u595wz",
-          "senderId": "gst_1769634030793_lu5ehvju8",
-          "senderName": "Guest gst_1769",
-          "content": "cc collette",
-          "type": "text",
-          "attachments": [],
-          "replyTo": null,
-          "readBy": [],
-          "reactions": {},
-          "edited": false,
-          "editedAt": null,
-          "createdAt": "2026-04-10T22:41:49.422Z",
-          "deletedAt": null
-        },
-        {
-          "id": "msg_1775860957936_y0ascb115",
-          "conversationId": "chat_1775860896627_r42u595wz",
-          "senderId": "gst_1769634030793_lu5ehvju8",
-          "senderName": "Guest gst_1769",
-          "content": "😬",
-          "type": "text",
-          "attachments": [],
-          "replyTo": null,
-          "readBy": [],
-          "reactions": {},
-          "edited": false,
-          "editedAt": null,
-          "createdAt": "2026-04-10T22:42:37.936Z",
-          "deletedAt": null
-        }
-      ],
-      "settings": {
-        "allowDelete": true,
-        "allowEdit": true,
-        "encrypted": true,
-        "archiveAfterDays": 90
-      },
-      "createdBy": "gst_1769634030793_lu5ehvju8",
-      "createdAt": "2026-04-10T22:41:36.626Z",
-      "updatedAt": "2026-04-10T22:43:55.249Z",
-      "lastMessage": {
-        "id": "msg_1775860957936_y0ascb115",
-        "conversationId": "chat_1775860896627_r42u595wz",
-        "senderId": "gst_1769634030793_lu5ehvju8",
-        "senderName": "Guest gst_1769",
-        "content": "😬",
-        "type": "text",
-        "attachments": [],
-        "replyTo": null,
-        "readBy": [],
-        "reactions": {},
-        "edited": false,
-        "editedAt": null,
-        "createdAt": "2026-04-10T22:42:37.936Z",
-        "deletedAt": null
-      }
-    },
-    {
-      "id": "chat_1777104113924_kf2vku4eq",
-      "eventId": "evt_1769537993483_82t3xcgsi",
-      "name": "Chat with participant",
-      "type": "direct",
-      "participants": [
-        {
-          "userId": "gst_1769634056510_photd0j1h",
-          "name": "Mme milena",
-          "email": "milena.mme@gmail.com",
-          "firstName": "Mme",
-          "lastName": "milena",
-          "gender": "f",
-          "notes": "Une invitée à la cérémonie.",
-          "isOnline": false,
-          "status": "offline",
-          "joinedAt": "2026-04-25T08:01:53.923Z",
-          "lastReadAt": "2026-04-25T08:10:53.896Z",
-          "lastSeenAt": "2026-04-25T08:11:06.336Z",
-          "unreadCount": 0
-        },
-        {
-          "userId": "gst_1769634056260_o62d3ric1",
-          "name": "Mme francoise",
-          "email": "francoise.mme@gmail.com",
-          "firstName": "Mme",
-          "lastName": "francoise",
-          "gender": "f",
-          "notes": "Membre du groupe d'intercession.",
-          "isOnline": false,
-          "status": "offline",
-          "joinedAt": null,
-          "lastReadAt": "2026-04-25T08:25:11.489Z",
-          "lastSeenAt": "2026-04-25T08:25:32.618Z",
-          "unreadCount": 0
-        }
-      ],
-      "messages": [
-        {
-          "id": "msg_1777104164095_dxnbalfpk",
-          "conversationId": "chat_1777104113924_kf2vku4eq",
-          "senderId": "gst_1769634056510_photd0j1h",
-          "senderName": "Guest gst_1769",
-          "content": "Bonjour maman , j'espere que tu vas tres bien , c'est moi Milena😙",
-          "type": "text",
-          "attachments": [],
-          "replyTo": null,
-          "readBy": [
-            {
-              "userId": "gst_1769634056260_o62d3ric1",
-              "readAt": "2026-04-25T08:04:28.398Z"
-            }
-          ],
-          "reactions": {},
-          "edited": false,
-          "editedAt": null,
-          "createdAt": "2026-04-25T08:02:44.095Z",
-          "deletedAt": null
-        },
-        {
-          "id": "msg_1777104314991_sbowxzvlk",
-          "conversationId": "chat_1777104113924_kf2vku4eq",
-          "senderId": "gst_1769634056260_o62d3ric1",
-          "senderName": "Guest gst_1769",
-          "content": "Salut ma fille j'espere que tu vas bien aussi☺️",
-          "type": "text",
-          "attachments": [],
-          "replyTo": null,
-          "readBy": [
-            {
-              "userId": "gst_1769634056510_photd0j1h",
-              "readAt": "2026-04-25T08:06:00.485Z"
-            }
-          ],
-          "reactions": {
-            "❤️": [
-              "gst_1769634056510_photd0j1h"
-            ]
-          },
-          "edited": false,
-          "editedAt": null,
-          "createdAt": "2026-04-25T08:05:14.991Z",
-          "deletedAt": null
-        }
-      ],
-      "settings": {
-        "allowDelete": true,
-        "allowEdit": true,
-        "encrypted": true,
-        "archiveAfterDays": 90
-      },
-      "createdBy": "gst_1769634056510_photd0j1h",
-      "createdAt": "2026-04-25T08:01:53.923Z",
-      "updatedAt": "2026-04-25T08:25:30.749Z",
-      "lastMessage": {
-        "id": "msg_1777104314991_sbowxzvlk",
-        "conversationId": "chat_1777104113924_kf2vku4eq",
-        "senderId": "gst_1769634056260_o62d3ric1",
-        "senderName": "Guest gst_1769",
-        "content": "Salut ma fille j'espere que tu vas bien aussi☺️",
-        "type": "text",
-        "attachments": [],
-        "replyTo": null,
-        "readBy": [],
-        "reactions": {},
-        "edited": false,
-        "editedAt": null,
-        "createdAt": "2026-04-25T08:05:14.991Z",
-        "deletedAt": null
-      }
     }
   ],
-  "tempUsers": [],
-  "passwordResets": [],
   "settings": {
     "theme": "light",
     "language": "fr"
   },
+  "tempUsers": [],
+  "passwordResets": [],
   "meta": {
-    "updatedAt": "2026-04-25T12:22:06.839Z",
+    "updatedAt": "2026-02-12T16:27:39.839Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }

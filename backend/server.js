@@ -1,6 +1,6 @@
 /**
  * ╔═══════════════════════════════════════════════════════════════╗
- * ║        🛡️  SECURA QR - SERVEUR ULTRA COMPLET V3.0  🛡️        ║
+ * ║        🛡️  SECURA QR - SERVEUR  V3.0  🛡️                ║
  * ║                                                               ║
  * ║  📡 API REST complète avec actions directes                   ║
  * ║  🔐 Sécurité JWT + API Key                                    ║
@@ -980,6 +980,7 @@ const generateTableAccessCode = (tableName) => {
 app.post('/api/auth/verify-token', (req, res) => {
   try {
     const authHeader = req.headers.authorization;
+
     if (!authHeader?.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
@@ -997,10 +998,11 @@ app.post('/api/auth/verify-token', (req, res) => {
       });
     }
 
+
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     const data = loadData();
     const user = data.users?.find(u => u.id === payload.id);
-
+console.log('Vérification token pour utilisateur:', payload.email || payload.id);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -1023,6 +1025,15 @@ app.post('/api/auth/verify-token', (req, res) => {
     });
 
   } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      log.warning('Token expiré', `${req.ip} - Expire: ${err.expiredAt}`);
+      return res.status(401).json({
+        success: false,
+        valid: false,
+        error: 'Token expiré'
+      });
+    }
+    console.error('Erreur vérification token:', err.message, err.name);
     log.warning('Token invalide ou expiré', req.ip);
     res.status(401).json({
       success: false,
@@ -11571,8 +11582,5 @@ process.on('unhandledRejection', (reason, promise) => {
     gracefulShutdown('UNHANDLED_REJECTION');
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 📝 EXPORT MODULE
-// ═══════════════════════════════════════════════════════════════
 
 module.exports = app;

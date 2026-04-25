@@ -1,6 +1,6 @@
 /**
  * ╔═══════════════════════════════════════════════════════════════╗
- * ║        🛡️  SECURA STORAGE - ULTRA COMPLET V5.0  🛡️           ║
+ * ║        🛡️  SECURA STORAGE - V2.0  🛡️                              ║
  * ║                                                               ║
  * ║  📡 Synchronisation bidirectionnelle avec API V3              ║
  * ║  💾 CRUD complet côté client                                  ║
@@ -60,7 +60,7 @@ class SecuraStorage {
         this.syncTimer = null;
         this.syncInProgress = false;
         this.requestCache = new Map(); // Cache pour GET
-        this.requestInFlight = new Map(); // Déduplications requêtes en vol
+        this.requestInFlight = new Map();
         this.lastSyncTime = null;
         this.syncErrors = [];
         this.isOnline = navigator.onLine;
@@ -4781,24 +4781,39 @@ async checkTokenIfNeeded() {
     }
 
     try {
-        const response = await this.apiRequest('/auth/verify-token',{
+        const response = await fetch(`${this.API_URL}/auth/verify-token`, {
             method: 'POST',
-             headers: { 
-                'authorization': `Bearer ${this.token}`,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.token}`
             },
+            signal: AbortSignal.timeout(5000)
         });
         
-        if (response.success && response.valid) {
+        if (response.status === 401) {
+            console.error('❌ Token invalide/expiré (401)');
+            this.handleInvalidToken();
+            return false;
+        }
+        
+        if (!response.ok) {
+            console.error('❌ Erreur vérification token:', response.status);
+            return false;
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.valid) {
             console.log('✅ Token valide');
             return true;
         } else {
-            console.error('❌ Token invalide selon le serveur:', response.error);
+            console.error('❌ Token invalide selon le serveur:', data.error);
             this.handleInvalidToken();
             return false;
         }
     } catch (err) {
-        console.warn('⚠️ Vérif token échouée (réseau?), présumé valide:', err.message);
-        return true;
+        console.warn('⚠️ Vérif token échouée (réseau?):', err.message);
+        return false;
     }
 }
 

@@ -3177,18 +3177,18 @@
       "description": "Anciens collègues et partenaires professionnels",
       "eventId": "evt_1769537993483_82t3xcgsi",
       "qrCode": {
-        "id": "qr_tbl_1777119726807_ahfwji0ek",
+        "id": "qr_tbl_1769792083178_qwzsykc8y",
         "qrData": {
           "t": "TBL",
           "e": "evt_1769537993483_82t3xcgsi",
           "tb": "tbl_1769575124807_chedzlng9",
           "tn": "CL-49",
-          "d": "2026-04-25T12:22:06.807Z"
+          "d": "2026-01-30T16:54:43.178Z"
         },
         "qrUrl": "http://localhost:3000/table/tbl_1769575124807_chedzlng9/info",
         "scanCount": 0,
         "lastScan": null,
-        "createdAt": "2026-04-25T12:22:06.807Z"
+        "createdAt": "2026-01-30T16:54:43.178Z"
       },
       "assignedGuests": [
         {
@@ -3252,7 +3252,7 @@
       "status": "active",
       "isActive": true,
       "createdAt": "2026-01-28T04:38:44.807Z",
-      "updatedAt": "2026-04-25T12:22:06.807Z"
+      "updatedAt": "2026-02-04T21:43:31.979Z"
     },
     {
       "id": "tbl_1769575125213_jql6e2omq",
@@ -16211,14 +16211,14 @@
       }
     }
   ],
-  "tempUsers": [],
-  "passwordResets": [],
   "settings": {
     "theme": "light",
     "language": "fr"
   },
+  "tempUsers": [],
+  "passwordResets": [],
   "meta": {
-    "updatedAt": "2026-04-25T12:22:06.839Z",
+    "updatedAt": "2026-04-25T08:52:25.753Z",
     "version": "3.0",
     "server": "SECURA-ULTRA-PRO-V3"
   }
