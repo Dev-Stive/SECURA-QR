@@ -34,16 +34,12 @@ const GUEST_CATEGORIES = {
 class SecuraStorage {
 
     
-    FRONTEND_URL = 'https://secura-qr.vercel.app';
-    BACKEND_URL = 'https://breakable-leela-geekhub-team-240bba40.koyeb.app/api';
-
-    // FRONTEND_URL = 'http://localhost:5500';
     
     constructor() {
         if (window.location.hostname === 'localhost') {
             this.API_URL = 'http://localhost:3000/api';
         } else {
-            this.API_URL = 'https://breakable-leela-geekhub-team-240bba40.koyeb.app/api';
+            this.API_URL = 'https://secura-qr.onrender.com/api';
         }
 
         this.token = localStorage.getItem('secura_token') || null;

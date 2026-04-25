@@ -19,7 +19,7 @@
 
         apiUrl: window.location.hostname === 'localhost'
             ? 'http://localhost:3000/api'
-            : 'https://breakable-leela-geekhub-team-240bba40.koyeb.app/api',
+            : 'https://secura-qr.onrender.com/api',
         
 
         pageTypes: {
