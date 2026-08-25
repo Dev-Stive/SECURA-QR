@@ -2,7 +2,11 @@
 
 ## 📋 Description
 
-SECURA est une application web complète et moderne pour la gestion d'événements (mariages, anniversaires, conférences) avec génération de QR Codes stylisés pour les invités. L'application permet de créer des événements, gérer les invités, générer des QR Codes personnalisés et scanner ces codes pour valider les présences.
+SECURA est une application web complète pour la gestion d'événements (mariages, anniversaires, conférences) avec génération de QR Codes stylisés pour les invités. L'application permet de créer des événements, gérer les invités, générer des QR Codes personnalisés, scanner ces codes pour valider les présences, et propose en plus la gestion des tables, une galerie photo, un chat en temps réel et la génération de tickets.
+
+Le projet est composé de deux parties :
+- **Frontend** : pages HTML/CSS/JS statiques (racine du repo + `welcome/`), déployées sur Vercel.
+- **Backend** : serveur Node.js/Express avec Socket.IO, déployé sur Render (dossier `backend/`).
 
 ## ✨ Fonctionnalités Principales
 
@@ -46,6 +50,24 @@ SECURA est une application web complète et moderne pour la gestion d'événemen
 - Statistiques du jour
 - Support multi-caméras
 
+### 🪑 Gestion des Tables
+- Placement des invités par table
+- Import CSV des tables
+- Vue occupée/libre par table
+
+### 📷 Galerie Photo
+- Upload de photos par les invités et les organisateurs
+- Stockage serveur (`backend/uploads/galleries/`)
+
+### 💬 Chat en Temps Réel
+- Discussion en direct entre invités/organisateurs via Socket.IO
+
+### 🎫 Génération de Tickets
+- Tickets imprimables (portrait et paysage) par invité
+
+### 🌐 Espace Invité ("Welcome")
+- Pages dédiées à chaque invité une fois son QR scanné : son QR personnel, sa table, le menu, le programme, la galerie, le chat
+
 ### 🎨 Interface Utilisateur
 - Design moderne et responsive
 - Thème clair/sombre
@@ -56,48 +78,37 @@ SECURA est une application web complète et moderne pour la gestion d'événemen
 - Notifications toast (SweetAlert2)
 
 ### 💾 Stockage & Données
-- LocalStorage (JSON)
-- Sauvegarde automatique
-- Export/Import complet
-- Structure événements → invités → QR codes
-- Backup et restauration
+- Backend Node.js avec authentification par compte (JWT + bcrypt)
+- Données persistées côté serveur dans un fichier JSON (`backend/data/secura-data.json`)
+- Sauvegardes automatiques (`backend/backups/`)
+- Export/Import CSV et JSON
 
 ## 🗂️ Structure du Projet
 
 ```
-secura/
-├── index.html              # Page d'accueil
-├── events.html             # Gestion événements
-├── guests.html             # Gestion invités
-├── qr-generator.html       # Générateur QR
-├── scanner.html            # Scanner QR
-├── css/
-│   └── styles.css          # Styles complets
-├── js/
-│   ├── storage.js          # Gestion stockage
-│   ├── theme.js            # Thème clair/sombre
-│   ├── main.js             # Scripts communs
-│   ├── particles-config.js # Configuration particles
-│   ├── events.js           # Logique événements
-│   ├── guests.js           # Logique invités
-│   ├── qr-generator.js     # Générateur QR
-│   └── scanner.js          # Scanner QR
-└── README.md              # Documentation
+SECURA-QR/
+├── index.html, events.html, guests.html, ...   # Pages frontend (racine)
+├── welcome/                  # Pages dédiées aux invités
+├── css/                      # Styles
+├── js/                       # Logique frontend (storage, auth, events, guests,
+│                              #   qr-generator, scanner, chat, galleries, tables, tickets...)
+├── vercel.json                # Config déploiement frontend (Vercel)
+└── backend/
+    ├── server.js               # Serveur Express + Socket.IO (point d'entrée)
+    ├── config/                 # Config (base de données, auth, storage, email...)
+    ├── repositories/           # Couche d'accès aux données (event, guest, user...)
+    ├── services/                # Services (logs, stockage)
+    ├── utils/                   # Helpers, validation, sécurité
+    ├── data/                    # Fichier JSON de données (secura-data.json)
+    ├── uploads/                 # Fichiers uploadés (galeries)
+    ├── backups/                 # Sauvegardes automatiques
+    └── render.yaml               # Config déploiement backend (Render)
 ```
 
 ## 🚀 Installation
 
-### Prérequis
-- Navigateur web moderne (Chrome, Firefox, Safari, Edge)
-- Serveur web local (optionnel pour tester)
-
-### Installation Simple
-1. Télécharger tous les fichiers
-2. Créer les dossiers `css/` et `js/`
-3. Placer les fichiers dans leurs dossiers respectifs
-4. Ouvrir `index.html` dans un navigateur
-
-### Installation avec Serveur Local (Recommandé)
+### Frontend
+Le frontend est un site statique. Pour le tester en local :
 ```bash
 # Avec Python 3
 python -m http.server 8000
@@ -108,16 +119,23 @@ npx serve
 # Avec PHP
 php -S localhost:8000
 ```
-
 Puis ouvrir : `http://localhost:8000`
+
+### Backend
+```bash
+cd backend
+npm install
+cp .env.example .env   # renseigner les variables (JWT_SECRET, API_KEY, PORT, ...)
+npm run dev             # démarrage avec nodemon
+```
+
+Le frontend communique avec le backend via une URL d'API configurée dans `js/storage.js` / `js/auth.js`.
 
 ## 📚 Bibliothèques Utilisées
 
-### CSS/Design
+### Frontend (CDN)
 - **Font Awesome 6.5.1** - Icônes
 - **Google Fonts** - Roboto, Figtree
-
-### JavaScript
 - **Particles.js 2.0.0** - Animation de fond
 - **SweetAlert2 11** - Notifications
 - **QRCode.js 1.0.0** - Génération QR
@@ -125,17 +143,28 @@ Puis ouvrir : `http://localhost:8000`
 - **PapaParse 5.4.1** - Parse CSV
 - **JSZip 3.10.1** - Compression ZIP
 
-Toutes les bibliothèques sont chargées depuis des CDN.
+### Backend (Node.js)
+- **Express 4** - Serveur HTTP / routage
+- **Socket.IO 4** - Communication temps réel (chat, scans live)
+- **jsonwebtoken** - Authentification par token
+- **bcryptjs** - Hachage des mots de passe
+- **multer** - Upload de fichiers
+- **archiver** - Génération d'archives ZIP
+- **node-cron** - Tâches planifiées (ex. sauvegardes)
+- **moment** - Manipulation de dates
 
 ## 💡 Utilisation
 
-### 1. Créer un Événement
+### 1. Créer un compte / se connecter
+L'accès au dashboard nécessite un compte (inscription/connexion via JWT).
+
+### 2. Créer un Événement
 1. Aller sur "Événements"
 2. Cliquer "Créer un événement"
 3. Remplir le formulaire
 4. Sauvegarder
 
-### 2. Ajouter des Invités
+### 3. Ajouter des Invités
 
 #### Méthode Manuelle
 1. Sélectionner un événement
@@ -156,7 +185,7 @@ Prénom,Nom,Email,Téléphone,Entreprise,Notes
 Jean,Dupont,jean@example.com,+237 6XX XXX XXX,Entreprise A,VIP
 ```
 
-### 3. Générer des QR Codes
+### 4. Générer des QR Codes
 
 #### QR Code Individuel
 1. Aller sur "Générateur QR"
@@ -171,7 +200,7 @@ Jean,Dupont,jean@example.com,+237 6XX XXX XXX,Entreprise A,VIP
 3. Attendre la génération
 4. Télécharger l'archive ZIP
 
-### 4. Scanner des QR Codes
+### 5. Scanner des QR Codes
 
 #### Scan par Caméra
 1. Aller sur "Scanner"
@@ -187,7 +216,7 @@ Jean,Dupont,jean@example.com,+237 6XX XXX XXX,Entreprise A,VIP
 3. Cliquer "Analyser"
 4. Voir les résultats
 
-### 5. Partager une Invitation
+### 6. Partager une Invitation
 
 Après génération du QR Code :
 1. Cliquer "Partager"
@@ -284,11 +313,11 @@ let qrConfig = {
 
 ## 🔒 Sécurité & Confidentialité
 
-- ✅ Toutes les données sont stockées localement (LocalStorage)
-- ✅ Aucune donnée envoyée à un serveur externe
-- ✅ Les QR Codes contiennent uniquement les infos nécessaires
-- ✅ Pas de tracking ni analytics
-- ⚠️ Backup recommandé (Export JSON)
+- Authentification par compte (JWT + mots de passe hachés bcrypt)
+- Les données des invités (nom, email, téléphone, statut) sont stockées côté serveur, pas uniquement dans le navigateur
+- Les QR Codes contiennent uniquement les infos nécessaires à la validation
+- ⚠️ Le fichier `.env` du backend (secrets, clés API, JWT secret) ne doit jamais être commité ni partagé
+- ⚠️ Les fichiers de données et de sauvegarde du backend contiennent des informations personnelles sur de vrais invités : à traiter comme sensibles (ne pas committer dans un dépôt public, sauvegarder de façon sécurisée)
 
 ## 🌐 Compatibilité
 
@@ -328,11 +357,10 @@ let qrConfig = {
 - Utiliser UTF-8 sans BOM
 - Télécharger le modèle fourni
 
-### Données perdues
-- Vérifier LocalStorage du navigateur
-- Ne pas effacer les données du site
-- Faire des exports réguliers
-- Utiliser mode navigation privée avec précaution
+### Le frontend n'arrive pas à contacter le backend
+- Vérifier l'URL de l'API configurée dans `js/storage.js` / `js/auth.js`
+- Vérifier que le serveur backend est démarré et accessible
+- Vérifier la configuration CORS côté serveur
 
 ## 📱 PWA (Progressive Web App)
 
@@ -343,15 +371,13 @@ L'application peut être installée comme app :
 
 ## 🚀 Améliorations Futures
 
-- [ ] Backend avec base de données
-- [ ] Authentification utilisateurs
+- [ ] Base de données relationnelle (au lieu du fichier JSON)
 - [ ] Envoi email automatique
 - [ ] Notifications push
 - [ ] Templates d'invitation
 - [ ] Statistiques avancées
 - [ ] Export PDF
 - [ ] Multi-langue
-- [ ] API REST
 - [ ] Synchronisation cloud
 
 ## 📄 Licence
