@@ -370,7 +370,6 @@
     <script src="js/particles-config.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/auth-check.js"></script>
     
     <script>
         // Vérifier si déjà connecté
@@ -380,7 +379,6 @@
                 // Vérifier le token
                 const valid = await authManager.verifyToken();
                 if (valid) {
-                    // Rediriger selon le rôle
                     const user = JSON.parse(localStorage.getItem('secura_user'));
                     if (user?.role === 'admin') {
                         window.location.href = '/dashboard.html';
